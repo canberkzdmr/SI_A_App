@@ -31,6 +31,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.login.presentation.viewmodel.LoginUiState
+import com.example.login.presentation.viewmodel.LoginViewModel
 import com.example.ui.components.AppHeadline
 import com.example.ui.components.AppLabel
 import com.example.ui.components.AppRegular
@@ -42,16 +46,41 @@ import com.example.ui.theme.primaryLight
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel = hiltViewModel(),
     prefillUsername: String?,
-    onLoginClick: (username: String, password: String) -> Unit,
+    onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    if (state.isLoggedIn) {
+        LaunchedEffect(Unit) {
+            onLoginSuccess()
+        }
+    }
+
+    LoginScreenContent(
+        state = state,
+        prefillUsername = prefillUsername,
+        onLoginClick = viewModel::login,
+        onRegisterClick = { onRegisterClick() },
+        onUserNameChange = viewModel::onUsernameChanged,
+        onPasswordChange = viewModel::onPasswordChanged,
+    )
+}
+
+@Composable
+fun LoginScreenContent(
+    state: LoginUiState,
+    prefillUsername: String?,
+    onLoginClick: () -> Unit,
+    onRegisterClick: () -> Unit,
+    onUserNameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     prefillUsername?.let {
-        username = it
+        onUserNameChange(it)
     }
 
     MyApplicationTheme {
@@ -68,7 +97,8 @@ fun LoginScreen(
                 WelcomeMessage(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally))
+                        .align(Alignment.CenterHorizontally)
+                )
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -90,8 +120,10 @@ fun LoginScreen(
                         modifier = Modifier.padding(start = 24.dp, end = 24.dp)
                     )
                     OutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
+                        value = state.username,
+                        onValueChange = {
+                            onUserNameChange(it)
+                        },
                         label = { Text("Username") },
                         singleLine = true,
                         placeholder = { Text("Your username") },
@@ -101,8 +133,10 @@ fun LoginScreen(
                             .padding(horizontal = 24.dp)
                     )
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
+                        value = state.password,
+                        onValueChange = {
+                            onPasswordChange(it)
+                        },
                         label = { Text("Password") },
                         singleLine = true,
                         placeholder = { Text("Enter your password") },
@@ -114,7 +148,7 @@ fun LoginScreen(
                     )
                     PrimaryButton(
                         "Login",
-                        onClick = { onLoginClick(username, password) },
+                        onClick = { onLoginClick() },
                         modifier = Modifier
                             .padding(horizontal = 24.dp, vertical = 8.dp)
                             .fillMaxWidth()
@@ -160,16 +194,20 @@ fun WelcomeMessage(modifier: Modifier) {
 }
 
 
-@Preview(showBackground = true, showSystemUi = true,
+@Preview(
+    showBackground = true, showSystemUi = true,
     device = "spec:parent=pixel_9"
 )
 @Composable
 fun LoginScreenPreview() {
     MyApplicationTheme {
-        LoginScreen(
+        LoginScreenContent(
+            state = LoginUiState(username = "canberk", "1234"),
             prefillUsername = "",
-            onLoginClick = { username, password -> Log.d("LoginPreview", "Login Clicked") },
+            onLoginClick = { Log.d("LoginPreview", "Login Clicked") },
             onRegisterClick = {},
+            onUserNameChange = {},
+            onPasswordChange = {},
         )
     }
 }

@@ -10,6 +10,10 @@ class VerifyPasswordUseCase(private val userRepository: UserRepository) {
         username: String,
         enteredPassword: String
     ): Boolean {
+        if (enteredPassword.isEmpty() || enteredPassword.isBlank()) {
+            return false
+        }
+
         val result = userRepository.getUserPasswordHashByUsername(username)
         result?.let { result ->
             if (result.isSuccess) {

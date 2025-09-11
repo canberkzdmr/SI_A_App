@@ -1,5 +1,6 @@
 package com.example.login.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.domain.usecase.VerifyPasswordUseCase
@@ -42,6 +43,7 @@ constructor(
 
             userResult?.let {
                 if (userResult.isFailure) {
+                    Log.e("LoginViewModel", "User not found")
                     _uiState.update {
                         it.copy(isLoading = false, errorMessage = "User not found")
                     }
@@ -53,15 +55,16 @@ constructor(
                 user?.let { user ->
                 val isValid = verifyPasswordUseCase(user.username, password)
                     if (isValid) {
+                        Log.i("LoginViewModel", "User logged in")
                         loginUseCase(username, password)
                         _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
                     } else {
+                        Log.i("LoginViewModel", "Invalid password")
                         _uiState.update {
                             it.copy(isLoading = false, errorMessage = "Invalid password")
                         }
                     }
                 }
-
             }
         }
     }

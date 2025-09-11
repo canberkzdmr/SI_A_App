@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.core.navigation.AppDestination
 import com.example.login.presentation.screen.LoginScreen
+import com.example.login.presentation.screen.LoginScreenContent
 import com.example.login.presentation.screen.RegisterScreen
 
 fun NavGraphBuilder.loginNavGraph(
@@ -26,7 +27,7 @@ fun NavGraphBuilder.loginNavGraph(
         val username = backStackEntry.arguments?.getString("username")
         LoginScreen(
             prefillUsername = username,
-            onLoginClick = { username, password ->
+            onLoginSuccess = {
                 onLoginSuccess()
             },
             onRegisterClick = {
