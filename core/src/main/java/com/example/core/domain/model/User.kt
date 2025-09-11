@@ -1,4 +1,4 @@
-package com.example.login.domain.model
+package com.example.core.domain.model
 
 data class User(
     val id: Int,
@@ -7,4 +7,5 @@ data class User(
     val email: String,
     val lastPasswordChangeDate: String,
     val registerDate: String,
+    val termsAndConditionsChecked: Boolean,
 )

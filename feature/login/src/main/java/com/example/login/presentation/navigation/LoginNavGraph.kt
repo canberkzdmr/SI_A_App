@@ -39,7 +39,7 @@ fun NavGraphBuilder.loginNavGraph(
         RegisterScreen(
             onRegisterSuccess = { username ->
                 onRegisterSuccess(username)
-            }
+            },
         )
     }
 }

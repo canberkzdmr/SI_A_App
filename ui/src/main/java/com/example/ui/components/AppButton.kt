@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -18,12 +19,17 @@ fun PrimaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
 ) {
     Button(
         onClick = onClick,
         modifier = modifier,
     ) {
-        Text(text = text)
+        if (!isLoading) {
+            Text(text = text)
+        } else {
+            CircularProgressIndicator()
+        }
     }
 }
 
@@ -50,7 +56,7 @@ fun SecondaryButton(
 fun PrimaryButtonPreview() {
     MyApplicationTheme {
         Column {
-            PrimaryButton(text = "Primary button", onClick = {})
+            PrimaryButton(text = "Primary button", onClick = {}, isLoading = false)
             SecondaryButton("Secondary button", onClick = {})
         }
     }
