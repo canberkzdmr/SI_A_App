@@ -46,6 +46,7 @@ dependencies {
     implementation(project(":ui"))
     implementation(project(":feature:login"))
     implementation(project(":feature:user"))
+    implementation(project(":feature:splash"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

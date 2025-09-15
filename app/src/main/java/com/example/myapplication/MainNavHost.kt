@@ -1,12 +1,14 @@
 package com.example.myapplication
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import com.cbo.user.ui.navgraph.userNavGraph
+import com.cbo.user.presentation.navigation.userNavGraph
 import com.example.core.navigation.AppDestination
 import com.example.login.presentation.navigation.loginNavGraph
+import com.example.splash.splashNavGraph
 
 @Composable
 fun MainNavHost(
@@ -15,7 +17,7 @@ fun MainNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppDestination.Login.route,
+        startDestination = AppDestination.Splash.route,
         modifier = modifier
     ) {
         loginNavGraph(
@@ -45,7 +47,35 @@ fun MainNavHost(
         )
 
         userNavGraph(
+            onLogOut = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to login")
+                navController.navigate(AppDestination.Login.createRoute()) {
+                    popUpTo(AppDestination.Login.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
+        )
 
+        splashNavGraph(
+            onNavigateToLogin = {
+                Log.d("MainNavHost", "(SplashNavGraph) Navigated to login")
+                navController.navigate(AppDestination.Login.createRoute()) {
+                    popUpTo(AppDestination.Login.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            },
+            onNavigateToMain =  {
+                navController.navigate(AppDestination.Profile.route) {
+                    popUpTo(AppDestination.Login.route) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
         )
     }
 }

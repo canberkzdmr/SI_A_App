@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
@@ -48,12 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.core.base.UiState
-import com.example.core.base.UiState.*
+import com.example.core.base.UiState.Loading
 import com.example.core.base.validation.FieldValidation
-import com.example.core.util.DateUtil
 import com.example.login.presentation.viewmodel.RegisterState
 import com.example.login.presentation.viewmodel.RegisterViewModel
-import com.example.ui.components.AppHeadline
 import com.example.ui.components.AppLabel
 import com.example.ui.components.AppRegular
 import com.example.ui.components.AppTitle
@@ -314,6 +312,7 @@ fun RegisterScreenContent(
                         keyboardActions = KeyboardActions(onNext = { focusRequesterReTypePassword.requestFocus() })
                     )
 
+                    val keyboardController = LocalSoftwareKeyboardController.current
                     // Retype Password Field
                     OutlinedTextField(
                         value = registerState.reTypePassword,
@@ -367,7 +366,7 @@ fun RegisterScreenContent(
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Password
                         ),
-                        keyboardActions = KeyboardActions(onDone = {})
+                        keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
                     )
 
                     Row(

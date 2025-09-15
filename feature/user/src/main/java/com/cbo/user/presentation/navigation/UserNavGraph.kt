@@ -1,13 +1,16 @@
-package com.cbo.user.ui.navgraph
+package com.cbo.user.presentation.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.cbo.user.ui.ProfileScreen
+import com.cbo.user.presentation.screen.ProfileScreen
 import com.example.core.navigation.AppDestination
 
 fun NavGraphBuilder.userNavGraph(
+    onLogOut: () -> Unit,
 ) {
     composable(AppDestination.Profile.route) {
-        ProfileScreen()
+        ProfileScreen(
+            onLogOut = { onLogOut() }
+        )
     }
 }

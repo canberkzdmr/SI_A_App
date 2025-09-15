@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -109,8 +110,23 @@ fun AppLabel(
     )
 }
 
+@Composable
+fun SectionHeader(
+    title: String,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary
+) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleSmall,
+        color = color,
+        modifier = modifier
+    )
+}
 
-@Preview(showBackground = true, name = "Text Components Preview")
+@Preview(showBackground = true, name = "Text Components Preview",
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
 private fun AppTextPreview() {
     MyApplicationTheme {
@@ -125,6 +141,7 @@ private fun AppTextPreview() {
             AppBody("This is body text used for regular content.")
             AppCaption("This is a caption for subtle info.")
             AppLabel("This is a label for UI elements.")
+            SectionHeader("Section Header")
         }
     }
 }
