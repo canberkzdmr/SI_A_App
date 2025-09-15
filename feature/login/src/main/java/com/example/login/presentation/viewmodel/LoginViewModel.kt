@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.domain.usecase.VerifyPasswordUseCase
-import com.example.core.session.domain.usecase.LoginUseCase
+import com.example.login.domain.usecase.LoginUseCase
 import com.example.login.domain.usecase.GetUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

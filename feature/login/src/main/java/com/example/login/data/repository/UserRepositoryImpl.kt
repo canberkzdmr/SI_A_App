@@ -5,7 +5,7 @@ import android.util.Log
 import com.example.core.data.dao.UserDao
 import com.example.core.data.model.UserEntity
 import com.example.core.domain.model.LoginException
-import com.example.core.domain.model.User
+import com.example.login.domain.model.User
 import com.example.login.domain.repository.UserRepository
 import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory

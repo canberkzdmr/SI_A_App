@@ -1,18 +1,19 @@
-package com.example.core.data.mapper
+package com.example.login
 
 import com.example.core.data.model.UserEntity
-import com.example.core.domain.model.User
+import com.example.login.domain.model.User
 
 // Data (Entity) → Domain
-fun UserEntity.toDomain(): User = User(
-    id = id,
-    username = username,
-    email = email,
-    password = "",
-    lastPasswordChangeDate = lastPasswordChangeDate,
-    registerDate = registrationDate,
-    termsAndConditionsChecked = true
-)
+fun UserEntity.toDomain(): User =
+    User(
+        id = id,
+        username = username,
+        email = email,
+        password = "",
+        lastPasswordChangeDate = lastPasswordChangeDate,
+        registerDate = registrationDate,
+        termsAndConditionsChecked = true
+    )
 
 // Domain → Data (for inserting into DB)
 fun User.toEntity(passwordHash: ByteArray, salt: ByteArray): UserEntity = UserEntity(

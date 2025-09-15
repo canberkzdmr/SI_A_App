@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.base.UiState
 import com.example.core.base.validation.FieldValidation
 import com.example.core.util.DateUtil
-import com.example.core.domain.model.User
+import com.example.login.domain.model.User
 import com.example.login.domain.usecase.RegisterUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

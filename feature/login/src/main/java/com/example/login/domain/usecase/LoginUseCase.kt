@@ -1,8 +1,7 @@
-package com.example.core.session.domain.usecase
+package com.example.login.domain.usecase
 
 import com.example.core.data.dao.UserDao
-import com.example.core.data.mapper.toDomain
-import com.example.core.domain.model.User
+import com.example.login.toDomain
 import com.example.core.domain.usecase.VerifyPasswordUseCase
 import com.example.core.session.domain.model.Session
 import com.example.core.session.domain.repository.SessionRepository
@@ -13,7 +12,7 @@ class LoginUseCase @Inject constructor(
     private val verifyPasswordUseCase: VerifyPasswordUseCase,
     private val sessionRepository: SessionRepository
 ) {
-    suspend operator fun invoke(username: String, password: String): Result<User> {
+    suspend operator fun invoke(username: String, password: String): Result<com.example.login.domain.model.User> {
         val userEntity = userDao.getUserByUsername(username)
             ?: return Result.failure(Exception("User not found"))
 

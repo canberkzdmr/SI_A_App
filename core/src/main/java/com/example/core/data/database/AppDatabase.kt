@@ -8,7 +8,7 @@ import com.example.core.data.dao.UserDao
 import com.example.core.data.model.NoteEntity
 import com.example.core.data.model.UserEntity
 
-@Database(entities = [NoteEntity::class, UserEntity::class], version = 1)
+@Database(entities = [NoteEntity::class, UserEntity::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun noteDao(): NoteDao
