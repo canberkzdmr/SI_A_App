@@ -1,7 +1,7 @@
 package com.example.login.domain.usecase
 
 import com.example.core.data.dao.UserDao
-import com.example.login.toDomain
+import com.example.login.domain.model.toDomain
 import com.example.core.domain.usecase.VerifyPasswordUseCase
 import com.example.core.session.domain.model.Session
 import com.example.core.session.domain.repository.SessionRepository

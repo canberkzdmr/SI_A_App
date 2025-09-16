@@ -129,7 +129,7 @@ fun RegisterScreenContent(
         buildAnnotatedString {
             append("I accept the")
             pushStringAnnotation("TERMS", annotation = "terms_and_conditions")
-            withStyle(style = SpanStyle(color = primaryLight)) {
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                 append(" terms and conditions ")
             }
             pop()
@@ -140,7 +140,7 @@ fun RegisterScreenContent(
         buildAnnotatedString {
             append("Already have an account? ")
             pushStringAnnotation("ACCOUNT", annotation = "already_have_an_account")
-            withStyle(style = SpanStyle(color = primaryLight)) {
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                 append("Login.")
             }
             pop()
@@ -158,14 +158,14 @@ fun RegisterScreenContent(
                     Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .background(color = primaryLight),
+                        .background(color = MaterialTheme.colorScheme.primary),
             )
             Spacer(
                 modifier =
                     Modifier
                         .weight(1f)
                         .fillMaxWidth()
-                        .background(color = surfaceDimLight),
+                        .background(color = MaterialTheme.colorScheme.surfaceDim),
             )
         }
 

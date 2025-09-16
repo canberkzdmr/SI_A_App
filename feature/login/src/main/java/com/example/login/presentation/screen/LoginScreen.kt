@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,23 +48,21 @@ import com.example.ui.theme.primaryLight
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    prefillUsername: String?,
+    prefillUsername: String? = null,
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (state.isLoggedIn) {
-        LaunchedEffect(Unit) {
-            onLoginSuccess()
-        }
+    LaunchedEffect(state.isLoggedIn) {
+        if (state.isLoggedIn) onLoginSuccess()
     }
 
     LoginScreenContent(
         state = state,
         prefillUsername = prefillUsername,
         onLoginClick = viewModel::login,
-        onRegisterClick = { onRegisterClick() },
+        onRegisterClick = onRegisterClick,
         onUserNameChange = viewModel::onUsernameChanged,
         onPasswordChange = viewModel::onPasswordChanged,
     )
@@ -72,26 +71,25 @@ fun LoginScreen(
 @Composable
 fun LoginScreenContent(
     state: LoginUiState,
-    prefillUsername: String?,
+    prefillUsername: String? = null,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onUserNameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    prefillUsername?.let {
-        onUserNameChange(it)
+    // Prefill username if provided
+    LaunchedEffect(prefillUsername) {
+        prefillUsername?.let(onUserNameChange)
     }
 
     MyApplicationTheme {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .background(color = primaryLight)
+                .background(color = MaterialTheme.colorScheme.primary)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 Spacer(modifier = Modifier.weight(1f))
 
                 WelcomeMessage(
@@ -106,58 +104,65 @@ fun LoginScreenContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = backgroundLight,
+                            color = MaterialTheme.colorScheme.background,
                             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
                         )
+                        .padding(vertical = 24.dp)
                 ) {
                     AppHeadline(
                         "Your style of notes!",
-                        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     AppRegular(
                         "Capture your thoughts and any ideas.",
-                        modifier = Modifier.padding(start = 24.dp, end = 24.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     OutlinedTextField(
                         value = state.username,
-                        onValueChange = {
-                            onUserNameChange(it)
-                        },
+                        onValueChange = onUserNameChange,
                         label = { Text("Username") },
-                        singleLine = true,
                         placeholder = { Text("Your username") },
+                        singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     OutlinedTextField(
                         value = state.password,
-                        onValueChange = {
-                            onPasswordChange(it)
-                        },
+                        onValueChange = onPasswordChange,
                         label = { Text("Password") },
-                        singleLine = true,
                         placeholder = { Text("Enter your password") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                        singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     PrimaryButton(
-                        "Login",
-                        onClick = { onLoginClick() },
+                        text = "Login",
+                        onClick = onLoginClick,
                         modifier = Modifier
-                            .padding(horizontal = 24.dp, vertical = 8.dp)
                             .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     TextButton(
-                        onClick = { onRegisterClick() },
-                        modifier = Modifier
-                            .padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
-                            .align(Alignment.CenterHorizontally)
+                        onClick = onRegisterClick,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
                         AppLabel("Don't have an account? Register here!")
                     }
@@ -168,43 +173,38 @@ fun LoginScreenContent(
 }
 
 @Composable
-fun WelcomeMessage(modifier: Modifier) {
+fun WelcomeMessage(modifier: Modifier = Modifier) {
     var visible by remember { mutableStateOf(false) }
 
-    // Trigger animation when the composable enters composition
     LaunchedEffect(Unit) {
         visible = true
     }
 
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(animationSpec = tween(durationMillis = 800)) +
+        enter = fadeIn(animationSpec = tween(800)) +
                 slideInVertically(
                     initialOffsetY = { it / 2 },
-                    animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing)
+                    animationSpec = tween(800, easing = FastOutSlowInEasing)
                 )
     ) {
         AppHeadline(
             "Welcome!",
             modifier = modifier,
-            color = primaryContainerLight,
+            color = MaterialTheme.colorScheme.primaryContainer,
             textAlign = TextAlign.Center
         )
     }
 }
 
-
-@Preview(
-    showBackground = true, showSystemUi = true,
-    device = "spec:parent=pixel_9"
-)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
     MyApplicationTheme {
         LoginScreenContent(
-            state = LoginUiState(username = "canberk", "1234"),
+            state = LoginUiState(username = "canberk", password = "1234"),
             prefillUsername = "",
-            onLoginClick = { Log.d("LoginPreview", "Login Clicked") },
+            onLoginClick = {},
             onRegisterClick = {},
             onUserNameChange = {},
             onPasswordChange = {},

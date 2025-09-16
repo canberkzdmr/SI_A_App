@@ -3,7 +3,9 @@ package com.example.login.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.core.domain.model.User
 import com.example.core.domain.usecase.VerifyPasswordUseCase
+import com.example.core.session.UserSession
 import com.example.login.domain.usecase.LoginUseCase
 import com.example.login.domain.usecase.GetUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +21,8 @@ class LoginViewModel
 constructor(
     private val getUserUseCase: GetUserUseCase,
     private val verifyPasswordUseCase: VerifyPasswordUseCase,
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val userSession: UserSession
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState
@@ -57,6 +60,13 @@ constructor(
                     if (isValid) {
                         Log.i("LoginViewModel", "User logged in")
                         loginUseCase(username, password)
+                        userSession.setUser(
+                            User(
+                                id = user.id,
+                                username = user.username,
+                                email = user.email,
+                            )
+                        )
                         _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
                     } else {
                         Log.i("LoginViewModel", "Invalid password")
