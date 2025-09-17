@@ -16,4 +16,5 @@ data class UserEntity(
     val email: String,
     val registrationDate: String,
     val lastPasswordChangeDate: String,
+    val isActive: Boolean,
 )

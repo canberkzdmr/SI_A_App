@@ -1,6 +1,7 @@
 package com.example.login.di
 
 import com.example.core.data.dao.UserDao
+import com.example.core.data.mapper.UserEntityMapper
 import com.example.core.domain.usecase.VerifyPasswordUseCase
 import com.example.core.session.domain.repository.SessionRepository
 import com.example.login.domain.usecase.LoginUseCase
@@ -19,12 +20,14 @@ object UseCaseModule {
     fun provideLoginUseCase(
         sessionRepository: SessionRepository,
         verifyPasswordUseCase: VerifyPasswordUseCase,
-        userDao: UserDao
+        userDao: UserDao,
+        userEntityMapper: UserEntityMapper
     ): LoginUseCase {
         return LoginUseCase(
             userDao,
             verifyPasswordUseCase,
-            sessionRepository
+            sessionRepository,
+            userEntityMapper
         )
     }
 }

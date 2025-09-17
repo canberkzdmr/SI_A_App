@@ -7,6 +7,6 @@ class LogoutUseCase @Inject constructor(
     private val sessionRepository: SessionRepository
 ) {
     suspend operator fun invoke() {
-        sessionRepository.clearSession()
+        sessionRepository.clearActiveUser()
     }
 }

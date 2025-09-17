@@ -2,8 +2,10 @@ package com.example.core.data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Update
 import com.example.core.data.model.UserEntity
 import com.example.core.domain.model.PasswordVerifyModel
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao: BaseDao<UserEntity> {
@@ -22,4 +24,13 @@ interface UserDao: BaseDao<UserEntity> {
 
     @Query("SELECT passwordHash, salt FROM USERS WHERE email = :email")
     suspend fun getPasswordHashByEmail(email: String): PasswordVerifyModel?
+
+    @Query("SELECT * FROM users WHERE isActive = 1 LIMIT 1")
+    fun getActiveUserFlow(): Flow<UserEntity?>
+
+    @Update
+    suspend fun updateUser(user: UserEntity)
+
+    @Query("UPDATE users SET isActive = 0")
+    suspend fun deactivateAllUsers()
 }

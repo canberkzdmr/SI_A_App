@@ -22,5 +22,6 @@ fun User.toEntity(passwordHash: ByteArray, salt: ByteArray): UserEntity = UserEn
     salt = salt,
     email = email,
     registrationDate = registerDate,
-    lastPasswordChangeDate = lastPasswordChangeDate
+    lastPasswordChangeDate = lastPasswordChangeDate,
+    isActive = true,
 )

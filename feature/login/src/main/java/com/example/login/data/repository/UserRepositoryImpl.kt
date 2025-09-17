@@ -29,6 +29,7 @@ constructor(
                     email = user.email,
                     lastPasswordChangeDate = user.lastPasswordChangeDate,
                     registrationDate = user.registerDate,
+                    isActive = false,
                 )
             userDao.insert(entity)
             Result.success(Unit)
