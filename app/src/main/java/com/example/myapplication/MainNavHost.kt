@@ -55,6 +55,13 @@ fun MainNavHost(
                     }
                     launchSingleTop = true
                 }
+            },
+            onEditProfile = {
+                navController.navigate(AppDestination.EditProfile.route)
+            },
+            onProfileUpdated = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Profile")
+                navController.popBackStack()
             }
         )
 

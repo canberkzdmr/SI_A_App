@@ -44,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -82,10 +83,10 @@ import java.time.LocalDate
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onLogOut: () -> Unit,
+    onEditProfile: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val user by viewModel.currentUser.collectAsState()
-
 
     // Collect one-shot events
     LaunchedEffect(user) {
@@ -103,7 +104,7 @@ fun ProfileScreen(
     ProfileScreenContent(
         uiState = uiState,
         onLogout = viewModel::logout,
-        onEditProfile = {},
+        onEditProfile = { onEditProfile() },
         onChangePassword = {},
         onDeleteAccount = {},
         onThemeChange = {},
@@ -133,73 +134,85 @@ fun ProfileScreenContent(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Profile") }
+                colors =
+                    TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                    ),
+                title = {
+                    Text("Profile", color = MaterialTheme.colorScheme.onPrimary)
+                },
             )
-        }
+        },
     ) { innerPadding ->
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp),
         ) {
             // ------------------------
             // Profile Header
             // ------------------------
             item {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (uiState.isLoading) {
                         ShimmerBox(
-                            modifier = Modifier
-                                .size(96.dp)
-                                .clip(CircleShape)
+                            modifier =
+                                Modifier
+                                    .size(96.dp)
+                                    .clip(CircleShape),
                         )
                     } else {
                         Image(
                             painter = painterResource(R.drawable.person_profile),
                             contentDescription = "Profile Picture",
-                            modifier = Modifier
-                                .size(96.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentScale = ContentScale.Crop
+                            modifier =
+                                Modifier
+                                    .size(96.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentScale = ContentScale.Crop,
                         )
                     }
 
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceEvenly
+                        verticalArrangement = Arrangement.SpaceEvenly,
                     ) {
                         Spacer(Modifier.height(8.dp))
                         if (uiState.isLoading) {
                             ShimmerBox(
-                                modifier = Modifier
-                                    .height(20.dp)
-                                    .fillMaxWidth(0.6f)
+                                modifier =
+                                    Modifier
+                                        .height(20.dp)
+                                        .fillMaxWidth(0.6f),
                             )
                             Spacer(Modifier.height(8.dp))
                             ShimmerBox(
-                                modifier = Modifier
-                                    .height(16.dp)
-                                    .fillMaxWidth(0.4f)
+                                modifier =
+                                    Modifier
+                                        .height(16.dp)
+                                        .fillMaxWidth(0.4f),
                             )
                         } else {
                             Text(
                                 text = uiState.username ?: "Guest",
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
                                 text = uiState.email ?: "Not available",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         Spacer(Modifier.height(16.dp))
@@ -207,39 +220,46 @@ fun ProfileScreenContent(
                 }
 
                 Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
                 )
             }
 
             // ------------------------
             // Sections with list items
             // ------------------------
-            val sections = listOf(
-                "Account" to listOf(
-                    Pair(Icons.Default.Edit, "Edit Profile"),
-                    Pair(Icons.Default.Lock, "Change Password"),
-                    Pair(Icons.Default.ExitToApp, "Logout"),
-                    Pair(Icons.Default.Delete, "Delete Account")
-                ),
-                "Preferences" to listOf(
-                    Pair(Icons.Default.DarkMode, "Theme"),
-                    Pair(Icons.Default.Language, "Language")
-                ),
-                "Notes" to listOf(
-                    Pair(Icons.Default.Category, "Manage Categories"),
-                    Pair(Icons.Default.UploadFile, "Export Notes")
-                ),
-                "Security" to listOf(
-                    Pair(Icons.Default.Fingerprint, "Enable Biometrics")
-                ),
-                "About" to listOf(
-                    Pair(Icons.Default.Info, "App Version: 1.0.0"),
-                    Pair(Icons.Default.SupportAgent, "Contact Support")
+            val sections =
+                listOf(
+                    "Account" to
+                        listOf(
+                            Pair(Icons.Default.Edit, "Edit Profile"),
+                            Pair(Icons.Default.Lock, "Change Password"),
+                            Pair(Icons.Default.ExitToApp, "Logout"),
+                            Pair(Icons.Default.Delete, "Delete Account"),
+                        ),
+                    "Preferences" to
+                        listOf(
+                            Pair(Icons.Default.DarkMode, "Theme"),
+                            Pair(Icons.Default.Language, "Language"),
+                        ),
+                    "Notes" to
+                        listOf(
+                            Pair(Icons.Default.Category, "Manage Categories"),
+                            Pair(Icons.Default.UploadFile, "Export Notes"),
+                        ),
+                    "Security" to
+                        listOf(
+                            Pair(Icons.Default.Fingerprint, "Enable Biometrics"),
+                        ),
+                    "About" to
+                        listOf(
+                            Pair(Icons.Default.Info, "App Version: 1.0.0"),
+                            Pair(Icons.Default.SupportAgent, "Contact Support"),
+                        ),
                 )
-            )
 
             sections.forEach { (sectionTitle, items) ->
                 item { SectionHeader(sectionTitle, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) }
@@ -247,10 +267,11 @@ fun ProfileScreenContent(
                 items(items) { item ->
                     if (uiState.isLoading) {
                         ShimmerBox(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .padding(vertical = 4.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                                    .padding(vertical = 4.dp),
                         )
                     } else {
                         ProfileListItem(
@@ -271,7 +292,7 @@ fun ProfileScreenContent(
                                     else -> {}
                                 }
                             },
-                            isDanger = item.second == "Delete Account"
+                            isDanger = item.second == "Delete Account",
                         )
                     }
                 }
@@ -280,57 +301,58 @@ fun ProfileScreenContent(
     }
 }
 
-
 @Composable
 fun ProfileListItem(
     icon: ImageVector,
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isDanger: Boolean = false
+    isDanger: Boolean = false,
 ) {
     val textColor = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 4.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(vertical = 4.dp),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(8.dp),
-        tonalElevation = 1.dp
+        tonalElevation = 1.dp,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = text,
-                tint = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                tint = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
-                color = textColor
+                color = textColor,
             )
         }
     }
 }
-
 
 @Preview(uiMode = Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun ProfileScreenPreview() {
     MyApplicationTheme {
         ProfileScreenContent(
-            uiState = ProfileUiState(
-                username = "Aslanim Ismail",
-                email = "ismail.aslan@example.com"
-            ),
+            uiState =
+                ProfileUiState(
+                    username = "Aslanim Ismail",
+                    email = "ismail.aslan@example.com",
+                ),
             onLogout = {},
             onEditProfile = {},
             onChangePassword = {},
@@ -340,7 +362,7 @@ fun ProfileScreenPreview() {
             onManageCategories = {},
             onExportNotes = {},
             onEnableBiometrics = {},
-            onContactSupport = {}
+            onContactSupport = {},
         )
     }
 }

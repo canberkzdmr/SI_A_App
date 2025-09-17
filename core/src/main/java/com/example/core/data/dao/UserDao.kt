@@ -2,8 +2,10 @@ package com.example.core.data.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.core.data.model.UserEntity
+import com.example.core.data.model.UserWithDetail
 import com.example.core.domain.model.PasswordVerifyModel
 import kotlinx.coroutines.flow.Flow
 
@@ -33,4 +35,15 @@ interface UserDao: BaseDao<UserEntity> {
 
     @Query("UPDATE users SET isActive = 0")
     suspend fun deactivateAllUsers()
+
+    @Query("SELECT * FROM users WHERE id = :userId")
+    suspend fun getUserById(userId: Int): UserEntity?
+
+    @Transaction
+    @Query("SELECT * FROM users WHERE id = :userId")
+    suspend fun getUserWithDetailById(userId: Int): UserWithDetail?
+
+    @Transaction
+    @Query("SELECT * FROM users")
+    suspend fun getAllUsersWithDetails(): List<UserWithDetail>
 }

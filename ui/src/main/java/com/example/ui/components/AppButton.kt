@@ -28,12 +28,14 @@ fun PrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    enabled: Boolean = true,
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = null,
 ) {
     Button(
         onClick = onClick,
         modifier = modifier,
+        enabled = enabled,
     ) {
         if (isLoading) {
             CircularProgressIndicator(

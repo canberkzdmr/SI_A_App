@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.core.data.dao.NoteDao
 import com.example.core.data.dao.UserDao
+import com.example.core.data.dao.UserDetailDao
 import com.example.core.data.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -26,4 +27,7 @@ object DatabaseModule {
 
     @Provides
     fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
+
+    @Provides
+    fun provideUserDetailDao(db: AppDatabase): UserDetailDao = db.userDetailDao()
 }
