@@ -48,9 +48,10 @@ import com.example.ui.components.ShimmerBox
 import com.example.ui.theme.MyApplicationTheme
 
 @Composable
-fun EditUserProfileScreen(
+fun EditProfileScreen(
     viewModel: EditProfileViewModel = hiltViewModel(),
     onSaveSuccess: () -> Unit,
+    onCancelEditProfile: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -58,9 +59,9 @@ fun EditUserProfileScreen(
         viewModel.loadUser()
     }
 
-    EditUserProfileScreenContent(
+    EditProfileScreenContent(
         uiState,
-        onCancel = {},
+        onCancel = { onCancelEditProfile() },
         updateFullName = viewModel::updateFullName,
         updateAddress = viewModel::updateAddress,
         updateBio = viewModel::updateBio,
@@ -88,7 +89,7 @@ fun EditUserProfileScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditUserProfileScreenContent(
+fun EditProfileScreenContent(
     uiState: EditUserProfileUiState,
     onCancel: () -> Unit,
     updateFullName: (String) -> Unit,
@@ -271,7 +272,7 @@ fun EditUserProfileScreenContent(
 @Composable
 fun EditProfileScreenPreview() {
     MyApplicationTheme {
-        EditUserProfileScreenContent(
+        EditProfileScreenContent(
             uiState =
                 EditUserProfileUiState(
                     username = "canberk",

@@ -60,7 +60,11 @@ fun MainNavHost(
                 navController.navigate(AppDestination.EditProfile.route)
             },
             onProfileUpdated = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Profile")
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Profile\n\tProfile updated")
+                navController.popBackStack()
+            },
+            onEditProfileCancelled = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Profile\n\tCancelled")
                 navController.popBackStack()
             }
         )

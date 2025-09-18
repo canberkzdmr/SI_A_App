@@ -1,10 +1,8 @@
 package com.cbo.user.presentation.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import com.cbo.user.presentation.screen.EditUserProfileScreen
+import com.cbo.user.presentation.screen.EditProfileScreen
 import com.cbo.user.presentation.screen.ProfileScreen
 import com.example.core.navigation.AppDestination
 
@@ -12,6 +10,7 @@ fun NavGraphBuilder.userNavGraph(
     onLogOut: () -> Unit,
     onEditProfile: () -> Unit,
     onProfileUpdated: () -> Unit,
+    onEditProfileCancelled: () -> Unit,
 ) {
     composable(AppDestination.Profile.route) {
         ProfileScreen(
@@ -21,7 +20,10 @@ fun NavGraphBuilder.userNavGraph(
     }
 
     composable(AppDestination.EditProfile.route) {
-        EditUserProfileScreen(
+        EditProfileScreen(
+            onCancelEditProfile = {
+                onEditProfileCancelled()
+            },
             onSaveSuccess = {
                 onProfileUpdated()
             }

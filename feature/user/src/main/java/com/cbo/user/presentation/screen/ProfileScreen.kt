@@ -2,6 +2,7 @@ package com.cbo.user.presentation.screen
 
 import android.content.res.Configuration
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -99,6 +100,10 @@ fun ProfileScreen(
                 is ProfileEvent.LoggedOut -> onLogOut()
             }
         }
+    }
+
+    BackHandler {
+        Log.i("ProfileScreen", "Back button is disabled for Profile Screen")
     }
 
     ProfileScreenContent(
