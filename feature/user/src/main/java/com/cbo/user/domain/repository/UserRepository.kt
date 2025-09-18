@@ -1,8 +1,8 @@
 package com.cbo.user.domain.repository
 
-import com.example.core.data.model.UserDetailEntity
-import com.example.core.data.model.UserEntity
-import com.example.core.data.model.UserWithDetail
+import com.example.core.database.entity.UserDetailEntity
+import com.example.core.database.entity.UserEntity
+import com.example.core.database.entity.UserWithDetail
 
 interface UserRepository {
     suspend fun getUserWithDetail(userId: Int): Result<UserWithDetail>

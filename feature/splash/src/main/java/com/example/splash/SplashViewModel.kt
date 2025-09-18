@@ -3,9 +3,7 @@ package com.example.splash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.domain.model.User
-import com.example.core.domain.usecase.GetActiveUserUseCase
-import com.example.core.session.UserSession
-import com.example.core.session.domain.repository.SessionRepository
+import com.example.core.session.domain.usecase.GetActiveUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +18,7 @@ import javax.inject.Inject
 class SplashViewModel
     @Inject
     constructor(
-        private val userSession: UserSession,
+        private val userSession: com.example.core.session.UserSession,
         private val getActiveUserUseCase: GetActiveUserUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(SplashUiState())

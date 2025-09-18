@@ -1,10 +1,22 @@
 package com.example.login.domain.usecase
 
-import com.example.login.domain.model.User
-import com.example.login.domain.repository.UserRepository
+import com.example.core.database.dao.UserDao
+import com.example.core.data.mapper.UserEntityMapper
+import com.example.core.domain.model.User
+import javax.inject.Inject
 
-class GetUserUseCase(private val userRepository: UserRepository) {
+class GetUserUseCase @Inject constructor(
+    private val userDao: UserDao,
+    private val userEntityMapper: UserEntityMapper
+) {
     suspend operator fun invoke(username: String): Result<User>? {
-        return userRepository.getUser(username)
+        return try {
+            val userEntity = userDao.getUserByUsername(username)
+            userEntity?.let {
+                Result.success(userEntityMapper.toDomain(it))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

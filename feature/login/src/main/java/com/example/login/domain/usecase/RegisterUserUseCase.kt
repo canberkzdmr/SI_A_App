@@ -1,7 +1,8 @@
 package com.example.login.domain.usecase
 
 import android.util.Log
-import com.example.core.domain.model.RegistrationException
+import com.example.core.domain.exception.RegistrationException
+
 import com.example.login.domain.model.User
 import com.example.login.domain.repository.UserRepository
 

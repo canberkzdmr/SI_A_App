@@ -47,9 +47,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.core.base.UiState
-import com.example.core.base.UiState.Loading
-import com.example.core.base.validation.FieldValidation
+import com.example.core.common.base.UiState
+import com.example.core.common.validation.FieldValidation
 import com.example.login.presentation.viewmodel.RegisterState
 import com.example.login.presentation.viewmodel.RegisterViewModel
 import com.example.ui.components.AppLabel
@@ -57,8 +56,6 @@ import com.example.ui.components.AppRegular
 import com.example.ui.components.AppTitle
 import com.example.ui.components.PrimaryButton
 import com.example.ui.theme.MyApplicationTheme
-import com.example.ui.theme.primaryLight
-import com.example.ui.theme.surfaceDimLight
 
 @Composable
 fun RegisterScreen(
@@ -411,7 +408,7 @@ fun RegisterScreenContent(
                         modifier =
                             Modifier
                                 .fillMaxWidth(),
-                        isLoading = uiState == Loading
+                        isLoading = uiState == UiState.Loading
                     )
                 }
             }

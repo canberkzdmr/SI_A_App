@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
-import com.example.core.data.model.UserDetailEntity
+import com.example.core.database.entity.UserDetailEntity
 import com.example.core.domain.model.User
-import com.example.core.domain.usecase.GetActiveUserUseCase
+import com.example.core.session.domain.usecase.GetActiveUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,11 +43,12 @@ constructor(
                                     userId = userWithDetail.user.id,
                                     username = userWithDetail.user.username,
                                     email = userWithDetail.user.email,
-                                    fullName = userWithDetail.detail?.fullName.orEmpty(),
-                                    avatarUrl = userWithDetail.detail?.avatarUrl.orEmpty(),
-                                    bio = userWithDetail.detail?.bio.orEmpty(),
-                                    phoneNumber = userWithDetail.detail?.phoneNumber.orEmpty(),
-                                    address = userWithDetail.detail?.address.orEmpty(),
+
+                                    fullName = userWithDetail.userDetail?.fullName.orEmpty(),
+                                    avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
+                                    bio = userWithDetail.userDetail?.bio.orEmpty(),
+                                    phoneNumber = userWithDetail.userDetail?.phoneNumber.orEmpty(),
+                                    address = userWithDetail.userDetail?.address.orEmpty(),
                                     isLoading = false
                                 )
                             },

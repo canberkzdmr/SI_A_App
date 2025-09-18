@@ -35,20 +35,23 @@ android {
 }
 
 dependencies {
+    // Core module dependencies - act as coordinator module
+    api(project(":core-domain"))
+    api(project(":core-data"))
+    api(project(":core-database"))
+    api(project(":core-common"))
+    api(project(":core-navigation"))
+    api(project(":core-session"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.datastore.core)
-    implementation(libs.androidx.datastore.preferences)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
-
+    // Hilt for dependency injection
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)

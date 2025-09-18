@@ -3,9 +3,9 @@ package com.example.login.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.core.base.UiState
-import com.example.core.base.validation.FieldValidation
-import com.example.core.util.DateUtil
+import com.example.core.common.base.UiState
+import com.example.core.common.util.DateUtil
+import com.example.core.common.validation.FieldValidation
 import com.example.login.domain.model.User
 import com.example.login.domain.usecase.RegisterUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

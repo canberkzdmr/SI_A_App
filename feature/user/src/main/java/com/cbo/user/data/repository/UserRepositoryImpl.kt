@@ -1,11 +1,11 @@
 package com.cbo.user.data.repository
 
 import com.cbo.user.domain.repository.UserRepository
-import com.example.core.data.dao.UserDao
-import com.example.core.data.dao.UserDetailDao
-import com.example.core.data.model.UserDetailEntity
-import com.example.core.data.model.UserEntity
-import com.example.core.data.model.UserWithDetail
+import com.example.core.database.dao.UserDao
+import com.example.core.database.dao.UserDetailDao
+import com.example.core.database.entity.UserDetailEntity
+import com.example.core.database.entity.UserEntity
+import com.example.core.database.entity.UserWithDetail
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(

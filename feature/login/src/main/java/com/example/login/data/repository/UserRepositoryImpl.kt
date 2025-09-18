@@ -2,9 +2,10 @@ package com.example.login.data.repository
 
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
-import com.example.core.data.dao.UserDao
-import com.example.core.data.model.UserEntity
-import com.example.core.domain.model.LoginException
+import com.example.core.database.dao.UserDao
+import com.example.core.database.entity.UserEntity
+import com.example.core.domain.exception.LoginException
+import com.example.core.data.mapper.UserEntityMapper
 import com.example.login.domain.model.User
 import com.example.login.domain.repository.UserRepository
 import java.security.SecureRandom
@@ -16,6 +17,7 @@ class UserRepositoryImpl
 @Inject
 constructor(
     private val userDao: UserDao,
+    private val userEntityMapper: UserEntityMapper
 ) : UserRepository {
     override suspend fun registerUser(user: User): Result<Unit> {
         return try {
@@ -44,22 +46,18 @@ constructor(
 
     override suspend fun getUser(username: String): Result<User>? {
         return try {
-            val user = userDao.getUserByUsername(username)?.let {
-                User(
-                    id = it.id,
-                    username = it.username,
-                    password = it.passwordHash.toString(),
-                    email = it.email,
-                    lastPasswordChangeDate = it.lastPasswordChangeDate,
-                    registerDate = it.registrationDate,
+            val userEntity = userDao.getUserByUsername(username)
+            userEntity?.let { entity ->
+                val user = User(
+                    id = entity.id,
+                    username = entity.username,
+                    password = "", // Don't return password hash
+                    email = entity.email,
+                    lastPasswordChangeDate = entity.lastPasswordChangeDate,
+                    registerDate = entity.registrationDate,
                     termsAndConditionsChecked = true
                 )
-            }
-
-            user?.let {
-                return Result.success(
-                    it
-                )
+                return Result.success(user)
             }
             Result.failure(LoginException.UserNotFoundException())
         } catch (e: Exception) {

@@ -1,6 +1,6 @@
 package com.example.login.di
 
-import com.example.core.data.dao.UserDao
+import com.example.core.database.dao.UserDao
 import com.example.core.data.mapper.UserEntityMapper
 import com.example.core.domain.usecase.VerifyPasswordUseCase
 import com.example.core.session.domain.repository.SessionRepository
@@ -30,4 +30,5 @@ object UseCaseModule {
             userEntityMapper
         )
     }
+
 }

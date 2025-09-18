@@ -1,6 +1,6 @@
 package com.example.login.domain.usecase
 
-import com.example.core.data.dao.UserDao
+import com.example.core.database.dao.UserDao
 import com.example.core.data.mapper.UserEntityMapper
 import com.example.core.domain.model.User
 import com.example.core.domain.usecase.VerifyPasswordUseCase

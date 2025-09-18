@@ -1,6 +1,6 @@
 package com.example.login.domain.model
 
-import com.example.core.data.model.UserEntity
+import com.example.core.database.entity.UserEntity
 
 // Data (Entity) → Domain
 fun UserEntity.toDomain(): User =

@@ -87,7 +87,7 @@ fun ProfileScreen(
     onEditProfile: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val user by viewModel.currentUser.collectAsState()
+    val user by viewModel.currentUser.collectAsState("")
 
     // Collect one-shot events
     LaunchedEffect(user) {
