@@ -8,6 +8,8 @@ import com.example.core.common.util.DateUtil
 import com.example.core.common.validation.FieldValidation
 import com.example.login.domain.model.User
 import com.example.login.domain.usecase.RegisterUserUseCase
+import com.example.ui.snackbar.SnackbarManager
+import com.example.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,13 +49,21 @@ constructor(
                     UiState.Success(Unit)
                 }
 
-                result.isFailure -> UiState.Error(
-                    result.exceptionOrNull()?.message ?: "Bilinmeyen hata"
-                )
+                result.isFailure -> {
+                    Log.e("RegisterViewmodel", result.exceptionOrNull()?.message ?: "Bilinmeyen hata")
+                    SnackbarManager.showMessage(SnackbarMessage.Error(result.exceptionOrNull()?.message ?: "Bilinmeyen hata"))
+                    UiState.Error(
+                        result.exceptionOrNull()?.message ?: "Bilinmeyen hata"
+                    )
+                }
 
-                else -> UiState.Error(
-                    result.exceptionOrNull()?.message ?: "Bilinmeyen hata"
-                )
+                else -> {
+                    Log.e("RegisterViewmodel", result.exceptionOrNull()?.message ?: "Bilinmeyen hata")
+                    SnackbarManager.showMessage(SnackbarMessage.Error(result.exceptionOrNull()?.message ?: "Bilinmeyen hata"))
+                    UiState.Error(
+                        result.exceptionOrNull()?.message ?: "Bilinmeyen hata"
+                    )
+                }
             }
         }
     }

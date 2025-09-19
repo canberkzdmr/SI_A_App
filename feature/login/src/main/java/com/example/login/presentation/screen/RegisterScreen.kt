@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.core.common.base.UiState
 import com.example.core.common.validation.FieldValidation
 import com.example.login.presentation.viewmodel.RegisterState
@@ -408,7 +409,7 @@ fun RegisterScreenContent(
                         modifier =
                             Modifier
                                 .fillMaxWidth(),
-                        isLoading = uiState == UiState.Loading
+                        isLoading = uiState == UiState.Loading,
                     )
                 }
             }

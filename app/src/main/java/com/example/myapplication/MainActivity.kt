@@ -3,7 +3,10 @@ package com.example.myapplication
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.example.ui.snackbar.SnackbarHostProvider
 import com.example.ui.theme.MyApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -14,7 +17,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             MyApplicationTheme {
                 val navController = rememberNavController()
-                MainNavHost(navController = navController)
+                SnackbarHostProvider { padding ->
+                    MainNavHost(
+                        navController = navController,
+                        modifier = Modifier.padding(padding),
+                    )
+                }
             }
         }
     }

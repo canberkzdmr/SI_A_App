@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.domain.model.User
 import com.example.core.session.UserSession
 import com.example.core.session.domain.usecase.LogoutUseCase
+import com.example.ui.snackbar.SnackbarManager
+import com.example.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -65,6 +67,7 @@ class ProfileViewModel @Inject constructor(
             )
             logoutUseCase.invoke()
             userSession.clearUser()
+            SnackbarManager.showMessage(SnackbarMessage.Info("Logged out successfully!"))
             _events.emit(ProfileEvent.LoggedOut)
         }
     }

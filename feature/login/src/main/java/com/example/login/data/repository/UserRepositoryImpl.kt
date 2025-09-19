@@ -44,25 +44,23 @@ constructor(
         }
     }
 
-    override suspend fun getUser(username: String): Result<User>? {
+    override suspend fun getUser(username: String): Result<User> {
         return try {
             val userEntity = userDao.getUserByUsername(username)
-            userEntity?.let { entity ->
-                val user = User(
-                    id = entity.id,
-                    username = entity.username,
-                    password = "", // Don't return password hash
-                    email = entity.email,
-                    lastPasswordChangeDate = entity.lastPasswordChangeDate,
-                    registerDate = entity.registrationDate,
-                    termsAndConditionsChecked = true
-                )
-                return Result.success(user)
-            }
-            Result.failure(LoginException.UserNotFoundException())
+
+            val user = User(
+                id = userEntity.id,
+                username = userEntity.username,
+                password = "", // Don't return password hash
+                email = userEntity.email,
+                lastPasswordChangeDate = userEntity.lastPasswordChangeDate,
+                registerDate = userEntity.registrationDate,
+                termsAndConditionsChecked = true
+            )
+            Result.success(user)
         } catch (e: Exception) {
             Log.e("UserRepositoryImpl", "An error occurred -> ${e.message}")
-            return null
+            Result.failure(LoginException.UserNotFoundException())
         }
     }
 

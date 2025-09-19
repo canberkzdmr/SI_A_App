@@ -9,12 +9,10 @@ class GetUserUseCase @Inject constructor(
     private val userDao: UserDao,
     private val userEntityMapper: UserEntityMapper
 ) {
-    suspend operator fun invoke(username: String): Result<User>? {
+    suspend operator fun invoke(username: String): Result<User> {
         return try {
             val userEntity = userDao.getUserByUsername(username)
-            userEntity?.let {
-                Result.success(userEntityMapper.toDomain(it))
-            }
+            Result.success(userEntityMapper.toDomain(userEntity))
         } catch (e: Exception) {
             Result.failure(e)
         }

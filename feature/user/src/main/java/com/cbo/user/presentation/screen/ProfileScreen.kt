@@ -92,7 +92,6 @@ fun ProfileScreen(
     // Collect one-shot events
     LaunchedEffect(user) {
         if (user == null) {
-            Log.i("ProfileScreen", "Could not retrieve user!")
             onLogOut()
         }
         viewModel.events.collect { event ->

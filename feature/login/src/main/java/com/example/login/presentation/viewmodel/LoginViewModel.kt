@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.domain.model.User
 import com.example.core.domain.usecase.VerifyPasswordUseCase
 import com.example.core.session.UserSession
-import com.example.login.domain.usecase.LoginUseCase
 import com.example.login.domain.usecase.GetUserUseCase
+import com.example.login.domain.usecase.LoginUseCase
+import com.example.ui.snackbar.SnackbarHostProvider
+import com.example.ui.snackbar.SnackbarManager
+import com.example.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,73 +20,68 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel
-@Inject
-constructor(
-    private val getUserUseCase: GetUserUseCase,
-    private val verifyPasswordUseCase: VerifyPasswordUseCase,
-    private val loginUseCase: LoginUseCase,
-    private val userSession: UserSession
-) : ViewModel() {
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState
+    @Inject
+    constructor(
+        private val getUserUseCase: GetUserUseCase,
+        private val verifyPasswordUseCase: VerifyPasswordUseCase,
+        private val loginUseCase: LoginUseCase,
+        private val userSession: UserSession,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(LoginUiState())
+        val uiState: StateFlow<LoginUiState> = _uiState
 
-    fun onUsernameChanged(username: String) {
-        _uiState.update { it.copy(username = username) }
-    }
+        fun onUsernameChanged(username: String) {
+            _uiState.update { it.copy(username = username) }
+        }
 
-    fun onPasswordChanged(password: String) {
-        _uiState.update { it.copy(password = password) }
-    }
+        fun onPasswordChanged(password: String) {
+            _uiState.update { it.copy(password = password) }
+        }
 
-    fun login() {
-        val username = _uiState.value.username
-        val password = _uiState.value.password
+        fun login() {
+            Log.i("LoginViewModel", "Login clicked")
 
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val username = _uiState.value.username
+            val password = _uiState.value.password
 
-            val userResult = getUserUseCase(username)
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            userResult?.let {
-                if (userResult.isFailure) {
+                val userResult = getUserUseCase(username)
+                val user = userResult.getOrNull()
+
+                if (userResult.isFailure || user == null) {
                     Log.e("LoginViewModel", "User not found")
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = "User not found")
-                    }
+                    SnackbarManager.showMessage(SnackbarMessage.Error("Check user informations"))
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "User not found") }
                     return@launch
                 }
 
-                val user = userResult.getOrNull()
-
-                user?.let { user ->
                 val isValid = verifyPasswordUseCase(user.username, password)
-                    if (isValid) {
-                        Log.i("LoginViewModel", "User logged in")
-                        loginUseCase(username, password)
-                        userSession.setUser(
-                            User(
-                                id = user.id,
-                                username = user.username,
-                                email = user.email,
-                            )
-                        )
-                        _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
-                    } else {
-                        Log.i("LoginViewModel", "Invalid password")
-                        _uiState.update {
-                            it.copy(isLoading = false, errorMessage = "Invalid password")
-                        }
-                    }
+                if (!isValid) {
+                    Log.i("LoginViewModel", "Invalid password")
+                    SnackbarManager.showMessage(SnackbarMessage.Error("Given informations are not correct"))
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "Invalid password") }
+                    return@launch
                 }
+
+                Log.i("LoginViewModel", "User logged in")
+                SnackbarManager.showMessage(SnackbarMessage.Success("Welcome $username!"))
+
+                loginUseCase(username, password)
+                userSession.setUser(
+                    User(id = user.id, username = user.username, email = user.email),
+                )
+
+                _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
             }
         }
     }
-}
 
 data class LoginUiState(
     val username: String = "",
     val password: String = "",
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )

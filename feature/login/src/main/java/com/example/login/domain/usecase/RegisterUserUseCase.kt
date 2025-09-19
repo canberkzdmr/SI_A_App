@@ -1,6 +1,7 @@
 package com.example.login.domain.usecase
 
 import android.util.Log
+import com.example.core.common.validation.FieldValidation
 import com.example.core.domain.exception.RegistrationException
 
 import com.example.login.domain.model.User
@@ -8,8 +9,9 @@ import com.example.login.domain.repository.UserRepository
 
 class RegisterUserUseCase(private val userRepository: UserRepository) {
     suspend operator fun invoke(user: User): Result<Unit> {
+        Log.d("RegisterUserUseCase", "Register user in progress")
         if (user.username.isBlank()) {
-            return Result.failure(RegistrationException.InvalidUserInputException("Kullanici adi bos birakilamaz"))
+            return Result.failure(RegistrationException.InvalidUserInputException())
         }
 
         if (!user.termsAndConditionsChecked) {
@@ -18,7 +20,7 @@ class RegisterUserUseCase(private val userRepository: UserRepository) {
         }
 
         if (checkUsernameExists(userRepository, user.username)) {
-            Log.e("RegisterUseCase",
+            Log.i("RegisterUserUseCase",
                 RegistrationException.UsernameAlreadyExistsException().message
                     ?: "Kullanici adi daha once alinmis!"
             )
@@ -26,11 +28,15 @@ class RegisterUserUseCase(private val userRepository: UserRepository) {
         }
 
         if (isEmailRegistered(userRepository, user.email)) {
-            Log.e("RegisterUseCase",
+            Log.e("RegisterUserUseCase",
                 RegistrationException.EmailAlreadyExistsException().message
                     ?: "Bu email adresi sistemde mevcut!"
             )
             return Result.failure(RegistrationException.EmailAlreadyExistsException())
+        }
+
+        if (!isValidPassword(user.password)) {
+            return Result.failure(RegistrationException.WeakPasswordException())
         }
 
         return userRepository.registerUser(user)
@@ -42,5 +48,14 @@ class RegisterUserUseCase(private val userRepository: UserRepository) {
 
     private suspend fun isEmailRegistered(userRepository: UserRepository, email: String): Boolean {
         return userRepository.isEmailRegistered(email)
+    }
+
+    private fun isValidPassword(password: String): Boolean {
+        val lengthValid = password.length >= 8
+        val hasUpperCase = password.any { it.isUpperCase() }
+        val hasLowerCase = password.any { it.isLowerCase() }
+        val hasDigit = password.any { it.isDigit() }
+
+        return lengthValid && hasUpperCase && hasLowerCase && hasDigit
     }
 }
