@@ -1,5 +1,6 @@
 package com.example.login.presentation.screen
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -125,18 +127,24 @@ fun RegisterScreenContent(
 
     val termsAnnotatedText =
         buildAnnotatedString {
-            append("I accept the")
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                append("I accept the")
+            }
             pushStringAnnotation("TERMS", annotation = "terms_and_conditions")
-            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onPrimaryContainer)) {
                 append(" terms and conditions ")
             }
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                append("as well as the privacy policy of application")
+            }
             pop()
-            append("as well as the privacy policy of application")
         }
 
     val alreadyHaveAnAccountAnnotatedText =
         buildAnnotatedString {
-            append("Already have an account? ")
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
+                append("Already have an account? ")
+            }
             pushStringAnnotation("ACCOUNT", annotation = "already_have_an_account")
             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                 append("Login.")
@@ -174,6 +182,7 @@ fun RegisterScreenContent(
                     .padding(24.dp),
         ) {
             Card(
+                colors = CardColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onSecondary, disabledContentColor = MaterialTheme.colorScheme.surfaceDim, disabledContainerColor = MaterialTheme.colorScheme.inversePrimary),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 shape = MaterialTheme.shapes.medium,
                 modifier =
@@ -440,7 +449,7 @@ fun RegisterScreenContent(
     }
 }
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun RegisterScreenPreview() {
     MyApplicationTheme {
