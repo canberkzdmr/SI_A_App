@@ -43,10 +43,10 @@ constructor(
                         getUserWithDetailUseCase(user.id).fold(
                             onSuccess = { userWithDetail ->
                                 _uiState.value = EditUserProfileUiState(
+                                    id = userWithDetail.userDetail?.id ?: -1,
                                     userId = userWithDetail.user.id,
                                     username = userWithDetail.user.username,
                                     email = userWithDetail.user.email,
-
                                     fullName = userWithDetail.userDetail?.fullName.orEmpty(),
                                     avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
                                     bio = userWithDetail.userDetail?.bio.orEmpty(),
@@ -130,6 +130,7 @@ constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             val detail = UserDetailEntity(
+                id = _uiState.value.id,
                 userId = _uiState.value.userId,
                 fullName = _uiState.value.fullName,
                 avatarUrl = _uiState.value.avatarUrl,
@@ -154,6 +155,7 @@ constructor(
 }
 
 data class EditUserProfileUiState(
+    val id: Int = -1,
     val userId: Int = -1,
     val username: String = "",
     val email: String = "",
