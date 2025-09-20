@@ -84,6 +84,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onLogOut: () -> Unit,
     onEditProfile: () -> Unit,
+    onChangePassword: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val user by viewModel.currentUser.collectAsState("")
@@ -108,7 +109,7 @@ fun ProfileScreen(
         uiState = uiState,
         onLogout = viewModel::logout,
         onEditProfile = { onEditProfile() },
-        onChangePassword = {},
+        onChangePassword = { onChangePassword() },
         onDeleteAccount = {},
         onThemeChange = {},
         onLanguageChange = {},

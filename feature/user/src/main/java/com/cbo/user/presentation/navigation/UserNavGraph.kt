@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.cbo.user.presentation.screen.EditProfileScreen
 import com.cbo.user.presentation.screen.ProfileScreen
+import com.cbo.user.presentation.screen.ChangePasswordScreen
 import com.cbo.core.navigation.AppDestination
 
 fun NavGraphBuilder.userNavGraph(
@@ -11,11 +12,15 @@ fun NavGraphBuilder.userNavGraph(
     onEditProfile: () -> Unit,
     onProfileUpdated: () -> Unit,
     onEditProfileCancelled: () -> Unit,
+    onChangePassword: () -> Unit,
+    onPasswordChanged: () -> Unit,
+    onChangePasswordCancelled: () -> Unit,
 ) {
     composable(AppDestination.Profile.route) {
         ProfileScreen(
             onLogOut = { onLogOut() },
-            onEditProfile = { onEditProfile() }
+            onEditProfile = { onEditProfile() },
+            onChangePassword = { onChangePassword() }
         )
     }
 
@@ -26,6 +31,17 @@ fun NavGraphBuilder.userNavGraph(
             },
             onSaveSuccess = {
                 onProfileUpdated()
+            }
+        )
+    }
+
+    composable(AppDestination.ChangePassword.route) {
+        ChangePasswordScreen(
+            onNavigateBack = {
+                onChangePasswordCancelled()
+            },
+            onPasswordChanged = {
+                onPasswordChanged()
             }
         )
     }

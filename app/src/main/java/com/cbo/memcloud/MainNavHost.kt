@@ -66,6 +66,18 @@ fun MainNavHost(
             onEditProfileCancelled = {
                 Log.d("MainNavHost", "(userNavGraph) Navigated to Profile\n\tCancelled")
                 navController.popBackStack()
+            },
+            onChangePassword = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Change Password")
+                navController.navigate(AppDestination.ChangePassword.route)
+            },
+            onPasswordChanged = {
+                Log.d("MainNavHost", "(userNavGraph) Password changed successfully")
+                navController.popBackStack()
+            },
+            onChangePasswordCancelled = {
+                Log.d("MainNavHost", "(userNavGraph) Change password cancelled")
+                navController.popBackStack()
             }
         )
 

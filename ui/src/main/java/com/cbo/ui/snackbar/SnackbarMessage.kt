@@ -4,20 +4,34 @@ import androidx.compose.material3.SnackbarDuration
 
 sealed class SnackbarMessage(
     val text: String,
-    val duration: SnackbarDuration
+    val duration: SnackbarDuration,
+    val type: SnackbarType
 ) {
     class Success(message: String) : SnackbarMessage(
-        text = "[SUCCESS]$message",
-        duration = SnackbarDuration.Short
+        text = message,
+        duration = SnackbarDuration.Short,
+        type = SnackbarType.SUCCESS
     )
 
     class Error(message: String) : SnackbarMessage(
-        text = "[ERROR]$message",
-        duration = SnackbarDuration.Long
+        text = message,
+        duration = SnackbarDuration.Long,
+        type = SnackbarType.ERROR
     )
 
     class Info(message: String) : SnackbarMessage(
-        text = "[INFO]$message",
-        duration = SnackbarDuration.Short
+        text = message,
+        duration = SnackbarDuration.Short,
+        type = SnackbarType.INFO
     )
+
+    class Warning(message: String) : SnackbarMessage(
+        text = message,
+        duration = SnackbarDuration.Short,
+        type = SnackbarType.WARNING
+    )
+}
+
+enum class SnackbarType {
+    SUCCESS, ERROR, INFO, WARNING
 }
