@@ -1,9 +1,11 @@
 package com.cbo.user.presentation.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
+import com.cbo.user.domain.usecase.SaveImageUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
 import com.example.core.database.entity.UserDetailEntity
 import com.example.core.domain.model.User
@@ -24,6 +26,7 @@ constructor(
     private val getActiveUserUseCase: GetActiveUserUseCase,
     private val getUserWithDetailUseCase: GetUserWithDetailUseCase,
     private val upsertUserDetailUseCase: UpsertUserDetailUseCase,
+    private val saveImageUseCase: SaveImageUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditUserProfileUiState(isLoading = true))
@@ -71,6 +74,38 @@ constructor(
         _uiState.value = _uiState.value.copy(
             avatarUrl = avatarUrl
         )
+    }
+
+    /**
+     * Handles image selection from gallery picker
+     * Copies the image to internal storage for persistence
+     */
+    fun onImageSelected(contentUri: Uri) {
+        viewModelScope.launch {
+            try {
+                Log.d("EditProfileViewModel", "Image selected: $contentUri")
+                
+                // Set image loading state
+                _uiState.update { it.copy(isImageLoading = true, error = null) }
+                
+                val currentAvatarUrl = _uiState.value.avatarUrl
+                
+                // Copy image to internal storage
+                val savedImagePath = saveImageUseCase(contentUri, currentAvatarUrl)
+                
+                if (savedImagePath != null) {
+                    Log.d("EditProfileViewModel", "Image saved to: $savedImagePath")
+                    updateAvatarUrl(savedImagePath)
+                    _uiState.update { it.copy(isImageLoading = false) }
+                } else {
+                    Log.e("EditProfileViewModel", "Failed to save image")
+                    _uiState.update { it.copy(isImageLoading = false, error = "Failed to save image") }
+                }
+            } catch (e: Exception) {
+                Log.e("EditProfileViewModel", "Error processing image", e)
+                _uiState.update { it.copy(isImageLoading = false, error = "Error processing image: ${e.message}") }
+            }
+        }
     }
 
     fun updateBio(bio: String) {
@@ -128,6 +163,7 @@ data class EditUserProfileUiState(
     val phoneNumber: String = "",
     val address: String = "",
     val isLoading: Boolean = false,
+    val isImageLoading: Boolean = false,
     val error: String? = null,
     val isSaved: Boolean = false
 )

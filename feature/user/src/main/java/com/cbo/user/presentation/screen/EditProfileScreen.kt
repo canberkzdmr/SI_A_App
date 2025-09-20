@@ -1,6 +1,7 @@
 package com.cbo.user.presentation.screen
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -36,7 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.cbo.user.presentation.viewmodel.EditProfileViewModel
 import com.cbo.user.presentation.viewmodel.EditUserProfileUiState
 import com.example.ui.components.AppBody
@@ -66,7 +67,7 @@ fun EditProfileScreen(
         updateAddress = viewModel::updateAddress,
         updateBio = viewModel::updateBio,
         updatePhoneNumber = viewModel::updatePhoneNumber,
-        updateAvatarUrl = viewModel::updateAvatarUrl,
+        onImageSelected = viewModel::onImageSelected,
         save = { viewModel.save() },
     )
 
@@ -96,7 +97,7 @@ fun EditProfileScreenContent(
     updateAddress: (String) -> Unit,
     updateBio: (String) -> Unit,
     updatePhoneNumber: (String) -> Unit,
-    updateAvatarUrl: (String) -> Unit,
+    onImageSelected: (Uri) -> Unit,
     save: () -> Unit,
 ) {
     // Launcher for gallery picker
@@ -104,7 +105,10 @@ fun EditProfileScreenContent(
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.GetContent(),
         ) { uri: Uri? ->
-            updateAvatarUrl(uri?.toString().orEmpty())
+            uri?.let { selectedUri ->
+                Log.i("EditProfileScreen", "Image selected: $selectedUri")
+                onImageSelected(selectedUri)
+            }
         }
 
     Scaffold(
@@ -145,41 +149,80 @@ fun EditProfileScreenContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
+                    // Container Box for avatar and edit button - no clipping here
                     Box(
-                        modifier =
-                            Modifier
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        modifier = Modifier.size(140.dp), // Larger to accommodate edit button
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (uiState.isLoading) {
-                            ShimmerBox(modifier = Modifier.fillMaxSize())
-                        } else if (uiState.avatarUrl.isNotEmpty()) {
-                            AsyncImage(
-                                model = uiState.avatarUrl,
-                                contentDescription = "Avatar",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop,
-                            )
-                        } else {
-                            AppTitle(
-                                text =
-                                    uiState.username
-                                        .firstOrNull()
-                                        ?.uppercaseChar()
-                                        ?.toString() ?: "?",
-                            )
+                        // Avatar container with clipping
+                        Box(
+                            modifier =
+                                Modifier
+                                    .size(120.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            when {
+                                uiState.isLoading -> {
+                                    // Overall loading state
+                                    ShimmerBox(
+                                        modifier = Modifier.fillMaxSize(),
+                                        cornerRadius = 60.dp // Circular shape
+                                    )
+                                }
+                                uiState.isImageLoading -> {
+                                    // Image loading state with shimmer
+                                    ShimmerBox(
+                                        modifier = Modifier.fillMaxSize(),
+                                        cornerRadius = 60.dp // Circular shape
+                                    )
+                                }
+                                uiState.avatarUrl.isNotEmpty() -> {
+                                    SubcomposeAsyncImage(
+                                        model = uiState.avatarUrl,
+                                        contentDescription = "Avatar",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop,
+                                        loading = {
+                                            ShimmerBox(
+                                                modifier = Modifier.fillMaxSize(),
+                                                cornerRadius = 60.dp // Circular shape
+                                            )
+                                        }
+                                    )
+                                }
+                                else -> {
+                                    AppTitle(
+                                        text =
+                                            uiState.username
+                                                .firstOrNull()
+                                                ?.uppercaseChar()
+                                                ?.toString() ?: "?",
+                                    )
+                                }
+                            }
                         }
 
-                        // Change Avatar Button
+                        // Change Avatar Button - positioned outside the clipped avatar
                         IconButton(
-                            onClick = { launcher.launch("image/*") },
+                            onClick = { 
+                                if (!uiState.isImageLoading) {
+                                    launcher.launch("image/*")
+                                }
+                            },
+                            enabled = !uiState.isImageLoading,
                             modifier =
                                 Modifier
                                     .align(Alignment.BottomEnd)
                                     .size(36.dp)
-                                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                    .background(
+                                        if (uiState.isImageLoading) 
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                        else 
+                                            MaterialTheme.colorScheme.primary, 
+                                        CircleShape
+                                    ),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
@@ -283,6 +326,7 @@ fun EditProfileScreenPreview() {
                     phoneNumber = "+90 555 555 55 55",
                     address = "Istanbul, Türkiye",
                     isLoading = false,
+                    isImageLoading = false,
                     error = null,
                     isSaved = false,
                 ),
@@ -290,7 +334,7 @@ fun EditProfileScreenPreview() {
             updateFullName = {},
             updateBio = {},
             updateAddress = {},
-            updateAvatarUrl = {},
+            onImageSelected = {},
             updatePhoneNumber = {},
             save = {},
         )
