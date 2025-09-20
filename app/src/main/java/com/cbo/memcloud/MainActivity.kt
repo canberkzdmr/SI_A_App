@@ -1,0 +1,29 @@
+package com.cbo.memcloud
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.cbo.ui.snackbar.SnackbarHostProvider
+import com.cbo.ui.theme.MyApplicationTheme
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MyApplicationTheme {
+                val navController = rememberNavController()
+                SnackbarHostProvider { padding ->
+                    MainNavHost(
+                        navController = navController,
+                        modifier = Modifier.padding(padding),
+                    )
+                }
+            }
+        }
+    }
+}

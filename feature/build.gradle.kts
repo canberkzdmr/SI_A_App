@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.feature"
+    namespace = "com.cbo.feature"
     compileSdk = 34
 
     defaultConfig {

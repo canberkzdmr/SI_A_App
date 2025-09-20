@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.SaveImageUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
-import com.example.core.database.entity.UserDetailEntity
-import com.example.core.domain.model.User
-import com.example.core.session.domain.usecase.GetActiveUserUseCase
+import com.cbo.core.database.entity.UserDetailEntity
+import com.cbo.core.domain.model.User
+import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

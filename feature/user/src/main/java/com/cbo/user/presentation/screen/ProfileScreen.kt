@@ -67,16 +67,16 @@ import com.cbo.user.R
 import com.cbo.user.presentation.viewmodel.ProfileEvent
 import com.cbo.user.presentation.viewmodel.ProfileUiState
 import com.cbo.user.presentation.viewmodel.ProfileViewModel
-import com.example.ui.components.AppCaption
-import com.example.ui.components.AppLabel
-import com.example.ui.components.AppTitle
-import com.example.ui.components.DestructiveButton
-import com.example.ui.components.SectionHeader
-import com.example.ui.components.ShimmerBox
-import com.example.ui.theme.MyApplicationTheme
-import com.example.ui.theme.outlineLight
-import com.example.ui.theme.primaryLight
-import com.example.ui.theme.surfaceDimLight
+import com.cbo.ui.components.AppCaption
+import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.DestructiveButton
+import com.cbo.ui.components.SectionHeader
+import com.cbo.ui.components.ShimmerBox
+import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.outlineLight
+import com.cbo.ui.theme.primaryLight
+import com.cbo.ui.theme.surfaceDimLight
 import java.time.LocalDate
 
 @Composable

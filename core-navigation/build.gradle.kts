@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core.navigation"
+    namespace = "com.cbo.core.navigation"
     compileSdk = 34
 
     defaultConfig {

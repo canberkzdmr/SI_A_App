@@ -40,13 +40,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import com.cbo.user.presentation.viewmodel.EditProfileViewModel
 import com.cbo.user.presentation.viewmodel.EditUserProfileUiState
-import com.example.ui.components.AppBody
-import com.example.ui.components.AppIconButton
-import com.example.ui.components.AppOutlinedTextField
-import com.example.ui.components.AppTitle
-import com.example.ui.components.PrimaryButton
-import com.example.ui.components.ShimmerBox
-import com.example.ui.theme.MyApplicationTheme
+import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.AppIconButton
+import com.cbo.ui.components.AppOutlinedTextField
+import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.PrimaryButton
+import com.cbo.ui.components.ShimmerBox
+import com.cbo.ui.theme.MyApplicationTheme
 
 @Composable
 fun EditProfileScreen(

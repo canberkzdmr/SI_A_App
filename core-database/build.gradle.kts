@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core.database"
+    namespace = "com.cbo.core.database"
     compileSdk = 34
 
     defaultConfig {

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.core.session"
+    namespace = "com.cbo.core.session"
     compileSdk = 34
 
     defaultConfig {

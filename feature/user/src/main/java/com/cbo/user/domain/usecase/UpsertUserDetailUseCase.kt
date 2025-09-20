@@ -1,7 +1,7 @@
 package com.cbo.user.domain.usecase
 
 import com.cbo.user.domain.repository.UserRepository
-import com.example.core.database.entity.UserDetailEntity
+import com.cbo.core.database.entity.UserDetailEntity
 import javax.inject.Inject
 
 class UpsertUserDetailUseCase @Inject constructor(

@@ -4,7 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.cbo.user.presentation.screen.EditProfileScreen
 import com.cbo.user.presentation.screen.ProfileScreen
-import com.example.core.navigation.AppDestination
+import com.cbo.core.navigation.AppDestination
 
 fun NavGraphBuilder.userNavGraph(
     onLogOut: () -> Unit,

@@ -3,11 +3,11 @@ package com.cbo.user.presentation.viewmodel
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
-import com.example.core.database.entity.UserDetailEntity
-import com.example.core.database.entity.UserEntity
-import com.example.core.database.entity.UserWithDetail
-import com.example.core.domain.model.User
-import com.example.core.session.domain.usecase.GetActiveUserUseCase
+import com.cbo.core.database.entity.UserDetailEntity
+import com.cbo.core.database.entity.UserEntity
+import com.cbo.core.database.entity.UserWithDetail
+import com.cbo.core.domain.model.User
+import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf

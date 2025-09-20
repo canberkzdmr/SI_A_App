@@ -1,9 +1,9 @@
 package com.cbo.user.presentation.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.core.domain.model.User
-import com.example.core.session.UserSession
-import com.example.core.session.domain.usecase.LogoutUseCase
+import com.cbo.core.domain.model.User
+import com.cbo.core.session.UserSession
+import com.cbo.core.session.domain.usecase.LogoutUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow

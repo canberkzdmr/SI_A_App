@@ -2,8 +2,8 @@ package com.cbo.user.di
 
 import com.cbo.user.data.repository.UserRepositoryImpl
 import com.cbo.user.domain.repository.UserRepository
-import com.example.core.database.dao.UserDao
-import com.example.core.database.dao.UserDetailDao
+import com.cbo.core.database.dao.UserDao
+import com.cbo.core.database.dao.UserDetailDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

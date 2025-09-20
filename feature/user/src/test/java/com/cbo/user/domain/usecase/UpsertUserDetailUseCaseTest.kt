@@ -1,7 +1,7 @@
 package com.cbo.user.domain.usecase
 
 import com.cbo.user.domain.repository.UserRepository
-import com.example.core.database.entity.UserDetailEntity
+import com.cbo.core.database.entity.UserDetailEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

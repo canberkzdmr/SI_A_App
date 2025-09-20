@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.login"
+    namespace = "com.cbo.login"
     compileSdk = 34
 
     defaultConfig {

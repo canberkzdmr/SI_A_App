@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.splash"
+    namespace = "com.cbo.splash"
     compileSdk = 34
 
     defaultConfig {
