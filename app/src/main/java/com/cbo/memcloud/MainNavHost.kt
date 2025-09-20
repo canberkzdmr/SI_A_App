@@ -8,6 +8,9 @@ import androidx.navigation.compose.NavHost
 import com.cbo.user.presentation.navigation.userNavGraph
 import com.cbo.core.navigation.AppDestination
 import com.cbo.login.presentation.navigation.loginNavGraph
+import com.cbo.notes.navigation.navigateToCreateNote
+import com.cbo.notes.navigation.navigateToNotes
+import com.cbo.notes.navigation.notesGraph
 import com.cbo.splash.splashNavGraph
 
 @Composable
@@ -78,6 +81,9 @@ fun MainNavHost(
             onChangePasswordCancelled = {
                 Log.d("MainNavHost", "(userNavGraph) Change password cancelled")
                 navController.popBackStack()
+            },
+            onDeleteUserClicked = {
+                navController.navigateToNotes()
             }
         )
 
@@ -91,7 +97,7 @@ fun MainNavHost(
                     launchSingleTop = true
                 }
             },
-            onNavigateToMain =  {
+            onNavigateToMain = {
                 navController.navigate(AppDestination.Profile.route) {
                     popUpTo(AppDestination.Login.route) {
                         inclusive = true
@@ -99,6 +105,12 @@ fun MainNavHost(
                     launchSingleTop = true
                 }
             }
+        )
+        notesGraph(
+            onNavigateBack = {},
+            onNavigateToCreateNote = { navController.navigateToCreateNote() },
+            onNavigateToEditNote = {},
+            onNavigateToCategories = {}
         )
     }
 }

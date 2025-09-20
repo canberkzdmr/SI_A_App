@@ -1,0 +1,57 @@
+package com.cbo.notes.data.mapper
+
+import com.cbo.core.database.entity.NoteEntity
+import com.cbo.core.database.entity.NoteWithDetails
+import com.cbo.notes.domain.model.Note
+import javax.inject.Inject
+
+class NoteEntityMapper @Inject constructor(
+    private val categoryEntityMapper: CategoryEntityMapper,
+    private val tagEntityMapper: TagEntityMapper
+) {
+    
+    fun toDomain(entity: NoteEntity): Note {
+        return Note(
+            id = entity.id,
+            userId = entity.userId,
+            title = entity.title,
+            content = entity.content,
+            createdAt = entity.createdAt,
+            updatedAt = entity.updatedAt,
+            isPinned = entity.isPinned,
+            isArchived = entity.isArchived,
+            isFavorite = entity.isFavorite
+        )
+    }
+    
+    fun toDomain(noteWithDetails: NoteWithDetails): Note {
+        return Note(
+            id = noteWithDetails.note.id,
+            userId = noteWithDetails.note.userId,
+            title = noteWithDetails.note.title,
+            content = noteWithDetails.note.content,
+            category = noteWithDetails.category?.let { categoryEntityMapper.toDomain(it) },
+            tags = noteWithDetails.tags.map { tagEntityMapper.toDomain(it) },
+            createdAt = noteWithDetails.note.createdAt,
+            updatedAt = noteWithDetails.note.updatedAt,
+            isPinned = noteWithDetails.note.isPinned,
+            isArchived = noteWithDetails.note.isArchived,
+            isFavorite = noteWithDetails.note.isFavorite
+        )
+    }
+    
+    fun toEntity(domain: Note): NoteEntity {
+        return NoteEntity(
+            id = domain.id,
+            userId = domain.userId,
+            title = domain.title,
+            content = domain.content,
+            categoryId = domain.category?.id,
+            createdAt = domain.createdAt,
+            updatedAt = domain.updatedAt,
+            isPinned = domain.isPinned,
+            isArchived = domain.isArchived,
+            isFavorite = domain.isFavorite
+        )
+    }
+}

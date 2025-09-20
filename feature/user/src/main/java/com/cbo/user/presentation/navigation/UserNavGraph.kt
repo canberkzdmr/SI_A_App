@@ -15,12 +15,14 @@ fun NavGraphBuilder.userNavGraph(
     onChangePassword: () -> Unit,
     onPasswordChanged: () -> Unit,
     onChangePasswordCancelled: () -> Unit,
+    onDeleteUserClicked: () -> Unit,
 ) {
     composable(AppDestination.Profile.route) {
         ProfileScreen(
             onLogOut = { onLogOut() },
             onEditProfile = { onEditProfile() },
-            onChangePassword = { onChangePassword() }
+            onChangePassword = { onChangePassword() },
+            onDeleteAccount = { onDeleteUserClicked() }
         )
     }
 

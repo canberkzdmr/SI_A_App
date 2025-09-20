@@ -2,7 +2,9 @@ package com.cbo.core.database.di
 
 import android.content.Context
 import androidx.room.Room
+import com.cbo.core.database.dao.CategoryDao
 import com.cbo.core.database.dao.NoteDao
+import com.cbo.core.database.dao.TagDao
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.database.dao.UserDetailDao
 import com.cbo.core.database.database.AppDatabase
@@ -35,4 +37,10 @@ object DatabaseModule {
 
     @Provides
     fun provideUserDetailDao(database: AppDatabase): UserDetailDao = database.userDetailDao()
+
+    @Provides
+    fun provideCategoryDao(database: AppDatabase): CategoryDao = database.categoryDao()
+
+    @Provides
+    fun provideTagDao(database: AppDatabase): TagDao = database.tagDao()
 }

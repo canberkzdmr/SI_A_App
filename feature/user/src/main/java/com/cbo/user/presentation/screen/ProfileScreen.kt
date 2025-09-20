@@ -85,6 +85,7 @@ fun ProfileScreen(
     onLogOut: () -> Unit,
     onEditProfile: () -> Unit,
     onChangePassword: () -> Unit,
+    onDeleteAccount: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val user by viewModel.currentUser.collectAsState("")
@@ -110,7 +111,7 @@ fun ProfileScreen(
         onLogout = viewModel::logout,
         onEditProfile = { onEditProfile() },
         onChangePassword = { onChangePassword() },
-        onDeleteAccount = {},
+        onDeleteAccount = { onDeleteAccount() },
         onThemeChange = {},
         onLanguageChange = {},
         onManageCategories = {},
