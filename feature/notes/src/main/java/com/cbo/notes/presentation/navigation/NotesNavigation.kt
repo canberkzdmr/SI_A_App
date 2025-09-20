@@ -1,4 +1,4 @@
-package com.cbo.notes.navigation
+package com.cbo.notes.presentation.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder

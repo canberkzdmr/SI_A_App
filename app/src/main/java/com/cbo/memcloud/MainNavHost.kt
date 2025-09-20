@@ -8,10 +8,15 @@ import androidx.navigation.compose.NavHost
 import com.cbo.user.presentation.navigation.userNavGraph
 import com.cbo.core.navigation.AppDestination
 import com.cbo.login.presentation.navigation.loginNavGraph
-import com.cbo.notes.navigation.navigateToCreateNote
-import com.cbo.notes.navigation.navigateToNotes
-import com.cbo.notes.navigation.notesGraph
+import com.cbo.notes.presentation.navigation.navigateToCreateNote
+import com.cbo.notes.presentation.navigation.navigateToEditNote
+import com.cbo.notes.presentation.navigation.navigateToNotes
+import com.cbo.notes.presentation.navigation.navigateToCategories
+import com.cbo.notes.presentation.navigation.notesGraph
 import com.cbo.splash.splashNavGraph
+import com.cbo.ui.snackbar.SnackbarManager
+import com.cbo.ui.snackbar.SnackbarMessage
+import kotlinx.coroutines.coroutineScope
 
 @Composable
 fun MainNavHost(
@@ -83,6 +88,10 @@ fun MainNavHost(
                 navController.popBackStack()
             },
             onDeleteUserClicked = {
+                Log.d("MainNavHost", "(userNavGraph) Delete Account clicked")
+            },
+            onNotesClicked = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Notes")
                 navController.navigateToNotes()
             }
         )
@@ -107,10 +116,18 @@ fun MainNavHost(
             }
         )
         notesGraph(
-            onNavigateBack = {},
-            onNavigateToCreateNote = { navController.navigateToCreateNote() },
-            onNavigateToEditNote = {},
-            onNavigateToCategories = {}
+            onNavigateBack = { 
+                navController.popBackStack() 
+            },
+            onNavigateToCreateNote = { 
+                navController.navigateToCreateNote() 
+            },
+            onNavigateToEditNote = { noteId -> 
+                navController.navigateToEditNote(noteId) 
+            },
+            onNavigateToCategories = { 
+                navController.navigateToCategories() 
+            }
         )
     }
 }

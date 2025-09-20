@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material3.Card
@@ -86,6 +87,7 @@ fun ProfileScreen(
     onEditProfile: () -> Unit,
     onChangePassword: () -> Unit,
     onDeleteAccount: () -> Unit,
+    onNotesClicked: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val user by viewModel.currentUser.collectAsState("")
@@ -111,7 +113,10 @@ fun ProfileScreen(
         onLogout = viewModel::logout,
         onEditProfile = { onEditProfile() },
         onChangePassword = { onChangePassword() },
-        onDeleteAccount = { onDeleteAccount() },
+        onDeleteAccount = {
+            onDeleteAccount()
+        },
+        onNotesClicked = { onNotesClicked() },
         onThemeChange = {},
         onLanguageChange = {},
         onManageCategories = {},
@@ -129,6 +134,7 @@ fun ProfileScreenContent(
     onEditProfile: () -> Unit,
     onChangePassword: () -> Unit,
     onDeleteAccount: () -> Unit,
+    onNotesClicked: () -> Unit,
     onThemeChange: () -> Unit,
     onLanguageChange: () -> Unit,
     onManageCategories: () -> Unit,
@@ -268,35 +274,41 @@ fun ProfileScreenContent(
             val sections =
                 listOf(
                     "Account" to
-                        listOf(
-                            Pair(Icons.Default.Edit, "Edit Profile"),
-                            Pair(Icons.Default.Lock, "Change Password"),
-                            Pair(Icons.Default.ExitToApp, "Logout"),
-                            Pair(Icons.Default.Delete, "Delete Account"),
-                        ),
+                            listOf(
+                                Pair(Icons.Default.Edit, "Edit Profile"),
+                                Pair(Icons.Default.Lock, "Change Password"),
+                                Pair(Icons.Default.ExitToApp, "Logout"),
+                                Pair(Icons.Default.Delete, "Delete Account"),
+                            ),
                     "Preferences" to
-                        listOf(
-                            Pair(Icons.Default.DarkMode, "Theme"),
-                            Pair(Icons.Default.Language, "Language"),
-                        ),
+                            listOf(
+                                Pair(Icons.Default.DarkMode, "Theme"),
+                                Pair(Icons.Default.Language, "Language"),
+                            ),
                     "Notes" to
-                        listOf(
-                            Pair(Icons.Default.Category, "Manage Categories"),
-                            Pair(Icons.Default.UploadFile, "Export Notes"),
-                        ),
+                            listOf(
+                                Pair(Icons.Default.Note, "My Notes"),
+                                Pair(Icons.Default.Category, "Manage Categories"),
+                                Pair(Icons.Default.UploadFile, "Export Notes"),
+                            ),
                     "Security" to
-                        listOf(
-                            Pair(Icons.Default.Fingerprint, "Enable Biometrics"),
-                        ),
+                            listOf(
+                                Pair(Icons.Default.Fingerprint, "Enable Biometrics"),
+                            ),
                     "About" to
-                        listOf(
-                            Pair(Icons.Default.Info, "App Version: 1.0.0"),
-                            Pair(Icons.Default.SupportAgent, "Contact Support"),
-                        ),
+                            listOf(
+                                Pair(Icons.Default.Info, "App Version: 1.0.0"),
+                                Pair(Icons.Default.SupportAgent, "Contact Support"),
+                            ),
                 )
 
             sections.forEach { (sectionTitle, items) ->
-                item { SectionHeader(sectionTitle, modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) }
+                item {
+                    SectionHeader(
+                        sectionTitle,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                    )
+                }
 
                 items(items) { item ->
                     if (uiState.isLoading) {
@@ -317,6 +329,7 @@ fun ProfileScreenContent(
                                     "Change Password" -> onChangePassword()
                                     "Logout" -> onLogout()
                                     "Delete Account" -> onDeleteAccount()
+                                    "My Notes" -> onNotesClicked()
                                     "Theme" -> onThemeChange()
                                     "Language" -> onLanguageChange()
                                     "Manage Categories" -> onManageCategories()
@@ -343,7 +356,8 @@ fun ProfileListItem(
     modifier: Modifier = Modifier,
     isDanger: Boolean = false,
 ) {
-    val textColor = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    val textColor =
+        if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
 
     Surface(
         modifier =
@@ -392,6 +406,7 @@ fun ProfileScreenPreview() {
             onEditProfile = {},
             onChangePassword = {},
             onDeleteAccount = {},
+            onNotesClicked = {},
             onThemeChange = {},
             onLanguageChange = {},
             onManageCategories = {},
