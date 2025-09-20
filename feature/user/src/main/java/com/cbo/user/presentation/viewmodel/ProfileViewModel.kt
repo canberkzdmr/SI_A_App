@@ -1,9 +1,12 @@
 package com.cbo.user.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.example.core.domain.model.User
 import com.example.core.session.UserSession
+import com.example.core.session.domain.usecase.GetActiveUserUseCase
 import com.example.core.session.domain.usecase.LogoutUseCase
 import com.example.ui.snackbar.SnackbarManager
 import com.example.ui.snackbar.SnackbarMessage
@@ -15,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,6 +27,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val logoutUseCase: LogoutUseCase,
     private val userSession: UserSession,
+    private val getActiveUserUseCase: GetActiveUserUseCase,
+    private val getUserWithDetailUseCase: GetUserWithDetailUseCase,
 ) : ViewModel() {
     val currentUser: Flow<User?> = userSession.currentUser
 
@@ -37,23 +43,42 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadProfile() {
-        // Simulate network/data loading
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(1000) // simulate network delay
-            userSession.currentUser.collect { user ->
-                if (user != null) {
-                    _uiState.update {
-                        it.copy(
-                            username = user.username,
-                            email = user.email,
-                            isLoading = false,
-                        )
-                    }
-                } else {
-                    _uiState.value.copy(isLoading = false)
+            delay(500)
+            getActiveUserUseCase()
+                .catch { 
+                    Log.e("ProfileViewModel", "Error loading active user", it)
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to load user data") } 
                 }
-            }
+                .collect { user: User? ->
+                    user?.let { user ->
+                        Log.d("ProfileViewModel", "Retrieved User: ${user.username}(${user.id})")
+                        
+                        // Load user with details including avatar
+                        getUserWithDetailUseCase(user.id).fold(
+                            onSuccess = { userWithDetail ->
+                                _uiState.value = ProfileUiState(
+                                    username = userWithDetail.user.username,
+                                    email = userWithDetail.user.email,
+                                    avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
+                                    isLoading = false
+                                )
+                            },
+                            onFailure = { error ->
+                                Log.e("ProfileViewModel", "Failed to load user details", error)
+                                _uiState.value = _uiState.value.copy(
+                                    username = user.username,
+                                    email = user.email,
+                                    isLoading = false,
+                                    errorMessage = "Failed to load profile details"
+                                )
+                            }
+                        )
+                    } ?: run {
+                        _uiState.value = _uiState.value.copy(isLoading = false)
+                    }
+                }
         }
     }
 
@@ -118,6 +143,7 @@ class ProfileViewModel @Inject constructor(
 data class ProfileUiState(
     val username: String? = "",
     val email: String? = "",
+    val avatarUrl: String = "",
     val lastLoginDate: String? = "",
     val isLoading: Boolean = false,
     val errorMessage: String? = null

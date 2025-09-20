@@ -62,8 +62,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
+import coil.compose.SubcomposeAsyncImage
 import com.cbo.user.R
 import com.cbo.user.presentation.viewmodel.ProfileEvent
 import com.cbo.user.presentation.viewmodel.ProfileUiState
@@ -174,10 +173,39 @@ fun ProfileScreenContent(
                                     .size(96.dp)
                                     .clip(CircleShape),
                         )
+                    } else if (uiState.avatarUrl.isNotEmpty()) {
+                        SubcomposeAsyncImage(
+                            model = uiState.avatarUrl,
+                            contentDescription = "Profile Picture",
+                            modifier =
+                                Modifier
+                                    .size(96.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentScale = ContentScale.Crop,
+                            loading = {
+                                ShimmerBox(
+                                    modifier = Modifier
+                                        .size(96.dp)
+                                        .clip(CircleShape),
+                                    cornerRadius = 48.dp // Half of 96dp for circular shape
+                                )
+                            },
+                            error = {
+                                // Fallback to default image if avatar fails to load
+                                Image(
+                                    painter = painterResource(R.drawable.person_profile),
+                                    contentDescription = "Default Profile Picture",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
+                        )
                     } else {
+                        // Show default image when no avatar is set
                         Image(
                             painter = painterResource(R.drawable.person_profile),
-                            contentDescription = "Profile Picture",
+                            contentDescription = "Default Profile Picture",
                             modifier =
                                 Modifier
                                     .size(96.dp)
@@ -356,6 +384,7 @@ fun ProfileScreenPreview() {
                 ProfileUiState(
                     username = "Aslanim Ismail",
                     email = "ismail.aslan@example.com",
+                    avatarUrl = "",
                 ),
             onLogout = {},
             onEditProfile = {},
