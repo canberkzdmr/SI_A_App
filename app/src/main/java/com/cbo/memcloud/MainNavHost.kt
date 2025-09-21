@@ -4,9 +4,12 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import com.cbo.user.presentation.navigation.userNavGraph
 import com.cbo.core.navigation.AppDestination
+import com.cbo.memcloud.presentation.screen.MainScreen
 import com.cbo.login.presentation.navigation.loginNavGraph
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
 import com.cbo.notes.presentation.navigation.navigateToEditNote
@@ -30,7 +33,7 @@ fun MainNavHost(
     ) {
         loginNavGraph(
             onLoginSuccess = {
-                navController.navigate(AppDestination.Profile.route) {
+                navController.navigate(AppDestination.Main.route) {
                     popUpTo(AppDestination.Login.route) {
                         inclusive = true
                     }
@@ -68,11 +71,11 @@ fun MainNavHost(
                 navController.navigate(AppDestination.EditProfile.route)
             },
             onProfileUpdated = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Profile\n\tProfile updated")
+                Log.d("MainNavHost", "(userNavGraph) Profile updated, navigating to Main")
                 navController.popBackStack()
             },
             onEditProfileCancelled = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Profile\n\tCancelled")
+                Log.d("MainNavHost", "(userNavGraph) Edit profile cancelled, navigating to Main")
                 navController.popBackStack()
             },
             onChangePassword = {
@@ -91,8 +94,8 @@ fun MainNavHost(
                 Log.d("MainNavHost", "(userNavGraph) Delete Account clicked")
             },
             onNotesClicked = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Notes")
-                navController.navigateToNotes()
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Main")
+                navController.navigate(AppDestination.Main.route)
             }
         )
 
@@ -107,7 +110,7 @@ fun MainNavHost(
                 }
             },
             onNavigateToMain = {
-                navController.navigate(AppDestination.Profile.route) {
+                navController.navigate(AppDestination.Main.route) {
                     popUpTo(AppDestination.Login.route) {
                         inclusive = true
                     }
@@ -115,6 +118,39 @@ fun MainNavHost(
                 }
             }
         )
+
+        // Main screen with bottom navigation
+        composable(AppDestination.Main.route) {
+            MainScreen(
+                onLogOut = {
+                    Log.d("MainNavHost", "(MainScreen) Navigated to login")
+                    navController.navigate(AppDestination.Login.createRoute()) {
+                        popUpTo(AppDestination.Login.route) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+                onEditProfile = {
+                    Log.d("MainNavHost", "(MainScreen) Navigated to Edit Profile")
+                    navController.navigate(AppDestination.EditProfile.route)
+                },
+                onChangePassword = {
+                    Log.d("MainNavHost", "(MainScreen) Navigated to Change Password")
+                    navController.navigate(AppDestination.ChangePassword.route)
+                },
+                onDeleteAccount = {
+                    Log.d("MainNavHost", "(MainScreen) Delete Account clicked")
+                },
+                onNavigateToCreateNote = {
+                    navController.navigateToCreateNote()
+                },
+                onNavigateToEditNote = { noteId ->
+                    navController.navigateToEditNote(noteId)
+                }
+            )
+        }
+
         notesGraph(
             onNavigateBack = { 
                 navController.popBackStack() 

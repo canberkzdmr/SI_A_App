@@ -70,5 +70,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
+    // Navigation
+    implementation(libs.navigation.compose)
+
     implementation(libs.javapoet)
 }

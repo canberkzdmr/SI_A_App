@@ -8,7 +8,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -16,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -141,7 +149,10 @@ fun EditNoteScreen(
                 TagSelection(
                     tags = uiState.availableTags,
                     selectedTags = uiState.selectedTags,
+                    tagInputText = uiState.tagInputText,
                     onTagToggle = viewModel::toggleTag,
+                    onTagInputChange = viewModel::updateTagInputText,
+                    onCreateTagFromInput = viewModel::createTagFromInput,
                     onCreateTag = viewModel::showCreateTagDialog
                 )
             }
@@ -181,7 +192,7 @@ fun EditNoteScreen(
         }
     }
 
-    // Tag creation dialog
+    // Tag creation dialog (kept for custom colors)
     if (uiState.showCreateTagDialog) {
         CreateTagDialog(
             tagName = uiState.newTagName,
@@ -227,7 +238,7 @@ private fun CategorySelection(
                     selected = selectedCategory?.id == category.id,
                     onClick = { onCategorySelected(category) },
                     label = category.name,
-                    color = category.color
+                    color = category.color,
                 )
             }
         }
@@ -238,7 +249,10 @@ private fun CategorySelection(
 private fun TagSelection(
     tags: List<Tag>,
     selectedTags: List<Tag>,
+    tagInputText: String,
     onTagToggle: (Tag) -> Unit,
+    onTagInputChange: (String) -> Unit,
+    onCreateTagFromInput: () -> Unit,
     onCreateTag: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -265,14 +279,14 @@ private fun TagSelection(
                     )
                 }
                 
-                // Add tag button
+                // Add tag button - kept for custom colors if needed
                 FilledTonalIconButton(
                     onClick = onCreateTag,
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Create new tag",
+                        contentDescription = "Create custom tag",
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -280,6 +294,60 @@ private fun TagSelection(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        // Tag input field
+        OutlinedTextField(
+            value = tagInputText,
+            onValueChange = { newValue ->
+                // Handle space character - create tag when space is typed
+                if (newValue.endsWith(" ") && newValue.trim().isNotBlank()) {
+                    val tagName = newValue.trim()
+                    if (tagName.isNotBlank()) {
+                        // Update with the tag name first, then create the tag
+                        onTagInputChange(tagName)
+                        onCreateTagFromInput()
+                    }
+                } else {
+                    onTagInputChange(newValue)
+                }
+            },
+            placeholder = { Text("Type tag name and press Enter or Space...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.type == KeyEventType.KeyDown &&
+                        (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) &&
+                        tagInputText.isNotBlank()
+                    ) {
+                        onCreateTagFromInput()
+                        true
+                    } else {
+                        false
+                    }
+                },
+            singleLine = true,
+            trailingIcon = {
+                if (tagInputText.isNotBlank()) {
+                    IconButton(onClick = onCreateTagFromInput) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add tag"
+                        )
+                    }
+                }
+            },
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (tagInputText.isNotBlank()) {
+                        onCreateTagFromInput()
+                    }
+                }
+            ),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            )
+        )
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -298,7 +366,7 @@ private fun TagSelection(
             if (tags.isEmpty()) {
                 item {
                     Text(
-                        text = "No tags yet. Tap + to create your first tag!",
+                        text = "No tags yet. Type in the field above to create your first tag!",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -576,7 +644,10 @@ private fun EditNoteScreenContent(
                 TagSelection(
                     selectedTags = uiState.selectedTags,
                     tags = uiState.availableTags,
+                    tagInputText = uiState.tagInputText,
                     onTagToggle = onTagToggle,
+                    onTagInputChange = { /* Handle tag input change in preview */ },
+                    onCreateTagFromInput = { /* Handle create tag from input in preview */ },
                     onCreateTag = { /* Handle create tag in preview */ }
                 )
             }

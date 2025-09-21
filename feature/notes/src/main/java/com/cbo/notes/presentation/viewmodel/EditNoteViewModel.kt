@@ -303,6 +303,62 @@ class EditNoteViewModel @Inject constructor(
             }
         }
     }
+
+    // Tag input field methods
+    fun updateTagInputText(text: String) {
+        _uiState.update { it.copy(tagInputText = text) }
+    }
+
+    fun createTagFromInput() {
+        val currentState = _uiState.value
+        val tagName = currentState.tagInputText.trim()
+        
+        if (tagName.isBlank()) {
+            return // Don't show error for empty input, just ignore
+        }
+
+        // Check if tag already exists
+        val existingTag = currentState.availableTags.find { 
+            it.name.equals(tagName, ignoreCase = true) 
+        }
+        if (existingTag != null) {
+            // If tag exists, just select it instead of creating a new one
+            if (!currentState.selectedTags.contains(existingTag)) {
+                toggleTag(existingTag)
+            }
+            _uiState.update { it.copy(tagInputText = "") }
+            return
+        }
+
+        viewModelScope.launch {
+            val currentUser = userSession.currentUser.first()
+            currentUser?.let { user ->
+                val newTag = Tag(
+                    userId = user.id,
+                    name = tagName,
+                    color = null // Default to no color for quick-created tags
+                )
+
+                createTagUseCase(newTag).fold(
+                    onSuccess = { createdTag ->
+                        // Add the new tag to available tags and select it
+                        _uiState.update { state ->
+                            state.copy(
+                                availableTags = state.availableTags + createdTag,
+                                selectedTags = state.selectedTags + createdTag,
+                                tagInputText = "",
+                                hasUnsavedChanges = true
+                            )
+                        }
+                        snackbarManager.showMessage(SnackbarMessage.Success("Tag '${createdTag.name}' created"))
+                    },
+                    onFailure = { throwable ->
+                        snackbarManager.showMessage(SnackbarMessage.Error("Failed to create tag: ${throwable.message}"))
+                    }
+                )
+            }
+        }
+    }
 }
 
 data class EditNoteUiState(
@@ -321,7 +377,9 @@ data class EditNoteUiState(
     val showCreateTagDialog: Boolean = false,
     val isCreatingTag: Boolean = false,
     val newTagName: String = "",
-    val newTagColor: String? = null
+    val newTagColor: String? = null,
+    // Tag input field state
+    val tagInputText: String = ""
 )
 
 sealed class NavigationEvent {
