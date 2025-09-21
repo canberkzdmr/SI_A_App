@@ -7,6 +7,7 @@ import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.usecase.CreateNoteUseCase
+import com.cbo.notes.domain.usecase.CreateTagUseCase
 import com.cbo.notes.domain.usecase.GetCategoriesUseCase
 import com.cbo.notes.domain.usecase.GetNoteByIdUseCase
 import com.cbo.notes.domain.usecase.GetTagsUseCase
@@ -34,6 +35,7 @@ class EditNoteViewModel @Inject constructor(
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val getTagsUseCase: GetTagsUseCase,
+    private val createTagUseCase: CreateTagUseCase,
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
@@ -207,6 +209,91 @@ class EditNoteViewModel @Inject constructor(
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
+
+    // Tag creation methods
+    fun showCreateTagDialog() {
+        _uiState.update { 
+            it.copy(
+                showCreateTagDialog = true,
+                newTagName = "",
+                newTagColor = null
+            ) 
+        }
+    }
+
+    fun hideCreateTagDialog() {
+        _uiState.update { 
+            it.copy(
+                showCreateTagDialog = false,
+                newTagName = "",
+                newTagColor = null
+            ) 
+        }
+    }
+
+    fun updateNewTagName(name: String) {
+        _uiState.update { it.copy(newTagName = name) }
+    }
+
+    fun updateNewTagColor(color: String?) {
+        _uiState.update { it.copy(newTagColor = color) }
+    }
+
+    fun createTag() {
+        val currentState = _uiState.value
+        if (currentState.newTagName.isBlank()) {
+            viewModelScope.launch {
+                snackbarManager.showMessage(SnackbarMessage.Warning("Tag name cannot be empty"))
+            }
+            return
+        }
+
+        // Check if tag already exists
+        val existingTag = currentState.availableTags.find { 
+            it.name.equals(currentState.newTagName.trim(), ignoreCase = true) 
+        }
+        if (existingTag != null) {
+            viewModelScope.launch {
+                snackbarManager.showMessage(SnackbarMessage.Warning("Tag '${currentState.newTagName}' already exists"))
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCreatingTag = true) }
+
+            val currentUser = userSession.currentUser.first()
+            currentUser?.let { user ->
+                val newTag = Tag(
+                    userId = user.id,
+                    name = currentState.newTagName.trim(),
+                    color = currentState.newTagColor
+                )
+
+                createTagUseCase(newTag).fold(
+                    onSuccess = { createdTag ->
+                        // Add the new tag to available tags and select it
+                        _uiState.update { state ->
+                            state.copy(
+                                availableTags = state.availableTags + createdTag,
+                                selectedTags = state.selectedTags + createdTag,
+                                showCreateTagDialog = false,
+                                isCreatingTag = false,
+                                newTagName = "",
+                                newTagColor = null,
+                                hasUnsavedChanges = true
+                            )
+                        }
+                        snackbarManager.showMessage(SnackbarMessage.Success("Tag '${createdTag.name}' created successfully"))
+                    },
+                    onFailure = { throwable ->
+                        _uiState.update { it.copy(isCreatingTag = false) }
+                        snackbarManager.showMessage(SnackbarMessage.Error("Failed to create tag: ${throwable.message}"))
+                    }
+                )
+            }
+        }
+    }
 }
 
 data class EditNoteUiState(
@@ -220,5 +307,10 @@ data class EditNoteUiState(
     val availableTags: List<Tag> = emptyList(),
     val hasUnsavedChanges: Boolean = false,
     val originalNote: Note? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    // Tag creation state
+    val showCreateTagDialog: Boolean = false,
+    val isCreatingTag: Boolean = false,
+    val newTagName: String = "",
+    val newTagColor: String? = null
 )

@@ -1,9 +1,13 @@
 package com.cbo.notes.presentation.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -128,13 +132,12 @@ fun EditNoteScreen(
                 }
 
                 // Tag selection
-                if (uiState.availableTags.isNotEmpty()) {
-                    TagSelection(
-                        tags = uiState.availableTags,
-                        selectedTags = uiState.selectedTags,
-                        onTagToggle = viewModel::toggleTag
-                    )
-                }
+                TagSelection(
+                    tags = uiState.availableTags,
+                    selectedTags = uiState.selectedTags,
+                    onTagToggle = viewModel::toggleTag,
+                    onCreateTag = viewModel::showCreateTagDialog
+                )
             }
         }
     }
@@ -170,6 +173,19 @@ fun EditNoteScreen(
         LaunchedEffect(errorMessage) {
             viewModel.clearError()
         }
+    }
+
+    // Tag creation dialog
+    if (uiState.showCreateTagDialog) {
+        CreateTagDialog(
+            tagName = uiState.newTagName,
+            selectedColor = uiState.newTagColor,
+            isCreating = uiState.isCreatingTag,
+            onTagNameChange = viewModel::updateNewTagName,
+            onColorChange = viewModel::updateNewTagColor,
+            onConfirm = viewModel::createTag,
+            onDismiss = viewModel::hideCreateTagDialog
+        )
     }
 }
 
@@ -217,6 +233,7 @@ private fun TagSelection(
     tags: List<Tag>,
     selectedTags: List<Tag>,
     onTagToggle: (Tag) -> Unit,
+    onCreateTag: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -230,12 +247,29 @@ private fun TagSelection(
                 style = MaterialTheme.typography.titleMedium
             )
             
-            if (selectedTags.isNotEmpty()) {
-                Text(
-                    text = "${selectedTags.size} selected",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (selectedTags.isNotEmpty()) {
+                    Text(
+                        text = "${selectedTags.size} selected",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                // Add tag button
+                FilledTonalIconButton(
+                    onClick = onCreateTag,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Create new tag",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
 
@@ -253,8 +287,166 @@ private fun TagSelection(
                     color = tag.color
                 )
             }
+            
+            // If no tags, show helpful message
+            if (tags.isEmpty()) {
+                item {
+                    Text(
+                        text = "No tags yet. Tap + to create your first tag!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
         }
     }
+}
+
+@Composable
+private fun CreateTagDialog(
+    tagName: String,
+    selectedColor: String?,
+    isCreating: Boolean,
+    onTagNameChange: (String) -> Unit,
+    onColorChange: (String?) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val colors = listOf(
+        "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#DDA0DD",
+        "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E9", "#F8C471"
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Create New Tag") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = tagName,
+                    onValueChange = onTagNameChange,
+                    label = { Text("Tag name") },
+                    placeholder = { Text("Enter tag name...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    isError = tagName.isBlank()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Color (optional)",
+                    style = MaterialTheme.typography.labelLarge
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(colors) { color ->
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(
+                                    Color(android.graphics.Color.parseColor(color)),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { onColorChange(color) }
+                                .then(
+                                    if (selectedColor == color) {
+                                        Modifier.border(
+                                            3.dp,
+                                            MaterialTheme.colorScheme.primary,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                        ) {
+                            if (selectedColor == color) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Add "No color" option
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outline,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable { onColorChange(null) }
+                                .then(
+                                    if (selectedColor == null) {
+                                        Modifier.border(
+                                            3.dp,
+                                            MaterialTheme.colorScheme.primary,
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                        ) {
+                            if (selectedColor == null) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .size(16.dp)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "No color",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                        .size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = tagName.isNotBlank() && !isCreating
+            ) {
+                if (isCreating) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Create")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 // Preview-specific version of EditNoteScreen that takes UI state directly
@@ -378,7 +570,8 @@ private fun EditNoteScreenContent(
                 TagSelection(
                     selectedTags = uiState.selectedTags,
                     tags = uiState.availableTags,
-                    onTagToggle = onTagToggle
+                    onTagToggle = onTagToggle,
+                    onCreateTag = { /* Handle create tag in preview */ }
                 )
             }
         }
@@ -505,6 +698,35 @@ private fun EditNoteScreenSavingPreview() {
                 availableTags = sampleEditTags(),
                 hasUnsavedChanges = false,
                 originalNote = null
+            ),
+            onNavigateBack = {},
+            onTitleChange = {},
+            onContentChange = {},
+            onSave = {},
+            onCategorySelected = {},
+            onTagToggle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun EditNoteScreenCreateTagPreview() {
+    MyApplicationTheme {
+        EditNoteScreenContent(
+            uiState = EditNoteUiState(
+                isLoading = false,
+                title = "My Shopping List",
+                content = "Need to buy groceries for the weekend party",
+                selectedCategory = sampleEditCategories()[1], // Personal
+                selectedTags = listOf(sampleEditTags()[4]), // todo
+                availableCategories = sampleEditCategories(),
+                availableTags = sampleEditTags(),
+                hasUnsavedChanges = true,
+                showCreateTagDialog = true,
+                newTagName = "shopping",
+                newTagColor = "#FF6B6B",
+                isCreatingTag = false
             ),
             onNavigateBack = {},
             onTitleChange = {},
