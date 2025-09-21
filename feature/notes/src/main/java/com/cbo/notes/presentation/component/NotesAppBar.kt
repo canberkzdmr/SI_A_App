@@ -10,7 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.cbo.notes.presentation.viewmodel.ViewMode
+import com.cbo.notes.presentation.ViewMode
+import com.cbo.ui.components.AppHeadline
+import com.cbo.ui.components.AppOutlinedTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,10 +42,7 @@ fun NotesAppBar(
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
-                Text(
-                    text = "Notes",
-                    style = MaterialTheme.typography.headlineMedium
-                )
+                AppHeadline(text = "Notes")
             }
         },
         actions = {
@@ -150,16 +149,15 @@ private fun SearchTextField(
     onClearQuery: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    TextField(
+    AppOutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier,
-        placeholder = { Text("Search notes...") },
+        placeholder = "Search notes...",
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                contentDescription = null
             )
         },
         trailingIcon = {
@@ -167,19 +165,11 @@ private fun SearchTextField(
                 IconButton(onClick = onClearQuery) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        contentDescription = "Clear search"
                     )
                 }
             }
         },
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-        singleLine = true,
-        shape = RoundedCornerShape(8.dp)
+        singleLine = true
     )
 }

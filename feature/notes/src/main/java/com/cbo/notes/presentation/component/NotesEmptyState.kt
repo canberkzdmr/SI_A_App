@@ -9,6 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.AppHeadline
+import com.cbo.ui.components.PrimaryButton
 
 @Composable
 fun NotesEmptyState(
@@ -37,28 +40,24 @@ fun NotesEmptyState(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Title
-        Text(
+        AppHeadline(
             text = when {
                 searchQuery.isNotEmpty() -> "No notes found"
                 hasNotes -> "No notes match your filters"
                 else -> "No notes yet"
             },
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Subtitle
-        Text(
+        AppBody(
             text = when {
                 searchQuery.isNotEmpty() -> "Try adjusting your search terms or create a new note with \"$searchQuery\""
                 hasNotes -> "Try clearing your filters or search to see all notes"
                 else -> "Start by creating your first note"
             },
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
@@ -67,20 +66,17 @@ fun NotesEmptyState(
 
         // Action button
         if (!hasNotes || searchQuery.isNotEmpty()) {
-            Button(
+            PrimaryButton(
+                text = if (searchQuery.isNotEmpty()) "Create \"$searchQuery\"" else "Create Note",
                 onClick = onCreateNote,
-                modifier = Modifier.fillMaxWidth(0.6f)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if (searchQuery.isNotEmpty()) "Create \"$searchQuery\"" else "Create Note"
-                )
-            }
+                modifier = Modifier.fillMaxWidth(0.6f),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null
+                    )
+                }
+            )
         }
     }
 }

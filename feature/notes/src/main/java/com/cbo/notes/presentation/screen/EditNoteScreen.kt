@@ -35,6 +35,9 @@ import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
+import com.cbo.ui.components.AppIconButton
+import com.cbo.ui.components.AppOutlinedTextField
+import com.cbo.ui.components.AppTitle
 import com.cbo.ui.theme.MyApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,22 +117,22 @@ fun EditNoteScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Title field
-                OutlinedTextField(
+                AppOutlinedTextField(
                     value = uiState.title,
                     onValueChange = viewModel::updateTitle,
-                    label = { Text("Title") },
-                    placeholder = { Text("Enter note title...") },
+                    label = "Title",
+                    placeholder = "Enter note title...",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = uiState.title.isBlank()
                 )
 
                 // Content field
-                OutlinedTextField(
+                AppOutlinedTextField(
                     value = uiState.content,
                     onValueChange = viewModel::updateContent,
-                    label = { Text("Content") },
-                    placeholder = { Text("Start writing your note...") },
+                    label = "Content",
+                    placeholder = "Start writing your note...",
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 200.dp),
@@ -214,9 +217,8 @@ private fun CategorySelection(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Text(
+        AppTitle(
             text = "Category",
-            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
@@ -262,10 +264,7 @@ private fun TagSelection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Tags",
-                style = MaterialTheme.typography.titleMedium
-            )
+            AppTitle(text = "Tags")
             
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -280,23 +279,24 @@ private fun TagSelection(
                 }
                 
                 // Add tag button - kept for custom colors if needed
-                FilledTonalIconButton(
+                AppIconButton(
                     onClick = onCreateTag,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Create custom tag",
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                    modifier = Modifier.size(32.dp),
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Create custom tag",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Tag input field
-        OutlinedTextField(
+        AppOutlinedTextField(
             value = tagInputText,
             onValueChange = { newValue ->
                 // Handle space character - create tag when space is typed
@@ -311,7 +311,7 @@ private fun TagSelection(
                     onTagInputChange(newValue)
                 }
             },
-            placeholder = { Text("Type tag name and press Enter or Space...") },
+            placeholder = "Type tag name and press Enter or Space...",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
@@ -397,11 +397,11 @@ private fun CreateTagDialog(
         title = { Text("Create New Tag") },
         text = {
             Column {
-                OutlinedTextField(
+                AppOutlinedTextField(
                     value = tagName,
                     onValueChange = onTagNameChange,
-                    label = { Text("Tag name") },
-                    placeholder = { Text("Enter tag name...") },
+                    label = "Tag name",
+                    placeholder = "Enter tag name...",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = tagName.isBlank()
@@ -596,10 +596,10 @@ private fun EditNoteScreenContent(
                     .verticalScroll(rememberScrollState())
             ) {
                 // Title input
-                OutlinedTextField(
+                AppOutlinedTextField(
                     value = uiState.title,
                     onValueChange = onTitleChange,
-                    label = { Text("Title") },
+                    label = "Title",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -607,10 +607,10 @@ private fun EditNoteScreenContent(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Content input
-                OutlinedTextField(
+                AppOutlinedTextField(
                     value = uiState.content,
                     onValueChange = onContentChange,
-                    label = { Text("Content") },
+                    label = "Content",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
@@ -620,9 +620,8 @@ private fun EditNoteScreenContent(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Category selection
-                Text(
+                AppTitle(
                     text = "Category",
-                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
@@ -635,9 +634,8 @@ private fun EditNoteScreenContent(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Tag selection
-                Text(
+                AppTitle(
                     text = "Tags",
-                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 

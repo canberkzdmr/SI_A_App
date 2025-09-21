@@ -15,6 +15,8 @@ import com.cbo.notes.domain.usecase.GetTagsUseCase
 import com.cbo.notes.domain.usecase.SearchNotesUseCase
 import com.cbo.notes.domain.usecase.ToggleNoteFavoriteUseCase
 import com.cbo.notes.domain.usecase.ToggleNotePinnedUseCase
+import com.cbo.notes.presentation.SortOrder
+import com.cbo.notes.presentation.ViewMode
 import com.cbo.core.session.UserSession
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
@@ -251,13 +253,3 @@ data class NotesUiState(
     val sortOrder: SortOrder = SortOrder.UPDATED_DESC,
     val errorMessage: String? = null
 )
-
-enum class ViewMode {
-    LIST, GRID
-}
-
-enum class SortOrder {
-    UPDATED_DESC, UPDATED_ASC,
-    CREATED_DESC, CREATED_ASC,
-    TITLE_ASC, TITLE_DESC
-}

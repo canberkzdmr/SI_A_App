@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbo.ui.theme.MyApplicationTheme
@@ -52,14 +53,18 @@ fun AppBody(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onBackground,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
         color = color,
         modifier = modifier,
-        textAlign = textAlign
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow
     )
 }
 

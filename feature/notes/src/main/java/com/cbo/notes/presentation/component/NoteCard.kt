@@ -14,6 +14,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cbo.notes.domain.model.Note
+import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.AppCaption
+import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppTitle
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,12 +58,8 @@ fun NoteCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
+                AppTitle(
                     text = note.title,
-                    style = if (isCompact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = if (isCompact) 2 else 3,
-                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -146,10 +146,8 @@ fun NoteCard(
             // Content preview
             if (note.content.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
+                AppBody(
                     text = note.content,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = if (isCompact) 3 else 4,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -182,10 +180,8 @@ fun NoteCard(
                     
                     // Show more tags indicator
                     if (note.tags.size > (if (isCompact) 2 else 3)) {
-                        Text(
+                        AppLabel(
                             text = "+${note.tags.size - (if (isCompact) 2 else 3)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier
                                 .padding(horizontal = 8.dp, vertical = 4.dp)
                         )
@@ -225,11 +221,7 @@ fun NoteCard(
                 }
 
                 // Updated date
-                Text(
-                    text = formatDate(note.updatedAt),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                AppCaption(text = formatDate(note.updatedAt))
             }
         }
     }

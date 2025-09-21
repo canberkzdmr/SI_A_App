@@ -173,11 +173,8 @@ class EditNoteViewModel @Inject constructor(
                         snackbarManager.showMessage(
                             SnackbarMessage.Success(if (isEditing) "Note updated" else "Note created")
                         )
-                        
-                        // Navigate back only when creating a new note
-                        if (!isEditing) {
-                            _navigationEvents.trySend(NavigationEvent.NavigateBack)
-                        }
+
+                        _navigationEvents.trySend(NavigationEvent.NavigateBack)
                     },
                     onFailure = { error ->
                         _uiState.update { it.copy(isSaving = false) }

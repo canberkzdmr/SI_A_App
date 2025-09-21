@@ -12,7 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.cbo.notes.presentation.viewmodel.SortOrder
+import com.cbo.notes.presentation.SortOrder
+import com.cbo.ui.components.AppHeadline
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,9 +38,8 @@ fun SortBottomSheet(
                 .padding(16.dp)
                 .selectableGroup()
         ) {
-            Text(
+            AppHeadline(
                 text = "Sort by",
-                style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
