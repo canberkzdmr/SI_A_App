@@ -12,13 +12,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Category
+import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
+import com.cbo.notes.presentation.viewmodel.EditNoteUiState
+import com.cbo.ui.theme.MyApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -252,3 +256,307 @@ private fun TagSelection(
         }
     }
 }
+
+// Preview-specific version of EditNoteScreen that takes UI state directly
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditNoteScreenContent(
+    uiState: EditNoteUiState,
+    onNavigateBack: () -> Unit,
+    onTitleChange: (String) -> Unit,
+    onContentChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onCategorySelected: (Category?) -> Unit,
+    onTagToggle: (Tag) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(if (uiState.originalNote != null) "Edit Note" else "Create Note") 
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            if (uiState.hasUnsavedChanges) {
+                                showDiscardDialog = true
+                            } else {
+                                onNavigateBack()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    TextButton(
+                        onClick = onSave,
+                        enabled = uiState.title.isNotBlank() && !uiState.isSaving
+                    ) {
+                        if (uiState.isSaving) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp)
+                            )
+                        } else {
+                            Text("Save")
+                        }
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Title input
+                OutlinedTextField(
+                    value = uiState.title,
+                    onValueChange = onTitleChange,
+                    label = { Text("Title") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Content input
+                OutlinedTextField(
+                    value = uiState.content,
+                    onValueChange = onContentChange,
+                    label = { Text("Content") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    maxLines = Int.MAX_VALUE
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Category selection
+                Text(
+                    text = "Category",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                CategorySelection(
+                    selectedCategory = uiState.selectedCategory,
+                    categories = uiState.availableCategories,
+                    onCategorySelected = onCategorySelected
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Tag selection
+                Text(
+                    text = "Tags",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                TagSelection(
+                    selectedTags = uiState.selectedTags,
+                    tags = uiState.availableTags,
+                    onTagToggle = onTagToggle
+                )
+            }
+        }
+    }
+
+    // Discard dialog
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("Discard changes?") },
+            text = { Text("You have unsaved changes. Are you sure you want to discard them?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                        onNavigateBack()
+                    }
+                ) {
+                    Text("Discard")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDiscardDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun EditNoteScreenCreatePreview() {
+    MyApplicationTheme {
+        EditNoteScreenContent(
+            uiState = EditNoteUiState(
+                isLoading = false,
+                title = "",
+                content = "",
+                selectedCategory = null,
+                selectedTags = emptyList(),
+                availableCategories = sampleEditCategories(),
+                availableTags = sampleEditTags(),
+                hasUnsavedChanges = false,
+                originalNote = null
+            ),
+            onNavigateBack = {},
+            onTitleChange = {},
+            onContentChange = {},
+            onSave = {},
+            onCategorySelected = {},
+            onTagToggle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun EditNoteScreenEditPreview() {
+    MyApplicationTheme {
+        EditNoteScreenContent(
+            uiState = EditNoteUiState(
+                isLoading = false,
+                title = "Project Meeting Notes",
+                content = "Discussed the new features for Q4. Need to finalize the design by Friday. John will handle the backend integration while Sarah focuses on the UI components.\n\nAction items:\n• Complete wireframes\n• Review technical specs\n• Schedule follow-up meeting",
+                selectedCategory = sampleEditCategories()[0], // Work category
+                selectedTags = listOf(sampleEditTags()[1], sampleEditTags()[2]), // meeting, project
+                availableCategories = sampleEditCategories(),
+                availableTags = sampleEditTags(),
+                hasUnsavedChanges = true,
+                originalNote = Note(
+                    id = 1,
+                    userId = 1,
+                    title = "Project Meeting Notes",
+                    content = "Original content...",
+                    isPinned = false,
+                    isFavorite = false,
+                    isArchived = false
+                )
+            ),
+            onNavigateBack = {},
+            onTitleChange = {},
+            onContentChange = {},
+            onSave = {},
+            onCategorySelected = {},
+            onTagToggle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun EditNoteScreenLoadingPreview() {
+    MyApplicationTheme {
+        EditNoteScreenContent(
+            uiState = EditNoteUiState(
+                isLoading = true
+            ),
+            onNavigateBack = {},
+            onTitleChange = {},
+            onContentChange = {},
+            onSave = {},
+            onCategorySelected = {},
+            onTagToggle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun EditNoteScreenSavingPreview() {
+    MyApplicationTheme {
+        EditNoteScreenContent(
+            uiState = EditNoteUiState(
+                isLoading = false,
+                isSaving = true,
+                title = "Quick Note",
+                content = "This is a quick note that I'm currently saving...",
+                selectedCategory = sampleEditCategories()[1], // Personal
+                selectedTags = listOf(sampleEditTags()[4]), // todo
+                availableCategories = sampleEditCategories(),
+                availableTags = sampleEditTags(),
+                hasUnsavedChanges = false,
+                originalNote = null
+            ),
+            onNavigateBack = {},
+            onTitleChange = {},
+            onContentChange = {},
+            onSave = {},
+            onCategorySelected = {},
+            onTagToggle = {}
+        )
+    }
+}
+
+// Sample data functions
+private fun sampleEditCategories(): List<Category> = listOf(
+    Category(
+        id = 1,
+        userId = 1,
+        name = "Work",
+        color = "#FF6B6B",
+        description = "Work-related notes",
+        notesCount = 5
+    ),
+    Category(
+        id = 2,
+        userId = 1,
+        name = "Personal",
+        color = "#4ECDC4",
+        description = "Personal notes and reminders",
+        notesCount = 3
+    ),
+    Category(
+        id = 3,
+        userId = 1,
+        name = "Ideas",
+        color = "#45B7D1",
+        description = "Creative ideas and inspiration",
+        notesCount = 2
+    ),
+    Category(
+        id = 4,
+        userId = 1,
+        name = "Learning",
+        color = "#FFA07A",
+        description = "Study notes and learning materials",
+        notesCount = 4
+    )
+)
+
+private fun sampleEditTags(): List<Tag> = listOf(
+    Tag(id = 1, userId = 1, name = "urgent", color = "#FF6B6B", usageCount = 3),
+    Tag(id = 2, userId = 1, name = "meeting", color = "#4ECDC4", usageCount = 2),
+    Tag(id = 3, userId = 1, name = "project", color = "#45B7D1", usageCount = 5),
+    Tag(id = 4, userId = 1, name = "idea", color = "#FFA07A", usageCount = 4),
+    Tag(id = 5, userId = 1, name = "todo", color = "#DDA0DD", usageCount = 6),
+    Tag(id = 6, userId = 1, name = "research", color = "#98D8C8", usageCount = 2)
+)

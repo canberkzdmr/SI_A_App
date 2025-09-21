@@ -1,8 +1,10 @@
 package com.cbo.notes.presentation.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -14,11 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.presentation.viewmodel.CategoriesViewModel
+import com.cbo.notes.presentation.viewmodel.CategoriesUiState
+import com.cbo.ui.theme.MyApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -312,4 +317,365 @@ private fun CategoryDialog(
         }
     )
 }
+
+// Preview-specific version of CategoriesScreen that takes UI state directly
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoriesScreenContent(
+    uiState: CategoriesUiState,
+    onNavigateBack: () -> Unit,
+    onCreateCategory: () -> Unit,
+    onEditCategory: (Category) -> Unit,
+    onDeleteCategory: (Category) -> Unit,
+    onSaveCategory: () -> Unit,
+    onDismissDialog: () -> Unit,
+    onTitleChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onColorChange: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text("Manage Categories") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onCreateCategory) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add category"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (uiState.categories.isEmpty()) {
+            // Empty state
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Category,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.outline
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Text(
+                    text = "No categories yet",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "Create categories to organize your notes better",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                FilledTonalButton(
+                    onClick = onCreateCategory
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Create Category")
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    top = paddingValues.calculateTopPadding() + 16.dp,
+                    bottom = paddingValues.calculateBottomPadding() + 16.dp,
+                    start = 16.dp,
+                    end = 16.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(uiState.categories) { category ->
+                    CategoryListItem(
+                        category = category,
+                        onEdit = { onEditCategory(category) },
+                        onDelete = { onDeleteCategory(category) }
+                    )
+                }
+            }
+        }
+    }
+
+    // Category Dialog
+    if (uiState.showCreateDialog) {
+        CategoryDialog(
+            title = if (uiState.editingCategory == null) "Create Category" else "Edit Category",
+            name = uiState.dialogTitle,
+            description = uiState.dialogDescription,
+            color = uiState.dialogColor,
+            isCreating = uiState.isCreating,
+            onNameChange = onTitleChange,
+            onDescriptionChange = onDescriptionChange,
+            onColorChange = onColorChange,
+            onSave = onSaveCategory,
+            onDismiss = onDismissDialog
+        )
+    }
+}
+
+@Composable
+private fun CategoryListItem(
+    category: Category,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val backgroundColor = category.color?.let { Color(android.graphics.Color.parseColor(it)) }
+        ?: MaterialTheme.colorScheme.surfaceVariant
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Color indicator
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .background(backgroundColor, RoundedCornerShape(6.dp))
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Category info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = category.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+
+                category.description?.let { desc ->
+                    if (desc.isNotBlank()) {
+                        Text(
+                            text = desc,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Text(
+                    text = "${category.notesCount} notes",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Actions
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit category"
+                    )
+                }
+
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete category",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun CategoriesScreenPreview() {
+    MyApplicationTheme {
+        CategoriesScreenContent(
+            uiState = CategoriesUiState(
+                isLoading = false,
+                categories = sampleCategoriesForPreview(),
+                showCreateDialog = false
+            ),
+            onNavigateBack = {},
+            onCreateCategory = {},
+            onEditCategory = {},
+            onDeleteCategory = {},
+            onSaveCategory = {},
+            onDismissDialog = {},
+            onTitleChange = {},
+            onDescriptionChange = {},
+            onColorChange = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun CategoriesScreenEmptyPreview() {
+    MyApplicationTheme {
+        CategoriesScreenContent(
+            uiState = CategoriesUiState(
+                isLoading = false,
+                categories = emptyList(),
+                showCreateDialog = false
+            ),
+            onNavigateBack = {},
+            onCreateCategory = {},
+            onEditCategory = {},
+            onDeleteCategory = {},
+            onSaveCategory = {},
+            onDismissDialog = {},
+            onTitleChange = {},
+            onDescriptionChange = {},
+            onColorChange = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun CategoriesScreenLoadingPreview() {
+    MyApplicationTheme {
+        CategoriesScreenContent(
+            uiState = CategoriesUiState(
+                isLoading = true,
+                categories = emptyList(),
+                showCreateDialog = false
+            ),
+            onNavigateBack = {},
+            onCreateCategory = {},
+            onEditCategory = {},
+            onDeleteCategory = {},
+            onSaveCategory = {},
+            onDismissDialog = {},
+            onTitleChange = {},
+            onDescriptionChange = {},
+            onColorChange = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun CategoriesScreenWithDialogPreview() {
+    MyApplicationTheme {
+        CategoriesScreenContent(
+            uiState = CategoriesUiState(
+                isLoading = false,
+                categories = sampleCategoriesForPreview(),
+                showCreateDialog = true,
+                dialogTitle = "New Category",
+                dialogDescription = "A category for organizing my notes",
+                dialogColor = "#FF6B6B",
+                editingCategory = null
+            ),
+            onNavigateBack = {},
+            onCreateCategory = {},
+            onEditCategory = {},
+            onDeleteCategory = {},
+            onSaveCategory = {},
+            onDismissDialog = {},
+            onTitleChange = {},
+            onDescriptionChange = {},
+            onColorChange = {}
+        )
+    }
+}
+
+// Sample data for previews
+private fun sampleCategoriesForPreview(): List<Category> = listOf(
+    Category(
+        id = 1,
+        userId = 1,
+        name = "Work",
+        color = "#FF6B6B",
+        description = "Work-related notes and tasks",
+        notesCount = 12
+    ),
+    Category(
+        id = 2,
+        userId = 1,
+        name = "Personal",
+        color = "#4ECDC4",
+        description = "Personal notes and reminders",
+        notesCount = 7
+    ),
+    Category(
+        id = 3,
+        userId = 1,
+        name = "Ideas",
+        color = "#45B7D1",
+        description = "Creative ideas and inspiration",
+        notesCount = 3
+    ),
+    Category(
+        id = 4,
+        userId = 1,
+        name = "Learning",
+        color = "#FFA07A",
+        description = "Study notes and learning materials",
+        notesCount = 15
+    ),
+    Category(
+        id = 5,
+        userId = 1,
+        name = "Travel",
+        color = "#DDA0DD",
+        description = "Travel plans and memories",
+        notesCount = 2
+    ),
+    Category(
+        id = 6,
+        userId = 1,
+        name = "Health",
+        color = "#98D8C8",
+        description = null,
+        notesCount = 4
+    )
+)
 
