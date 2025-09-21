@@ -25,6 +25,7 @@ import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
+import com.cbo.notes.presentation.viewmodel.NavigationEvent
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.ui.theme.MyApplicationTheme
 
@@ -38,8 +39,13 @@ fun EditNoteScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDiscardDialog by remember { mutableStateOf(false) }
 
+    // Handle navigation events
     LaunchedEffect(Unit) {
-        // Any initialization logic if needed
+        viewModel.navigationEvents.collect { event ->
+            when (event) {
+                is NavigationEvent.NavigateBack -> onNavigateBack()
+            }
+        }
     }
 
     Scaffold(

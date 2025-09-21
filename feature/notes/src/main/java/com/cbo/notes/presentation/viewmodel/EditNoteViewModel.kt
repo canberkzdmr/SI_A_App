@@ -16,12 +16,14 @@ import com.cbo.core.session.UserSession
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -44,6 +46,9 @@ class EditNoteViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(EditNoteUiState())
     val uiState: StateFlow<EditNoteUiState> = _uiState.asStateFlow()
+
+    private val _navigationEvents = Channel<NavigationEvent>()
+    val navigationEvents = _navigationEvents.receiveAsFlow()
 
     init {
         loadData()
@@ -168,7 +173,11 @@ class EditNoteViewModel @Inject constructor(
                         snackbarManager.showMessage(
                             SnackbarMessage.Success(if (isEditing) "Note updated" else "Note created")
                         )
-                        // Navigate back could be handled in the UI
+                        
+                        // Navigate back only when creating a new note
+                        if (!isEditing) {
+                            _navigationEvents.trySend(NavigationEvent.NavigateBack)
+                        }
                     },
                     onFailure = { error ->
                         _uiState.update { it.copy(isSaving = false) }
@@ -314,3 +323,7 @@ data class EditNoteUiState(
     val newTagName: String = "",
     val newTagColor: String? = null
 )
+
+sealed class NavigationEvent {
+    object NavigateBack : NavigationEvent()
+}
