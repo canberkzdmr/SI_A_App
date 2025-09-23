@@ -1,5 +1,7 @@
 package com.cbo.notes.presentation.screen
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,6 +64,10 @@ fun NotesScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showSortBottomSheet by remember { mutableStateOf(false) }
+
+    BackHandler {
+        Log.i("NotesScreen", "Back button is disabled for Notes Screen")
+    }
 
     Scaffold(
         modifier = modifier,

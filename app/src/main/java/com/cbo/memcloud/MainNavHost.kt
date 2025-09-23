@@ -4,22 +4,17 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.cbo.user.presentation.navigation.userNavGraph
 import com.cbo.core.navigation.AppDestination
-import com.cbo.memcloud.presentation.screen.MainScreen
 import com.cbo.login.presentation.navigation.loginNavGraph
+import com.cbo.memcloud.presentation.screen.MainScreen
+import com.cbo.notes.presentation.navigation.navigateToCategories
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
 import com.cbo.notes.presentation.navigation.navigateToEditNote
-import com.cbo.notes.presentation.navigation.navigateToNotes
-import com.cbo.notes.presentation.navigation.navigateToCategories
 import com.cbo.notes.presentation.navigation.notesGraph
 import com.cbo.splash.splashNavGraph
-import com.cbo.ui.snackbar.SnackbarManager
-import com.cbo.ui.snackbar.SnackbarMessage
-import kotlinx.coroutines.coroutineScope
+import com.cbo.user.presentation.navigation.userNavGraph
 
 @Composable
 fun MainNavHost(
@@ -34,9 +29,7 @@ fun MainNavHost(
         loginNavGraph(
             onLoginSuccess = {
                 navController.navigate(AppDestination.Main.route) {
-                    popUpTo(AppDestination.Login.route) {
-                        inclusive = true
-                    }
+                    popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
             },
@@ -101,19 +94,14 @@ fun MainNavHost(
 
         splashNavGraph(
             onNavigateToLogin = {
-                Log.d("MainNavHost", "(SplashNavGraph) Navigated to login")
                 navController.navigate(AppDestination.Login.createRoute()) {
-                    popUpTo(AppDestination.Login.route) {
-                        inclusive = true
-                    }
+                    popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
             },
             onNavigateToMain = {
                 navController.navigate(AppDestination.Main.route) {
-                    popUpTo(AppDestination.Login.route) {
-                        inclusive = true
-                    }
+                    popUpTo(AppDestination.Login.route) { inclusive = true }
                     launchSingleTop = true
                 }
             }
@@ -121,13 +109,12 @@ fun MainNavHost(
 
         // Main screen with bottom navigation
         composable(AppDestination.Main.route) {
+            Log.d("MainNavHost", "Main Screen navigation called")
             MainScreen(
                 onLogOut = {
-                    Log.d("MainNavHost", "(MainScreen) Navigated to login")
                     navController.navigate(AppDestination.Login.createRoute()) {
-                        popUpTo(AppDestination.Login.route) {
-                            inclusive = true
-                        }
+                        // clear main graph and go back to login
+                        popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
@@ -152,17 +139,17 @@ fun MainNavHost(
         }
 
         notesGraph(
-            onNavigateBack = { 
-                navController.popBackStack() 
+            onNavigateBack = {
+                navController.popBackStack()
             },
-            onNavigateToCreateNote = { 
-                navController.navigateToCreateNote() 
+            onNavigateToCreateNote = {
+                navController.navigateToCreateNote()
             },
-            onNavigateToEditNote = { noteId -> 
-                navController.navigateToEditNote(noteId) 
+            onNavigateToEditNote = { noteId ->
+                navController.navigateToEditNote(noteId)
             },
-            onNavigateToCategories = { 
-                navController.navigateToCategories() 
+            onNavigateToCategories = {
+                navController.navigateToCategories()
             }
         )
     }

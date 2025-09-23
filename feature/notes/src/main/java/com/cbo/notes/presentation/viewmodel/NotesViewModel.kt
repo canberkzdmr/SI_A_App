@@ -1,5 +1,6 @@
 package com.cbo.notes.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.notes.domain.model.Category
@@ -51,6 +52,7 @@ class NotesViewModel @Inject constructor(
     val uiState: StateFlow<NotesUiState> = _uiState.asStateFlow()
 
     init {
+        Log.d("NotesViewModel", "init")
         loadData()
     }
 
@@ -58,6 +60,7 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             val currentUser = userSession.currentUser.first()
             currentUser?.let { user ->
+                Log.d("NotesViewModel", "current user ${user.username}(${user.id})")
                 _uiState.update { it.copy(isLoading = true) }
 
                 combine(

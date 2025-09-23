@@ -46,9 +46,9 @@ sealed class BottomNavDestination(
 fun AppBottomNavigation(
     navController: NavController,
     destinations: List<BottomNavDestination> = listOf(
-        BottomNavDestination.Notes,
         BottomNavDestination.Categories,
-        BottomNavDestination.Profile
+        BottomNavDestination.Notes,
+        BottomNavDestination.Profile,
     )
 ) {
     val navBackStackEntry = navController.currentBackStackEntryAsState()
