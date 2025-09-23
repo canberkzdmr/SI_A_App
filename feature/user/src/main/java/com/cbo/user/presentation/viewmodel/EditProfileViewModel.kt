@@ -43,11 +43,13 @@ constructor(
                         getUserWithDetailUseCase(user.id).fold(
                             onSuccess = { userWithDetail ->
                                 _uiState.value = EditUserProfileUiState(
-                                    id = userWithDetail.userDetail?.id ?: -1,
+                                    id = userWithDetail.userDetail?.id,
                                     userId = userWithDetail.user.id,
                                     username = userWithDetail.user.username,
                                     email = userWithDetail.user.email,
                                     fullName = userWithDetail.userDetail?.fullName.orEmpty(),
+                                    gender = userWithDetail.userDetail?.gender.orEmpty(),
+                                    dateOfBirth = userWithDetail.userDetail?.dateOfBirth.orEmpty(),
                                     avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
                                     bio = userWithDetail.userDetail?.bio.orEmpty(),
                                     phoneNumber = userWithDetail.userDetail?.phoneNumber.orEmpty(),
@@ -126,6 +128,16 @@ constructor(
         )
     }
 
+    fun updateGender(gender: String) {
+        Log.d("EditProfileViewModel", "updateGender: $gender")
+        _uiState.value = _uiState.value.copy(gender = gender)
+    }
+
+    fun updateDateOfBirth(dob: String) {
+        Log.d("EditProfileViewModel", "update dob: $dob")
+        _uiState.value = _uiState.value.copy(dateOfBirth = dob)
+    }
+
     fun save() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -137,8 +149,8 @@ constructor(
                 bio = _uiState.value.bio,
                 phoneNumber = _uiState.value.phoneNumber,
                 address = _uiState.value.address,
-                dateOfBirth = null,
-                gender = null
+                dateOfBirth = _uiState.value.dateOfBirth,
+                gender = _uiState.value.gender,
             )
             upsertUserDetailUseCase.invoke(detail).fold(
                 onSuccess = {
@@ -155,11 +167,13 @@ constructor(
 }
 
 data class EditUserProfileUiState(
-    val id: Int = -1,
+    val id: Int? = null,
     val userId: Int = -1,
     val username: String = "",
     val email: String = "",
     val fullName: String = "",
+    val gender: String = "",
+    val dateOfBirth: String = "",
     val avatarUrl: String = "",
     val bio: String = "",
     val phoneNumber: String = "",

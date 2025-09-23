@@ -1,5 +1,6 @@
 package com.cbo.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,18 +40,29 @@ fun AppOutlinedTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     singleLine: Boolean = true,
+    readOnly: Boolean = false,
     minLines: Int = 1,
     maxLines: Int = Int.MAX_VALUE,
+    onClick: (() -> Unit)? = null, // 👈 new optional param
 ) {
+    val clickableModifier = if (onClick != null) {
+        modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    } else {
+        modifier.fillMaxWidth()
+    }
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
+        modifier = clickableModifier,
         label = label?.let { { Text(it) } },
         placeholder = placeholder?.let { { Text(it) } },
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         isError = isError,
+        readOnly = readOnly,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -68,6 +80,7 @@ fun AppOutlinedTextField(
             ),
     )
 }
+
 
 @Preview(showBackground = true, name = "Outlined Text Field Preview")
 @Composable

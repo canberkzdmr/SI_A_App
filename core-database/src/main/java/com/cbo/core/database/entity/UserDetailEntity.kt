@@ -18,7 +18,7 @@ import androidx.room.PrimaryKey
     indices = [Index(value = ["userId"], unique = true)]
 )
 data class UserDetailEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Int? = 0,
     val userId: Int, // foreign key to UserEntity
     val fullName: String?,
     val avatarUrl: String?, // can be a URL or base64 string
