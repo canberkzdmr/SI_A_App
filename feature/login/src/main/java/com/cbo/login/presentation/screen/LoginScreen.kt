@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -30,6 +32,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,14 +76,16 @@ fun LoginScreen(
 
 @Composable
 fun LoginScreenContent(
+    modifier: Modifier = Modifier,
     state: LoginUiState,
     prefillUsername: String? = null,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     onUserNameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
+    val focusRequesterPassword = remember { FocusRequester() }
+
     // Prefill username if provided
     LaunchedEffect(prefillUsername) {
         prefillUsername?.let(onUserNameChange)
@@ -85,38 +93,40 @@ fun LoginScreenContent(
 
     MyApplicationTheme {
         Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.primary)
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.primary),
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Spacer(modifier = Modifier.weight(1f))
 
                 WelcomeMessage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally),
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.background,
-                            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                        )
-                        .padding(vertical = 24.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .background(
+                                color = MaterialTheme.colorScheme.background,
+                                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                            ).padding(vertical = 24.dp),
                 ) {
                     AppHeadline(
                         "Your style of notes!",
-                        modifier = Modifier.padding(horizontal = 24.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     AppRegular(
                         "Capture your thoughts and any ideas.",
-                        modifier = Modifier.padding(horizontal = 24.dp)
+                        modifier = Modifier.padding(horizontal = 24.dp),
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -128,13 +138,17 @@ fun LoginScreenContent(
                         placeholder = { Text("Your username") },
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusRequesterPassword.requestFocus() }),
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    val keyboardController = LocalSoftwareKeyboardController.current
                     OutlinedTextField(
                         value = state.password,
                         onValueChange = onPasswordChange,
@@ -143,9 +157,22 @@ fun LoginScreenContent(
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                                .focusRequester(remember { focusRequesterPassword }),
+                        keyboardOptions =
+                            KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Send,
+                            ),
+                        keyboardActions =
+                            KeyboardActions(
+                                onSend = {
+                                    keyboardController?.hide()
+                                    onLoginClick()
+                                },
+                            ),
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -153,16 +180,17 @@ fun LoginScreenContent(
                     PrimaryButton(
                         text = "Login",
                         onClick = onLoginClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     TextButton(
                         onClick = onRegisterClick,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
                     ) {
                         AppLabel("Don't have an account? Register here!")
                     }
@@ -182,17 +210,18 @@ fun WelcomeMessage(modifier: Modifier = Modifier) {
 
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(animationSpec = tween(800)) +
+        enter =
+            fadeIn(animationSpec = tween(800)) +
                 slideInVertically(
                     initialOffsetY = { it / 2 },
-                    animationSpec = tween(800, easing = FastOutSlowInEasing)
-                )
+                    animationSpec = tween(800, easing = FastOutSlowInEasing),
+                ),
     ) {
         AppHeadline(
             "Welcome!",
             modifier = modifier,
             color = MaterialTheme.colorScheme.primaryContainer,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }

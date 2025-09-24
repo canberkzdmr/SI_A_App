@@ -51,6 +51,9 @@ fun MainScreen(
                     onNavigateToEditNote = onNavigateToEditNote,
                     onNavigateToCategories = {
                         navController.navigate(BottomNavDestination.Categories.route)
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate(BottomNavDestination.Profile.route)
                     }
                 )
             }

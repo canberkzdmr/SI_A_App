@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
@@ -42,8 +44,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -126,6 +133,12 @@ fun EditProfileScreenContent(
                 onImageSelected(selectedUri)
             }
         }
+
+    val focusRequesterGender = remember { FocusRequester() }
+    val focusRequesterDateOfBirth = remember { FocusRequester() }
+    val focusRequesterBio = remember { FocusRequester() }
+    val focusRequesterPhoneNumber = remember { FocusRequester() }
+    val focusRequesterAddress = remember { FocusRequester() }
 
     Scaffold(
         topBar = {
@@ -283,13 +296,17 @@ fun EditProfileScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = 8.dp)
+                            .focusRequester(remember { FocusRequester() }),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(onNext = { focusRequesterGender.requestFocus() })
                 )
 
                 // Gender
                 GenderSelector(
                     selectedGender = uiState.gender,
                     onGenderSelected = updateGender,
+                    modifier = Modifier.focusRequester(focusRequesterGender)
                 )
 
                 // Date of birth
@@ -350,37 +367,52 @@ fun EditProfileScreenContent(
 fun GenderSelector(
     selectedGender: String,
     onGenderSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    val options = listOf("Female", "Male")
+    val options = listOf("Male", "Female")
     var expanded by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
+        onExpandedChange = { expanded = !expanded }
     ) {
         AppOutlinedTextField(
             value = selectedGender,
             onValueChange = {},
-            readOnly = true,
+            modifier = modifier
+                .menuAnchor()
+                .focusRequester(focusRequester)
+                .onFocusChanged { state ->
+                    Log.d("EditProfileScreen", "Dropdown focus state: ${state.isFocused}")
+                    if (state.isFocused) {
+                        expanded = true
+                        keyboardController?.hide()
+                    }
+                },
             label = "Gender",
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier =
-                Modifier
-                    .menuAnchor()
-                    .fillMaxWidth(),
+            readOnly = true,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            onClick = {
+                expanded = true
+                keyboardController?.hide()
+            }
         )
 
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
+            onDismissRequest = { expanded = false }
         ) {
             options.forEach { gender ->
                 DropdownMenuItem(
-                    text = { AppBody(gender) },
+                    text = { Text(gender) },
                     onClick = {
                         onGenderSelected(gender)
                         expanded = false
-                    },
+                    }
                 )
             }
         }

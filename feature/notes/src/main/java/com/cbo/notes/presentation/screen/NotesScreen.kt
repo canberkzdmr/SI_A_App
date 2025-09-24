@@ -59,6 +59,7 @@ fun NotesScreen(
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
     onNavigateToCategories: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: NotesViewModel = hiltViewModel(),
 ) {
@@ -80,6 +81,7 @@ fun NotesScreen(
                 onViewModeChange = viewModel::changeViewMode,
                 onSortClick = { showSortBottomSheet = true },
                 onCategoriesClick = onNavigateToCategories,
+                onSettingsClick = onNavigateToSettings,
             )
         },
         floatingActionButton = {
@@ -317,6 +319,7 @@ private fun NotesScreenContent(
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
     onNavigateToCategories: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
     onViewModeChange: (ViewMode) -> Unit,
@@ -343,6 +346,7 @@ private fun NotesScreenContent(
                 onViewModeChange = onViewModeChange,
                 onSortClick = onSortClick,
                 onCategoriesClick = onNavigateToCategories,
+                onSettingsClick = onNavigateToSettings,
             )
         },
         floatingActionButton = {
@@ -438,6 +442,7 @@ private fun NotesScreenPreview() {
             onTogglePin = {},
             onToggleFavorite = {},
             onArchive = {},
+            onNavigateToSettings = {},
             onDelete = {},
         )
     }
@@ -462,6 +467,7 @@ private fun NotesScreenGridPreview() {
             onTogglePin = {},
             onToggleFavorite = {},
             onArchive = {},
+            onNavigateToSettings = {},
             onDelete = {},
         )
     }
@@ -492,6 +498,7 @@ private fun NotesScreenEmptyPreview() {
             onTogglePin = {},
             onToggleFavorite = {},
             onArchive = {},
+            onNavigateToSettings = {},
             onDelete = {},
         )
     }
@@ -516,6 +523,7 @@ private fun NotesScreenLoadingPreview() {
             onTogglePin = {},
             onToggleFavorite = {},
             onArchive = {},
+            onNavigateToSettings = {},
             onDelete = {},
         )
     }

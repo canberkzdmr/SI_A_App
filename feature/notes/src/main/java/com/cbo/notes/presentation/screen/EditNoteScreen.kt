@@ -135,8 +135,11 @@ fun EditNoteScreen(
                     placeholder = "Start writing your note...",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .defaultMinSize(minHeight = 200.dp),
-                    minLines = 8
+//                        .defaultMinSize(minHeight = 200.dp)
+                        .height(200.dp)
+                    ,
+                    minLines = 8,
+                    singleLine = false
                 )
 
                 // Category selection
@@ -611,10 +614,11 @@ private fun EditNoteScreenContent(
                     value = uiState.content,
                     onValueChange = onContentChange,
                     label = "Content",
+                    singleLine = false,
+                    minLines = 3,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp),
-                    maxLines = Int.MAX_VALUE
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))

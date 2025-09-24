@@ -150,6 +150,9 @@ fun MainNavHost(
             },
             onNavigateToCategories = {
                 navController.navigateToCategories()
+            },
+            onNavigateToSettings = {
+                navController.navigate(AppDestination.Profile.route)
             }
         )
     }

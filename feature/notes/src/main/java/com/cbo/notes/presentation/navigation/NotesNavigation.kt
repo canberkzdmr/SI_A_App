@@ -35,13 +35,15 @@ fun NavGraphBuilder.notesGraph(
     onNavigateBack: () -> Unit,
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
-    onNavigateToCategories: () -> Unit
+    onNavigateToCategories: () -> Unit,
+    onNavigateToSettings: () -> Unit,
 ) {
     composable(route = NOTES_ROUTE) {
         NotesScreen(
             onNavigateToCreateNote = onNavigateToCreateNote,
             onNavigateToEditNote = onNavigateToEditNote,
-            onNavigateToCategories = onNavigateToCategories
+            onNavigateToCategories = onNavigateToCategories,
+            onNavigateToSettings = onNavigateToSettings,
         )
     }
 

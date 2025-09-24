@@ -104,9 +104,9 @@ fun ProfileScreen(
         }
     }
 
-    BackHandler {
+    /*BackHandler {
         Log.i("ProfileScreen", "Back button is disabled for Profile Screen")
-    }
+    }*/
 
     ProfileScreenContent(
         uiState = uiState,

@@ -24,6 +24,7 @@ fun NotesAppBar(
     onViewModeChange: (ViewMode) -> Unit,
     onSortClick: () -> Unit,
     onCategoriesClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
@@ -121,7 +122,7 @@ fun NotesAppBar(
                         DropdownMenuItem(
                             text = { Text("Settings") },
                             onClick = {
-                                // Handle settings navigation
+                                onSettingsClick()
                                 showMenu = false
                             },
                             leadingIcon = {
