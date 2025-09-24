@@ -22,6 +22,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -116,6 +118,8 @@ fun EditNoteScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                val focusRequestContent = remember { FocusRequester() }
+
                 // Title field
                 AppOutlinedTextField(
                     value = uiState.title,
@@ -124,7 +128,9 @@ fun EditNoteScreen(
                     placeholder = "Enter note title...",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    isError = uiState.title.isBlank()
+                    isError = uiState.title.isBlank(),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(onNext = { focusRequestContent.requestFocus() })
                 )
 
                 // Content field
@@ -137,6 +143,7 @@ fun EditNoteScreen(
                         .fillMaxWidth()
 //                        .defaultMinSize(minHeight = 200.dp)
                         .height(200.dp)
+                        .focusRequester(remember { focusRequestContent })
                     ,
                     minLines = 8,
                     singleLine = false

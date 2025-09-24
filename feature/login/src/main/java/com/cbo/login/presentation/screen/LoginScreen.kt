@@ -46,9 +46,9 @@ import com.cbo.login.presentation.viewmodel.LoginUiState
 import com.cbo.login.presentation.viewmodel.LoginViewModel
 import com.cbo.ui.components.AppHeadline
 import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.PrimaryButton
-import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.theme.MyApplicationTheme
 
 @Composable
@@ -131,11 +131,11 @@ fun LoginScreenContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    OutlinedTextField(
+                    AppOutlinedTextField(
                         value = state.username,
                         onValueChange = onUserNameChange,
-                        label = { Text("Username") },
-                        placeholder = { Text("Your username") },
+                        label = "Username",
+                        placeholder = "Your username",
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                         modifier =
@@ -149,11 +149,11 @@ fun LoginScreenContent(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     val keyboardController = LocalSoftwareKeyboardController.current
-                    OutlinedTextField(
+                    AppOutlinedTextField(
                         value = state.password,
                         onValueChange = onPasswordChange,
-                        label = { Text("Password") },
-                        placeholder = { Text("Enter your password") },
+                        label = "Password",
+                        placeholder = "Enter your password",
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
