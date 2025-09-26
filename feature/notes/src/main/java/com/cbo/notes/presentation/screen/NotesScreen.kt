@@ -52,7 +52,7 @@ import com.cbo.notes.presentation.ViewMode
 import com.cbo.notes.presentation.viewmodel.NotesUiState
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
 import com.cbo.ui.components.AppLabel
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun NotesScreen(
@@ -426,7 +426,7 @@ private fun NotesScreenContent(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun NotesScreenPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         NotesScreenContent(
             uiState = previewNotesUiState(),
             onNavigateToCreateNote = {},
@@ -451,7 +451,7 @@ private fun NotesScreenPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun NotesScreenGridPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         NotesScreenContent(
             uiState = previewNotesUiState().copy(viewMode = ViewMode.GRID),
             onNavigateToCreateNote = {},
@@ -476,7 +476,7 @@ private fun NotesScreenGridPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun NotesScreenEmptyPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         NotesScreenContent(
             uiState =
                 NotesUiState(
@@ -507,7 +507,7 @@ private fun NotesScreenEmptyPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun NotesScreenLoadingPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         NotesScreenContent(
             uiState = NotesUiState(isLoading = true),
             onNavigateToCreateNote = {},

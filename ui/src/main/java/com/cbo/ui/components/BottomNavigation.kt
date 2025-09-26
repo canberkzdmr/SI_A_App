@@ -1,9 +1,11 @@
 package com.cbo.ui.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -23,7 +25,7 @@ sealed class BottomNavDestination(
     object Notes : BottomNavDestination(
         route = "main_notes",
         title = "Notes",
-        icon = Icons.Default.Note
+        icon = Icons.AutoMirrored.Filled.Note
     )
     
     object Categories : BottomNavDestination(
@@ -37,6 +39,12 @@ sealed class BottomNavDestination(
         title = "Profile", 
         icon = Icons.Default.Person
     )
+
+    object Tags : BottomNavDestination(
+        route = "main_tags",
+        title = "Tags",
+        icon = Icons.Default.Tag
+    )
 }
 
 /**
@@ -46,8 +54,9 @@ sealed class BottomNavDestination(
 fun AppBottomNavigation(
     navController: NavController,
     destinations: List<BottomNavDestination> = listOf(
-        BottomNavDestination.Categories,
         BottomNavDestination.Notes,
+        BottomNavDestination.Categories,
+        BottomNavDestination.Tags,
         BottomNavDestination.Profile,
     )
 ) {

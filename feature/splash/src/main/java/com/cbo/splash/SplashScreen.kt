@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun SplashScreen(
@@ -361,7 +361,7 @@ private fun drawMemCloudIcon(
 @Preview
 @Composable
 fun SplashScreenPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         SplashContent(isLoading = true)
     }
 }

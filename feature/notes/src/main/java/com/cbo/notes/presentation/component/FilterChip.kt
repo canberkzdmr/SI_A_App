@@ -16,6 +16,8 @@ fun FilterChip(
     onClick: () -> Unit,
     label: String,
     color: String? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (selected) {
@@ -59,6 +61,8 @@ fun FilterChip(
             borderColor = if (selected && color != null) backgroundColor else MaterialTheme.colorScheme.outline,
             selectedBorderColor = backgroundColor
         ),
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
         modifier = modifier
     )
 }

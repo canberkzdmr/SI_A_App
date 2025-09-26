@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.cbo.ui.snackbar.SnackbarHostProvider
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyApplicationTheme {
+            MemCloudApplicationTheme {
                 val navController = rememberNavController()
                 SnackbarHostProvider { padding ->
                     MainNavHost(

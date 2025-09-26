@@ -11,8 +11,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cbo.notes.presentation.navigation.navigateToCategories
+import com.cbo.notes.presentation.navigation.navigateToTags
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.CategoriesScreen
+import com.cbo.notes.presentation.screen.TagsScreen
 import com.cbo.user.presentation.screen.ProfileScreen
 import com.cbo.ui.components.AppBottomNavigation
 import com.cbo.ui.components.BottomNavDestination
@@ -87,7 +90,21 @@ fun MainScreen(
                     onNotesClicked = {
                         Log.d("MainScreen", "PS onNotesClicked")
                         navController.navigate(BottomNavDestination.Notes.route)
+                    },
+                    onCategoriesClicked = {
+                        Log.d("MainScreen", "PS onCategoriesClicked")
+                        navController.navigate(BottomNavDestination.Categories.route)
+                    },
+                    onTagsClicked = {
+                        Log.d("MainScreen", "PS onTagsClicked")
+                        navController.navigate(BottomNavDestination.Tags.route)
                     }
+                )
+            }
+
+            composable(BottomNavDestination.Tags.route) {
+                TagsScreen(
+                    onNavigateBack = { Log.d("MainScreen", "TS onNavigateBack")}
                 )
             }
         }

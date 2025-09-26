@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -23,11 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun AppOutlinedTextField(
@@ -90,7 +87,7 @@ fun AppOutlinedTextField(
 private fun AppOutlinedTextFieldPreview() {
     var text by remember { mutableStateOf("test1") }
 
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             AppOutlinedTextField(
                 value = text,

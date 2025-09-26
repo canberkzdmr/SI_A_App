@@ -249,7 +249,7 @@ val unspecified_scheme = ColorFamily(
 )
 
 @Composable
-fun MyApplicationTheme(
+fun MemCloudApplicationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {

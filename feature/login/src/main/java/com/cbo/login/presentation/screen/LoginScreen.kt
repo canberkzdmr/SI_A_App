@@ -21,8 +21,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +47,7 @@ import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.PrimaryButton
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun LoginScreen(
@@ -91,7 +89,7 @@ fun LoginScreenContent(
         prefillUsername?.let(onUserNameChange)
     }
 
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         Box(
             modifier =
                 modifier
@@ -229,7 +227,7 @@ fun WelcomeMessage(modifier: Modifier = Modifier) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         LoginScreenContent(
             state = LoginUiState(username = "canberk", password = "1234"),
             prefillUsername = "",

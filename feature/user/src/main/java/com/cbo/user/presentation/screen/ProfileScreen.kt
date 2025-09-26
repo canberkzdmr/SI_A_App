@@ -2,13 +2,10 @@ package com.cbo.user.presentation.screen
 
 import android.content.res.Configuration
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,62 +20,49 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.UploadFile
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
+import com.cbo.ui.components.SectionHeader
+import com.cbo.ui.components.ShimmerBox
+import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.user.R
 import com.cbo.user.presentation.viewmodel.ProfileEvent
 import com.cbo.user.presentation.viewmodel.ProfileUiState
 import com.cbo.user.presentation.viewmodel.ProfileViewModel
-import com.cbo.ui.components.AppCaption
-import com.cbo.ui.components.AppLabel
-import com.cbo.ui.components.AppTitle
-import com.cbo.ui.components.DestructiveButton
-import com.cbo.ui.components.SectionHeader
-import com.cbo.ui.components.ShimmerBox
-import com.cbo.ui.theme.MyApplicationTheme
-import com.cbo.ui.theme.outlineLight
-import com.cbo.ui.theme.primaryLight
-import com.cbo.ui.theme.surfaceDimLight
-import java.time.LocalDate
 
 @Composable
 fun ProfileScreen(
@@ -88,6 +72,8 @@ fun ProfileScreen(
     onChangePassword: () -> Unit,
     onDeleteAccount: () -> Unit,
     onNotesClicked: () -> Unit = {},
+    onCategoriesClicked: () -> Unit = {},
+    onTagsClicked: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val user by viewModel.currentUser.collectAsState("")
@@ -119,7 +105,8 @@ fun ProfileScreen(
         onNotesClicked = { onNotesClicked() },
         onThemeChange = {},
         onLanguageChange = {},
-        onManageCategories = {},
+        onManageCategories = { onCategoriesClicked() },
+        onManageTags = { onTagsClicked() },
         onExportNotes = {},
         onEnableBiometrics = {},
         onContactSupport = {},
@@ -138,6 +125,7 @@ fun ProfileScreenContent(
     onThemeChange: () -> Unit,
     onLanguageChange: () -> Unit,
     onManageCategories: () -> Unit,
+    onManageTags: () -> Unit,
     onExportNotes: () -> Unit,
     onEnableBiometrics: () -> Unit,
     onContactSupport: () -> Unit,
@@ -193,10 +181,11 @@ fun ProfileScreenContent(
                             contentScale = ContentScale.Crop,
                             loading = {
                                 ShimmerBox(
-                                    modifier = Modifier
-                                        .size(96.dp)
-                                        .clip(CircleShape),
-                                    cornerRadius = 48.dp // Half of 96dp for circular shape
+                                    modifier =
+                                        Modifier
+                                            .size(96.dp)
+                                            .clip(CircleShape),
+                                    cornerRadius = 48.dp, // Half of 96dp for circular shape
                                 )
                             },
                             error = {
@@ -207,7 +196,7 @@ fun ProfileScreenContent(
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop,
                                 )
-                            }
+                            },
                         )
                     } else {
                         // Show default image when no avatar is set
@@ -274,39 +263,40 @@ fun ProfileScreenContent(
             val sections =
                 listOf(
                     "Account" to
-                            listOf(
-                                Pair(Icons.Default.Edit, "Edit Profile"),
-                                Pair(Icons.Default.Lock, "Change Password"),
-                                Pair(Icons.Default.ExitToApp, "Logout"),
-                                Pair(Icons.Default.Delete, "Delete Account"),
-                            ),
+                        listOf(
+                            Pair(Icons.Default.Edit, "Edit Profile"),
+                            Pair(Icons.Default.Lock, "Change Password"),
+                            Pair(Icons.AutoMirrored.Filled.ExitToApp, "Logout"),
+                            Pair(Icons.Default.Delete, "Delete Account"),
+                        ),
                     "Preferences" to
-                            listOf(
-                                Pair(Icons.Default.DarkMode, "Theme"),
-                                Pair(Icons.Default.Language, "Language"),
-                            ),
+                        listOf(
+                            Pair(Icons.Default.DarkMode, "Theme"),
+                            Pair(Icons.Default.Language, "Language"),
+                        ),
                     "Notes" to
-                            listOf(
-                                Pair(Icons.Default.Note, "My Notes"),
-                                Pair(Icons.Default.Category, "Manage Categories"),
-                                Pair(Icons.Default.UploadFile, "Export Notes"),
-                            ),
+                        listOf(
+                            Pair(Icons.AutoMirrored.Filled.Note, "My Notes"),
+                            Pair(Icons.Default.Category, "Manage Categories"),
+                            Pair(Icons.Default.Tag, "Manage Tags"),
+                            Pair(Icons.Default.UploadFile, "Export Notes"),
+                        ),
                     "Security" to
-                            listOf(
-                                Pair(Icons.Default.Fingerprint, "Enable Biometrics"),
-                            ),
+                        listOf(
+                            Pair(Icons.Default.Fingerprint, "Enable Biometrics"),
+                        ),
                     "About" to
-                            listOf(
-                                Pair(Icons.Default.Info, "App Version: 1.0.0"),
-                                Pair(Icons.Default.SupportAgent, "Contact Support"),
-                            ),
+                        listOf(
+                            Pair(Icons.Default.Info, "App Version: 1.0.0"),
+                            Pair(Icons.Default.SupportAgent, "Contact Support"),
+                        ),
                 )
 
             sections.forEach { (sectionTitle, items) ->
                 item {
                     SectionHeader(
                         sectionTitle,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                     )
                 }
 
@@ -333,6 +323,10 @@ fun ProfileScreenContent(
                                     "Theme" -> onThemeChange()
                                     "Language" -> onLanguageChange()
                                     "Manage Categories" -> onManageCategories()
+                                    "Manage Tags" -> {
+                                        Log.d("ProfileScreen", "onManageTags()")
+                                        onManageTags()
+                                    }
                                     "Export Notes" -> onExportNotes()
                                     "Enable Biometrics" -> onEnableBiometrics()
                                     "Contact Support" -> onContactSupport()
@@ -394,7 +388,7 @@ fun ProfileListItem(
 @Preview(uiMode = Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun ProfileScreenPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         ProfileScreenContent(
             uiState =
                 ProfileUiState(
@@ -410,6 +404,7 @@ fun ProfileScreenPreview() {
             onThemeChange = {},
             onLanguageChange = {},
             onManageCategories = {},
+            onManageTags = {},
             onExportNotes = {},
             onEnableBiometrics = {},
             onContactSupport = {},

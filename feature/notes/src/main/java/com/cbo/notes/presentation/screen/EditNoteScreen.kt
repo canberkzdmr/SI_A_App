@@ -40,7 +40,7 @@ import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -693,7 +693,7 @@ private fun EditNoteScreenContent(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun EditNoteScreenCreatePreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         EditNoteScreenContent(
             uiState = EditNoteUiState(
                 isLoading = false,
@@ -719,7 +719,7 @@ private fun EditNoteScreenCreatePreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun EditNoteScreenEditPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         EditNoteScreenContent(
             uiState = EditNoteUiState(
                 isLoading = false,
@@ -753,7 +753,7 @@ private fun EditNoteScreenEditPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun EditNoteScreenLoadingPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         EditNoteScreenContent(
             uiState = EditNoteUiState(
                 isLoading = true
@@ -771,7 +771,7 @@ private fun EditNoteScreenLoadingPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun EditNoteScreenSavingPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         EditNoteScreenContent(
             uiState = EditNoteUiState(
                 isLoading = false,
@@ -798,7 +798,7 @@ private fun EditNoteScreenSavingPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun EditNoteScreenCreateTagPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         EditNoteScreenContent(
             uiState = EditNoteUiState(
                 isLoading = false,

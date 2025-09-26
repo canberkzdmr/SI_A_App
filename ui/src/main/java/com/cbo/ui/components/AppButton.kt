@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun PrimaryButton(
@@ -158,7 +158,7 @@ fun AppIconButton(
 @Preview
 @Composable
 fun PrimaryButtonPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)

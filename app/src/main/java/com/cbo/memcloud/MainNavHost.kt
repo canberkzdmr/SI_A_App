@@ -12,6 +12,7 @@ import com.cbo.memcloud.presentation.screen.MainScreen
 import com.cbo.notes.presentation.navigation.navigateToCategories
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
 import com.cbo.notes.presentation.navigation.navigateToEditNote
+import com.cbo.notes.presentation.navigation.navigateToTags
 import com.cbo.notes.presentation.navigation.notesGraph
 import com.cbo.splash.splashNavGraph
 import com.cbo.user.presentation.navigation.userNavGraph
@@ -89,6 +90,14 @@ fun MainNavHost(
             onNotesClicked = {
                 Log.d("MainNavHost", "(userNavGraph) Navigated to Main")
                 navController.navigate(AppDestination.Main.route)
+            },
+            onCategoriesClicked = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Categories")
+                navController.navigateToCategories()
+            },
+            onTagsClicked = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Tags")
+                navController.navigateToTags()
             }
         )
 
@@ -153,6 +162,9 @@ fun MainNavHost(
             },
             onNavigateToSettings = {
                 navController.navigate(AppDestination.Profile.route)
+            },
+            onNavigateToTags = {
+                navController.navigateToTags()
             }
         )
     }

@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun AppHeadline(
@@ -134,7 +134,7 @@ fun SectionHeader(
 )
 @Composable
 private fun AppTextPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

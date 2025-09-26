@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Category
@@ -59,7 +60,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.presentation.viewmodel.CategoriesUiState
 import com.cbo.notes.presentation.viewmodel.CategoriesViewModel
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
+import androidx.core.graphics.toColorInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +80,7 @@ fun CategoriesScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                         )
                     }
@@ -239,7 +241,7 @@ private fun CategoryItem(
             ) {
                 // Color indicator
                 val backgroundColor =
-                    category.color?.let { Color(android.graphics.Color.parseColor(it)) }
+                    category.color?.let { Color(it.toColorInt()) }
                         ?: MaterialTheme.colorScheme.primaryContainer
 
                 Box(
@@ -594,7 +596,7 @@ private fun CategoryListItem(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun CategoriesScreenPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         CategoriesScreenContent(
             uiState =
                 CategoriesUiState(
@@ -618,7 +620,7 @@ private fun CategoriesScreenPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun CategoriesScreenEmptyPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         CategoriesScreenContent(
             uiState =
                 CategoriesUiState(
@@ -642,7 +644,7 @@ private fun CategoriesScreenEmptyPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun CategoriesScreenLoadingPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         CategoriesScreenContent(
             uiState =
                 CategoriesUiState(
@@ -666,7 +668,7 @@ private fun CategoriesScreenLoadingPreview() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun CategoriesScreenWithDialogPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         CategoriesScreenContent(
             uiState =
                 CategoriesUiState(

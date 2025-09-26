@@ -9,11 +9,13 @@ import androidx.navigation.navArgument
 import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.EditNoteScreen
 import com.cbo.notes.presentation.screen.NotesScreen
+import com.cbo.notes.presentation.screen.TagsScreen
 
 const val NOTES_ROUTE = "notes"
 const val CREATE_NOTE_ROUTE = "create_note"
 const val EDIT_NOTE_ROUTE = "edit_note"
 const val CATEGORIES_ROUTE = "categories"
+const val TAGS_ROUTE = "tags"
 
 fun NavController.navigateToNotes(navOptions: NavOptions? = null) {
     this.navigate(NOTES_ROUTE, navOptions)
@@ -31,12 +33,17 @@ fun NavController.navigateToCategories(navOptions: NavOptions? = null) {
     this.navigate(CATEGORIES_ROUTE, navOptions)
 }
 
+fun NavController.navigateToTags(navOptions: NavOptions? = null) {
+    this.navigate(TAGS_ROUTE, navOptions)
+}
+
 fun NavGraphBuilder.notesGraph(
     onNavigateBack: () -> Unit,
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
     onNavigateToCategories: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToTags: () -> Unit,
 ) {
     composable(route = NOTES_ROUTE) {
         NotesScreen(
@@ -69,6 +76,12 @@ fun NavGraphBuilder.notesGraph(
 
     composable(route = CATEGORIES_ROUTE) {
         CategoriesScreen(
+            onNavigateBack = onNavigateBack
+        )
+    }
+
+    composable(route = TAGS_ROUTE) {
+        TagsScreen(
             onNavigateBack = onNavigateBack
         )
     }

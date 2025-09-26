@@ -49,7 +49,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cbo.core.common.base.UiState
 import com.cbo.core.common.validation.FieldValidation
 import com.cbo.login.presentation.viewmodel.RegisterState
@@ -58,7 +57,7 @@ import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.PrimaryButton
-import com.cbo.ui.theme.MyApplicationTheme
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun RegisterScreen(
@@ -68,7 +67,7 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val registerState by viewModel.registerState.collectAsStateWithLifecycle()
 
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         Box(
             modifier =
                 Modifier
@@ -452,7 +451,7 @@ fun RegisterScreenContent(
 @Preview(uiMode = Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun RegisterScreenPreview() {
-    MyApplicationTheme {
+    MemCloudApplicationTheme {
         RegisterScreenContent(
             uiState = UiState.Idle,
             registerState = RegisterState(),
