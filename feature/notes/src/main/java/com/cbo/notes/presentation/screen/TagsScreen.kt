@@ -1,6 +1,14 @@
 package com.cbo.notes.presentation.screen
 
+import android.util.Log
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,11 +25,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +40,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,7 +51,6 @@ import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.TagsUiState
 import com.cbo.notes.presentation.viewmodel.TagsViewModel
-import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.HeaderCard
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -71,7 +80,7 @@ fun TagsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { Log.d("TagsScreen", "Add tag clicked") }) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Add Tag",
@@ -79,6 +88,17 @@ fun TagsScreen(
                     }
                 },
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { Log.d("TagsScreen", "FAB Add Tag clicked") },
+                containerColor = MaterialTheme.colorScheme.primary,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Note",
+                )
+            }
         },
     ) { paddingValues ->
         when {
@@ -110,7 +130,7 @@ fun TagsScreen(
                         modifier =
                             Modifier
                                 .padding(paddingValues)
-                                .padding(8.dp),
+                                .padding(16.dp),
                         iconSelected = Icons.Default.Tag,
                         title = "Manage Your Tags",
                         content = "You can edit tags with clicking on them\nTo delete them click on delete button, you are free to select multiple tags to delete them at the same time!",
@@ -119,7 +139,11 @@ fun TagsScreen(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(
+                                8.dp,
+                                Alignment.CenterHorizontally,
+                            ),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier =
                             Modifier
@@ -127,7 +151,18 @@ fun TagsScreen(
                                 .fillMaxWidth(),
                     ) {
                         uiState.tags.forEach { tag ->
-                            TagItem(tag, selectedTags = uiState.selectedTags, onTagToggle = {})
+//                            TagItem(tag, selectedTags = uiState.selectedTags, onTagToggle = {})
+                            JiggleTag(
+                                tag.name,
+                                isJiggling = false,
+                                onClick = { Log.d("TagsScreen", "onClick Tag -> ${tag.name}") },
+                                onLongClick = {
+                                    Log.d(
+                                        "TagsScreen",
+                                        "onLongClickTag -> ${tag.name}",
+                                    )
+                                },
+                            )
                         }
                     }
                 }
@@ -210,7 +245,11 @@ fun TagsScreenContent(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement =
+                            Arrangement.spacedBy(
+                                4.dp,
+                                Alignment.CenterHorizontally,
+                            ),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier =
                             Modifier
@@ -241,6 +280,53 @@ fun TagItem(
         label = "${tag.name} (${tag.usageCount})",
         color = tag.color,
     )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun JiggleTag(
+    text: String,
+    isJiggling: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "jiggle")
+
+    // Small rotation back and forth
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = -1.75f,
+        targetValue = 1.75f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = 200, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "rotation",
+    )
+
+    val animatedModifier =
+        if (isJiggling) {
+            Modifier.graphicsLayer {
+                rotationZ = rotation
+            }
+        } else {
+            Modifier
+        }
+
+    Box {
+        AssistChip(
+            modifier = animatedModifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            Log.d("TagsScreen", "Long Clicked tag: $text")
+                        },
+                    )
+                },
+            onClick = { Log.d("TagsScreen", "Clicked tag: $text") },
+            label = { Text(text) },
+        )
+    }
 }
 
 @Composable

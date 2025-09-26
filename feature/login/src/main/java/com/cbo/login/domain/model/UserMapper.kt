@@ -3,19 +3,20 @@ package com.cbo.login.domain.model
 import com.cbo.core.database.entity.UserEntity
 
 // Data (Entity) → Domain
-fun UserEntity.toDomain(): User =
-    User(
+fun UserEntity.toDomain(): RegisterUserModel =
+    RegisterUserModel(
         id = id,
         username = username,
         email = email,
         password = "",
+        retypePassword = "",
         lastPasswordChangeDate = lastPasswordChangeDate,
         registerDate = registrationDate,
         termsAndConditionsChecked = true
     )
 
 // Domain → Data (for inserting into DB)
-fun User.toEntity(passwordHash: ByteArray, salt: ByteArray): UserEntity = UserEntity(
+fun RegisterUserModel.toEntity(passwordHash: ByteArray, salt: ByteArray): UserEntity = UserEntity(
     id = id,
     username = username,
     passwordHash = passwordHash,

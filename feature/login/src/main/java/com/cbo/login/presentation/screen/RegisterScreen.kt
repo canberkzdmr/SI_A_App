@@ -418,6 +418,7 @@ fun RegisterScreenContent(
                             Modifier
                                 .fillMaxWidth(),
                         isLoading = uiState == UiState.Loading,
+                        enabled = registerState.isValid,
                     )
                 }
             }

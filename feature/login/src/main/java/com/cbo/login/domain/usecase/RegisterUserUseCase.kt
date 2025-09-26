@@ -1,61 +1,48 @@
 package com.cbo.login.domain.usecase
 
 import android.util.Log
-import com.cbo.core.common.validation.FieldValidation
 import com.cbo.core.domain.exception.RegistrationException
 
-import com.cbo.login.domain.model.User
+import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.repository.UserRepository
 
 class RegisterUserUseCase(private val userRepository: UserRepository) {
-    suspend operator fun invoke(user: User): Result<Unit> {
+
+    suspend operator fun invoke(user: RegisterUserModel): Result<Unit> {
         Log.d("RegisterUserUseCase", "Register user in progress")
-        if (user.username.isBlank()) {
-            return Result.failure(RegistrationException.InvalidUserInputException())
-        }
 
-        if (!user.termsAndConditionsChecked) {
-            Log.i("RegisterUserUseCase", "Terms and Conditions not checked")
-            return Result.failure(RegistrationException.TermsAndConditionsCheckerException())
-        }
+        return when {
+            user.username.isBlank() ->
+                Result.failure(RegistrationException.InvalidUserInputException())
 
-        if (checkUsernameExists(userRepository, user.username)) {
-            Log.i("RegisterUserUseCase",
-                RegistrationException.UsernameAlreadyExistsException().message
-                    ?: "Kullanici adi daha once alinmis!"
-            )
-            return Result.failure(RegistrationException.UsernameAlreadyExistsException())
-        }
+            user.email.isBlank() ->
+                Result.failure(RegistrationException.EmptyEmailException())
 
-        if (isEmailRegistered(userRepository, user.email)) {
-            Log.e("RegisterUserUseCase",
-                RegistrationException.EmailAlreadyExistsException().message
-                    ?: "Bu email adresi sistemde mevcut!"
-            )
-            return Result.failure(RegistrationException.EmailAlreadyExistsException())
-        }
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(user.email).matches() ->
+                Result.failure(RegistrationException.InvalidEmailException())
 
-        if (!isValidPassword(user.password)) {
-            return Result.failure(RegistrationException.WeakPasswordException())
-        }
+            user.password != user.retypePassword ->
+                Result.failure(RegistrationException.PasswordMismatchException())
 
-        return userRepository.registerUser(user)
+            !user.termsAndConditionsChecked ->
+                Result.failure(RegistrationException.TermsAndConditionsCheckerException())
+
+            userRepository.isUsernameExists(user.username) ->
+                Result.failure(RegistrationException.UsernameAlreadyExistsException())
+
+            userRepository.isEmailRegistered(user.email) ->
+                Result.failure(RegistrationException.EmailAlreadyExistsException())
+
+            !isValidPassword(user.password) ->
+                Result.failure(RegistrationException.WeakPasswordException())
+
+            else -> userRepository.registerUser(user)
+        }
     }
 
-    private suspend fun checkUsernameExists(userRepository: UserRepository, username: String): Boolean {
-        return userRepository.isUsernameExists(username)
-    }
-
-    private suspend fun isEmailRegistered(userRepository: UserRepository, email: String): Boolean {
-        return userRepository.isEmailRegistered(email)
-    }
-
-    private fun isValidPassword(password: String): Boolean {
-        val lengthValid = password.length >= 8
-        val hasUpperCase = password.any { it.isUpperCase() }
-        val hasLowerCase = password.any { it.isLowerCase() }
-        val hasDigit = password.any { it.isDigit() }
-
-        return lengthValid && hasUpperCase && hasLowerCase && hasDigit
-    }
+    private fun isValidPassword(password: String): Boolean =
+        password.length >= 8 &&
+                password.any { it.isUpperCase() } &&
+                password.any { it.isLowerCase() } &&
+                password.any { it.isDigit() }
 }

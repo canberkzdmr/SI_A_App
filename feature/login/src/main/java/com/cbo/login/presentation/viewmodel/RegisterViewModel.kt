@@ -6,7 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.cbo.core.common.base.UiState
 import com.cbo.core.common.util.DateUtil
 import com.cbo.core.common.validation.FieldValidation
-import com.cbo.login.domain.model.User
+import com.cbo.core.domain.exception.RegistrationException
+import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.usecase.RegisterUserUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
@@ -14,148 +15,172 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel
-@Inject
-constructor(
-    private val registerUserUseCase: RegisterUserUseCase,
-) : ViewModel() {
-    private val TAG = "RegisterViewModel"
-    private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
-    val uiState: StateFlow<UiState<Unit>> = _uiState
-    private val _registerState = MutableStateFlow(RegisterState())
-    val registerState: StateFlow<RegisterState> = _registerState.asStateFlow()
+    @Inject
+    constructor(
+        private val registerUserUseCase: RegisterUserUseCase,
+    ) : ViewModel() {
+        private val TAG = "RegisterViewModel"
 
-    fun register(onSuccess: () -> Unit) {
-        viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            val user =
-                User(
-                    id = 0,
-                    username = _registerState.value.username,
-                    password = _registerState.value.password,
-                    email = _registerState.value.email,
-                    termsAndConditionsChecked = _registerState.value.termsAndConditionsChecked,
-                    lastPasswordChangeDate = DateUtil.fullDate(),
-                    registerDate = DateUtil.fullDate(),
-                )
-            val result = registerUserUseCase.invoke(user)
-            _uiState.value = when {
+        private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+        val uiState: StateFlow<UiState<Unit>> = _uiState.asStateFlow()
+
+        private val _registerState = MutableStateFlow(RegisterState())
+        val registerState: StateFlow<RegisterState> = _registerState.asStateFlow()
+
+        // --- Registration ---
+        fun register(onSuccess: () -> Unit) =
+            viewModelScope.launch {
+                _uiState.value = UiState.Loading
+
+                val user =
+                    with(_registerState.value) {
+                        RegisterUserModel(
+                            id = 0,
+                            username = username,
+                            password = password,
+                            retypePassword = reTypePassword,
+                            email = email,
+                            termsAndConditionsChecked = termsAndConditionsChecked,
+                            lastPasswordChangeDate = DateUtil.fullDate(),
+                            registerDate = DateUtil.fullDate(),
+                        )
+                    }
+
+                val result = registerUserUseCase(user)
+                _uiState.value = handleRegisterResult(result, onSuccess)
+            }
+
+        private fun handleRegisterResult(
+            result: Result<Unit>,
+            onSuccess: () -> Unit,
+        ): UiState<Unit> =
+            when {
                 result.isSuccess -> {
                     onSuccess()
                     UiState.Success(Unit)
                 }
-
                 result.isFailure -> {
-                    Log.e("RegisterViewmodel", result.exceptionOrNull()?.message ?: "Bilinmeyen hata")
-                    SnackbarManager.showMessage(SnackbarMessage.Error(result.exceptionOrNull()?.message ?: "Bilinmeyen hata"))
-                    UiState.Error(
-                        result.exceptionOrNull()?.message ?: "Bilinmeyen hata"
-                    )
+                    val exception = result.exceptionOrNull()
+                    Log.e(TAG, exception?.message ?: "Unknown error")
+                    handleRegistrationException(exception)
+                    // NOTE: SnackbarManager here is kept for compatibility with your project.
+                    // In Compose you usually emit an event (SharedFlow) and call snackbarHostState.showSnackbar(...) from the Composable.
+                    viewModelScope.launch {
+                        SnackbarManager.showMessage(
+                            SnackbarMessage.Warning(exception?.message ?: "Unknown error"),
+                        )
+                    }
+                    UiState.Error(exception?.message ?: "Unknown error")
                 }
-
                 else -> {
-                    Log.e("RegisterViewmodel", result.exceptionOrNull()?.message ?: "Bilinmeyen hata")
-                    SnackbarManager.showMessage(SnackbarMessage.Error(result.exceptionOrNull()?.message ?: "Bilinmeyen hata"))
-                    UiState.Error(
-                        result.exceptionOrNull()?.message ?: "Bilinmeyen hata"
-                    )
+                    viewModelScope.launch { SnackbarManager.showMessage(SnackbarMessage.Error("Unknown error")) }
+                    UiState.Error("Unknown error")
+                }
+            }
+
+        private fun handleRegistrationException(exception: Throwable?) {
+            when (exception) {
+                is RegistrationException -> {
+                    Log.w(TAG, "Registration error: ${exception.message}")
                 }
             }
         }
-    }
 
-    fun updateUsername(name: String) {
-        _registerState.value = _registerState.value.copy(username = name)
-    }
+        // --- Field updates ---
+        fun updateUsername(name: String) = updateField { copy(username = name) }
 
-    fun updateEmail(email: String) {
-        _registerState.value = _registerState.value.copy(email = email)
-    }
+        fun updateEmail(email: String) = updateField { copy(email = email) }
 
-    fun updatePassword(password: String) {
-        _registerState.value = _registerState.value.copy(password = password)
-    }
+        fun updatePassword(password: String) = updateField { copy(password = password) }
 
-    fun updateRetypePassword(retypePassword: String) {
-        _registerState.value = _registerState.value.copy(reTypePassword = retypePassword)
-    }
+        fun updateRetypePassword(reTypePassword: String) = updateField { copy(reTypePassword = reTypePassword) }
 
-    fun updateTermsAndConditionsChecker(termsAndConditionsChecked: Boolean) {
-        _registerState.value =
-            _registerState.value.copy(termsAndConditionsChecked = termsAndConditionsChecked)
-    }
+        fun updateTermsAndConditionsChecker(checked: Boolean) = updateField { copy(termsAndConditionsChecked = checked) }
 
-    fun isRegistrationValid(): Boolean {
-        var isValid = false
-        viewModelScope.launch {
-            if (validateUserName().isValid &&
-                validateEmail().isValid &&
-                validatePassword().isValid &&
-                validateReTypePassword().isValid &&
-                validateTermsAndConditionsChecker().isValid
-            ) {
-                isValid = true
+        /**
+         * IMPORTANT: compute the updated state first, then compute isValid based on the updated state.
+         * This prevents validating "old" values.
+         */
+        private fun updateField(update: RegisterState.() -> RegisterState) {
+            _registerState.update { current ->
+                val updated = current.update() // apply the field change
+                updated.copy(isValid = validateAllFields(updated)) // validate using updated state
             }
         }
-        return isValid
-    }
 
-    fun validateUserName(): FieldValidation {
-        return if (_registerState.value.username.length >= 3) FieldValidation(true)
-        else FieldValidation(false, "Username must be at least 3 characters")
-    }
+        // --- Validation helpers ---
+        private fun validateAllFields(state: RegisterState): Boolean =
+            state.username.length >= 3 &&
+                android.util.Patterns.EMAIL_ADDRESS
+                    .matcher(state.email)
+                    .matches() &&
+                isValidPassword(state.password) &&
+                state.password == state.reTypePassword &&
+                state.termsAndConditionsChecked
 
-    fun validateEmail(): FieldValidation {
-        return if (android.util.Patterns.EMAIL_ADDRESS.matcher(_registerState.value.email)
-                .matches()
-        ) FieldValidation(true)
-        else FieldValidation(false, "Invalid email format")
-    }
+        private fun isValidPassword(password: String): Boolean =
+            password.length >= 8 &&
+                password.any { it.isUpperCase() } &&
+                password.any { it.isLowerCase() } &&
+                password.any { it.isDigit() }
 
-    fun validatePassword(): FieldValidation {
-        val lengthValid = _registerState.value.password.length >= 8
-        val hasUpperCase = _registerState.value.password.any { it.isUpperCase() }
-        val hasLowerCase = _registerState.value.password.any { it.isLowerCase() }
-        val hasDigit = _registerState.value.password.any { it.isDigit() }
+        fun validateUserName(): FieldValidation =
+            if (_registerState.value.username.length >= 3) {
+                FieldValidation(true)
+            } else {
+                FieldValidation(false, "Username must be at least 3 characters")
+            }
 
-        return if (lengthValid && hasUpperCase && hasLowerCase && hasDigit) FieldValidation(true)
-        else FieldValidation(
-            false,
-            getPasswordError()
-        )
-    }
+        fun validateEmail(): FieldValidation =
+            if (android.util.Patterns.EMAIL_ADDRESS
+                    .matcher(_registerState.value.email)
+                    .matches()
+            ) {
+                FieldValidation(true)
+            } else {
+                FieldValidation(false, "Invalid email format")
+            }
 
-    private fun getPasswordError(): String? {
-        return when {
-            _registerState.value.password.length < 8 -> "Must be at least 8 characters"
-            !_registerState.value.password.any { it.isUpperCase() } -> "Include at least one uppercase letter"
-            !_registerState.value.password.any { it.isLowerCase() } -> "Include at least one lowercase letter"
-            !_registerState.value.password.any { it.isDigit() } -> "Include at least one number"
-            else -> null
+        fun validatePassword(): FieldValidation {
+            val password = _registerState.value.password
+            return if (isValidPassword(password)) {
+                FieldValidation(true)
+            } else {
+                FieldValidation(false, getPasswordError(password))
+            }
         }
+
+        private fun getPasswordError(password: String): String =
+            when {
+                password.length < 8 -> "Must be at least 8 characters"
+                !password.any { it.isUpperCase() } -> "Include at least one uppercase letter"
+                !password.any { it.isLowerCase() } -> "Include at least one lowercase letter"
+                !password.any { it.isDigit() } -> "Include at least one number"
+                else -> "Invalid password"
+            }
+
+        fun validateReTypePassword(): FieldValidation =
+            if (_registerState.value.password == _registerState.value.reTypePassword) {
+                FieldValidation(true)
+            } else {
+                FieldValidation(false, "Passwords are not matching")
+            }
+
+        private fun validateTermsAndConditionsChecker(): FieldValidation =
+            if (_registerState.value.termsAndConditionsChecked) {
+                FieldValidation(true)
+            } else {
+                FieldValidation(false, "Please approve terms and conditions")
+            }
     }
 
-    fun validateReTypePassword(): FieldValidation {
-        return if (_registerState.value.password.contentEquals(_registerState.value.reTypePassword)) FieldValidation(
-            true
-        )
-        else FieldValidation(false, "Passwords are not matching")
-    }
-
-    private fun validateTermsAndConditionsChecker(): FieldValidation {
-        return if (_registerState.value.termsAndConditionsChecked) {
-            FieldValidation(true)
-        } else {
-            Log.d(TAG, "Terms and conditions have not been checked")
-            FieldValidation(false, "Please approve terms and conditions")
-        }
-    }
-}
-
+// --- State Data Class ---
 data class RegisterState(
     val username: String = "",
     val password: String = "",

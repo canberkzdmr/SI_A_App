@@ -8,20 +8,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import java.lang.Math.pow
 import kotlin.math.pow
+import androidx.core.graphics.toColorInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterChip(
+    modifier: Modifier = Modifier,
     selected: Boolean,
     onClick: () -> Unit,
     label: String,
     color: String? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
-    modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (selected) {
-        color?.let { Color(android.graphics.Color.parseColor(it)) } 
+        color?.let { Color(it.toColorInt()) }
             ?: MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.surface
@@ -30,7 +31,7 @@ fun FilterChip(
     val contentColor = if (selected) {
         if (color != null) {
             // Calculate contrasting color for custom colors
-            val bgColor = Color(android.graphics.Color.parseColor(color))
+            val bgColor = Color(color.toColorInt())
             if (bgColor.luminance() > 0.5f) Color.Black else Color.White
         } else {
             MaterialTheme.colorScheme.onPrimary
@@ -63,7 +64,7 @@ fun FilterChip(
         ),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 

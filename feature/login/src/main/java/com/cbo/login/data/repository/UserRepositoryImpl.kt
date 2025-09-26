@@ -6,7 +6,7 @@ import com.cbo.core.database.dao.UserDao
 import com.cbo.core.database.entity.UserEntity
 import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.data.mapper.UserEntityMapper
-import com.cbo.login.domain.model.User
+import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.repository.UserRepository
 import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
@@ -19,7 +19,7 @@ constructor(
     private val userDao: UserDao,
     private val userEntityMapper: UserEntityMapper
 ) : UserRepository {
-    override suspend fun registerUser(user: User): Result<Unit> {
+    override suspend fun registerUser(user: RegisterUserModel): Result<Unit> {
         return try {
             val salt = generateSalt()
             val hash = hashPassword(user.password, salt)
@@ -44,14 +44,15 @@ constructor(
         }
     }
 
-    override suspend fun getUser(username: String): Result<User> {
+    override suspend fun getUser(username: String): Result<RegisterUserModel> {
         return try {
             val userEntity = userDao.getUserByUsername(username)
 
-            val user = User(
+            val user = RegisterUserModel(
                 id = userEntity.id,
                 username = userEntity.username,
                 password = "", // Don't return password hash
+                retypePassword = "",
                 email = userEntity.email,
                 lastPasswordChangeDate = userEntity.lastPasswordChangeDate,
                 registerDate = userEntity.registrationDate,
