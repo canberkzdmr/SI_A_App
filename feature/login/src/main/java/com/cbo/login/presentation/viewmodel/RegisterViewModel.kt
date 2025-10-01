@@ -69,8 +69,6 @@ class RegisterViewModel
                     val exception = result.exceptionOrNull()
                     Log.e(TAG, exception?.message ?: "Unknown error")
                     handleRegistrationException(exception)
-                    // NOTE: SnackbarManager here is kept for compatibility with your project.
-                    // In Compose you usually emit an event (SharedFlow) and call snackbarHostState.showSnackbar(...) from the Composable.
                     viewModelScope.launch {
                         SnackbarManager.showMessage(
                             SnackbarMessage.Warning(exception?.message ?: "Unknown error"),

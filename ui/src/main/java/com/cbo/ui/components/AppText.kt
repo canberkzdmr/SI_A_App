@@ -99,6 +99,8 @@ fun AppCaption(
     )
 }
 
+
+
 @Composable
 fun AppLabel(
     text: String,
@@ -109,6 +111,22 @@ fun AppLabel(
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium,
+        color = color,
+        modifier = modifier,
+        textAlign = textAlign
+    )
+}
+
+@Composable
+fun AppLabelLarge(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    textAlign: TextAlign? = null
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
         color = color,
         modifier = modifier,
         textAlign = textAlign
@@ -145,6 +163,7 @@ private fun AppTextPreview() {
             AppTitle("This is a Title")
             AppBody("This is body text used for regular content.")
             AppCaption("This is a caption for subtle info.")
+            AppLabelLarge("This is a large label for UI elements.")
             AppLabel("This is a label for UI elements.")
             SectionHeader("Section Header")
         }

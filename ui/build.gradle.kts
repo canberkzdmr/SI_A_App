@@ -57,6 +57,7 @@ dependencies {
     // Hilt for dependency injection
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+//    implementation(libs.androidx.compose.foundation)
     ksp(libs.hilt.compiler)
     
     testImplementation(libs.junit)

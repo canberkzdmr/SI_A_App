@@ -12,6 +12,7 @@ interface TagRepository {
     suspend fun insertTag(tag: Tag): Result<Tag>
     suspend fun updateTag(tag: Tag): Result<Tag>
     suspend fun deleteTag(tagId: Int): Result<Unit>
+    suspend fun deleteTagList(tags: List<Tag>): Result<Unit>
     
     suspend fun updateTagColor(tagId: Int, color: String?): Result<Unit>
     suspend fun updateTagUsageCount(tagId: Int): Result<Unit>

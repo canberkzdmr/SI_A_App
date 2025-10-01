@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cbo.notes.presentation.navigation.navigateToCategories
+import com.cbo.notes.presentation.navigation.navigateToNotes
 import com.cbo.notes.presentation.navigation.navigateToTags
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.CategoriesScreen
@@ -104,7 +105,9 @@ fun MainScreen(
 
             composable(BottomNavDestination.Tags.route) {
                 TagsScreen(
-                    onNavigateBack = { Log.d("MainScreen", "TS onNavigateBack")}
+                    onNavigateBack = {
+                        navController.navigate(BottomNavDestination.Notes.route)
+                    }
                 )
             }
         }

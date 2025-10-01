@@ -81,6 +81,17 @@ class TagRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteTagList(tags: List<Tag>): Result<Unit> {
+        return try {
+            val entities = tags.map { tagEntityMapper.toEntity(it) }
+            tagDao.deleteAll(entities)
+            Result.success(Unit)
+        } catch (e: Exception) {
+
+            Result.failure(e)
+        }
+    }
+
     override suspend fun updateTagColor(tagId: Int, color: String?): Result<Unit> {
         return try {
             tagDao.updateTagColor(tagId, color)

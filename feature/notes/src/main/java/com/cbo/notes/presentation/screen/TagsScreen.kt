@@ -1,14 +1,19 @@
 package com.cbo.notes.presentation.screen
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,11 +26,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Tag
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,16 +49,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Tag
+import com.cbo.notes.presentation.component.CreateTagDialog
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.TagsUiState
 import com.cbo.notes.presentation.viewmodel.TagsViewModel
+import com.cbo.notes.presentation.viewmodel.ViewMode
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.HeaderCard
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -64,12 +75,20 @@ fun TagsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    BackHandler {
+        if (uiState.viewMode == ViewMode.DELETE) {
+            viewModel.changeViewMode(ViewMode.EDIT)
+        } else {
+            onNavigateBack()
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
-                    AppTitle("Manage Tags")
+                    AppTitle("Tags")
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -80,7 +99,34 @@ fun TagsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { Log.d("TagsScreen", "Add tag clicked") }) {
+                    IconButton(
+                        onClick = {
+                            Log.d("TagsScreen", "Delete Tags clicked")
+                            viewModel.changeViewMode(if (uiState.viewMode == ViewMode.EDIT) ViewMode.DELETE else ViewMode.EDIT)
+                        },
+                    ) {
+                        when (uiState.viewMode) {
+                            ViewMode.EDIT -> {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete tags mode",
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            }
+
+                            ViewMode.DELETE -> {
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = "Cancel delete mode",
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
+                    }
+                    IconButton(onClick = {
+                        Log.d("TagsScreen", "Add tag clicked")
+                        viewModel.showCreateTagDialog()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Add Tag",
@@ -91,13 +137,66 @@ fun TagsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { Log.d("TagsScreen", "FAB Add Tag clicked") },
-                containerColor = MaterialTheme.colorScheme.primary,
+                onClick = {
+                    Log.d("TagsScreen", "FAB Add Tag clicked")
+                    if (uiState.viewMode == ViewMode.EDIT) {
+                        viewModel.showCreateTagDialog()
+                    } else {
+                        // Delete all]
+                        viewModel.deleteSelectedTags()
+                    }
+                },
+                containerColor =
+                    animateColorAsState(
+                        targetValue =
+                            if (uiState.viewMode == ViewMode.EDIT) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.error
+                            },
+                        animationSpec = tween(300),
+                        label = "fabColorAnim",
+                    ).value,
             ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add Note",
-                )
+                AnimatedContent(
+                    targetState = uiState.viewMode,
+                    transitionSpec = {
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(300),
+                        ) togetherWith
+                            slideOutHorizontally(
+                                targetOffsetX = { -it },
+                                animationSpec = tween(300),
+                            )
+                    },
+                    label = "fabIconAnim",
+                ) { viewMode ->
+                    val iconColor by animateColorAsState(
+                        targetValue =
+                            if (viewMode == ViewMode.EDIT) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onError
+                            },
+                        animationSpec = tween(300),
+                        label = "fabIconColorAnim",
+                    )
+
+                    if (viewMode == ViewMode.EDIT) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Note",
+                            tint = iconColor,
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Note",
+                            tint = iconColor,
+                        )
+                    }
+                }
             }
         },
     ) { paddingValues ->
@@ -125,7 +224,9 @@ fun TagsScreen(
 
             // Tags Content
             else -> {
-                Column {
+                Column(
+                    Modifier.verticalScroll(rememberScrollState()),
+                ) {
                     HeaderCard(
                         modifier =
                             Modifier
@@ -133,7 +234,10 @@ fun TagsScreen(
                                 .padding(16.dp),
                         iconSelected = Icons.Default.Tag,
                         title = "Manage Your Tags",
-                        content = "You can edit tags with clicking on them\nTo delete them click on delete button, you are free to select multiple tags to delete them at the same time!",
+                        content =
+                            "Switch to \uD83D\uDDD1\uFE0F Delete mode using the action button at the top.\n" +
+                                "In ✏\uFE0F Edit mode, tap a tag to update it.\n" +
+                                "In \uD83D\uDDD1\uFE0F Delete mode, select tags you don’t need and tap the delete button (FAB) to remove them all.",
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -147,20 +251,31 @@ fun TagsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier =
                             Modifier
-                                .padding(8.dp)
+                                .padding(horizontal = 8.dp)
                                 .fillMaxWidth(),
                     ) {
                         uiState.tags.forEach { tag ->
-//                            TagItem(tag, selectedTags = uiState.selectedTags, onTagToggle = {})
                             JiggleTag(
-                                tag.name,
-                                isJiggling = false,
-                                onClick = { Log.d("TagsScreen", "onClick Tag -> ${tag.name}") },
-                                onLongClick = {
-                                    Log.d(
-                                        "TagsScreen",
-                                        "onLongClickTag -> ${tag.name}",
-                                    )
+                                tag,
+                                viewMode = uiState.viewMode,
+                                onClick = {
+                                    Log.d("TagsScreen", "onClick Tag -> ${tag.name}")
+                                    if (uiState.viewMode == ViewMode.EDIT) {
+                                        viewModel.showEditTagDialog(tag)
+                                    } else {
+                                        null
+                                    }
+                                },
+                                selectedTags = uiState.selectedTags,
+                                onTagSelected = {
+                                    Log.d("TagsScreen", "Selected tag -> $tag")
+                                    val currentTags = uiState.selectedTags.toMutableList()
+                                    if (currentTags.contains(tag)) {
+                                        currentTags.remove(tag)
+                                    } else {
+                                        currentTags.add(tag)
+                                    }
+                                    viewModel.updateSelectedTags(currentTags)
                                 },
                             )
                         }
@@ -168,6 +283,24 @@ fun TagsScreen(
                 }
             }
         }
+    }
+
+    if (uiState.showCreateDialog) {
+        CreateTagDialog(
+            tagName = uiState.dialogTagName,
+            selectedColor = uiState.dialogTagColor,
+            isCreating = uiState.isCreating,
+            onConfirm = {
+                if (uiState.editingTag == null) {
+                    viewModel.saveTag()
+                } else {
+                    viewModel.updateTag()
+                }
+            },
+            onDismiss = { viewModel.hideCreateTagDialog() },
+            onTagNameChange = { name -> viewModel.updateTagName(name) },
+            onColorChange = { color -> viewModel.updateTagColor(color) },
+        )
     }
 }
 
@@ -180,6 +313,7 @@ fun TagsScreen(
 fun TagsScreenContent(
     uiState: TagsUiState,
     modifier: Modifier = Modifier,
+    updateTagName: (String) -> Unit,
 ) {
     Scaffold(
         modifier = modifier,
@@ -239,7 +373,10 @@ fun TagsScreenContent(
                                 .padding(8.dp),
                         iconSelected = Icons.Default.Tag,
                         title = "Manage Your Tags",
-                        content = "You can edit tags with clicking on them\nTo delete them click on delete button, you are free to select multiple tags to delete them at the same time!",
+                        content =
+                            "Switch to \uD83D\uDDD1\uFE0F Delete mode using the action button at the top.\n" +
+                                "In ✏\uFE0F Edit mode, tap a tag to update it.\n" +
+                                "In \uD83D\uDDD1\uFE0F Delete mode, select tags you don’t need and tap the delete button (FAB) to remove them all.",
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
@@ -257,12 +394,39 @@ fun TagsScreenContent(
                                 .fillMaxWidth(),
                     ) {
                         uiState.tags.forEach { tag ->
-                            TagItem(tag, selectedTags = uiState.selectedTags, onTagToggle = {})
+                            JiggleTag(
+                                tag,
+                                viewMode = uiState.viewMode,
+                                onClick = {
+                                },
+                                selectedTags = uiState.selectedTags,
+                                onTagSelected = {
+                                    Log.d("TagsScreen", "Selected tag -> $tag")
+                                    val currentTags = uiState.selectedTags.toMutableList()
+                                    if (currentTags.contains(tag)) {
+                                        currentTags.remove(tag)
+                                    } else {
+                                        currentTags.add(tag)
+                                    }
+                                },
+                            )
                         }
                     }
                 }
             }
         }
+    }
+
+    if (uiState.showCreateDialog) {
+        CreateTagDialog(
+            tagName = if (uiState.editingTag != null) "Edit Tag" else "Create Tag",
+            selectedColor = uiState.editingTag?.color,
+            isCreating = uiState.isCreating,
+            onConfirm = {},
+            onDismiss = {},
+            onTagNameChange = updateTagName,
+            onColorChange = {},
+        )
     }
 }
 
@@ -285,17 +449,19 @@ fun TagItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun JiggleTag(
-    text: String,
-    isJiggling: Boolean,
+    tag: Tag,
+    viewMode: ViewMode,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    selectedTags: List<Tag>,
+    onTagSelected: () -> Unit,
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "jiggle")
+    val haptic = LocalHapticFeedback.current
 
     // Small rotation back and forth
     val rotation by infiniteTransition.animateFloat(
-        initialValue = -1.75f,
-        targetValue = 1.75f,
+        initialValue = -1f,
+        targetValue = 1f,
         animationSpec =
             infiniteRepeatable(
                 animation = tween(durationMillis = 200, easing = LinearEasing),
@@ -305,26 +471,34 @@ fun JiggleTag(
     )
 
     val animatedModifier =
-        if (isJiggling) {
-            Modifier.graphicsLayer {
-                rotationZ = rotation
+        when (viewMode) {
+            ViewMode.EDIT -> {
+                Modifier
             }
-        } else {
-            Modifier
+
+            ViewMode.DELETE -> {
+                Modifier.graphicsLayer {
+                    rotationZ = rotation
+                }
+            }
         }
 
     Box {
-        AssistChip(
-            modifier = animatedModifier
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onLongPress = {
-                            Log.d("TagsScreen", "Long Clicked tag: $text")
-                        },
-                    )
-                },
-            onClick = { Log.d("TagsScreen", "Clicked tag: $text") },
-            label = { Text(text) },
+        FilterChip(
+            modifier = animatedModifier,
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                if (viewMode == ViewMode.EDIT) {
+                    onClick()
+                } else {
+                    onTagSelected()
+                }
+                Log.d("TagsScreen", "Clicked tag: ${tag.name}(id:${tag.id})")
+            },
+            isDeleteMode = viewMode == ViewMode.DELETE,
+            label = "#${tag.name} (${tag.usageCount})",
+            selected = selectedTags.any { it.id == tag.id },
+            color = tag.color,
         )
     }
 }
@@ -393,6 +567,24 @@ fun TagsScreenPreview() {
                     tags = sampleEditTags(),
                     name = "test54",
                 ),
+            updateTagName = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+fun TagsScreenDeleteModePreview() {
+    MemCloudApplicationTheme {
+        TagsScreenContent(
+            uiState =
+                TagsUiState(
+                    isLoading = false,
+                    tags = sampleEditTags(),
+                    name = "test54",
+                    viewMode = ViewMode.DELETE,
+                ),
+            updateTagName = {},
         )
     }
 }

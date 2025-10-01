@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
+import com.cbo.notes.presentation.component.CreateTagDialog
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
@@ -40,6 +41,7 @@ import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -385,152 +387,6 @@ private fun TagSelection(
             }
         }
     }
-}
-
-@Composable
-private fun CreateTagDialog(
-    tagName: String,
-    selectedColor: String?,
-    isCreating: Boolean,
-    onTagNameChange: (String) -> Unit,
-    onColorChange: (String?) -> Unit,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val colors = listOf(
-        "#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#DDA0DD",
-        "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E9", "#F8C471"
-    )
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Create New Tag") },
-        text = {
-            Column {
-                AppOutlinedTextField(
-                    value = tagName,
-                    onValueChange = onTagNameChange,
-                    label = "Tag name",
-                    placeholder = "Enter tag name...",
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = tagName.isBlank()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Color (optional)",
-                    style = MaterialTheme.typography.labelLarge
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(colors) { color ->
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(
-                                    Color(android.graphics.Color.parseColor(color)),
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .clickable { onColorChange(color) }
-                                .then(
-                                    if (selectedColor == color) {
-                                        Modifier.border(
-                                            3.dp,
-                                            MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                    } else {
-                                        Modifier
-                                    }
-                                )
-                        ) {
-                            if (selectedColor == color) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier
-                                        .align(Alignment.Center)
-                                        .size(16.dp)
-                                )
-                            }
-                        }
-                    }
-                    
-                    // Add "No color" option
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.outline,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .clickable { onColorChange(null) }
-                                .then(
-                                    if (selectedColor == null) {
-                                        Modifier.border(
-                                            3.dp,
-                                            MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(8.dp)
-                                        )
-                                    } else {
-                                        Modifier
-                                    }
-                                )
-                        ) {
-                            if (selectedColor == null) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier
-                                        .align(Alignment.Center)
-                                        .size(16.dp)
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "No color",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier
-                                        .align(Alignment.Center)
-                                        .size(16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onConfirm,
-                enabled = tagName.isNotBlank() && !isCreating
-            ) {
-                if (isCreating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Create")
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }
 
 // Preview-specific version of EditNoteScreen that takes UI state directly

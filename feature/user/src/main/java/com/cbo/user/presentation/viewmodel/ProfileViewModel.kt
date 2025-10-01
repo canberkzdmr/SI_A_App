@@ -45,7 +45,7 @@ class ProfileViewModel @Inject constructor(
     private fun loadProfile() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            delay(2000)
+            delay(500)
             getActiveUserUseCase()
                 .catch { 
                     Log.e("ProfileViewModel", "Error loading active user", it)

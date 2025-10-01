@@ -45,6 +45,14 @@ class DeleteTagUseCase @Inject constructor(
     }
 }
 
+class DeleteTagListUseCase @Inject constructor(
+    private val tagRepository: TagRepository
+) {
+    suspend operator fun invoke(tagList: List<Tag>): Result<Unit> {
+        return tagRepository.deleteTagList(tagList)
+    }
+}
+
 class GetMostUsedTagsUseCase @Inject constructor(
     private val tagRepository: TagRepository
 ) {

@@ -1,12 +1,19 @@
 package com.cbo.ui.theme
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowInsetsControllerCompat
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -260,7 +267,31 @@ fun MemCloudApplicationTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+        typography = Typography
+    ) {
+        ApplySystemBarColors()
+        content()
+    }
+}
+
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+@Composable
+fun ApplySystemBarColors() {
+    val view = LocalView.current
+    val darkTheme = isSystemInDarkTheme()
+    val color = MaterialTheme.colorScheme.primary
+
+    SideEffect {
+        val activity = view.context.findActivity()
+        activity?.window?.let { window ->
+            window.statusBarColor = color.toArgb()
+            WindowInsetsControllerCompat(window, window.decorView)
+                .isAppearanceLightStatusBars = !darkTheme
+        }
+    }
 }
