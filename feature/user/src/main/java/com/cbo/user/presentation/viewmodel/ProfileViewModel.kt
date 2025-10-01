@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.core.domain.model.User
+import com.cbo.core.domain.preferences.PreferencesRepository
 import com.cbo.core.session.UserSession
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.core.session.domain.usecase.LogoutUseCase
@@ -29,6 +30,7 @@ class ProfileViewModel @Inject constructor(
     private val userSession: UserSession,
     private val getActiveUserUseCase: GetActiveUserUseCase,
     private val getUserWithDetailUseCase: GetUserWithDetailUseCase,
+    private val preferencesRepository: PreferencesRepository,
 ) : ViewModel() {
     val currentUser: Flow<User?> = userSession.currentUser
 
@@ -132,6 +134,13 @@ class ProfileViewModel @Inject constructor(
 
     fun enableBiometrics() {
         // Logic to enable biometrics
+    }
+
+    val isBiometricEnabled: Boolean
+        get() = preferencesRepository.isBiometricEnabled()
+
+    fun toggleBiometrics(enabled: Boolean) {
+        preferencesRepository.setBiometricEnabled(enabled)
     }
 
     fun contactSupport() {

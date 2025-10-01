@@ -44,7 +44,9 @@ dependencies {
     // Hilt for dependency injection
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    
+
+    implementation (libs.androidx.biometric)
+
     // Network (if needed for remote data sources)
     // implementation(libs.retrofit)
     // implementation(libs.okhttp.logging.interceptor)

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.User
+import com.cbo.core.domain.preferences.PreferencesRepository
 import com.cbo.core.domain.usecase.VerifyPasswordUseCase
 import com.cbo.core.session.UserSession
 import com.cbo.login.domain.usecase.GetUserUseCase
@@ -26,6 +27,7 @@ class LoginViewModel
         private val verifyPasswordUseCase: VerifyPasswordUseCase,
         private val loginUseCase: LoginUseCase,
         private val userSession: UserSession,
+        private val preferencesRepository: PreferencesRepository,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(LoginUiState())
         val uiState: StateFlow<LoginUiState> = _uiState
@@ -76,7 +78,23 @@ class LoginViewModel
                 _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
             }
         }
+
+        fun isBiometricEnabled(): Boolean = preferencesRepository.isBiometricEnabled()
+
+        fun enableBiometricLogin(enabled: Boolean) {
+            preferencesRepository.setBiometricEnabled(enabled)
+        }
+
+    fun showBiometricPromptMessage(message: String) {
+        viewModelScope.launch {
+            SnackbarManager.showMessage(SnackbarMessage.Error(message))
+        }
     }
+
+    fun setShowBiometricDialog(enabled: Boolean) {
+        _uiState.update { it.copy(showBiometricDialog = enabled) }
+    }
+}
 
 data class LoginUiState(
     val username: String = "",
@@ -84,4 +102,5 @@ data class LoginUiState(
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
     val errorMessage: String? = null,
+    val showBiometricDialog: Boolean = false,
 )

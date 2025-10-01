@@ -21,32 +21,40 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cbo.core.data.biometric.BiometricUtils
 import com.cbo.login.presentation.viewmodel.LoginUiState
 import com.cbo.login.presentation.viewmodel.LoginViewModel
+import com.cbo.ui.components.AppDialog
 import com.cbo.ui.components.AppHeadline
 import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.PrimaryButton
+import com.cbo.ui.snackbar.SnackbarManager
+import com.cbo.ui.snackbar.SnackbarMessage
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -56,9 +64,19 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
 ) {
+    val context = LocalContext.current as FragmentActivity
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isLoggedIn) {
+        if (viewModel.isBiometricEnabled()) {
+            BiometricUtils.showBiometricPrompt(
+                activity = context,
+                onSuccess = { onLoginSuccess() },
+                onError = { message ->
+                    viewModel.showBiometricPromptMessage(message)
+                },
+            )
+        }
         if (state.isLoggedIn) onLoginSuccess()
     }
 
@@ -69,6 +87,8 @@ fun LoginScreen(
         onRegisterClick = onRegisterClick,
         onUserNameChange = viewModel::onUsernameChanged,
         onPasswordChange = viewModel::onPasswordChanged,
+        onBiometricLoginEnabled = viewModel::enableBiometricLogin,
+        onShowBiometricDialog = viewModel::setShowBiometricDialog,
     )
 }
 
@@ -81,6 +101,8 @@ fun LoginScreenContent(
     onRegisterClick: () -> Unit,
     onUserNameChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
+    onBiometricLoginEnabled: (Boolean) -> Unit,
+    onShowBiometricDialog: (Boolean) -> Unit,
 ) {
     val focusRequesterPassword = remember { FocusRequester() }
 
@@ -177,7 +199,9 @@ fun LoginScreenContent(
 
                     PrimaryButton(
                         text = "Login",
-                        onClick = onLoginClick,
+                        onClick = {
+                            onLoginClick()
+                        },
                         modifier =
                             Modifier
                                 .fillMaxWidth()
@@ -194,6 +218,20 @@ fun LoginScreenContent(
                     }
                 }
             }
+        }
+
+        if (state.showBiometricDialog) {
+            AppDialog(
+                title = "Enable Biometric Login?" ,
+                message = "You can log in faster next time using fingerprint or face.",
+                confirmText = "Enable",
+                onConfirm = {
+                    onBiometricLoginEnabled(true)
+                    onShowBiometricDialog(false)
+                },
+                onDismiss = { onShowBiometricDialog(false) },
+                dismissText = "Not now",
+            )
         }
     }
 }
@@ -235,6 +273,8 @@ fun LoginScreenPreview() {
             onRegisterClick = {},
             onUserNameChange = {},
             onPasswordChange = {},
+            onBiometricLoginEnabled = {},
+            onShowBiometricDialog = {},
         )
     }
 }
