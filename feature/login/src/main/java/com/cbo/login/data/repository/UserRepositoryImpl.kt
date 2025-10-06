@@ -2,10 +2,15 @@ package com.cbo.login.data.repository
 
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
+import androidx.room.Transaction
+import androidx.room.withTransaction
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.database.entity.UserEntity
 import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.data.mapper.UserEntityMapper
+import com.cbo.core.database.dao.UserSettingsDao
+import com.cbo.core.database.database.AppDatabase
+import com.cbo.core.database.entity.UserSettings
 import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.repository.UserRepository
 import java.security.SecureRandom
@@ -17,24 +22,31 @@ class UserRepositoryImpl
 @Inject
 constructor(
     private val userDao: UserDao,
-    private val userEntityMapper: UserEntityMapper
+    private val userSettingsDao: UserSettingsDao,
+    private val userEntityMapper: UserEntityMapper,
+    private val db: AppDatabase,
 ) : UserRepository {
+
+    @Transaction
     override suspend fun registerUser(user: RegisterUserModel): Result<Unit> {
         return try {
-            val salt = generateSalt()
-            val hash = hashPassword(user.password, salt)
-            val entity =
-                UserEntity(
-                    username = user.username,
-                    passwordHash = hash,
-                    salt = salt,
-                    email = user.email,
-                    lastPasswordChangeDate = user.lastPasswordChangeDate,
-                    registrationDate = user.registerDate,
-                    isActive = false,
-                )
-            userDao.insert(entity)
-            Result.success(Unit)
+            db.withTransaction {
+                val salt = generateSalt()
+                val hash = hashPassword(user.password, salt)
+                val entity =
+                    UserEntity(
+                        username = user.username,
+                        passwordHash = hash,
+                        salt = salt,
+                        email = user.email,
+                        lastPasswordChangeDate = user.lastPasswordChangeDate,
+                        registrationDate = user.registerDate,
+                        isActive = false,
+                    )
+                val id = userDao.insert(entity).toInt()
+                userSettingsDao.insertOrUpdate(UserSettings(userId = id))
+                Result.success(Unit)
+            }
         } catch (e: SQLiteConstraintException) {
             Log.e("UserRepositoryImpl", "Violated Constraints -> ${e.message}")
             Result.failure(e)

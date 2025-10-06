@@ -1,5 +1,6 @@
 package com.cbo.splash
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -37,12 +38,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cbo.core.data.biometric.BiometricUtils
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -51,13 +55,30 @@ fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToMain: () -> Unit
 ) {
+    val context = LocalContext.current as FragmentActivity
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isLoading, state.isLoggedIn) {
+        Log.d("SplashScreen", "SplashScreen launched effect")
         if (!state.isLoading) {
             if (state.isLoggedIn) {
-                onNavigateToMain()
+                Log.d("SplashScreen", "isBiometricEnabled -> ${state.isBiometricEnabled}")
+                if (state.isBiometricEnabled) {
+                    BiometricUtils.showBiometricPrompt(
+                        activity = context,
+                        onSuccess = {
+                            Log.d("SplashScreen", "Biometric Prompt Success")
+                            onNavigateToMain()
+                        },
+                        onError = { message ->
+                            viewModel.showBiometricPromptMessage(message)
+                        },
+                    )
+                } else {
+                    onNavigateToMain()
+                }
             } else {
+                Log.d("SplashScreen", "isLoggedIn -> ${state.isBiometricEnabled}")
                 onNavigateToLogin()
             }
         }

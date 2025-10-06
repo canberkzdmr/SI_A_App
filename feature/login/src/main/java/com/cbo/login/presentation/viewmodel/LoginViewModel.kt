@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.preferences.PreferencesRepository
+import com.cbo.core.domain.usecase.GetUserSettingsUseCase
+import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
+import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
 import com.cbo.core.domain.usecase.VerifyPasswordUseCase
 import com.cbo.core.session.UserSession
 import com.cbo.login.domain.usecase.GetUserUseCase
 import com.cbo.login.domain.usecase.LoginUseCase
-import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,9 +30,45 @@ class LoginViewModel
         private val loginUseCase: LoginUseCase,
         private val userSession: UserSession,
         private val preferencesRepository: PreferencesRepository,
+        private val getUserSettingsUseCase: GetUserSettingsUseCase,
+        private val setFirstLoginDoneUseCase: SetFirstLoginDoneUseCase,
+        private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(LoginUiState())
         val uiState: StateFlow<LoginUiState> = _uiState
+
+        private fun loadUserSettings() {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+                val user = getUser()
+
+                user?.let {
+                    val userSettingsResult = getUserSettingsUseCase.invoke(it.id)
+                    when {
+                        userSettingsResult.isFailure -> {
+                            val exception = userSettingsResult.exceptionOrNull()
+                            Log.e("LoginViewModel", exception?.message ?: "Unknown error")
+                        }
+                        userSettingsResult.isSuccess -> {
+                            val userSettings = userSettingsResult.getOrNull()
+                            userSettings?.let { settings ->
+
+                            } ?: run {
+                                Log.e("LoginViewModel", "Get User Settings result is success, but could not retrieve settings.")
+                            }
+                        }
+                    }
+                } ?: run {
+                    Log.e("LoginViewModel", "init, User not found")
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false, errorMessage = "User not found"
+                        )
+                    }
+                }
+            }
+        }
 
         fun onUsernameChanged(username: String) {
             _uiState.update { it.copy(username = username) }
@@ -41,18 +79,15 @@ class LoginViewModel
         }
 
         fun login() {
-            Log.i("LoginViewModel", "Login clicked")
-
             val username = _uiState.value.username
             val password = _uiState.value.password
 
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-                val userResult = getUserUseCase(username)
-                val user = userResult.getOrNull()
+                val user = getUser()
 
-                if (userResult.isFailure || user == null) {
+                if (user == null) {
                     Log.e("LoginViewModel", "User not found")
                     SnackbarManager.showMessage(SnackbarMessage.Error("Check user informations"))
                     _uiState.update { it.copy(isLoading = false, errorMessage = "User not found") }
@@ -67,34 +102,82 @@ class LoginViewModel
                     return@launch
                 }
 
-                Log.i("LoginViewModel", "User logged in")
-                SnackbarManager.showMessage(SnackbarMessage.Success("Welcome $username!"))
+                val userSettings = getUserSettingsUseCase(user.id)
+                when {
+                    userSettings.isSuccess -> {
+                        userSettings.getOrNull()?.let {
+                            if (!it.isFirstLoginDone) {
+                                setFirstLoginDone()
+                                setShowBiometricDialog(true)
+                                return@launch
+                            }
+                        }
+                    }
+                    userSettings.isFailure -> {
+                        Log.e("LoginViewModel", "Get User Settings failed: ${userSettings.exceptionOrNull()}")
+                    }
+                }
 
                 loginUseCase(username, password)
                 userSession.setUser(
                     User(id = user.id, username = user.username, email = user.email),
                 )
+                Log.i("LoginViewModel", "User logged in")
+                SnackbarManager.showMessage(SnackbarMessage.Success("Welcome $username!"))
 
-                _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
+                _uiState.update { it.copy(isLoading = false, isLoggedIn = true, isFirstLoginDone = true) }
             }
         }
 
-        fun isBiometricEnabled(): Boolean = preferencesRepository.isBiometricEnabled()
-
         fun enableBiometricLogin(enabled: Boolean) {
-            preferencesRepository.setBiometricEnabled(enabled)
+            viewModelScope.launch {
+                val user = getUser()
+                user?.let {
+                    setBiometricEnabledUseCase.invoke(it.id, enabled)
+                } ?: run {
+                    Log.e("LoginViewModel", "Enable BiometricLogin: User is null")
+                }
+            }
         }
 
-    fun showBiometricPromptMessage(message: String) {
-        viewModelScope.launch {
-            SnackbarManager.showMessage(SnackbarMessage.Error(message))
+        fun showBiometricPromptMessage(message: String) {
+            viewModelScope.launch {
+                SnackbarManager.showMessage(SnackbarMessage.Error(message))
+            }
+        }
+
+        fun setShowBiometricDialog(enabled: Boolean) {
+            _uiState.update { it.copy(showBiometricDialog = enabled) }
+        }
+
+        fun setFirstLoginDone() {
+            viewModelScope.launch {
+                val user = getUser()
+                user?.let { it ->
+                    setFirstLoginDoneUseCase.invoke(it.id, true)
+                } ?: run {
+                    Log.e("LoginViewModel", "User is null!")
+                }
+            }
+        }
+
+        private suspend fun getUser(): User? {
+            val userResult = getUserUseCase(_uiState.value.username)
+            userResult.fold(
+                onSuccess = {
+                    val user = userResult.getOrNull()
+                    if (user == null) {
+                        Log.w("LoginViewModel", "Get User Result: Success, User: null")
+                    }
+                    return user
+                },
+                onFailure = {
+                    Log.e("LoginViewModel", "Get User Result: Fail")
+                    return null
+                },
+            )
         }
     }
-
-    fun setShowBiometricDialog(enabled: Boolean) {
-        _uiState.update { it.copy(showBiometricDialog = enabled) }
-    }
-}
 
 data class LoginUiState(
     val username: String = "",
@@ -102,5 +185,7 @@ data class LoginUiState(
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
     val errorMessage: String? = null,
+    val isFirstLoginDone: Boolean = false,
+    val isBiometricEnabled: Boolean = false,
     val showBiometricDialog: Boolean = false,
 )

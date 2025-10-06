@@ -9,12 +9,14 @@ import com.cbo.core.database.dao.NoteDao
 import com.cbo.core.database.dao.TagDao
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.database.dao.UserDetailDao
+import com.cbo.core.database.dao.UserSettingsDao
 import com.cbo.core.database.entity.CategoryEntity
 import com.cbo.core.database.entity.NoteEntity
 import com.cbo.core.database.entity.NoteTagCrossRef
 import com.cbo.core.database.entity.TagEntity
 import com.cbo.core.database.entity.UserDetailEntity
 import com.cbo.core.database.entity.UserEntity
+import com.cbo.core.database.entity.UserSettings
 
 @Database(
     entities = [
@@ -23,9 +25,10 @@ import com.cbo.core.database.entity.UserEntity
         TagEntity::class, 
         NoteTagCrossRef::class,
         UserEntity::class, 
-        UserDetailEntity::class
+        UserDetailEntity::class,
+        UserSettings::class,
     ], 
-    version = 2, 
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -35,4 +38,5 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun tagDao(): TagDao
     abstract fun userDao(): UserDao
     abstract fun userDetailDao(): UserDetailDao
+    abstract fun userSettingsDao(): UserSettingsDao
 }

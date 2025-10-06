@@ -1,9 +1,14 @@
 package com.cbo.splash
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.User
+import com.cbo.core.domain.preferences.PreferencesRepository
+import com.cbo.core.domain.usecase.GetUserSettingsUseCase
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
+import com.cbo.ui.snackbar.SnackbarManager
+import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +25,7 @@ class SplashViewModel
     constructor(
         private val userSession: com.cbo.core.session.UserSession,
         private val getActiveUserUseCase: GetActiveUserUseCase,
+        private val getUserSettingsUseCase: GetUserSettingsUseCase,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(SplashUiState())
         val uiState: StateFlow<SplashUiState> = _uiState
@@ -27,8 +33,7 @@ class SplashViewModel
         init {
             viewModelScope.launch {
                 // Give splash screen a short delay for better UX (e.g., logo animation)
-                delay(1000)
-
+                delay(3000)
                 observeActiveUser()
             }
         }
@@ -41,12 +46,32 @@ class SplashViewModel
                     .collect { user: User? ->
                         if (user != null) {
                             userSession.setUser(user) // hydrate session
-                            _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
+                            val userSettingsResult = getUserSettingsUseCase.invoke(user.id)
+                            when {
+                                userSettingsResult.isSuccess -> {
+                                    userSettingsResult.getOrNull()?.let { settings ->
+                                        _uiState.update { it.copy(isLoading = false, isLoggedIn = true, isBiometricEnabled = settings.isBiometricsEnabled) }
+                                    } ?: run {
+                                        _uiState.update { it.copy(isLoading = false, isLoggedIn = true, isBiometricEnabled = false) }
+                                    }
+                                }
+                                userSettingsResult.isFailure -> {
+                                    Log.d("SplashViewModel", "Could not get user settings: ${userSettingsResult.exceptionOrNull()}")
+                                    _uiState.update { it.copy(isLoading = false, isLoggedIn = true, isBiometricEnabled = false) }
+                                }
+                            }
+//                            _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
                         } else {
                             userSession.clearUser()
-                            _uiState.update { it.copy(isLoading = false, isLoggedIn = false) }
+                            _uiState.update { it.copy(isLoading = false, isLoggedIn = false, isBiometricEnabled = false) }
                         }
                     }
+            }
+        }
+
+        fun showBiometricPromptMessage(message: String) {
+            viewModelScope.launch {
+                SnackbarManager.showMessage(SnackbarMessage.Error(message))
             }
         }
     }
@@ -54,6 +79,7 @@ class SplashViewModel
 data class SplashUiState(
     val isLoading: Boolean = true,
     val isLoggedIn: Boolean = false,
+    val isBiometricEnabled: Boolean = false,
 )
 
 sealed class SplashDestination {

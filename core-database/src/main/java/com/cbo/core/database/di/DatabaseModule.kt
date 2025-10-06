@@ -7,6 +7,8 @@ import com.cbo.core.database.dao.NoteDao
 import com.cbo.core.database.dao.TagDao
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.database.dao.UserDetailDao
+import com.cbo.core.database.dao.UserSettingsDao
+import com.cbo.core.database.database.ALL_MIGRATIONS
 import com.cbo.core.database.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -18,19 +20,24 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "app_database"
-        ).build()
-    }
+    fun provideAppDatabase(
+        @ApplicationContext context: Context,
+    ): AppDatabase =
+        Room
+            .databaseBuilder(
+                context,
+                AppDatabase::class.java,
+                "app_database",
+            ).addMigrations(*ALL_MIGRATIONS)
+            .build()
 
     @Provides
     fun provideUserDao(database: AppDatabase): UserDao = database.userDao()
+
+    @Provides
+    fun provideUserSettingsDao(database: AppDatabase): UserSettingsDao = database.userSettingsDao()
 
     @Provides
     fun provideNoteDao(database: AppDatabase): NoteDao = database.noteDao()

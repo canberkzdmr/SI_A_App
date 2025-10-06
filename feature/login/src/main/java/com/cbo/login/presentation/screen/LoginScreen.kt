@@ -1,5 +1,6 @@
 package com.cbo.login.presentation.screen
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -21,14 +22,12 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,8 +52,6 @@ import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.PrimaryButton
-import com.cbo.ui.snackbar.SnackbarManager
-import com.cbo.ui.snackbar.SnackbarMessage
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -68,16 +65,23 @@ fun LoginScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isLoggedIn) {
-        if (viewModel.isBiometricEnabled()) {
-            BiometricUtils.showBiometricPrompt(
-                activity = context,
-                onSuccess = { onLoginSuccess() },
-                onError = { message ->
-                    viewModel.showBiometricPromptMessage(message)
-                },
-            )
+        Log.d("LoginScreen", "state isLoggedIn: ${state.isLoggedIn}")
+        if (state.isLoggedIn) {
+            /*if (true) {
+                BiometricUtils.showBiometricPrompt(
+                    activity = context,
+                    onSuccess = {
+                        Log.d("LoginScreen", "Biometric Prompt Success")
+                        onLoginSuccess()
+                                },
+                    onError = { message ->
+                        viewModel.showBiometricPromptMessage(message)
+                    },
+                )
+            } else {*/
+                onLoginSuccess()
+//            }
         }
-        if (state.isLoggedIn) onLoginSuccess()
     }
 
     LoginScreenContent(
@@ -137,7 +141,8 @@ fun LoginScreenContent(
                             .background(
                                 color = MaterialTheme.colorScheme.background,
                                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                            ).padding(vertical = 24.dp),
+                            )
+                            .padding(vertical = 24.dp),
                 ) {
                     AppHeadline(
                         "Your style of notes!",
@@ -201,6 +206,10 @@ fun LoginScreenContent(
                         text = "Login",
                         onClick = {
                             onLoginClick()
+                            /*if (state.isFirstLoginDone) {
+                            } else {
+                                onShowBiometricDialog(true)
+                            }*/
                         },
                         modifier =
                             Modifier
@@ -222,14 +231,20 @@ fun LoginScreenContent(
 
         if (state.showBiometricDialog) {
             AppDialog(
-                title = "Enable Biometric Login?" ,
+                title = "Enable Biometric Login?",
                 message = "You can log in faster next time using fingerprint or face.",
                 confirmText = "Enable",
                 onConfirm = {
                     onBiometricLoginEnabled(true)
+                    Log.d("LoginScreen", "Biometric Login Enabled")
                     onShowBiometricDialog(false)
+                    onLoginClick()
                 },
-                onDismiss = { onShowBiometricDialog(false) },
+                onDismiss = {
+                    onShowBiometricDialog(false)
+                    Log.d("LoginScreen", "Biometric Login is Not Enabled")
+                    onLoginClick()
+                },
                 dismissText = "Not now",
             )
         }

@@ -35,6 +35,7 @@ android {
 
 dependencies {
     // Core modules
+    implementation(project(":core-common"))
     implementation(project(":core-domain"))
     implementation(project(":core-database"))
     

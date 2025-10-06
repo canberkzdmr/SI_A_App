@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.preferences.PreferencesRepository
+import com.cbo.core.domain.usecase.GetUserSettingsUseCase
+import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.session.UserSession
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.core.session.domain.usecase.LogoutUseCase
@@ -30,10 +32,9 @@ class ProfileViewModel @Inject constructor(
     private val userSession: UserSession,
     private val getActiveUserUseCase: GetActiveUserUseCase,
     private val getUserWithDetailUseCase: GetUserWithDetailUseCase,
-    private val preferencesRepository: PreferencesRepository,
+    private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
 ) : ViewModel() {
     val currentUser: Flow<User?> = userSession.currentUser
-
     private val _uiState = MutableStateFlow(ProfileUiState(isLoading = true))
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
@@ -51,7 +52,7 @@ class ProfileViewModel @Inject constructor(
             getActiveUserUseCase()
                 .catch { 
                     Log.e("ProfileViewModel", "Error loading active user", it)
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to load user data") } 
+                    _uiState.update { state -> state.copy(isLoading = false, errorMessage = "Failed to load user data") }
                 }
                 .collect { user: User? ->
                     user?.let { user ->
@@ -61,10 +62,12 @@ class ProfileViewModel @Inject constructor(
                         getUserWithDetailUseCase(user.id).fold(
                             onSuccess = { userWithDetail ->
                                 _uiState.value = ProfileUiState(
+                                    userId = userWithDetail.user.id,
                                     username = userWithDetail.user.username,
                                     email = userWithDetail.user.email,
                                     avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
-                                    isLoading = false
+                                    isLoading = false,
+                                    isBiometricEnabled = userWithDetail.userSettings.isBiometricsEnabled
                                 )
                             },
                             onFailure = { error ->
@@ -132,15 +135,11 @@ class ProfileViewModel @Inject constructor(
         // Logic to export notes
     }
 
-    fun enableBiometrics() {
-        // Logic to enable biometrics
-    }
-
-    val isBiometricEnabled: Boolean
-        get() = preferencesRepository.isBiometricEnabled()
-
-    fun toggleBiometrics(enabled: Boolean) {
-        preferencesRepository.setBiometricEnabled(enabled)
+    fun toggleBiometrics() {
+        viewModelScope.launch {
+            setBiometricEnabledUseCase.invoke(userId = _uiState.value.userId, enabled = !_uiState.value.isBiometricEnabled)
+            _uiState.update { it.copy(isBiometricEnabled = !it.isBiometricEnabled) }
+        }
     }
 
     fun contactSupport() {
@@ -150,12 +149,14 @@ class ProfileViewModel @Inject constructor(
 }
 
 data class ProfileUiState(
+    val userId: Int = -1,
     val username: String? = "",
     val email: String? = "",
     val avatarUrl: String = "",
     val lastLoginDate: String? = "",
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isBiometricEnabled: Boolean = false,
 )
 
 sealed class ProfileEvent {

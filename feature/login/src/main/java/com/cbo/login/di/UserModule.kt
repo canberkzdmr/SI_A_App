@@ -2,6 +2,8 @@ package com.cbo.login.di
 
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.data.mapper.UserEntityMapper
+import com.cbo.core.database.dao.UserSettingsDao
+import com.cbo.core.database.database.AppDatabase
 import com.cbo.login.data.repository.UserRepositoryImpl
 import com.cbo.login.domain.repository.UserRepository
 import com.cbo.login.domain.usecase.GetUserUseCase
@@ -15,7 +17,7 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object UserModule {
     @Provides
-    fun provideUserRepository(userDao: UserDao, userEntityMapper: UserEntityMapper): UserRepository = UserRepositoryImpl(userDao, userEntityMapper)
+    fun provideUserRepository(userDao: UserDao, userSettingsDao: UserSettingsDao, userEntityMapper: UserEntityMapper, db: AppDatabase): UserRepository = UserRepositoryImpl(userDao, userSettingsDao, userEntityMapper, db)
 
     @Provides
     fun provideRegisterUserUseCase(repository: UserRepository): RegisterUserUseCase = RegisterUserUseCase(repository)

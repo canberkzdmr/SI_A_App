@@ -31,6 +31,7 @@ coroutines = "1.7.3"
 mockito = "5.5.0"
 foundation = "1.8.0"
 appcompatVersion = "1.7.1"
+roomCommonJvm = "2.8.1"
 
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }

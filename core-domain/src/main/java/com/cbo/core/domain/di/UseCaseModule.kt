@@ -1,6 +1,10 @@
 package com.cbo.core.domain.di
 
 import com.cbo.core.domain.repository.UserRepository
+import com.cbo.core.domain.repository.UserSettingsRepository
+import com.cbo.core.domain.usecase.GetUserSettingsUseCase
+import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
+import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
 import com.cbo.core.domain.usecase.VerifyPasswordUseCase
 import dagger.Module
 import dagger.Provides
@@ -18,5 +22,29 @@ object UseCaseModule {
         userRepository: UserRepository
     ): VerifyPasswordUseCase {
         return VerifyPasswordUseCase(userRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetUserSettingsUseCase(
+        userSettingsRepository: UserSettingsRepository
+    ): GetUserSettingsUseCase {
+        return GetUserSettingsUseCase(userSettingsRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSetFirstLoginDoneUseCase(
+        userSettingsRepository: UserSettingsRepository
+    ): SetFirstLoginDoneUseCase {
+        return SetFirstLoginDoneUseCase(userSettingsRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSetBiometricEnabledUseCase(
+        userSettingsRepository: UserSettingsRepository
+    ): SetBiometricEnabledUseCase {
+        return SetBiometricEnabledUseCase(userSettingsRepository)
     }
 }

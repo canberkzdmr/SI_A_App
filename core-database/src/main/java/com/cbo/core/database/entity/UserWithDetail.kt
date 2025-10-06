@@ -9,5 +9,10 @@ data class UserWithDetail(
         parentColumn = "id",
         entityColumn = "userId"
     )
-    val userDetail: UserDetailEntity?
+    val userDetail: UserDetailEntity?,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "userId"
+    )
+    val userSettings: UserSettings
 )

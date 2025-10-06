@@ -21,7 +21,6 @@ class LoginUseCase
         ): Result<User> {
             val userEntity =
                 userDao.getUserByUsername(username)
-                    ?: return Result.failure(Exception("User not found"))
 
             val isValid = verifyPasswordUseCase(username, password)
 
