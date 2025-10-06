@@ -10,7 +10,8 @@ object BiometricUtils {
     fun showBiometricPrompt(
         activity: FragmentActivity,
         onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onFail: (String) -> Unit,
+        onError: (String) -> Unit,
     ) {
         val executor = ContextCompat.getMainExecutor(activity)
 
@@ -29,7 +30,7 @@ object BiometricUtils {
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    onError("Authentication failed")
+                    onFail("Authentication failed")
                 }
             })
 

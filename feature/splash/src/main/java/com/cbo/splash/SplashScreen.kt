@@ -67,11 +67,15 @@ fun SplashScreen(
                     BiometricUtils.showBiometricPrompt(
                         activity = context,
                         onSuccess = {
-                            Log.d("SplashScreen", "Biometric Prompt Success")
+                            Log.i("SplashScreen", "Biometric Prompt Success")
                             onNavigateToMain()
                         },
+                        onFail = { message ->
+                            Log.e("SplashScreen", "Biometric Prompt Fail")
+                        },
                         onError = { message ->
-                            viewModel.showBiometricPromptMessage(message)
+                            Log.e("SplashScreen", "Biometric Prompt Error")
+                            onNavigateToLogin()
                         },
                     )
                 } else {

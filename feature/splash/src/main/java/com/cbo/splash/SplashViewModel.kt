@@ -33,7 +33,7 @@ class SplashViewModel
         init {
             viewModelScope.launch {
                 // Give splash screen a short delay for better UX (e.g., logo animation)
-                delay(3000)
+                delay(2000)
                 observeActiveUser()
             }
         }
