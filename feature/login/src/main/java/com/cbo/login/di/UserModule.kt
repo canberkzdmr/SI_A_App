@@ -6,6 +6,7 @@ import com.cbo.core.database.dao.UserSettingsDao
 import com.cbo.core.database.database.AppDatabase
 import com.cbo.login.data.repository.UserRepositoryImpl
 import com.cbo.login.domain.repository.UserRepository
+import com.cbo.login.domain.usecase.GetUserEntityUseCase
 import com.cbo.login.domain.usecase.GetUserUseCase
 import com.cbo.login.domain.usecase.RegisterUserUseCase
 import dagger.Module
@@ -24,4 +25,7 @@ object UserModule {
 
     @Provides
     fun provideGetUserUseCase(userDao: UserDao, userEntityMapper: UserEntityMapper): GetUserUseCase = GetUserUseCase(userDao, userEntityMapper)
+
+    @Provides
+    fun provideGetUserEntityUseCase(userDao: UserDao): GetUserEntityUseCase = GetUserEntityUseCase(userDao)
 }

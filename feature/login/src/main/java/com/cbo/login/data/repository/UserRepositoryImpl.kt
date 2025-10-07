@@ -60,17 +60,21 @@ constructor(
         return try {
             val userEntity = userDao.getUserByUsername(username)
 
-            val user = RegisterUserModel(
-                id = userEntity.id,
-                username = userEntity.username,
-                password = "", // Don't return password hash
-                retypePassword = "",
-                email = userEntity.email,
-                lastPasswordChangeDate = userEntity.lastPasswordChangeDate,
-                registerDate = userEntity.registrationDate,
-                termsAndConditionsChecked = true
-            )
-            Result.success(user)
+            userEntity?.let {
+                val user = RegisterUserModel(
+                    id = userEntity.id,
+                    username = userEntity.username,
+                    password = "", // Don't return password hash
+                    retypePassword = "",
+                    email = userEntity.email,
+                    lastPasswordChangeDate = userEntity.lastPasswordChangeDate,
+                    registerDate = userEntity.registrationDate,
+                    termsAndConditionsChecked = true
+                )
+                Result.success(user)
+            } ?: run {
+                Result.failure(LoginException.UserNotFoundException())
+            }
         } catch (e: Exception) {
             Log.e("UserRepositoryImpl", "An error occurred -> ${e.message}")
             Result.failure(LoginException.UserNotFoundException())

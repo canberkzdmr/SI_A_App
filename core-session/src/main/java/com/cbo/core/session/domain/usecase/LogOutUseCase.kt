@@ -9,7 +9,6 @@ class LogoutUseCase @Inject constructor(
     private val sessionRepository: SessionRepository
 ) {
     suspend operator fun invoke() {
-        preferencesRepository.setBiometricEnabled(false)
         sessionRepository.clearSession()
     }
 }

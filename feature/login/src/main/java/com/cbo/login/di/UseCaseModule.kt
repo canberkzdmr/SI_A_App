@@ -2,8 +2,11 @@ package com.cbo.login.di
 
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.data.mapper.UserEntityMapper
+import com.cbo.core.domain.usecase.GetUserSettingsUseCase
+import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
 import com.cbo.core.domain.usecase.VerifyPasswordUseCase
 import com.cbo.core.session.domain.repository.SessionRepository
+import com.cbo.login.domain.usecase.GetUserEntityUseCase
 import com.cbo.login.domain.usecase.LoginUseCase
 import dagger.Module
 import dagger.Provides
@@ -18,14 +21,18 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun provideLoginUseCase(
-        sessionRepository: SessionRepository,
+        getUserEntityUseCase: GetUserEntityUseCase,
         verifyPasswordUseCase: VerifyPasswordUseCase,
-        userDao: UserDao,
+        getUserSettingsUseCase: GetUserSettingsUseCase,
+        setFirstLoginDoneUseCase: SetFirstLoginDoneUseCase,
+        sessionRepository: SessionRepository,
         userEntityMapper: UserEntityMapper
     ): LoginUseCase {
         return LoginUseCase(
-            userDao,
+            getUserEntityUseCase,
             verifyPasswordUseCase,
+            getUserSettingsUseCase,
+            setFirstLoginDoneUseCase,
             sessionRepository,
             userEntityMapper
         )

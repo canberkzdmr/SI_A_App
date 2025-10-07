@@ -1,8 +1,12 @@
 package com.cbo.login.domain.usecase
 
-import com.cbo.core.database.dao.UserDao
+import android.util.Log
 import com.cbo.core.data.mapper.UserEntityMapper
+import com.cbo.core.database.dao.UserDao
+import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.model.User
+import com.cbo.core.domain.usecase.GetUserSettingsUseCase
+import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
 import com.cbo.core.domain.usecase.VerifyPasswordUseCase
 import com.cbo.core.session.domain.repository.SessionRepository
 import javax.inject.Inject
@@ -10,8 +14,10 @@ import javax.inject.Inject
 class LoginUseCase
     @Inject
     constructor(
-        private val userDao: UserDao,
+        private val getUserEntityUseCase: GetUserEntityUseCase,
         private val verifyPasswordUseCase: VerifyPasswordUseCase,
+        private val getUserSettingsUseCase: GetUserSettingsUseCase,
+        private val setFirstLoginDoneUseCase: SetFirstLoginDoneUseCase,
         private val sessionRepository: SessionRepository,
         private val userEntityMapper: UserEntityMapper,
     ) {
@@ -19,17 +25,36 @@ class LoginUseCase
             username: String,
             password: String,
         ): Result<User> {
-            val userEntity =
-                userDao.getUserByUsername(username)
+            return try {
+                getUserEntityUseCase.invoke(username).fold(
+                    onSuccess = { user ->
+                        val isValid = verifyPasswordUseCase(username, password)
+                        if (!isValid) return Result.failure(LoginException.InvalidCredentialsException())
 
-            val isValid = verifyPasswordUseCase(username, password)
+                        val userSettings = getUserSettingsUseCase.invoke(user.id)
+                        userSettings.getOrNull()?.let {
+                            if (!it.isFirstLoginDone) {
+                                setFirstLoginDoneUseCase.invoke(
+                                    user.id,
+                                    true
+                                )
+                                return Result.failure(LoginException.FirstLoginIsNotCompleted())
+                            }
+                        } ?: run {
+                            Log.e("LoginUseCase", "Could not get user settings")
+                        }
 
-            return if (isValid) {
-                val user = userEntityMapper.toDomain(userEntity)
-                sessionRepository.setActiveUser(userEntity) // mark as active
-                return Result.success(user)
-            } else {
-                Result.failure(Exception("Invalid password"))
+                        val user = userEntityMapper.toDomain(user)
+                        sessionRepository.setActiveUser(userEntityMapper.toEntity(user, byteArrayOf(), byteArrayOf(), "", "")) // mark as active
+                        Result.success(user)
+                    },
+                    onFailure = {
+                        return Result.failure(LoginException.UserNotFoundException())
+                    }
+                )
+            } catch (e: Exception) {
+                Log.e("LoginUseCase", "Unknown error ${e.message}")
+                return Result.failure(LoginException.UnknownException())
             }
         }
     }

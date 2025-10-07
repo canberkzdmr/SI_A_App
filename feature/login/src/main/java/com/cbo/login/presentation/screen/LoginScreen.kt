@@ -67,20 +67,7 @@ fun LoginScreen(
     LaunchedEffect(state.isLoggedIn) {
         Log.d("LoginScreen", "state isLoggedIn: ${state.isLoggedIn}")
         if (state.isLoggedIn) {
-            /*if (true) {
-                BiometricUtils.showBiometricPrompt(
-                    activity = context,
-                    onSuccess = {
-                        Log.d("LoginScreen", "Biometric Prompt Success")
-                        onLoginSuccess()
-                                },
-                    onError = { message ->
-                        viewModel.showBiometricPromptMessage(message)
-                    },
-                )
-            } else {*/
-                onLoginSuccess()
-//            }
+            onLoginSuccess()
         }
     }
 
@@ -141,8 +128,7 @@ fun LoginScreenContent(
                             .background(
                                 color = MaterialTheme.colorScheme.background,
                                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                            )
-                            .padding(vertical = 24.dp),
+                            ).padding(vertical = 24.dp),
                 ) {
                     AppHeadline(
                         "Your style of notes!",
