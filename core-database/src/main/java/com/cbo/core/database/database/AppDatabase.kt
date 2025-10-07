@@ -16,7 +16,7 @@ import com.cbo.core.database.entity.NoteTagCrossRef
 import com.cbo.core.database.entity.TagEntity
 import com.cbo.core.database.entity.UserDetailEntity
 import com.cbo.core.database.entity.UserEntity
-import com.cbo.core.database.entity.UserSettings
+import com.cbo.core.database.entity.UserSettingsEntity
 
 @Database(
     entities = [
@@ -26,7 +26,7 @@ import com.cbo.core.database.entity.UserSettings
         NoteTagCrossRef::class,
         UserEntity::class, 
         UserDetailEntity::class,
-        UserSettings::class,
+        UserSettingsEntity::class,
     ], 
     version = 3,
     exportSchema = false

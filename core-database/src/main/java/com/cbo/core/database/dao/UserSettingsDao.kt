@@ -4,20 +4,20 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.cbo.core.database.entity.UserSettings
+import com.cbo.core.database.entity.UserSettingsEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserSettingsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrUpdate(settings: UserSettings)
+    suspend fun insertOrUpdate(settings: UserSettingsEntity)
 
     @Query("SELECT * FROM user_settings WHERE userId = :userId LIMIT 1")
-    suspend fun getUserSettings(userId: Int): UserSettings?
+    suspend fun getUserSettings(userId: Int): UserSettingsEntity?
 
     @Query("SELECT * FROM user_settings WHERE userId = :userId LIMIT 1")
-    fun getUserSettingsFlow(userId: Int): Flow<UserSettings?>
+    fun getUserSettingsFlow(userId: Int): Flow<UserSettingsEntity?>
 
     // isFirstLoginDone
     @Query("SELECT isFirstLoginDone FROM user_settings WHERE userId = :userId LIMIT 1")

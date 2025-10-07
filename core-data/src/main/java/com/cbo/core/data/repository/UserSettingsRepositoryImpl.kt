@@ -3,10 +3,8 @@ package com.cbo.core.data.repository
 import android.util.Log
 import com.cbo.core.data.mapper.UserSettingsEntityMapper
 import com.cbo.core.database.dao.UserSettingsDao
-import com.cbo.core.database.entity.UserSettings
 import com.cbo.core.domain.exception.UserSettingsException
 import com.cbo.core.domain.repository.UserSettingsRepository
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class UserSettingsRepositoryImpl @Inject constructor(

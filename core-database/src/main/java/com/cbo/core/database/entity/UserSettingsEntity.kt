@@ -15,7 +15,7 @@ import androidx.room.PrimaryKey
         )
     ]
 )
-data class UserSettings(
+data class UserSettingsEntity(
     @PrimaryKey val userId: Int,
     val isFirstLoginDone: Boolean = false,
     val isBiometricsEnabled: Boolean = false,

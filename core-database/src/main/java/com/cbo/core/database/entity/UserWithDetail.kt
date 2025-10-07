@@ -14,5 +14,5 @@ data class UserWithDetail(
         parentColumn = "id",
         entityColumn = "userId"
     )
-    val userSettings: UserSettings
+    val userSettingsEntity: UserSettingsEntity
 )

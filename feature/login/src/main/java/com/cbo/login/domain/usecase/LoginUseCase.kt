@@ -2,7 +2,6 @@ package com.cbo.login.domain.usecase
 
 import android.util.Log
 import com.cbo.core.data.mapper.UserEntityMapper
-import com.cbo.core.database.dao.UserDao
 import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.usecase.GetUserSettingsUseCase

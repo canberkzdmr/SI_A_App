@@ -10,7 +10,7 @@ import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.data.mapper.UserEntityMapper
 import com.cbo.core.database.dao.UserSettingsDao
 import com.cbo.core.database.database.AppDatabase
-import com.cbo.core.database.entity.UserSettings
+import com.cbo.core.database.entity.UserSettingsEntity
 import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.repository.UserRepository
 import java.security.SecureRandom
@@ -44,7 +44,7 @@ constructor(
                         isActive = false,
                     )
                 val id = userDao.insert(entity).toInt()
-                userSettingsDao.insertOrUpdate(UserSettings(userId = id))
+                userSettingsDao.insertOrUpdate(UserSettingsEntity(userId = id))
                 Result.success(Unit)
             }
         } catch (e: SQLiteConstraintException) {

@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.core.domain.model.User
-import com.cbo.core.domain.preferences.PreferencesRepository
-import com.cbo.core.domain.usecase.GetUserSettingsUseCase
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.session.UserSession
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
@@ -67,7 +65,7 @@ class ProfileViewModel @Inject constructor(
                                     email = userWithDetail.user.email,
                                     avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
                                     isLoading = false,
-                                    isBiometricEnabled = userWithDetail.userSettings.isBiometricsEnabled
+                                    isBiometricEnabled = userWithDetail.userSettingsEntity.isBiometricsEnabled
                                 )
                             },
                             onFailure = { error ->
