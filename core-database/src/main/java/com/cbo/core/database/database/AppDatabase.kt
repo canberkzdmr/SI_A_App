@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.cbo.core.database.converter.Converters
+import com.cbo.core.database.converter.ViewModeConverter
 import com.cbo.core.database.dao.CategoryDao
 import com.cbo.core.database.dao.NoteDao
 import com.cbo.core.database.dao.TagDao
@@ -28,10 +29,10 @@ import com.cbo.core.database.entity.UserSettingsEntity
         UserDetailEntity::class,
         UserSettingsEntity::class,
     ], 
-    version = 3,
+    version = 4,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@TypeConverters(Converters::class, ViewModeConverter::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun noteDao(): NoteDao
     abstract fun categoryDao(): CategoryDao

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.cbo.core.database.entity.UserSettingsEntity
+import com.cbo.core.domain.model.ViewMode
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -32,4 +33,10 @@ interface UserSettingsDao {
 
     @Query("UPDATE user_settings SET isBiometricsEnabled = :enabled WHERE userId = :userId")
     suspend fun updateBiometricsEnabled(userId: Int, enabled: Boolean)
+
+    @Query("SELECT notesViewMode from user_settings WHERE userId = :userId LIMIT 1")
+    suspend fun getNotesViewMode(userId: Int): ViewMode
+
+    @Query("UPDATE user_settings SET notesViewMode = :viewMode WHERE userId = :userId")
+    suspend fun setNotesViewMode(userId: Int, viewMode: ViewMode)
 }

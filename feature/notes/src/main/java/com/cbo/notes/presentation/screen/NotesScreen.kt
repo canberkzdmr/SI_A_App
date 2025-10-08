@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cbo.core.domain.model.ViewMode
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
@@ -48,7 +49,6 @@ import com.cbo.notes.presentation.component.NotesAppBar
 import com.cbo.notes.presentation.component.NotesEmptyState
 import com.cbo.notes.presentation.component.SortBottomSheet
 import com.cbo.notes.presentation.SortOrder
-import com.cbo.notes.presentation.ViewMode
 import com.cbo.notes.presentation.viewmodel.NotesUiState
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
 import com.cbo.ui.components.AppLabel

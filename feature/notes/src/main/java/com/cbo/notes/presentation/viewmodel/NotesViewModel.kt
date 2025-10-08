@@ -3,6 +3,7 @@ package com.cbo.notes.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cbo.core.domain.model.ViewMode
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
@@ -17,8 +18,9 @@ import com.cbo.notes.domain.usecase.SearchNotesUseCase
 import com.cbo.notes.domain.usecase.ToggleNoteFavoriteUseCase
 import com.cbo.notes.domain.usecase.ToggleNotePinnedUseCase
 import com.cbo.notes.presentation.SortOrder
-import com.cbo.notes.presentation.ViewMode
 import com.cbo.core.session.UserSession
+import com.cbo.notes.domain.usecase.GetNotesViewModeUseCase
+import com.cbo.notes.domain.usecase.SetNotesViewModeUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +47,8 @@ class NotesViewModel @Inject constructor(
     private val toggleNoteFavoriteUseCase: ToggleNoteFavoriteUseCase,
     private val archiveNoteUseCase: ArchiveNoteUseCase,
     private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val getNotesViewModeUseCase: GetNotesViewModeUseCase,
+    private val setNotesViewModeUseCase: SetNotesViewModeUseCase,
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
@@ -66,24 +70,27 @@ class NotesViewModel @Inject constructor(
                 combine(
                     getNotesUseCase(user.id),
                     getCategoriesUseCase(user.id),
-                    getTagsUseCase(user.id)
+                    getTagsUseCase(user.id),
                 ) { notes, categories, tags ->
                     Triple(notes, categories, tags)
                 }.catch { throwable ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
-                            isLoading = false, 
+                            isLoading = false,
                             errorMessage = "Failed to load notes: ${throwable.message}"
-                        ) 
+                        )
                     }
                 }.collect { (notes, categories, tags) ->
+                    val viewMode = getNotesViewModeUseCase()
+                    Log.d("NotesViewModel", "Notes View Mode retrieved -> $viewMode")
                     _uiState.update { currentState ->
                         currentState.copy(
                             isLoading = false,
                             notes = notes,
                             categories = categories,
                             tags = tags,
-                            filteredNotes = filterNotes(notes, currentState.searchQuery, currentState.selectedCategory, currentState.selectedTags)
+                            filteredNotes = filterNotes(notes, currentState.searchQuery, currentState.selectedCategory, currentState.selectedTags),
+                            viewMode = viewMode.getOrNull() ?: ViewMode.LIST
                         )
                     }
                 }
@@ -186,7 +193,10 @@ class NotesViewModel @Inject constructor(
     }
 
     fun changeViewMode(viewMode: ViewMode) {
-        _uiState.update { it.copy(viewMode = viewMode) }
+        viewModelScope.launch {
+            setNotesViewModeUseCase.invoke(viewMode)
+            _uiState.update { it.copy(viewMode = viewMode) }
+        }
     }
 
     fun changeSortOrder(sortOrder: SortOrder) {

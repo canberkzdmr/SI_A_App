@@ -1,16 +1,12 @@
 package com.cbo.notes.presentation.component
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.cbo.notes.presentation.ViewMode
+import com.cbo.core.domain.model.ViewMode
 import com.cbo.ui.components.AppHeadline
 import com.cbo.ui.components.AppOutlinedTextField
 

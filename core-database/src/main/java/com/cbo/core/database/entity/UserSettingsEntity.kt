@@ -3,6 +3,7 @@ package com.cbo.core.database.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.cbo.core.domain.model.ViewMode
 
 @Entity (
     tableName = "user_settings",
@@ -19,4 +20,5 @@ data class UserSettingsEntity(
     @PrimaryKey val userId: Int,
     val isFirstLoginDone: Boolean = false,
     val isBiometricsEnabled: Boolean = false,
+    val notesViewMode: ViewMode = ViewMode.LIST
 )

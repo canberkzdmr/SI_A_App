@@ -3,9 +3,11 @@ package com.cbo.notes.di
 import com.cbo.notes.data.repository.CategoryRepositoryImpl
 import com.cbo.notes.data.repository.NoteRepositoryImpl
 import com.cbo.notes.data.repository.TagRepositoryImpl
+import com.cbo.notes.data.repository.UserSettingsRepositoryImpl
 import com.cbo.notes.domain.repository.CategoryRepository
 import com.cbo.notes.domain.repository.NoteRepository
 import com.cbo.notes.domain.repository.TagRepository
+import com.cbo.notes.domain.repository.UserSettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindTagRepository(
         tagRepositoryImpl: TagRepositoryImpl
     ): TagRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserSettingsRepository(
+        userSettingsRepositoryImpl: UserSettingsRepositoryImpl
+    ): UserSettingsRepository
 }
