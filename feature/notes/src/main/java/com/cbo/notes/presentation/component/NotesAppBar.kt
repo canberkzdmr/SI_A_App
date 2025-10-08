@@ -1,11 +1,14 @@
 package com.cbo.notes.presentation.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import com.cbo.core.domain.model.ViewMode
 import com.cbo.ui.components.AppHeadline
 import com.cbo.ui.components.AppOutlinedTextField
@@ -170,3 +173,72 @@ private fun SearchTextField(
         singleLine = true
     )
 }
+
+@Preview
+@Composable
+fun PreviewSearchTextField() {
+    MaterialTheme {
+        Column(modifier = Modifier.fillMaxWidth().background(Color.White)) {
+            SearchTextField(
+                "",
+                {},
+                {},
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Notes App Bar - Default (List View)")
+@Composable
+fun PreviewNotesAppBar_ListView() {
+    MaterialTheme {
+        NotesAppBar(
+            searchQuery = "",
+            onSearchQueryChange = {},
+            onClearSearch = {},
+            viewMode = ViewMode.LIST,
+            onViewModeChange = {},
+            onSortClick = {},
+            onCategoriesClick = {},
+            onSettingsClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Notes App Bar - Grid View")
+@Composable
+fun PreviewNotesAppBar_GridView() {
+    MaterialTheme {
+        NotesAppBar(
+            searchQuery = "",
+            onSearchQueryChange = {},
+            onClearSearch = {},
+            viewMode = ViewMode.GRID,
+            onViewModeChange = {},
+            onSortClick = {},
+            onCategoriesClick = {},
+            onSettingsClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Notes App Bar - Search Active")
+@Composable
+fun PreviewNotesAppBar_SearchActive() {
+    MaterialTheme {
+        var query by remember { mutableStateOf("Meeting notes") }
+
+        // Simulate search mode by passing non-empty query
+        NotesAppBar(
+            searchQuery = query,
+            onSearchQueryChange = { query = it },
+            onClearSearch = { query = "" },
+            viewMode = ViewMode.LIST,
+            onViewModeChange = {},
+            onSortClick = {},
+            onCategoriesClick = {},
+            onSettingsClick = {}
+        )
+    }
+}
+

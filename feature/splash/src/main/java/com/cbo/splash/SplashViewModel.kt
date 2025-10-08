@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.preferences.PreferencesRepository
 import com.cbo.core.domain.usecase.GetUserSettingsUseCase
+import com.cbo.core.session.domain.repository.SessionRepository
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage

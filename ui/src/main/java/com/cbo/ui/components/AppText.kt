@@ -49,6 +49,22 @@ fun AppTitle(
 }
 
 @Composable
+fun AppTitleMedium(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onBackground,
+    textAlign: TextAlign? = null
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        color = color,
+        modifier = modifier,
+        textAlign = textAlign
+    )
+}
+
+@Composable
 fun AppBody(
     text: String,
     modifier: Modifier = Modifier,
@@ -73,13 +89,17 @@ fun AppRegular(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onBackground,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     Text(
         text = text,
         color = color,
         modifier = modifier,
-        textAlign = textAlign
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow
     )
 }
 
@@ -161,6 +181,7 @@ private fun AppTextPreview() {
         ) {
             AppHeadline("This is a Headline")
             AppTitle("This is a Title")
+            AppTitleMedium("This is a Title Medium")
             AppBody("This is body text used for regular content.")
             AppCaption("This is a caption for subtle info.")
             AppLabelLarge("This is a large label for UI elements.")

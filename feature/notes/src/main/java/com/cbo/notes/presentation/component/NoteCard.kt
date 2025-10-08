@@ -12,12 +12,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbo.notes.domain.model.Note
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppCaption
 import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.AppTitleMedium
+import com.cbo.ui.theme.MemCloudApplicationTheme
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -58,7 +62,7 @@ fun NoteCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AppTitle(
+                AppTitleMedium(
                     text = note.title,
                     modifier = Modifier.weight(1f)
                 )
@@ -289,3 +293,111 @@ private fun formatDate(timestamp: Long): String {
         else -> SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(timestamp))
     }
 }
+
+@Preview(showBackground = true, name = "Note Card - Regular")
+@Composable
+fun PreviewNoteCard_Regular() {
+    val note = Note(
+        id = 1,
+        title = "Grocery List",
+        content = "Milk, Eggs, Bread, Coffee, Cheese, Chicken breast, Olive oil",
+        category = com.cbo.notes.domain.model.Category(
+            id = 1,
+            name = "Personal",
+            color = "#BBDEFB",
+            userId = 0
+        ),
+        userId = 0,
+        tags = listOf(
+            com.cbo.notes.domain.model.Tag(id = 1, name = "shopping", color = "#FFCDD2", userId = 0),
+            com.cbo.notes.domain.model.Tag(id = 2, name = "urgent", color = "#FFF9C4", userId = 0)
+        ),
+        isPinned = false,
+        isFavorite = false,
+        updatedAt = System.currentTimeMillis() - 2 * 60 * 60 * 1000 // 2 hours ago
+    )
+
+    MemCloudApplicationTheme {
+        NoteCard(
+            note = note,
+            onClick = {},
+            onTogglePin = {},
+            onToggleFavorite = {},
+            onArchive = {},
+            onDelete = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Note Card - Pinned & Favorite")
+@Composable
+fun PreviewNoteCard_PinnedFavorite() {
+    val note = Note(
+        id = 2,
+        title = "Project Ideas",
+        content = "1. Habit Tracker App\n2. Expense Splitter\n3. Recipe Organizer with AI search",
+        category = com.cbo.notes.domain.model.Category(
+            id = 2,
+            name = "Work",
+            color = "#C8E6C9",
+            userId = 0
+        ),
+        tags = listOf(
+            com.cbo.notes.domain.model.Tag(id = 3, name = "android", color = "#B3E5FC", userId = 0),
+            com.cbo.notes.domain.model.Tag(id = 4, name = "compose", color = "#D1C4E9", userId = 0)
+        ),
+        userId = 0,
+        isPinned = true,
+        isFavorite = true,
+        updatedAt = System.currentTimeMillis() - 30 * 60 * 1000 // 30 min ago
+    )
+
+    MemCloudApplicationTheme {
+        NoteCard(
+            note = note,
+            onClick = {},
+            onTogglePin = {},
+            onToggleFavorite = {},
+            onArchive = {},
+            onDelete = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Note Card - Compact")
+@Composable
+fun PreviewNoteCard_Compact() {
+    val note = Note(
+        id = 3,
+        title = "Meeting Summary",
+        content = "Discussed project roadmap and upcoming milestones. Next meeting scheduled for Friday.",
+        category = com.cbo.notes.domain.model.Category(
+            id = 3,
+            name = "Meetings",
+            userId = 0,
+            color = "#FFE0B2",
+        ),
+        tags = listOf(
+            com.cbo.notes.domain.model.Tag(id = 5, name = "team", color = "#FFECB3", userId = 0),
+            com.cbo.notes.domain.model.Tag(id = 6, name = "weekly", color = "#E1BEE7", userId = 0),
+            com.cbo.notes.domain.model.Tag(id = 7, name = "planning", color = "#BBDEFB", userId = 0)
+        ),
+        isPinned = false,
+        isFavorite = false,
+        userId = 0,
+        updatedAt = System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000 // 3 days ago
+    )
+
+    MemCloudApplicationTheme {
+        NoteCard(
+            note = note,
+            onClick = {},
+            onTogglePin = {},
+            onToggleFavorite = {},
+            onArchive = {},
+            onDelete = {},
+            isCompact = true
+        )
+    }
+}
+

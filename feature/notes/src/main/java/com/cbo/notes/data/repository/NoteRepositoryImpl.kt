@@ -5,6 +5,7 @@ import com.cbo.notes.data.mapper.NoteEntityMapper
 import com.cbo.core.database.dao.NoteDao
 import com.cbo.core.database.dao.TagDao
 import com.cbo.core.database.entity.NoteTagCrossRef
+import com.cbo.notes.data.mapper.TagEntityMapper
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 class NoteRepositoryImpl @Inject constructor(
     private val noteDao: NoteDao,
     private val tagDao: TagDao,
-    private val noteEntityMapper: NoteEntityMapper
+    private val noteEntityMapper: NoteEntityMapper,
+    private val tagEntityMapper: TagEntityMapper,
 ) : NoteRepository {
 
     override fun getNotesByUser(userId: Int): Flow<List<Note>> {
@@ -82,6 +84,24 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun updateNote(note: Note): Result<Note> {
         return try {
             val entity = noteEntityMapper.toEntity(note)
+            val tagList = tagDao.getTagsByNote(note.id) // tags in db
+            if (tagList.isNotEmpty()) {
+                for (tag in tagList) { // tags in db
+                    if (!note.tags.contains(tagEntityMapper.toDomain(tag))) { // if not in updated tag list remove from cross ref
+                        noteDao.deleteNoteTagCrossRef(NoteTagCrossRef(note.id, tag.id))
+                        tagDao.updateTagUsageCount(tag.id)
+                    }
+                }
+            }
+            if (note.tags.isNotEmpty()) {
+                for (tag in note.tags) { // updated tag list
+                    if (!tagList.contains(tagEntityMapper.toEntity(tag))) { // if in updated list but not in db insert it
+                        noteDao.insertNoteTagCrossRef(NoteTagCrossRef(note.id, tag.id))
+                        tagDao.updateTagUsageCount(tag.id)
+                    }
+                }
+            }
+
             noteDao.update(entity)
             Result.success(note)
         } catch (e: Exception) {

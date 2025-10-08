@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppHeadline
@@ -78,5 +79,41 @@ fun NotesEmptyState(
                 }
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Empty Notes - No Notes Yet")
+@Composable
+fun PreviewNotesEmptyState_NoNotes() {
+    MaterialTheme {
+        NotesEmptyState(
+            hasNotes = false,
+            searchQuery = "",
+            onCreateNote = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Empty Notes - With Notes but Filtered Out")
+@Composable
+fun PreviewNotesEmptyState_WithNotesFiltered() {
+    MaterialTheme {
+        NotesEmptyState(
+            hasNotes = true,
+            searchQuery = "",
+            onCreateNote = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Empty Notes - Search No Result")
+@Composable
+fun PreviewNotesEmptyState_SearchNoResult() {
+    MaterialTheme {
+        NotesEmptyState(
+            hasNotes = true,
+            searchQuery = "Meeting notes",
+            onCreateNote = {}
+        )
     }
 }

@@ -5,12 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.model.User
-import com.cbo.core.domain.preferences.PreferencesRepository
-import com.cbo.core.domain.usecase.GetUserSettingsUseCase
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
-import com.cbo.core.domain.usecase.VerifyPasswordUseCase
-import com.cbo.core.session.UserSession
 import com.cbo.login.domain.usecase.GetUserUseCase
 import com.cbo.login.domain.usecase.LoginUseCase
 import com.cbo.ui.snackbar.SnackbarManager
@@ -27,11 +23,7 @@ class LoginViewModel
     @Inject
     constructor(
         private val getUserUseCase: GetUserUseCase,
-        private val verifyPasswordUseCase: VerifyPasswordUseCase,
         private val loginUseCase: LoginUseCase,
-        private val userSession: UserSession,
-        private val preferencesRepository: PreferencesRepository,
-        private val getUserSettingsUseCase: GetUserSettingsUseCase,
         private val setFirstLoginDoneUseCase: SetFirstLoginDoneUseCase,
         private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
     ) : ViewModel() {

@@ -192,10 +192,6 @@ fun LoginScreenContent(
                         text = "Login",
                         onClick = {
                             onLoginClick()
-                            /*if (state.isFirstLoginDone) {
-                            } else {
-                                onShowBiometricDialog(true)
-                            }*/
                         },
                         modifier =
                             Modifier

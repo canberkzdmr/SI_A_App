@@ -1,5 +1,6 @@
 package com.cbo.notes.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -121,6 +122,7 @@ class EditNoteViewModel @Inject constructor(
         } else {
             currentTags.add(tag)
         }
+        Log.d("EditNoteViewModel", "toggleTag current tags: $currentTags")
         _uiState.update { it.copy(selectedTags = currentTags, hasUnsavedChanges = true) }
     }
 
