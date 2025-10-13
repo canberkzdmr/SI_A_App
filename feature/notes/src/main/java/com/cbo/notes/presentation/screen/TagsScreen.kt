@@ -294,6 +294,7 @@ fun TagsScreen(
         CreateTagDialog(
             tagName = uiState.dialogTagName,
             selectedColor = uiState.dialogTagColor,
+            isEdit = uiState.editingTag != null,
             isCreating = uiState.isCreating,
             onConfirm = {
                 if (uiState.editingTag == null) {
@@ -443,10 +444,11 @@ fun TagsScreenContent(
             tagName = if (uiState.editingTag != null) "Edit Tag" else "Create Tag",
             selectedColor = uiState.editingTag?.color,
             isCreating = uiState.isCreating,
-            onConfirm = {},
-            onDismiss = {},
+            isEdit = uiState.editingTag != null,
             onTagNameChange = updateTagName,
             onColorChange = {},
+            onConfirm = {},
+            onDismiss = {},
         )
     }
 }
@@ -518,7 +520,7 @@ fun JiggleTag(
             },
             isDeleteMode = viewMode == ViewMode.DELETE,
             label = "#${tag.name} (${tag.usageCount})",
-            selected = selectedTags.any { it.id == tag.id },
+            selected = if (viewMode == ViewMode.EDIT) true else selectedTags.any { it.id == tag.id },
             color = tag.color,
         )
     }

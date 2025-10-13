@@ -3,17 +3,15 @@ package com.cbo.notes.presentation.component
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.cbo.core.domain.FieldValidationRules
 import com.cbo.ui.components.AppLabelLarge
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.components.CustomAlertDialog
+import com.cbo.ui.components.TertiaryButton
 
 @Composable
 internal fun CreateTagDialog(
@@ -24,21 +22,31 @@ internal fun CreateTagDialog(
     onColorChange: (String?) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    isEdit: Boolean,
 ) {
     CustomAlertDialog(
         onDismiss = { onDismiss() },
-        title = if (tagName.isBlank()) "Create New Tag" else "Edit Tag",
+        title = if (isEdit) "Edit Tag" else "Create New Tag",
         content = {
             AppOutlinedTextField(
                 value = tagName,
-                onValueChange = { name ->
-                    onTagNameChange(name.trim())
+                onValueChange = { newValue ->
+                    if (newValue.endsWith(" ") && newValue.trim().isNotBlank()) {
+                        val tagName = newValue.trim()
+                        if (tagName.isNotBlank()) {
+                            onTagNameChange(tagName)
+                        }
+                    } else {
+                        onTagNameChange(newValue.trim())
+                    }
                 },
-                label = "Tag name",
+                label = "Tag name (max ${FieldValidationRules.MAX_TAG_NAME_LENGTH} chars)",
+                isValid = tagName.length <= FieldValidationRules.MAX_TAG_NAME_LENGTH,
+                validationErrorMessage = "Tag name must be less than ${FieldValidationRules.MAX_TAG_NAME_LENGTH} characters",
                 placeholder = "Enter tag name...",
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                isError = tagName.isBlank(),
+                isError = tagName.isBlank() || tagName.length > FieldValidationRules.MAX_TAG_NAME_LENGTH,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -55,22 +63,16 @@ internal fun CreateTagDialog(
             )
         },
         buttons = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-            TextButton(
+            TertiaryButton(
+                text = "Cancel",
+                onClick = onDismiss
+            )
+            TertiaryButton(
+                text = "Create",
                 onClick = onConfirm,
-                enabled = tagName.isNotBlank() && !isCreating,
-            ) {
-                if (isCreating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                    )
-                } else {
-                    Text("Create")
-                }
-            }
+                enabled = tagName.isNotBlank() && !isCreating && tagName.length <= FieldValidationRules.MAX_TAG_NAME_LENGTH,
+                isInProgress = isCreating,
+            )
         },
     )
 }

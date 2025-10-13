@@ -1,13 +1,9 @@
 package com.cbo.notes.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,7 +36,6 @@ import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
-import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -207,16 +201,17 @@ fun EditNoteScreen(
         }
     }
 
-    // Tag creation dialog (kept for custom colors)
+    // Tag creation dialog
     if (uiState.showCreateTagDialog) {
         CreateTagDialog(
             tagName = uiState.newTagName,
             selectedColor = uiState.newTagColor,
             isCreating = uiState.isCreatingTag,
+            isEdit = false,
             onTagNameChange = viewModel::updateNewTagName,
             onColorChange = viewModel::updateNewTagColor,
             onConfirm = viewModel::createTag,
-            onDismiss = viewModel::hideCreateTagDialog
+            onDismiss = viewModel::hideCreateTagDialog,
         )
     }
 }

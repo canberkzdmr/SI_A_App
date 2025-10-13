@@ -1,5 +1,10 @@
 package com.cbo.notes.presentation.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -68,16 +73,35 @@ fun NotesAppBar(
                         )
                     }
                 ) {
-                    Icon(
-                        imageVector =
-                            when (viewMode) {
-                                ViewMode.LIST -> Icons.Default.ViewStream
-                                ViewMode.GRID -> Icons.Default.GridView
-                                ViewMode.COMPACT -> Icons.AutoMirrored.Filled.ViewList
-                            }
-                        ,
-                        contentDescription = "Toggle view mode"
-                    )
+                    AnimatedContent(
+                        targetState = viewMode,
+                        transitionSpec = {
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(300),
+                            ) togetherWith
+                                    slideOutHorizontally(
+                                        targetOffsetX = { -it },
+                                        animationSpec = tween(300),
+                                    )
+                        },
+                        label = "fabIconAnim",
+                    ) { viewMode ->
+                        when (viewMode) {
+                            ViewMode.LIST -> Icon(
+                                imageVector = Icons.Default.ViewStream,
+                                contentDescription = "Toggle view mode"
+                            )
+                            ViewMode.GRID -> Icon(
+                                imageVector = Icons.Default.GridView,
+                                contentDescription = "Toggle view mode"
+                            )
+                            ViewMode.COMPACT -> Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ViewList,
+                                contentDescription = "Toggle view mode"
+                            )
+                        }
+                    }
                 }
 
                 // Sort button
@@ -233,6 +257,23 @@ fun PreviewNotesAppBar_GridView() {
     }
 }
 
+@Preview(showBackground = true, name = "Notes App Bar - Grid View")
+@Composable
+fun PreviewNotesAppBar_CompactView() {
+    MaterialTheme {
+        NotesAppBar(
+            searchQuery = "",
+            onSearchQueryChange = {},
+            onClearSearch = {},
+            viewMode = ViewMode.COMPACT,
+            onViewModeChange = {},
+            onSortClick = {},
+            onCategoriesClick = {},
+            onSettingsClick = {}
+        )
+    }
+}
+
 @Preview(showBackground = true, name = "Notes App Bar - Search Active")
 @Composable
 fun PreviewNotesAppBar_SearchActive() {
@@ -244,7 +285,7 @@ fun PreviewNotesAppBar_SearchActive() {
             searchQuery = query,
             onSearchQueryChange = { query = it },
             onClearSearch = { query = "" },
-            viewMode = ViewMode.LIST,
+            viewMode = ViewMode.COMPACT,
             onViewModeChange = {},
             onSortClick = {},
             onCategoriesClick = {},

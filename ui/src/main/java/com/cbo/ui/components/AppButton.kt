@@ -97,6 +97,7 @@ fun TertiaryButton(
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = null,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
+    isInProgress: Boolean = false,
 ) {
     TextButton(
         onClick = onClick,
@@ -104,14 +105,21 @@ fun TertiaryButton(
         enabled = enabled,
         contentPadding = contentPadding,
     ) {
-        if (leadingIcon != null) {
-            leadingIcon()
-            Spacer(Modifier.width(8.dp))
-        }
-        Text(text = text)
-        if (trailingIcon != null) {
-            Spacer(Modifier.width(8.dp))
-            trailingIcon()
+        if (isInProgress) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                strokeWidth = 2.dp
+            )
+        } else {
+            if (leadingIcon != null) {
+                leadingIcon()
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(text = text)
+            if (trailingIcon != null) {
+                Spacer(Modifier.width(8.dp))
+                trailingIcon()
+            }
         }
     }
 }

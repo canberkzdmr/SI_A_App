@@ -28,9 +28,11 @@ import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun AppOutlinedTextField(
+    modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    isValid: Boolean = true,
+    validationErrorMessage: String = "",
     label: String? = null,
     placeholder: String? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -59,6 +61,14 @@ fun AppOutlinedTextField(
         modifier = clickableModifier,
         label = label?.let { { Text(it) } },
         placeholder = placeholder?.let { { Text(it) } },
+        supportingText = {
+            if (!isValid) {
+                Text(
+                    text = validationErrorMessage,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         isError = isError,
@@ -101,6 +111,18 @@ private fun AppOutlinedTextFieldPreview() {
             AppOutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
+                label = "Password",
+                placeholder = "Enter your password",
+                visualTransformation = PasswordVisualTransformation(),
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                isError = text.length < 6,
+            )
+
+            AppOutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                isValid = false,
+                validationErrorMessage = "Test Validation Error",
                 label = "Password",
                 placeholder = "Enter your password",
                 visualTransformation = PasswordVisualTransformation(),
