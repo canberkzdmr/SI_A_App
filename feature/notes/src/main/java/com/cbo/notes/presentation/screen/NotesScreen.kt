@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,8 +25,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,15 +41,17 @@ import com.cbo.core.domain.model.ViewMode
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
+import com.cbo.notes.presentation.SortOrder
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.component.NoteCard
+import com.cbo.notes.presentation.component.NoteCardCompact
 import com.cbo.notes.presentation.component.NotesAppBar
 import com.cbo.notes.presentation.component.NotesEmptyState
 import com.cbo.notes.presentation.component.SortBottomSheet
-import com.cbo.notes.presentation.SortOrder
 import com.cbo.notes.presentation.viewmodel.NotesUiState
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
 import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.TertiaryButton
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -197,15 +197,13 @@ private fun FilterSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AppLabel(text = "Filters")
+            AppLabel(text = "Filters", modifier = Modifier.padding(vertical = 16.dp))
 
             if (selectedCategory != null || selectedTags.isNotEmpty()) {
-                TextButton(
+                TertiaryButton(
+                    "Clear All",
                     onClick = onClearFilters,
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                ) {
-                    Text("Clear All", style = MaterialTheme.typography.labelMedium)
-                }
+                )
             }
         }
 
@@ -290,7 +288,7 @@ private fun NotesContent(
 
         ViewMode.GRID -> {
             LazyVerticalStaggeredGrid(
-                columns = StaggeredGridCells.Fixed(2),
+                columns = Fixed(2),
                 modifier = modifier,
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -305,6 +303,25 @@ private fun NotesContent(
                         onArchive = { onArchive(note.id) },
                         onDelete = { onDelete(note.id) },
                         isCompact = true,
+                    )
+                }
+            }
+        }
+
+        ViewMode.COMPACT -> {
+            LazyColumn(
+                modifier = modifier,
+                contentPadding = PaddingValues(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(notes) { note ->
+                    NoteCardCompact(
+                        note = note,
+                        onClick = { onNoteClick(note.id) },
+                        onTogglePin = { onTogglePin(note.id) },
+                        onToggleFavorite = { onToggleFavorite(note.id) },
+                        onArchive = { onArchive(note.id) },
+                        onDelete = { onDelete(note.id) }
                     )
                 }
             }
@@ -454,6 +471,31 @@ private fun NotesScreenGridPreview() {
     MemCloudApplicationTheme {
         NotesScreenContent(
             uiState = previewNotesUiState().copy(viewMode = ViewMode.GRID),
+            onNavigateToCreateNote = {},
+            onNavigateToEditNote = {},
+            onNavigateToCategories = {},
+            onSearchQueryChange = {},
+            onClearSearch = {},
+            onViewModeChange = {},
+            onSortClick = {},
+            onCategorySelected = {},
+            onTagSelected = {},
+            onClearFilters = {},
+            onTogglePin = {},
+            onToggleFavorite = {},
+            onArchive = {},
+            onNavigateToSettings = {},
+            onDelete = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+private fun NotesScreenCompactPreview() {
+    MemCloudApplicationTheme {
+        NotesScreenContent(
+            uiState = previewNotesUiState().copy(viewMode = ViewMode.COMPACT),
             onNavigateToCreateNote = {},
             onNavigateToEditNote = {},
             onNavigateToCategories = {},

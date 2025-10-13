@@ -3,6 +3,7 @@ package com.cbo.notes.presentation.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -59,12 +60,22 @@ fun NotesAppBar(
                 IconButton(
                     onClick = { 
                         onViewModeChange(
-                            if (viewMode == ViewMode.LIST) ViewMode.GRID else ViewMode.LIST
+                            when (viewMode) {
+                                ViewMode.LIST -> ViewMode.GRID
+                                ViewMode.GRID -> ViewMode.COMPACT
+                                ViewMode.COMPACT -> ViewMode.LIST
+                            }
                         )
                     }
                 ) {
                     Icon(
-                        imageVector = if (viewMode == ViewMode.LIST) Icons.Default.GridView else Icons.Default.ViewList,
+                        imageVector =
+                            when (viewMode) {
+                                ViewMode.LIST -> Icons.Default.ViewStream
+                                ViewMode.GRID -> Icons.Default.GridView
+                                ViewMode.COMPACT -> Icons.AutoMirrored.Filled.ViewList
+                            }
+                        ,
                         contentDescription = "Toggle view mode"
                     )
                 }

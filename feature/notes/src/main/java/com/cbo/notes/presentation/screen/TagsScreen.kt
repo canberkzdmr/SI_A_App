@@ -62,6 +62,7 @@ import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.TagsUiState
 import com.cbo.notes.presentation.viewmodel.TagsViewModel
 import com.cbo.notes.presentation.viewmodel.ViewMode
+import com.cbo.ui.components.AppDialog
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.HeaderCard
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -142,8 +143,12 @@ fun TagsScreen(
                     if (uiState.viewMode == ViewMode.EDIT) {
                         viewModel.showCreateTagDialog()
                     } else {
-                        // Delete all]
-                        viewModel.deleteSelectedTags()
+                        // Delete all
+                        if (uiState.selectedTags.isNotEmpty()) {
+                            viewModel.showDeleteTagDialog()
+                        } else {
+                            viewModel.resetStateToEdit()
+                        }
                     }
                 },
                 containerColor =
@@ -300,6 +305,22 @@ fun TagsScreen(
             onDismiss = { viewModel.hideCreateTagDialog() },
             onTagNameChange = { name -> viewModel.updateTagName(name) },
             onColorChange = { color -> viewModel.updateTagColor(color) },
+        )
+    }
+
+    if (uiState.showDeleteTagDialog) {
+        val count = uiState.selectedTags.size
+        AppDialog(
+            title = "Delete Tags",
+            message =
+                if (uiState.selectedTags.size > 1) {
+                    "Are you sure you want to delete $count tags? This action cannot be undone."
+                } else {
+                    "Are you sure you want to delete this tag?"
+                }
+            ,
+            onConfirm = viewModel::deleteSelectedTags,
+            onDismiss = viewModel::resetStateToEdit
         )
     }
 }

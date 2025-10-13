@@ -1,6 +1,9 @@
 package com.cbo.notes.presentation.screen
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,11 +14,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,6 +36,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DismissValue
+import androidx.compose.material3.DismissValue.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -38,13 +45,19 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -63,8 +76,14 @@ import com.cbo.notes.presentation.viewmodel.CategoriesUiState
 import com.cbo.notes.presentation.viewmodel.CategoriesViewModel
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import androidx.core.graphics.toColorInt
+import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppOutlinedTextField
+import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.AppTitleMedium
+import com.cbo.ui.components.ColorPicker
+import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
+/*@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriesScreen(
     onNavigateBack: () -> Unit,
@@ -126,11 +145,12 @@ fun CategoriesScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(uiState.categories) { category ->
+                    itemsIndexed(uiState.categories) { index, category ->
                         CategoryItem(
                             category = category,
                             onEdit = { viewModel.showEditCategoryDialog(category) },
                             onDelete = { viewModel.deleteCategory(category) },
+                            isFirstItem = index == 0,
                         )
                     }
                 }
@@ -160,7 +180,129 @@ fun CategoriesScreen(
             viewModel.clearError()
         }
     }
+}*/
+
+@Composable
+fun CategoriesScreen(
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: CategoriesViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    CategoriesContent(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onCreateCategory = viewModel::showCreateCategoryDialog,
+        onEditCategory = viewModel::showEditCategoryDialog,
+        onDeleteCategory = viewModel::deleteCategory,
+        updateDialogTitle = viewModel::updateDialogTitle,
+        updateDialogDescription = viewModel::updateDialogDescription,
+        updateDialogColor = viewModel::updateDialogColor,
+        saveCategory = viewModel::saveCategory,
+        hideDialog = viewModel::hideDialog,
+        modifier = modifier,
+    )
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoriesContent(
+    uiState: CategoriesUiState,
+    onNavigateBack: () -> Unit,
+    onCreateCategory: () -> Unit,
+    onEditCategory: (Category) -> Unit,
+    onDeleteCategory: (Category) -> Unit,
+    updateDialogTitle: (String) -> Unit,
+    updateDialogDescription: (String) -> Unit,
+    updateDialogColor: (String?) -> Unit,
+    saveCategory: () -> Unit,
+    hideDialog: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text("Manage Categories") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onCreateCategory) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add category",
+                        )
+                    }
+                },
+            )
+        },
+    ) { paddingValues ->
+        when {
+            uiState.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            uiState.categories.isEmpty() -> {
+                EmptyCategoriesState(
+                    onCreateCategory = onCreateCategory,
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                )
+            }
+
+            else -> {
+                LazyColumn(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    itemsIndexed(uiState.categories) { index, category ->
+                        CategoryItem(
+                            category = category,
+                            onEdit = { onEditCategory(category) },
+                            onDelete = { onDeleteCategory(category) },
+                            isFirstItem = index == 0,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (uiState.showCreateDialog) {
+        CategoryDialog(
+            title = if (uiState.editingCategory != null) "Edit Category" else "Create Category",
+            name = uiState.dialogTitle,
+            description = uiState.dialogDescription,
+            color = uiState.dialogColor,
+            isCreating = uiState.isCreating,
+            onNameChange = updateDialogTitle,
+            onDescriptionChange = updateDialogDescription,
+            onColorChange = updateDialogColor,
+            onSave = saveCategory,
+            onDismiss = hideDialog,
+        )
+    }
+}
+
 
 @Composable
 private fun EmptyCategoriesState(
@@ -215,89 +357,126 @@ private fun EmptyCategoriesState(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CategoryItem(
+fun CategoryItem(
     category: Category,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
+    isFirstItem: Boolean = false,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    onDelete()
+                    true
+                }
+                else -> false
+            }
+        },
+        positionalThreshold = { totalDistance -> totalDistance * 0.5f }
+    )
+
+    // --- Show swipe hint only for the first item ---
+    val showHint = remember { mutableStateOf(isFirstItem) }
+    val offsetX by animateDpAsState(
+        targetValue = if (showHint.value) (-14).dp else 0.dp,
+        animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+    )
+
+    LaunchedEffect(isFirstItem) {
+        if (isFirstItem) {
+            delay(300)
+            showHint.value = false
+        }
+    }
+
+    SwipeToDismissBox(
+        state = swipeToDismissBoxState,
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            val direction = swipeToDismissBoxState.dismissDirection
+            if (direction == SwipeToDismissBoxValue.EndToStart) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.error)
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.onError,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+        },
+        modifier = modifier
+            .padding(vertical = 4.dp)
+            .offset(x = offsetX)
+            .fillMaxWidth()
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Card(
+            onClick = onEdit,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         ) {
             Row(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // Color indicator
-                val backgroundColor =
-                    category.color?.let { Color(it.toColorInt()) }
-                        ?: MaterialTheme.colorScheme.primaryContainer
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    // Color indicator
+                    val backgroundColor =
+                        category.color?.let { Color(it.toColorInt()) }
+                            ?: MaterialTheme.colorScheme.primaryContainer
 
-                Box(
-                    modifier =
-                        Modifier
-                            .size(16.dp)
-                            .background(backgroundColor, RoundedCornerShape(8.dp)),
-                )
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = category.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .background(backgroundColor, RoundedCornerShape(6.dp)),
                     )
 
-                    category.description?.let { desc ->
-                        if (desc.isNotBlank()) {
-                            Text(
+                    Column(modifier = Modifier.weight(1f)) {
+                        AppTitleMedium(
+                            text = category.name,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+
+                        category.description?.takeIf { it.isNotBlank() }?.let { desc ->
+                            AppLabel(
                                 text = desc,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
+
+                        AppLabel(
+                            text = "${category.notesCount} notes",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
                     }
-
-                    Text(
-                        text = "${category.notesCount} notes",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit category",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete category",
-                        tint = MaterialTheme.colorScheme.error,
-                    )
                 }
             }
         }
     }
 }
+
 
 @Composable
 private fun CategoryDialog(
@@ -319,11 +498,12 @@ private fun CategoryDialog(
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 val descriptionFocusRequester = remember { FocusRequester() }
 
-                OutlinedTextField(
+                // Category name
+                AppOutlinedTextField(
                     value = name,
                     onValueChange = onNameChange,
-                    label = { Text("Category Name") },
-                    placeholder = { Text("Enter category name...") },
+                    label = "Category Name",
+                    placeholder = "Enter category name...",
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     isError = name.isBlank(),
@@ -331,12 +511,13 @@ private fun CategoryDialog(
                     keyboardActions = KeyboardActions(onNext = { descriptionFocusRequester.requestFocus() }),
                 )
 
+                // Description (optional)
                 val keyboardController = LocalSoftwareKeyboardController.current
-                OutlinedTextField(
+                AppOutlinedTextField(
                     value = description,
                     onValueChange = onDescriptionChange,
-                    label = { Text("Description (optional)") },
-                    placeholder = { Text("Enter description...") },
+                    label = "Description (optional)",
+                    placeholder = "Enter description...",
                     maxLines = 3,
                     modifier =
                         Modifier
@@ -350,8 +531,11 @@ private fun CategoryDialog(
                         }),
                 )
 
-                // Color selection could be added here
-                // For now, we'll keep it simple and allow users to set colors later
+                // Color selection
+                ColorPicker(
+                    selectedColor = color,
+                    onColorChange = onColorChange
+                )
             }
         },
         confirmButton = {
@@ -377,326 +561,69 @@ private fun CategoryDialog(
     )
 }
 
-// Preview-specific version of CategoriesScreen that takes UI state directly
-@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
 @Composable
-private fun CategoriesScreenContent(
-    uiState: CategoriesUiState,
-    onNavigateBack: () -> Unit,
-    onCreateCategory: () -> Unit,
-    onEditCategory: (Category) -> Unit,
-    onDeleteCategory: (Category) -> Unit,
-    onSaveCategory: () -> Unit,
-    onDismissDialog: () -> Unit,
-    onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    onColorChange: (String?) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = { Text("Manage Categories") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onCreateCategory) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add category",
-                        )
-                    }
-                },
-            )
-        },
-    ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (uiState.categories.isEmpty()) {
-            // Empty state
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Category,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.outline,
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "No categories yet",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Create categories to organize your notes better",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                FilledTonalButton(
-                    onClick = onCreateCategory,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Create Category")
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding =
-                    PaddingValues(
-                        top = paddingValues.calculateTopPadding() + 16.dp,
-                        bottom = paddingValues.calculateBottomPadding() + 16.dp,
-                        start = 16.dp,
-                        end = 16.dp,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(uiState.categories) { category ->
-                    CategoryListItem(
-                        category = category,
-                        onEdit = { onEditCategory(category) },
-                        onDelete = { onDeleteCategory(category) },
-                    )
-                }
-            }
-        }
-    }
-
-    // Category Dialog
-    if (uiState.showCreateDialog) {
-        CategoryDialog(
-            title = if (uiState.editingCategory == null) "Create Category" else "Edit Category",
-            name = uiState.dialogTitle,
-            description = uiState.dialogDescription,
-            color = uiState.dialogColor,
-            isCreating = uiState.isCreating,
-            onNameChange = onTitleChange,
-            onDescriptionChange = onDescriptionChange,
-            onColorChange = onColorChange,
-            onSave = onSaveCategory,
-            onDismiss = onDismissDialog,
-        )
-    }
-}
-
-@Composable
-private fun CategoryListItem(
-    category: Category,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val backgroundColor =
-        category.color?.let { Color(android.graphics.Color.parseColor(it)) }
-            ?: MaterialTheme.colorScheme.surfaceVariant
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // Color indicator
-            Box(
-                modifier =
-                    Modifier
-                        .size(24.dp)
-                        .background(backgroundColor, RoundedCornerShape(6.dp)),
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Category info
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = category.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                )
-
-                category.description?.let { desc ->
-                    if (desc.isNotBlank()) {
-                        Text(
-                            text = desc,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-
-                Text(
-                    text = "${category.notesCount} notes",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-
-            // Actions
-            Row {
-                IconButton(onClick = onEdit) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit category",
-                    )
-                }
-
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete category",
-                        tint = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
-)
-@Composable
-private fun CategoriesScreenPreview() {
-    MemCloudApplicationTheme {
-        CategoriesScreenContent(
-            uiState =
-                CategoriesUiState(
-                    isLoading = false,
-                    categories = sampleCategoriesForPreview(),
-                    showCreateDialog = false,
-                ),
+fun CategoriesContentPreview_WithData() {
+    MemCloudApplicationTheme{
+        CategoriesContent(
+            uiState = CategoriesUiState(
+                categories = sampleCategoriesForPreview()
+            ),
             onNavigateBack = {},
             onCreateCategory = {},
             onEditCategory = {},
             onDeleteCategory = {},
-            onSaveCategory = {},
-            onDismissDialog = {},
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onColorChange = {},
+            updateDialogTitle = {},
+            updateDialogDescription = {},
+            updateDialogColor = {},
+            saveCategory = {},
+            hideDialog = {},
         )
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
-private fun CategoriesScreenEmptyPreview() {
+fun CategoriesContentPreview_Empty() {
     MemCloudApplicationTheme {
-        CategoriesScreenContent(
-            uiState =
-                CategoriesUiState(
-                    isLoading = false,
-                    categories = emptyList(),
-                    showCreateDialog = false,
-                ),
+        CategoriesContent(
+            uiState = CategoriesUiState(
+                isLoading = false,
+                categories = emptyList(),
+                showCreateDialog = false,
+            ),
             onNavigateBack = {},
             onCreateCategory = {},
             onEditCategory = {},
             onDeleteCategory = {},
-            onSaveCategory = {},
-            onDismissDialog = {},
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onColorChange = {},
+            updateDialogTitle = {},
+            updateDialogDescription = {},
+            updateDialogColor = {},
+            saveCategory = {},
+            hideDialog = {},
         )
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
 @Composable
-private fun CategoriesScreenLoadingPreview() {
+fun CategoriesContentPreview_Loading() {
     MemCloudApplicationTheme {
-        CategoriesScreenContent(
-            uiState =
-                CategoriesUiState(
-                    isLoading = true,
-                    categories = emptyList(),
-                    showCreateDialog = false,
-                ),
+        CategoriesContent(
+            uiState = CategoriesUiState(isLoading = true),
             onNavigateBack = {},
             onCreateCategory = {},
             onEditCategory = {},
             onDeleteCategory = {},
-            onSaveCategory = {},
-            onDismissDialog = {},
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onColorChange = {},
+            updateDialogTitle = {},
+            updateDialogDescription = {},
+            updateDialogColor = {},
+            saveCategory = {},
+            hideDialog = {},
         )
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun CategoriesScreenWithDialogPreview() {
-    MemCloudApplicationTheme {
-        CategoriesScreenContent(
-            uiState =
-                CategoriesUiState(
-                    isLoading = false,
-                    categories = sampleCategoriesForPreview(),
-                    showCreateDialog = true,
-                    dialogTitle = "New Category",
-                    dialogDescription = "A category for organizing my notes",
-                    dialogColor = "#FF6B6B",
-                    editingCategory = null,
-                ),
-            onNavigateBack = {},
-            onCreateCategory = {},
-            onEditCategory = {},
-            onDeleteCategory = {},
-            onSaveCategory = {},
-            onDismissDialog = {},
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onColorChange = {},
-        )
-    }
-}
 
 // Sample data for previews
 private fun sampleCategoriesForPreview(): List<Category> =

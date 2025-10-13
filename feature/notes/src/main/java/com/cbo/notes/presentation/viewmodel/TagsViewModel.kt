@@ -59,7 +59,7 @@ class TagsViewModel
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
-                                    tags = tags,
+                                    tags = tags.sortedByDescending { tag -> tag.createdAt },
                                 )
                             }
                         }
@@ -74,25 +74,11 @@ class TagsViewModel
                 tag?.let {
                     updateTagUseCase.invoke(tag).fold(
                         onSuccess = {
-                            _uiState.update {
-                                it.copy(
-                                    isCreating = false,
-                                    showCreateDialog = false,
-                                    editingTag = null,
-                                    selectedTags = emptyList(),
-                                )
-                            }
+                            resetStateToEdit()
                             snackbarManager.showMessage(SnackbarMessage.Success("Tag updated"))
                         },
                         onFailure = { error ->
-                            _uiState.update {
-                                it.copy(
-                                    isCreating = false,
-                                    showCreateDialog = false,
-                                    editingTag = null,
-                                    selectedTags = emptyList(),
-                                )
-                            }
+                            resetStateToEdit()
                             snackbarManager.showMessage(SnackbarMessage.Error("Failed to update tag."))
                         },
                     )
@@ -169,40 +155,16 @@ class TagsViewModel
                 if (selectedTags.isNotEmpty()) {
                     deleteTagListUseCase.invoke(selectedTags).fold(
                         onSuccess = {
-                            _uiState.update {
-                                it.copy(
-                                    isCreating = false,
-                                    showCreateDialog = false,
-                                    editingTag = null,
-                                    selectedTags = emptyList(),
-                                    viewMode = ViewMode.EDIT,
-                                )
-                            }
+                            resetStateToEdit()
                             snackbarManager.showMessage(SnackbarMessage.Success("Tags deleted"))
                         },
                         onFailure = {
-                            _uiState.update {
-                                it.copy(
-                                    isCreating = false,
-                                    showCreateDialog = false,
-                                    editingTag = null,
-                                    selectedTags = emptyList(),
-                                    viewMode = ViewMode.EDIT,
-                                )
-                            }
+                            resetStateToEdit()
                             snackbarManager.showMessage(SnackbarMessage.Error("Failed to delete tags"))
                         },
                     )
                 } else {
-                    _uiState.update {
-                        it.copy(
-                            isCreating = false,
-                            showCreateDialog = false,
-                            editingTag = null,
-                            selectedTags = emptyList(),
-                            viewMode = ViewMode.EDIT,
-                        )
-                    }
+                    resetStateToEdit()
                 }
             }
         }
@@ -238,6 +200,7 @@ class TagsViewModel
         fun showEditTagDialog(tag: Tag) {
             _uiState.update {
                 it.copy(
+                    showDeleteTagDialog = false,
                     showCreateDialog = true,
                     editingTag = tag,
                     dialogTagName = tag.name,
@@ -256,6 +219,27 @@ class TagsViewModel
         fun updateTagColor(color: String?) {
             _uiState.update { it.copy(dialogTagColor = color) }
         }
+
+        fun showDeleteTagDialog() {
+            _uiState.update { it.copy(showDeleteTagDialog = true, showCreateDialog = false) }
+        }
+
+        fun hideDeleteTagDialog() {
+            _uiState.update { it.copy(showDeleteTagDialog = false) }
+        }
+
+        fun resetStateToEdit() {
+            _uiState.update {
+                it.copy(
+                    isCreating = false,
+                    showCreateDialog = false,
+                    showDeleteTagDialog = false,
+                    editingTag = null,
+                    selectedTags = emptyList(),
+                    viewMode = ViewMode.EDIT,
+                )
+            }
+        }
     }
 
 enum class ViewMode {
@@ -272,6 +256,7 @@ data class TagsUiState(
     val color: String? = null,
     val usageCount: Int = 0,
     val selectedTags: List<Tag> = emptyList(),
+    val showDeleteTagDialog: Boolean = false,
     val showCreateDialog: Boolean = false,
     val editingTag: Tag? = null,
     val dialogTagName: String = "",

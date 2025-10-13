@@ -194,6 +194,7 @@ class NotesViewModel @Inject constructor(
 
     fun changeViewMode(viewMode: ViewMode) {
         viewModelScope.launch {
+            Log.d("NotesViewModel", "ViewMode Changed to -> $viewMode")
             setNotesViewModeUseCase.invoke(viewMode)
             _uiState.update { it.copy(viewMode = viewMode) }
         }

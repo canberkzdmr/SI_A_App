@@ -10,6 +10,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,14 +55,18 @@ fun AppTitleMedium(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onBackground,
-    textAlign: TextAlign? = null
+    overflow: TextOverflow = TextOverflow.Clip,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
 ) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleMedium,
+        fontWeight = fontWeight,
         color = color,
+        overflow = overflow,
+        textAlign = textAlign,
         modifier = modifier,
-        textAlign = textAlign
     )
 }
 
@@ -119,21 +125,24 @@ fun AppCaption(
     )
 }
 
-
-
 @Composable
 fun AppLabel(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    style: TextStyle = MaterialTheme.typography.labelMedium,
+    overflow: TextOverflow = TextOverflow.Visible,
+    maxLines: Int = Int.MAX_VALUE,
+    color: Color = Color.Unspecified,
 ) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelMedium,
-        color = color,
+        style = style,
         modifier = modifier,
-        textAlign = textAlign
+        textAlign = textAlign,
+        color = color,
+        overflow = overflow,
+        maxLines = maxLines
     )
 }
 
