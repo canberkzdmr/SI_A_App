@@ -43,10 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cbo.core.data.biometric.BiometricUtils
 import com.cbo.login.presentation.viewmodel.LoginUiState
 import com.cbo.login.presentation.viewmodel.LoginViewModel
-import com.cbo.ui.components.AppDialog
+import com.cbo.ui.components.AppAlertDialog
 import com.cbo.ui.components.AppHeadline
 import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppOutlinedTextField
@@ -212,7 +211,7 @@ fun LoginScreenContent(
         }
 
         if (state.showBiometricDialog) {
-            AppDialog(
+            AppAlertDialog(
                 title = "Enable Biometric Login?",
                 message = "You can log in faster next time using fingerprint or face.",
                 confirmText = "Enable",

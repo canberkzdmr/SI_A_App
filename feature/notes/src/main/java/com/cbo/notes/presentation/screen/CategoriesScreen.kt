@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -48,11 +49,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -65,12 +70,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.presentation.viewmodel.CategoriesUiState
 import com.cbo.notes.presentation.viewmodel.CategoriesViewModel
+import com.cbo.ui.components.AppAlertDialog
+import com.cbo.ui.components.AppInfoDialog
 import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitleMedium
 import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CategoriesScreen(
@@ -83,6 +91,7 @@ fun CategoriesScreen(
     CategoriesContent(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
+        onClickDialog = viewModel::showInfoDialog,
         onCreateCategory = viewModel::showCreateCategoryDialog,
         onEditCategory = viewModel::showEditCategoryDialog,
         onDeleteCategory = viewModel::deleteCategory,
@@ -101,6 +110,7 @@ fun CategoriesScreen(
 fun CategoriesContent(
     uiState: CategoriesUiState,
     onNavigateBack: () -> Unit,
+    onClickDialog: () -> Unit,
     onCreateCategory: () -> Unit,
     onEditCategory: (Category) -> Unit,
     onDeleteCategory: (Category) -> Unit,
@@ -125,6 +135,12 @@ fun CategoriesContent(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onClickDialog) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Info"
+                        )
+                    }
                     IconButton(onClick = onCreateCategory) {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -189,6 +205,14 @@ fun CategoriesContent(
             onColorChange = updateDialogColor,
             onSave = saveCategory,
             onDismiss = hideDialog,
+        )
+    }
+
+    if (uiState.showInfoDialog) {
+        AppInfoDialog(
+            title = "Info",
+            onDismiss = hideDialog,
+            message = "\uD83D\uDCA1 Tip: Swipe left to delete",
         )
     }
 }
@@ -256,12 +280,16 @@ fun CategoryItem(
     modifier: Modifier = Modifier,
     isFirstItem: Boolean = false,
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             when (value) {
                 SwipeToDismissBoxValue.EndToStart -> {
-                    onDelete()
-                    true
+                    showDeleteDialog = true
+                    false
                 }
                 else -> false
             }
@@ -269,11 +297,25 @@ fun CategoryItem(
         positionalThreshold = { totalDistance -> totalDistance * 0.5f }
     )
 
-    // --- Show swipe hint only for the first item ---
+    // Haptic feedback on swipe completion fraction
+    var hasTriggeredHaptic by remember { mutableStateOf(false) }
+    LaunchedEffect(swipeToDismissBoxState.progress) {
+        val progress = swipeToDismissBoxState.progress
+        if (!hasTriggeredHaptic && progress >= 0.5f) {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            hasTriggeredHaptic = true
+        }
+        if (progress < 0.5f && hasTriggeredHaptic) {
+            // reset if user swipes back
+            hasTriggeredHaptic = false
+        }
+    }
+
+    // Show swipe hint only for the first item
     val showHint = remember { mutableStateOf(isFirstItem) }
     val offsetX by animateDpAsState(
-        targetValue = if (showHint.value) (-14).dp else 0.dp,
-        animationSpec = tween(durationMillis = 500, easing = LinearEasing)
+        targetValue = if (showHint.value) (-48).dp else 0.dp,
+        animationSpec = tween(durationMillis = 125, easing = LinearEasing)
     )
 
     LaunchedEffect(isFirstItem) {
@@ -281,6 +323,25 @@ fun CategoryItem(
             delay(300)
             showHint.value = false
         }
+    }
+
+    if (showDeleteDialog) {
+        AppAlertDialog(
+            title = "Delete ${category.name}",
+            message = "Are you sure you want to delete ${category.name} category.\nThis action cannot be undone.",
+            confirmText = "Delete",
+            dismissText = "Cancel",
+            onConfirm = {
+                showDeleteDialog = false
+                onDelete()
+            },
+            onDismiss = {
+                showDeleteDialog = false
+                coroutineScope.launch {
+                    swipeToDismissBoxState.snapTo(SwipeToDismissBoxValue.Settled)
+                }
+            }
+        )
     }
 
     SwipeToDismissBox(
@@ -460,14 +521,15 @@ fun CategoriesContentPreview_WithData() {
                 categories = sampleCategoriesForPreview()
             ),
             onNavigateBack = {},
+            onClickDialog = {},
             onCreateCategory = {},
             onEditCategory = {},
-            onDeleteCategory = {},
             updateDialogTitle = {},
             updateDialogDescription = {},
             updateDialogColor = {},
             saveCategory = {},
             hideDialog = {},
+            onDeleteCategory = {},
         )
     }
 }
@@ -483,14 +545,15 @@ fun CategoriesContentPreview_Empty() {
                 showCreateDialog = false,
             ),
             onNavigateBack = {},
+            onClickDialog = {},
             onCreateCategory = {},
             onEditCategory = {},
-            onDeleteCategory = {},
             updateDialogTitle = {},
             updateDialogDescription = {},
             updateDialogColor = {},
             saveCategory = {},
             hideDialog = {},
+            onDeleteCategory = {},
         )
     }
 }
@@ -502,14 +565,15 @@ fun CategoriesContentPreview_Loading() {
         CategoriesContent(
             uiState = CategoriesUiState(isLoading = true),
             onNavigateBack = {},
+            onClickDialog = {},
             onCreateCategory = {},
             onEditCategory = {},
-            onDeleteCategory = {},
             updateDialogTitle = {},
             updateDialogDescription = {},
             updateDialogColor = {},
             saveCategory = {},
             hideDialog = {},
+            onDeleteCategory = {},
         )
     }
 }

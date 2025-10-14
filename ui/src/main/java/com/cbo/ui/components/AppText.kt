@@ -39,7 +39,8 @@ fun AppTitle(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onBackground,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    style: TextStyle = MaterialTheme.typography.titleLarge
 ) {
     Text(
         text = text,
@@ -58,10 +59,11 @@ fun AppTitleMedium(
     overflow: TextOverflow = TextOverflow.Clip,
     textAlign: TextAlign? = null,
     fontWeight: FontWeight? = null,
+    style: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleMedium,
+        style = style,
         fontWeight = fontWeight,
         color = color,
         overflow = overflow,
@@ -77,11 +79,12 @@ fun AppBody(
     color: Color = MaterialTheme.colorScheme.onBackground,
     textAlign: TextAlign? = null,
     maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Clip
+    overflow: TextOverflow = TextOverflow.Clip,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
 ) {
     Text(
         text = text,
-        style = MaterialTheme.typography.bodyMedium,
+        style = style,
         color = color,
         modifier = modifier,
         textAlign = textAlign,

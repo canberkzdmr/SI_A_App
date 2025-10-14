@@ -61,6 +61,14 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
+    fun showInfoDialog() {
+        _uiState.update {
+            it.copy(
+                showInfoDialog = true,
+            )
+        }
+    }
+
     fun showCreateCategoryDialog() {
         _uiState.update { 
             it.copy(
@@ -88,6 +96,7 @@ class CategoriesViewModel @Inject constructor(
     fun hideDialog() {
         _uiState.update { 
             it.copy(
+                showInfoDialog = false,
                 showCreateDialog = false,
                 editingCategory = null,
                 dialogTitle = "",
@@ -186,6 +195,7 @@ class CategoriesViewModel @Inject constructor(
                     )
                 }
             )
+            hideDialog()
         }
     }
 
@@ -198,6 +208,7 @@ data class CategoriesUiState(
     val isLoading: Boolean = false,
     val isCreating: Boolean = false,
     val categories: List<Category> = emptyList(),
+    val showInfoDialog: Boolean = false,
     val showCreateDialog: Boolean = false,
     val editingCategory: Category? = null,
     val dialogTitle: String = "",

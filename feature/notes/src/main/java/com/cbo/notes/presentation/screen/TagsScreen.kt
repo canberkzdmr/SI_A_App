@@ -63,7 +63,7 @@ import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.TagsUiState
 import com.cbo.notes.presentation.viewmodel.TagsViewModel
 import com.cbo.notes.presentation.viewmodel.ViewMode
-import com.cbo.ui.components.AppDialog
+import com.cbo.ui.components.AppAlertDialog
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.HeaderCard
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -284,7 +284,7 @@ fun TagsContent(
 
     if (uiState.showDeleteTagDialog) {
         val count = uiState.selectedTags.size
-        AppDialog(
+        AppAlertDialog(
             title = "Delete Tags",
             message = if (count > 1)
                 "Are you sure you want to delete $count tags? This action cannot be undone."
