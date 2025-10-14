@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -205,7 +206,7 @@ fun NoteCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     note.category?.let { category ->
@@ -220,7 +221,8 @@ fun NoteCard(
                     // Updated date
                     AppCaption(
                         modifier = Modifier.padding(start = 4.dp),
-                        text = formatDate(note.updatedAt)
+                        text = formatDate(note.updatedAt),
+                        maxLines = 1
                     )
                 }
             }
@@ -230,7 +232,7 @@ fun NoteCard(
             Icon(
                 imageVector = Icons.Default.PushPin,
                 contentDescription = "Pinned",
-                tint = MaterialTheme.colorScheme.primary,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier =
                     Modifier
                         .size(24.dp)
@@ -238,7 +240,7 @@ fun NoteCard(
                         .align(Alignment.TopEnd)
                         .offset(x = 0.dp, y = (-14).dp) // move it slightly outside the card
                         .background(
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f),
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                             shape = CircleShape,
                         )/*.border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)*/
                         .padding(2.dp),
@@ -426,6 +428,8 @@ private fun CategoryChip(
             AppLabel(
                 text = category.name,
                 style = if (isSmall) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         colors =

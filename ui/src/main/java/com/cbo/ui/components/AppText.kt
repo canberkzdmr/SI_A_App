@@ -114,14 +114,16 @@ fun AppCaption(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
 ) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelSmall,
         color = color,
         modifier = modifier,
-        textAlign = textAlign
+        textAlign = textAlign,
+        maxLines = maxLines,
     )
 }
 

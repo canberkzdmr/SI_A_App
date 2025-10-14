@@ -360,7 +360,7 @@ private fun TagSelection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
-            items(tags) { tag ->
+            items(tags.sortedByDescending { it in selectedTags }) { tag ->
                 FilterChip(
                     selected = selectedTags.any { it.id == tag.id },
                     onClick = { onTagToggle(tag) },
@@ -481,12 +481,6 @@ private fun EditNoteScreenContent(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // Category selection
-                AppTitle(
-                    text = "Category",
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                
                 CategorySelection(
                     selectedCategory = uiState.selectedCategory,
                     categories = uiState.availableCategories,
@@ -494,12 +488,6 @@ private fun EditNoteScreenContent(
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
-                
-                // Tag selection
-                AppTitle(
-                    text = "Tags",
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
                 
                 TagSelection(
                     selectedTags = uiState.selectedTags,

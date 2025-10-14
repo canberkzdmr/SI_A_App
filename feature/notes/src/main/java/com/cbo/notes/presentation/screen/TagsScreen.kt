@@ -1,5 +1,6 @@
 package com.cbo.notes.presentation.screen
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -67,7 +68,6 @@ import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.HeaderCard
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TagsScreen(
     onNavigateBack: () -> Unit,
@@ -76,9 +76,55 @@ fun TagsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    TagsContent(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onChangeViewMode = viewModel::changeViewMode,
+        onShowCreateTagDialog = viewModel::showCreateTagDialog,
+        onShowEditTagDialog = viewModel::showEditTagDialog,
+        onUpdateSelectedTags = { tag ->
+            Log.d("TagsScreen", "Selected tag -> $tag")
+            val currentTags = uiState.selectedTags.toMutableList()
+            if (currentTags.contains(tag)) {
+                currentTags.remove(tag)
+            } else {
+                currentTags.add(tag)
+            }
+            viewModel.updateSelectedTags(currentTags)
+        },
+        onSaveTag = viewModel::saveTag,
+        onUpdateTag = viewModel::updateTag,
+        onHideCreateTagDialog = viewModel::hideCreateTagDialog,
+        onDeleteSelectedTags = viewModel::deleteSelectedTags,
+        onResetStateToEdit = viewModel::resetStateToEdit,
+        onTagNameChange = viewModel::updateTagName, // 👈 add this
+        onColorChange = viewModel::updateTagColor,  // 👈 add this
+        modifier = modifier
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun TagsContent(
+    uiState: TagsUiState,
+    onNavigateBack: () -> Unit,
+    onChangeViewMode: (ViewMode) -> Unit,
+    onShowCreateTagDialog: () -> Unit,
+    onShowEditTagDialog: (Tag) -> Unit,
+    onUpdateSelectedTags: (Tag) -> Unit,
+    onSaveTag: () -> Unit,
+    onUpdateTag: () -> Unit,
+    onHideCreateTagDialog: () -> Unit,
+    onDeleteSelectedTags: () -> Unit,
+    onResetStateToEdit: () -> Unit,
+    onTagNameChange: (String) -> Unit,
+    onColorChange: (String?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     BackHandler {
         if (uiState.viewMode == ViewMode.DELETE) {
-            viewModel.changeViewMode(ViewMode.EDIT)
+            onChangeViewMode(ViewMode.EDIT)
         } else {
             onNavigateBack()
         }
@@ -88,80 +134,55 @@ fun TagsScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = {
-                    AppTitle("Tags")
-                },
+                title = { AppTitle("Tags") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
                     IconButton(
                         onClick = {
-                            Log.d("TagsScreen", "Delete Tags clicked")
-                            viewModel.changeViewMode(if (uiState.viewMode == ViewMode.EDIT) ViewMode.DELETE else ViewMode.EDIT)
-                        },
+                            onChangeViewMode(
+                                if (uiState.viewMode == ViewMode.EDIT) ViewMode.DELETE else ViewMode.EDIT
+                            )
+                        }
                     ) {
                         when (uiState.viewMode) {
-                            ViewMode.EDIT -> {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete tags mode",
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            }
-
-                            ViewMode.DELETE -> {
-                                Icon(
-                                    imageVector = Icons.Default.Cancel,
-                                    contentDescription = "Cancel delete mode",
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            }
+                            ViewMode.EDIT -> Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete tags mode",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            ViewMode.DELETE -> Icon(
+                                Icons.Default.Cancel,
+                                contentDescription = "Cancel delete mode",
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
-                    IconButton(onClick = {
-                        Log.d("TagsScreen", "Add tag clicked")
-                        viewModel.showCreateTagDialog()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Tag",
-                        )
+                    IconButton(onClick = onShowCreateTagDialog) {
+                        Icon(Icons.Default.Add, contentDescription = "Add Tag")
                     }
-                },
+                }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    Log.d("TagsScreen", "FAB Add Tag clicked")
                     if (uiState.viewMode == ViewMode.EDIT) {
-                        viewModel.showCreateTagDialog()
+                        onShowCreateTagDialog()
                     } else {
-                        // Delete all
-                        if (uiState.selectedTags.isNotEmpty()) {
-                            viewModel.showDeleteTagDialog()
-                        } else {
-                            viewModel.resetStateToEdit()
-                        }
+                        if (uiState.selectedTags.isNotEmpty()) onDeleteSelectedTags()
+                        else onResetStateToEdit()
                     }
                 },
-                containerColor =
-                    animateColorAsState(
-                        targetValue =
-                            if (uiState.viewMode == ViewMode.EDIT) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.error
-                            },
-                        animationSpec = tween(300),
-                        label = "fabColorAnim",
-                    ).value,
+                containerColor = animateColorAsState(
+                    targetValue = if (uiState.viewMode == ViewMode.EDIT)
+                        MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.error,
+                    animationSpec = tween(300)
+                ).value
             ) {
                 AnimatedContent(
                     targetState = uiState.viewMode,
@@ -170,118 +191,76 @@ fun TagsScreen(
                             initialOffsetX = { it },
                             animationSpec = tween(300),
                         ) togetherWith
-                            slideOutHorizontally(
-                                targetOffsetX = { -it },
-                                animationSpec = tween(300),
-                            )
+                                slideOutHorizontally(
+                                    targetOffsetX = { -it },
+                                    animationSpec = tween(300),
+                                )
                     },
                     label = "fabIconAnim",
                 ) { viewMode ->
                     val iconColor by animateColorAsState(
-                        targetValue =
-                            if (viewMode == ViewMode.EDIT) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onError
-                            },
-                        animationSpec = tween(300),
-                        label = "fabIconColorAnim",
+                        targetValue = if (viewMode == ViewMode.EDIT)
+                            MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onError,
+                        animationSpec = tween(300)
                     )
-
-                    if (viewMode == ViewMode.EDIT) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Note",
-                            tint = iconColor,
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Note",
-                            tint = iconColor,
-                        )
-                    }
+                    Icon(
+                        imageVector = if (viewMode == ViewMode.EDIT)
+                            Icons.Default.Add
+                        else Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = iconColor
+                    )
                 }
             }
-        },
+        }
     ) { paddingValues ->
         when {
-            // Loading Screen
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+            uiState.isLoading -> Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
 
-            // Empty Tags
-            uiState.tags.isEmpty() -> {
-                EmptyTagsState(
-                    onCreateTag = viewModel::showCreateTagDialog,
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                )
-            }
+            uiState.tags.isEmpty() -> EmptyTagsState(
+                onCreateTag = onShowCreateTagDialog,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
 
-            // Tags Content
             else -> {
-                Column(
-                    Modifier.verticalScroll(rememberScrollState()),
-                ) {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
                     HeaderCard(
-                        modifier =
-                            Modifier
-                                .padding(paddingValues)
-                                .padding(16.dp),
+                        modifier = Modifier
+                            .padding(paddingValues)
+                            .padding(16.dp),
                         iconSelected = Icons.Default.Tag,
                         title = "Manage Your Tags",
-                        content =
-                            "Switch to \uD83D\uDDD1\uFE0F Delete mode using the action button at the top.\n" +
-                                "In ✏\uFE0F Edit mode, tap a tag to update it.\n" +
-                                "In \uD83D\uDDD1\uFE0F Delete mode, select tags you don’t need and tap the delete button (FAB) to remove them all.",
+                        content = "Switch to 🗑 Delete mode using the top button.\n" +
+                                "In ✏ Edit mode, tap a tag to update it.\n" +
+                                "In 🗑 Delete mode, select tags you don’t need and tap the delete FAB."
                     )
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(Modifier.height(32.dp))
 
                     FlowRow(
-                        horizontalArrangement =
-                            Arrangement.spacedBy(
-                                8.dp,
-                                Alignment.CenterHorizontally,
-                            ),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier =
-                            Modifier
-                                .padding(horizontal = 8.dp)
-                                .fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .fillMaxWidth()
                     ) {
                         uiState.tags.forEach { tag ->
                             JiggleTag(
-                                tag,
+                                tag = tag,
                                 viewMode = uiState.viewMode,
-                                onClick = {
-                                    Log.d("TagsScreen", "onClick Tag -> ${tag.name}")
-                                    if (uiState.viewMode == ViewMode.EDIT) {
-                                        viewModel.showEditTagDialog(tag)
-                                    } else {
-                                        null
-                                    }
-                                },
+                                onClick = { if (uiState.viewMode == ViewMode.EDIT) onShowEditTagDialog(tag) },
                                 selectedTags = uiState.selectedTags,
                                 onTagSelected = {
-                                    Log.d("TagsScreen", "Selected tag -> $tag")
-                                    val currentTags = uiState.selectedTags.toMutableList()
-                                    if (currentTags.contains(tag)) {
-                                        currentTags.remove(tag)
-                                    } else {
-                                        currentTags.add(tag)
-                                    }
-                                    viewModel.updateSelectedTags(currentTags)
-                                },
+                                    onUpdateSelectedTags(tag)
+                                }
                             )
                         }
                     }
@@ -296,16 +275,10 @@ fun TagsScreen(
             selectedColor = uiState.dialogTagColor,
             isEdit = uiState.editingTag != null,
             isCreating = uiState.isCreating,
-            onConfirm = {
-                if (uiState.editingTag == null) {
-                    viewModel.saveTag()
-                } else {
-                    viewModel.updateTag()
-                }
-            },
-            onDismiss = { viewModel.hideCreateTagDialog() },
-            onTagNameChange = { name -> viewModel.updateTagName(name) },
-            onColorChange = { color -> viewModel.updateTagColor(color) },
+            onConfirm = { if (uiState.editingTag == null) onSaveTag() else onUpdateTag() },
+            onDismiss = onHideCreateTagDialog,
+            onTagNameChange = onTagNameChange,
+            onColorChange = onColorChange
         )
     }
 
@@ -313,142 +286,11 @@ fun TagsScreen(
         val count = uiState.selectedTags.size
         AppDialog(
             title = "Delete Tags",
-            message =
-                if (uiState.selectedTags.size > 1) {
-                    "Are you sure you want to delete $count tags? This action cannot be undone."
-                } else {
-                    "Are you sure you want to delete this tag?"
-                }
-            ,
-            onConfirm = viewModel::deleteSelectedTags,
-            onDismiss = viewModel::resetStateToEdit
-        )
-    }
-}
-
-@OptIn(
-    ExperimentalFoundationApi::class,
-    ExperimentalMaterial3Api::class,
-    ExperimentalLayoutApi::class,
-)
-@Composable
-fun TagsScreenContent(
-    uiState: TagsUiState,
-    modifier: Modifier = Modifier,
-    updateTagName: (String) -> Unit,
-) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    AppTitle("Manage Tags")
-                },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Tag",
-                        )
-                    }
-                },
-            )
-        },
-    ) { paddingValues ->
-        when {
-            // Loading Screen
-            uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-
-            // Empty Tags
-            uiState.tags.isEmpty() -> {
-                EmptyTagsState(
-                    onCreateTag = {},
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                )
-            }
-
-            // Tags Content
-            else -> {
-                Column {
-                    HeaderCard(
-                        modifier =
-                            Modifier
-                                .padding(paddingValues)
-                                .padding(8.dp),
-                        iconSelected = Icons.Default.Tag,
-                        title = "Manage Your Tags",
-                        content =
-                            "Switch to \uD83D\uDDD1\uFE0F Delete mode using the action button at the top.\n" +
-                                "In ✏\uFE0F Edit mode, tap a tag to update it.\n" +
-                                "In \uD83D\uDDD1\uFE0F Delete mode, select tags you don’t need and tap the delete button (FAB) to remove them all.",
-                    )
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    FlowRow(
-                        horizontalArrangement =
-                            Arrangement.spacedBy(
-                                4.dp,
-                                Alignment.CenterHorizontally,
-                            ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier =
-                            Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                    ) {
-                        uiState.tags.forEach { tag ->
-                            JiggleTag(
-                                tag,
-                                viewMode = uiState.viewMode,
-                                onClick = {
-                                },
-                                selectedTags = uiState.selectedTags,
-                                onTagSelected = {
-                                    Log.d("TagsScreen", "Selected tag -> $tag")
-                                    val currentTags = uiState.selectedTags.toMutableList()
-                                    if (currentTags.contains(tag)) {
-                                        currentTags.remove(tag)
-                                    } else {
-                                        currentTags.add(tag)
-                                    }
-                                },
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (uiState.showCreateDialog) {
-        CreateTagDialog(
-            tagName = if (uiState.editingTag != null) "Edit Tag" else "Create Tag",
-            selectedColor = uiState.editingTag?.color,
-            isCreating = uiState.isCreating,
-            isEdit = uiState.editingTag != null,
-            onTagNameChange = updateTagName,
-            onColorChange = {},
-            onConfirm = {},
-            onDismiss = {},
+            message = if (count > 1)
+                "Are you sure you want to delete $count tags? This action cannot be undone."
+            else "Are you sure you want to delete this tag?",
+            onConfirm = onDeleteSelectedTags,
+            onDismiss = onResetStateToEdit
         )
     }
 }
@@ -579,43 +421,75 @@ private fun EmptyTagsState(
     }
 }
 
-@Preview
+@Preview(showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
-fun TagsScreenPreview() {
+fun TagsContentPreview_Empty() {
     MemCloudApplicationTheme {
-        TagsScreenContent(
-            uiState =
-                TagsUiState(
-                    isLoading = false,
-                    tags = sampleEditTags(),
-                    name = "test54",
-                ),
-            updateTagName = {},
+        TagsContent(
+            uiState = TagsUiState(tags = emptyList(), viewMode = ViewMode.EDIT),
+            onNavigateBack = {},
+            onChangeViewMode = {},
+            onShowCreateTagDialog = {},
+            onShowEditTagDialog = {},
+            onUpdateSelectedTags = {},
+            onSaveTag = {},
+            onUpdateTag = {},
+            onHideCreateTagDialog = {},
+            onDeleteSelectedTags = {},
+            onResetStateToEdit = {},
+            onTagNameChange = {},
+            onColorChange = {},
         )
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun TagsScreenDeleteModePreview() {
+fun TagsContentPreview_WithData() {
     MemCloudApplicationTheme {
-        TagsScreenContent(
-            uiState =
-                TagsUiState(
-                    isLoading = false,
-                    tags = sampleEditTags(),
-                    name = "test54",
-                    viewMode = ViewMode.DELETE,
-                ),
-            updateTagName = {},
+        TagsContent(
+            uiState = TagsUiState(tags = sampleEditTags(), viewMode = ViewMode.EDIT),
+            onNavigateBack = {},
+            onChangeViewMode = {},
+            onShowCreateTagDialog = {},
+            onShowEditTagDialog = {},
+            onUpdateSelectedTags = {},
+            onSaveTag = {},
+            onUpdateTag = {},
+            onHideCreateTagDialog = {},
+            onDeleteSelectedTags = {},
+            onResetStateToEdit = {},
+            onTagNameChange = {},
+            onColorChange = {}
         )
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun TagsScreenEmptyPreview() {
+fun TagsContentPreview_DeleteMode() {
+    val sampleTags = listOf(
+        Tag(1, userId = 1, "Work", "#FF9800"),
+        Tag(2, userId = 1,"Personal", "#4CAF50")
+    )
     MemCloudApplicationTheme {
+        TagsContent(
+            uiState = TagsUiState(tags = sampleTags, viewMode = ViewMode.DELETE, selectedTags = listOf(sampleTags[0])),
+            onNavigateBack = {},
+            onChangeViewMode = {},
+            onShowCreateTagDialog = {},
+            onShowEditTagDialog = {},
+            onUpdateSelectedTags = {},
+            onSaveTag = {},
+            onUpdateTag = {},
+            onHideCreateTagDialog = {},
+            onDeleteSelectedTags = {},
+            onResetStateToEdit = {},
+            onTagNameChange = {},
+            onColorChange = {}
+        )
     }
 }
 
