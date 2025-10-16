@@ -60,6 +60,7 @@ fun NotesScreen(
     onNavigateToEditNote: (noteId: Int) -> Unit,
     onNavigateToCategories: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    initialCategoryId: Int? = null,
     modifier: Modifier = Modifier,
     viewModel: NotesViewModel = hiltViewModel(),
 ) {
@@ -68,6 +69,13 @@ fun NotesScreen(
 
     BackHandler {
         Log.i("NotesScreen", "Back button is disabled for Notes Screen")
+    }
+
+    LaunchedEffect(initialCategoryId, uiState.categories) {
+        if (initialCategoryId != null && uiState.categories.isNotEmpty()) {
+            val category = uiState.categories.firstOrNull { it.id == initialCategoryId }
+            viewModel.filterByCategory(category)
+        }
     }
 
     Scaffold(

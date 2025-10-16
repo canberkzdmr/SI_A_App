@@ -6,8 +6,10 @@ import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.usecase.CreateCategoryUseCase
 import com.cbo.notes.domain.usecase.DeleteCategoryUseCase
 import com.cbo.notes.domain.usecase.GetCategoriesUseCase
+import com.cbo.notes.domain.usecase.GetNotesUseCase
 import com.cbo.notes.domain.usecase.UpdateCategoryUseCase
 import com.cbo.core.session.UserSession
+import com.cbo.notes.domain.model.Tag
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,6 +27,7 @@ import javax.inject.Inject
 class CategoriesViewModel @Inject constructor(
     private val userSession: UserSession,
     private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val getNotesUseCase: GetNotesUseCase,
     private val createCategoryUseCase: CreateCategoryUseCase,
     private val updateCategoryUseCase: UpdateCategoryUseCase,
     private val deleteCategoryUseCase: DeleteCategoryUseCase,
@@ -43,20 +47,50 @@ class CategoriesViewModel @Inject constructor(
             currentUser?.let { user ->
                 _uiState.update { it.copy(isLoading = true) }
 
-                getCategoriesUseCase(user.id)
-                    .catch { throwable ->
-                        _uiState.update { 
-                            it.copy(
-                                isLoading = false, 
-                                errorMessage = "Failed to load categories: ${throwable.message}"
-                            ) 
+                combine(
+                    getCategoriesUseCase(user.id),
+                    getNotesUseCase(user.id)
+                ) { categories, notes ->
+                    val lastUpdated = notes
+                        .filter { it.category != null }
+                        .groupBy { it.category!!.id }
+                        .mapValues { (_, notesInCat) ->
+                            notesInCat.maxOfOrNull { it.updatedAt } ?: 0L
                         }
-                    }
-                    .collect { categories ->
-                        _uiState.update { 
-                            it.copy(isLoading = false, categories = categories) 
+
+                    val topTags: Map<Int, List<Tag>> = notes
+                        .filter { it.category != null }
+                        .groupBy { it.category!!.id }
+                        .mapValues { (_, notesInCat) ->
+                            notesInCat
+                                .flatMap { it.tags }
+                                .groupBy { it.id }
+                                .values
+                                .sortedByDescending { it.size }
+                                .map { it.first() }
+                                .take(3)
                         }
+
+                    Triple(categories, lastUpdated, topTags)
+                }
+                .catch { throwable ->
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false, 
+                            errorMessage = "Failed to load categories: ${throwable.message}"
+                        ) 
                     }
+                }
+                .collect { (categories, lastUpdated, topTags) ->
+                    _uiState.update { 
+                        it.copy(
+                            isLoading = false,
+                            categories = categories,
+                            lastUpdatedByCategory = lastUpdated,
+                            topTagsByCategory = topTags
+                        ) 
+                    }
+                }
             }
         }
     }
@@ -208,6 +242,8 @@ data class CategoriesUiState(
     val isLoading: Boolean = false,
     val isCreating: Boolean = false,
     val categories: List<Category> = emptyList(),
+    val lastUpdatedByCategory: Map<Int, Long> = emptyMap(),
+    val topTagsByCategory: Map<Int, List<com.cbo.notes.domain.model.Tag>> = emptyMap(),
     val showInfoDialog: Boolean = false,
     val showCreateDialog: Boolean = false,
     val editingCategory: Category? = null,

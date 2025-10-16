@@ -11,6 +11,7 @@ import com.cbo.login.presentation.navigation.loginNavGraph
 import com.cbo.memcloud.presentation.screen.MainScreen
 import com.cbo.notes.presentation.navigation.navigateToCategories
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
+import com.cbo.notes.presentation.navigation.navigateToNotes
 import com.cbo.notes.presentation.navigation.navigateToEditNote
 import com.cbo.notes.presentation.navigation.navigateToTags
 import com.cbo.notes.presentation.navigation.notesGraph
@@ -165,6 +166,9 @@ fun MainNavHost(
             },
             onNavigateToTags = {
                 navController.navigateToTags()
+            },
+            onOpenNotesForCategory = { categoryId ->
+                navController.navigateToNotes(categoryId)
             }
         )
     }

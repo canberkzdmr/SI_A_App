@@ -27,7 +27,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -36,6 +39,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
@@ -68,13 +73,18 @@ import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Category
+import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.viewmodel.CategoriesUiState
 import com.cbo.notes.presentation.viewmodel.CategoriesViewModel
 import com.cbo.ui.components.AppAlertDialog
 import com.cbo.ui.components.AppInfoDialog
 import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitleMedium
+import com.cbo.ui.components.HeaderCard
+import com.cbo.ui.components.RelativeTimeText
+import com.cbo.ui.components.StatChip
 import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import kotlinx.coroutines.delay
@@ -83,6 +93,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun CategoriesScreen(
     onNavigateBack: () -> Unit,
+    onOpenNotesForCategory: (Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CategoriesViewModel = hiltViewModel(),
 ) {
@@ -94,6 +105,7 @@ fun CategoriesScreen(
         onClickDialog = viewModel::showInfoDialog,
         onCreateCategory = viewModel::showCreateCategoryDialog,
         onEditCategory = viewModel::showEditCategoryDialog,
+        onOpenNotesForCategory = onOpenNotesForCategory,
         onDeleteCategory = viewModel::deleteCategory,
         updateDialogTitle = viewModel::updateDialogTitle,
         updateDialogDescription = viewModel::updateDialogDescription,
@@ -113,6 +125,7 @@ fun CategoriesContent(
     onClickDialog: () -> Unit,
     onCreateCategory: () -> Unit,
     onEditCategory: (Category) -> Unit,
+    onOpenNotesForCategory: (Int) -> Unit,
     onDeleteCategory: (Category) -> Unit,
     updateDialogTitle: (String) -> Unit,
     updateDialogDescription: (String) -> Unit,
@@ -180,12 +193,23 @@ fun CategoriesContent(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
+                    item {
+                        HeaderCard(
+                            title = "Organize your notes with categories",
+                            content = "Tap a category to view its notes. Swipe right to edit, left to delete.",
+                            elevation = 0.dp,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                     itemsIndexed(uiState.categories) { index, category ->
                         CategoryItem(
                             category = category,
                             onEdit = { onEditCategory(category) },
+                            onOpen = { onOpenNotesForCategory(category.id) },
                             onDelete = { onDeleteCategory(category) },
                             isFirstItem = index == 0,
+                            lastUpdatedMillis = uiState.lastUpdatedByCategory[category.id],
+                            previewTags = uiState.topTagsByCategory[category.id].orEmpty(),
                         )
                     }
                 }
@@ -276,9 +300,12 @@ private fun EmptyCategoriesState(
 fun CategoryItem(
     category: Category,
     onEdit: () -> Unit,
+    onOpen: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     isFirstItem: Boolean = false,
+    lastUpdatedMillis: Long? = null,
+    previewTags: List<Tag> = emptyList(),
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -287,6 +314,10 @@ fun CategoryItem(
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    onEdit()
+                    false
+                }
                 SwipeToDismissBoxValue.EndToStart -> {
                     showDeleteDialog = true
                     false
@@ -346,25 +377,44 @@ fun CategoryItem(
 
     SwipeToDismissBox(
         state = swipeToDismissBoxState,
-        enableDismissFromStartToEnd = false,
+        enableDismissFromStartToEnd = true,
         enableDismissFromEndToStart = true,
         backgroundContent = {
             val direction = swipeToDismissBoxState.dismissDirection
-            if (direction == SwipeToDismissBoxValue.EndToStart) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.error)
-                        .padding(horizontal = 20.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = MaterialTheme.colorScheme.onError,
-                        modifier = Modifier.size(28.dp)
-                    )
+            when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(horizontal = 20.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.error)
+                            .padding(horizontal = 20.dp),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+                else -> {}
             }
         },
         modifier = modifier
@@ -373,7 +423,7 @@ fun CategoryItem(
             .fillMaxWidth()
     ) {
         Card(
-            onClick = onEdit,
+            onClick = onOpen,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -409,17 +459,62 @@ fun CategoryItem(
                         )
 
                         category.description?.takeIf { it.isNotBlank() }?.let { desc ->
-                            AppLabel(
+                            AppBody(
                                 text = desc,
-                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
 
-                        AppLabel(
-                            text = "${category.notesCount} notes",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatChip(text = "${category.notesCount} notes")
+                            val lastUpdated = lastUpdatedMillis
+                            if (lastUpdated != null && lastUpdated > 0L) {
+                                StatChip(text = "updated ")
+                                RelativeTimeText(epochMillis = lastUpdated)
+                            } else {
+                                RelativeTimeText(epochMillis = category.createdAt)
+                            }
+                        }
+
+                        if (previewTags.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                previewTags.forEach { tag ->
+                                    StatChip(text = "#${tag.name}")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                var expanded by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More actions"
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                expanded = false
+                                onEdit()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                expanded = false
+                                onDelete()
+                            }
                         )
                     }
                 }
@@ -524,6 +619,7 @@ fun CategoriesContentPreview_WithData() {
             onClickDialog = {},
             onCreateCategory = {},
             onEditCategory = {},
+            onOpenNotesForCategory = {},
             updateDialogTitle = {},
             updateDialogDescription = {},
             updateDialogColor = {},
@@ -548,6 +644,7 @@ fun CategoriesContentPreview_Empty() {
             onClickDialog = {},
             onCreateCategory = {},
             onEditCategory = {},
+            onOpenNotesForCategory = {},
             updateDialogTitle = {},
             updateDialogDescription = {},
             updateDialogColor = {},
@@ -568,6 +665,7 @@ fun CategoriesContentPreview_Loading() {
             onClickDialog = {},
             onCreateCategory = {},
             onEditCategory = {},
+            onOpenNotesForCategory = {},
             updateDialogTitle = {},
             updateDialogDescription = {},
             updateDialogColor = {},

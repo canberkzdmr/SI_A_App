@@ -21,6 +21,10 @@ fun NavController.navigateToNotes(navOptions: NavOptions? = null) {
     this.navigate(NOTES_ROUTE, navOptions)
 }
 
+fun NavController.navigateToNotes(categoryId: Int, navOptions: NavOptions? = null) {
+    this.navigate("$NOTES_ROUTE?categoryId=$categoryId", navOptions)
+}
+
 fun NavController.navigateToCreateNote(navOptions: NavOptions? = null) {
     this.navigate(CREATE_NOTE_ROUTE, navOptions)
 }
@@ -44,13 +48,25 @@ fun NavGraphBuilder.notesGraph(
     onNavigateToCategories: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToTags: () -> Unit,
+    onOpenNotesForCategory: (Int) -> Unit,
 ) {
-    composable(route = NOTES_ROUTE) {
+    composable(
+        route = "$NOTES_ROUTE?categoryId={categoryId}",
+        arguments = listOf(
+            navArgument("categoryId") {
+                type = NavType.IntType
+                defaultValue = -1
+            }
+        )
+    ) { backStackEntry ->
+        val categoryArg = backStackEntry.arguments?.getInt("categoryId") ?: -1
+        val initialCategoryId = if (categoryArg != -1) categoryArg else null
         NotesScreen(
             onNavigateToCreateNote = onNavigateToCreateNote,
             onNavigateToEditNote = onNavigateToEditNote,
             onNavigateToCategories = onNavigateToCategories,
             onNavigateToSettings = onNavigateToSettings,
+            initialCategoryId = initialCategoryId,
         )
     }
 
@@ -76,7 +92,8 @@ fun NavGraphBuilder.notesGraph(
 
     composable(route = CATEGORIES_ROUTE) {
         CategoriesScreen(
-            onNavigateBack = onNavigateBack
+            onNavigateBack = onNavigateBack,
+            onOpenNotesForCategory = onOpenNotesForCategory,
         )
     }
 

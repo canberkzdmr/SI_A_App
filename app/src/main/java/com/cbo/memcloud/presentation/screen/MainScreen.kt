@@ -1,12 +1,18 @@
 package com.cbo.memcloud.presentation.screen
 
 import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,6 +26,7 @@ import com.cbo.notes.presentation.screen.TagsScreen
 import com.cbo.user.presentation.screen.ProfileScreen
 import com.cbo.ui.components.AppBottomNavigation
 import com.cbo.ui.components.BottomNavDestination
+import com.cbo.ui.components.BottomNavigationOverlay
 
 /**
  * Main screen that hosts the bottom navigation and main app content
@@ -35,12 +42,20 @@ fun MainScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        bottomBar = {
-            AppBottomNavigation(navController = navController)
-        }
-    ) { paddingValues ->
+    var isBottomNavExpanded by remember { mutableStateOf(false) }
+    var selectedCategoryIdForNotes by remember { mutableStateOf<Int?>(null) }
+    
+    Box(modifier = modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                AppBottomNavigation(
+                    navController = navController,
+                    isExpanded = isBottomNavExpanded,
+                    onExpandedChange = { isBottomNavExpanded = it }
+                )
+            }
+        ) { paddingValues ->
         Log.d("MainScreen", "current destination (${navController.currentDestination?.route})")
         NavHost(
             navController = navController,
@@ -58,13 +73,18 @@ fun MainScreen(
                     },
                     onNavigateToSettings = {
                         navController.navigate(BottomNavDestination.Profile.route)
-                    }
+                    },
+                    initialCategoryId = selectedCategoryIdForNotes
                 )
             }
 
             composable(BottomNavDestination.Categories.route) {
                 CategoriesScreen(
                     onNavigateBack = {
+                        navController.navigate(BottomNavDestination.Notes.route)
+                    },
+                    onOpenNotesForCategory = { categoryId ->
+                        selectedCategoryIdForNotes = categoryId
                         navController.navigate(BottomNavDestination.Notes.route)
                     }
                 )
@@ -111,5 +131,36 @@ fun MainScreen(
                 )
             }
         }
+    }
+        
+        // Overlay for expanded bottom navigation
+        BottomNavigationOverlay(
+            isExpanded = isBottomNavExpanded,
+            onDismiss = { isBottomNavExpanded = false },
+            onOptionClick = { option ->
+                when (option) {
+                    "categories" -> {
+                        navController.navigate(BottomNavDestination.Categories.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                    "tags" -> {
+                        navController.navigate(BottomNavDestination.Tags.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                    // Add more cases as needed
+                }
+                isBottomNavExpanded = false
+            }
+        )
     }
 }
