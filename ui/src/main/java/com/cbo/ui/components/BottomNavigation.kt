@@ -27,7 +27,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateDpAsState
@@ -98,7 +100,8 @@ fun AppBottomNavigation(
     navController: NavController,
     modifier: Modifier = Modifier,
     isExpanded: Boolean = false,
-    onExpandedChange: (Boolean) -> Unit = {}
+    onExpandedChange: (Boolean) -> Unit = {},
+    showCenterButton: Boolean = true
 ) {
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry.value?.destination
@@ -122,7 +125,8 @@ fun AppBottomNavigation(
                 onExpandedChange(false)
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        showCenterButton = showCenterButton
     )
 }
 
@@ -144,7 +148,7 @@ fun BottomNavigationOverlay(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.3f))
+                .background(Color.Black.copy(alpha = 0.2f))
                 .clickable { onDismiss() }
         )
     }
@@ -170,7 +174,8 @@ fun BottomNavigationBar(
     activeRoute: String,
     isExpanded: Boolean,
     onTabClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showCenterButton: Boolean = true
 ) {
     val mainTabs = listOf(
         TabItem("main_notes", Icons.AutoMirrored.Filled.Note, "Notes"),
@@ -182,7 +187,7 @@ fun BottomNavigationBar(
     
     // Find the index of the active tab (excluding center button)
     val activeTabIndex = mainTabs.indexOfFirst { it.id == activeRoute && it.id != "center" }
-    Log.d("BottomNavigation", "activeTabIndex: $activeTabIndex")
+
     // Adjust index for center button position (center is at index 1)
     val adjustedIndex = when {
         activeTabIndex < 0 -> -1
@@ -191,15 +196,25 @@ fun BottomNavigationBar(
         activeTabIndex > 2 -> activeTabIndex - 1 // Categories, Tags, Profile (shift left by 1)
         else -> activeTabIndex
     }
-
-    Log.d("BottomNavigation","adjustedIndex: $adjustedIndex")
     
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 8.dp
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .padding()
+                .fillMaxWidth(),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            HorizontalDivider(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth(),
+                thickness = Dp.Hairline,
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -213,7 +228,7 @@ fun BottomNavigationBar(
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            CenterButton(
+                            CenterLabel(
                                 isExpanded = isExpanded,
                                 onClick = { onTabClick(tab.id) }
                             )
@@ -231,6 +246,20 @@ fun BottomNavigationBar(
                             )
                         }
                     }
+                }
+            }
+
+            // Overlay the center FAB so it doesn't affect the bar height
+            if (showCenterButton) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .zIndex(1f)
+                ) {
+                    CenterButton(
+                        isExpanded = isExpanded,
+                        onClick = { onTabClick("center") }
+                    )
                 }
             }
             
@@ -379,8 +408,6 @@ fun SlidingIndicator(
         3 -> 4 // Profile (position 4)
         else -> 0
     }
-
-    Log.d("BottomNavigation", "SlidingIndicatior/positionIndex: $positionIndex")
     
     val targetOffset = 8.dp + (itemWidth * positionIndex) + (itemWidth / 2)
     
@@ -394,7 +421,7 @@ fun SlidingIndicator(
     )
     
     val indicatorWidth by animateDpAsState(
-        targetValue = 20.dp,
+        targetValue = 4.dp,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
@@ -437,18 +464,24 @@ fun CenterButton(
         label = "scale"
     )
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
-        modifier = Modifier.offset(y = (-12).dp)
+    Box(
+        contentAlignment = Alignment.TopCenter,
+        modifier = Modifier
+            .zIndex(1f)
+            .offset(y = (-18).dp)
     ) {
         FloatingActionButton(
             onClick = onClick,
             containerColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier
-                .size(56.dp)
+                .size(64.dp)
                 .scale(animatedScale)
                 .rotate(animatedRotation)
+                .zIndex(1f),
+            elevation = FloatingActionButtonDefaults.elevation(
+                defaultElevation = 10.dp,
+                pressedElevation = 12.dp
+            )
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
@@ -457,16 +490,35 @@ fun CenterButton(
                 modifier = Modifier.size(28.dp)
             )
         }
+    }
+}
 
-        if (!isExpanded) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Create",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-            // Invisible spacer to match the indicator space in other tabs
-            Spacer(modifier = Modifier.height(6.dp))
+@Composable
+fun CenterLabel(
+    isExpanded: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = false, radius = 28.dp)
+            ) { onClick() }
+    ) {
+        val labelSlotHeight = 28.dp
+        Box(
+            modifier = Modifier.height(labelSlotHeight),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            if (!isExpanded) {
+                Text(
+                    text = "Create",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
@@ -479,7 +531,7 @@ fun CenterActionOptions(
         CenterOption("categories", Icons.Default.Category, "Categories", Color(0xFFFF6B6B)),
         CenterOption("tags", Icons.Default.Tag, "Tags", Color(0xFF4ECDC4)),
         CenterOption("search", Icons.Default.Search, "Search", Color(0xFF45B7D1)),
-        CenterOption("settings", Icons.Default.Settings, "Settings", Color(0xFF96CEB4))
+        CenterOption("create_note", Icons.Default.Edit, "New Note", Color(0xFF7E57C2)),
     )
 
     Box(

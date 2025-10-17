@@ -18,11 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -91,17 +87,6 @@ fun NotesScreen(
                 onCategoriesClick = onNavigateToCategories,
                 onSettingsClick = onNavigateToSettings,
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToCreateNote,
-                modifier = Modifier.padding(16.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Create Note",
-                )
-            }
         },
     ) { paddingValues ->
         Column(
@@ -373,17 +358,6 @@ private fun NotesScreenContent(
                 onCategoriesClick = onNavigateToCategories,
                 onSettingsClick = onNavigateToSettings,
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToCreateNote,
-                containerColor = MaterialTheme.colorScheme.primary,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add Note",
-                )
-            }
         },
     ) { paddingValues ->
         Column(

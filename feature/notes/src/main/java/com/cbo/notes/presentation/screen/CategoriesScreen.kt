@@ -236,7 +236,7 @@ fun CategoriesContent(
         AppInfoDialog(
             title = "Info",
             onDismiss = hideDialog,
-            message = "\uD83D\uDCA1 Tip: Swipe left to delete",
+            message = "\uD83D\uDCA1 Tip: Swipe right to edit, left to delete",
         )
     }
 }

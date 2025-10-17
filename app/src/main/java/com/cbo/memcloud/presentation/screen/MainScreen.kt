@@ -2,6 +2,8 @@ package com.cbo.memcloud.presentation.screen
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -27,6 +29,7 @@ import com.cbo.user.presentation.screen.ProfileScreen
 import com.cbo.ui.components.AppBottomNavigation
 import com.cbo.ui.components.BottomNavDestination
 import com.cbo.ui.components.BottomNavigationOverlay
+import com.cbo.ui.components.CenterButton
 
 /**
  * Main screen that hosts the bottom navigation and main app content
@@ -52,7 +55,8 @@ fun MainScreen(
                 AppBottomNavigation(
                     navController = navController,
                     isExpanded = isBottomNavExpanded,
-                    onExpandedChange = { isBottomNavExpanded = it }
+                    onExpandedChange = { isBottomNavExpanded = it },
+                    showCenterButton = false
                 )
             }
         ) { paddingValues ->
@@ -133,12 +137,29 @@ fun MainScreen(
         }
     }
         
+        // Center floating action button rendered as an overlay so it can overflow the bar
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box(modifier = Modifier.navigationBarsPadding()) {
+                CenterButton(
+                    isExpanded = isBottomNavExpanded,
+                    onClick = { isBottomNavExpanded = !isBottomNavExpanded }
+                )
+            }
+        }
+
         // Overlay for expanded bottom navigation
         BottomNavigationOverlay(
             isExpanded = isBottomNavExpanded,
             onDismiss = { isBottomNavExpanded = false },
             onOptionClick = { option ->
                 when (option) {
+                    "create_note" -> {
+                        onNavigateToCreateNote()
+                    }
                     "categories" -> {
                         navController.navigate(BottomNavDestination.Categories.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
