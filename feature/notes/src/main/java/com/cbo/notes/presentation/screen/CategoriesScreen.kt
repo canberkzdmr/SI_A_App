@@ -30,17 +30,16 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
@@ -58,6 +57,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -77,15 +77,14 @@ import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.viewmodel.CategoriesUiState
 import com.cbo.notes.presentation.viewmodel.CategoriesViewModel
 import com.cbo.ui.components.AppAlertDialog
-import com.cbo.ui.components.AppInfoDialog
-import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.AppInfoDialog
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitleMedium
+import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.components.HeaderCard
 import com.cbo.ui.components.RelativeTimeText
 import com.cbo.ui.components.StatChip
-import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -295,6 +294,44 @@ private fun EmptyCategoriesState(
     }
 }
 
+@Composable
+private fun SwipeBackgroundEdit(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(horizontal = 20.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Icon(
+            imageVector = Icons.Default.Edit,
+            contentDescription = "Edit",
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(28.dp)
+        )
+    }
+}
+
+@Composable
+private fun SwipeBackgroundDelete(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.error)
+            .padding(horizontal = 20.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Delete",
+            tint = MaterialTheme.colorScheme.onError,
+            modifier = Modifier.size(28.dp)
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryItem(
@@ -348,6 +385,7 @@ fun CategoryItem(
         targetValue = if (showHint.value) (-48).dp else 0.dp,
         animationSpec = tween(durationMillis = 125, easing = LinearEasing)
     )
+    val hintBackgroundVisible = isFirstItem && (showHint.value || offsetX < 0.dp)
 
     LaunchedEffect(isFirstItem) {
         if (isFirstItem) {
@@ -375,56 +413,32 @@ fun CategoryItem(
         )
     }
 
-    SwipeToDismissBox(
-        state = swipeToDismissBoxState,
-        enableDismissFromStartToEnd = true,
-        enableDismissFromEndToStart = true,
-        backgroundContent = {
-            val direction = swipeToDismissBoxState.dismissDirection
-            when (direction) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.primary)
-                            .padding(horizontal = 20.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                }
-                SwipeToDismissBoxValue.EndToStart -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.error)
-                            .padding(horizontal = 20.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.onError,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                }
-                else -> {}
-            }
-        },
+    Box(
         modifier = modifier
             .padding(vertical = 4.dp)
-            .offset(x = offsetX)
             .fillMaxWidth()
     ) {
-        Card(
+        if (hintBackgroundVisible) {
+            SwipeBackgroundDelete(Modifier.matchParentSize().clip(RoundedCornerShape(12.dp)))
+        }
+        SwipeToDismissBox(
+            state = swipeToDismissBoxState,
+            enableDismissFromStartToEnd = true,
+            enableDismissFromEndToStart = true,
+            backgroundContent = {
+                when (swipeToDismissBoxState.dismissDirection) {
+                    SwipeToDismissBoxValue.StartToEnd -> SwipeBackgroundEdit()
+                    SwipeToDismissBoxValue.EndToStart -> SwipeBackgroundDelete()
+                    else -> {}
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Card(
             onClick = onOpen,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(x = offsetX),
             shape = RoundedCornerShape(12.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -518,6 +532,7 @@ fun CategoryItem(
                         )
                     }
                 }
+            }
             }
         }
     }
