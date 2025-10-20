@@ -1,23 +1,18 @@
 package com.cbo.notes.presentation.component
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.cbo.core.domain.model.ViewMode
+import androidx.compose.ui.unit.dp
 import com.cbo.ui.components.AppHeadline
-import com.cbo.ui.components.AppOutlinedTextField
+import com.cbo.ui.components.AppSearchField
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,27 +20,27 @@ fun NotesAppBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
-    viewMode: ViewMode,
-    onViewModeChange: (ViewMode) -> Unit,
-    onSortClick: () -> Unit,
     onCategoriesClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isSearchActive by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     TopAppBar(
         modifier = modifier,
         title = {
             if (isSearchActive) {
-                SearchTextField(
-                    query = searchQuery,
-                    onQueryChange = onSearchQueryChange,
-                    onClearQuery = {
-                        onClearSearch()
-                        isSearchActive = false
-                    },
-                    modifier = Modifier.fillMaxWidth()
+                AppSearchField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    onClear = onClearSearch,
+                    placeholder = "Search notes...",
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
                 )
             } else {
                 AppHeadline(text = "Notes")
@@ -53,120 +48,64 @@ fun NotesAppBar(
         },
         actions = {
             if (!isSearchActive) {
-                // Search button
                 IconButton(onClick = { isSearchActive = true }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                }
+            }
+
+            // More options menu
+            var showMenu by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { showMenu = true }) {
                     Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options"
                     )
                 }
 
-                // View mode toggle
-                IconButton(
-                    onClick = { 
-                        onViewModeChange(
-                            when (viewMode) {
-                                ViewMode.LIST -> ViewMode.GRID
-                                ViewMode.GRID -> ViewMode.COMPACT
-                                ViewMode.COMPACT -> ViewMode.LIST
-                            }
-                        )
-                    }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
                 ) {
-                    AnimatedContent(
-                        targetState = viewMode,
-                        transitionSpec = {
-                            slideInHorizontally(
-                                initialOffsetX = { it },
-                                animationSpec = tween(300),
-                            ) togetherWith
-                                    slideOutHorizontally(
-                                        targetOffsetX = { -it },
-                                        animationSpec = tween(300),
-                                    )
+                    DropdownMenuItem(
+                        text = { Text("Manage Categories") },
+                        onClick = {
+                            onCategoriesClick()
+                            showMenu = false
                         },
-                        label = "fabIconAnim",
-                    ) { viewMode ->
-                        when (viewMode) {
-                            ViewMode.LIST -> Icon(
-                                imageVector = Icons.Default.ViewStream,
-                                contentDescription = "Toggle view mode"
-                            )
-                            ViewMode.GRID -> Icon(
-                                imageVector = Icons.Default.GridView,
-                                contentDescription = "Toggle view mode"
-                            )
-                            ViewMode.COMPACT -> Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ViewList,
-                                contentDescription = "Toggle view mode"
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Category,
+                                contentDescription = null
                             )
                         }
-                    }
-                }
-
-                // Sort button
-                IconButton(onClick = onSortClick) {
-                    Icon(
-                        imageVector = Icons.Default.Sort,
-                        contentDescription = "Sort"
                     )
-                }
-
-                // More options menu
-                var showMenu by remember { mutableStateOf(false) }
-                
-                Box {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options"
-                        )
-                    }
-
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Manage Categories") },
-                            onClick = {
-                                onCategoriesClick()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Category,
-                                    contentDescription = null
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Archive") },
-                            onClick = {
-                                // Handle archive navigation
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Archive,
-                                    contentDescription = null
-                                )
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Settings") },
-                            onClick = {
-                                onSettingsClick()
-                                showMenu = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = null
-                                )
-                            }
-                        )
-                    }
+                    DropdownMenuItem(
+                        text = { Text("Archive") },
+                        onClick = {
+                            // Handle archive navigation
+                            showMenu = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Archive,
+                                contentDescription = null
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Settings") },
+                        onClick = {
+                            onSettingsClick()
+                            showMenu = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = null
+                            )
+                        }
+                    )
                 }
             }
         },
@@ -175,119 +114,25 @@ fun NotesAppBar(
             titleContentColor = MaterialTheme.colorScheme.onSurface
         )
     )
-}
 
-@Composable
-private fun SearchTextField(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    onClearQuery: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    AppOutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = modifier,
-        placeholder = "Search notes...",
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null
-            )
-        },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = onClearQuery) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear search"
-                    )
-                }
-            }
-        },
-        singleLine = true
-    )
-}
-
-@Preview
-@Composable
-fun PreviewSearchTextField() {
-    MaterialTheme {
-        Column(modifier = Modifier.fillMaxWidth().background(Color.White)) {
-            SearchTextField(
-                "",
-                {},
-                {},
-            )
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            // Request focus and show keyboard when entering search mode
+            focusRequester.requestFocus()
+            keyboardController?.show()
         }
     }
 }
 
-@Preview(showBackground = true, name = "Notes App Bar - Default (List View)")
+
+@Preview(showBackground = true, name = "Notes App Bar")
 @Composable
-fun PreviewNotesAppBar_ListView() {
+fun PreviewNotesAppBar() {
     MaterialTheme {
         NotesAppBar(
             searchQuery = "",
             onSearchQueryChange = {},
             onClearSearch = {},
-            viewMode = ViewMode.LIST,
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategoriesClick = {},
-            onSettingsClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Notes App Bar - Grid View")
-@Composable
-fun PreviewNotesAppBar_GridView() {
-    MaterialTheme {
-        NotesAppBar(
-            searchQuery = "",
-            onSearchQueryChange = {},
-            onClearSearch = {},
-            viewMode = ViewMode.GRID,
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategoriesClick = {},
-            onSettingsClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Notes App Bar - Grid View")
-@Composable
-fun PreviewNotesAppBar_CompactView() {
-    MaterialTheme {
-        NotesAppBar(
-            searchQuery = "",
-            onSearchQueryChange = {},
-            onClearSearch = {},
-            viewMode = ViewMode.COMPACT,
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategoriesClick = {},
-            onSettingsClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Notes App Bar - Search Active")
-@Composable
-fun PreviewNotesAppBar_SearchActive() {
-    MaterialTheme {
-        var query by remember { mutableStateOf("Meeting notes") }
-
-        // Simulate search mode by passing non-empty query
-        NotesAppBar(
-            searchQuery = query,
-            onSearchQueryChange = { query = it },
-            onClearSearch = { query = "" },
-            viewMode = ViewMode.COMPACT,
-            onViewModeChange = {},
-            onSortClick = {},
             onCategoriesClick = {},
             onSettingsClick = {}
         )

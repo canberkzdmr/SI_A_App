@@ -6,20 +6,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,16 +36,15 @@ import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.SortOrder
-import com.cbo.notes.presentation.component.FilterChip
+import com.cbo.notes.presentation.component.ImprovedFilterSection
+import com.cbo.notes.presentation.component.FiltersBottomSheet
 import com.cbo.notes.presentation.component.NoteCard
 import com.cbo.notes.presentation.component.NoteCardCompact
 import com.cbo.notes.presentation.component.NotesAppBar
+import com.cbo.notes.presentation.component.NotesControls
 import com.cbo.notes.presentation.component.NotesEmptyState
-import com.cbo.notes.presentation.component.SortBottomSheet
 import com.cbo.notes.presentation.viewmodel.NotesUiState
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
-import com.cbo.ui.components.AppLabel
-import com.cbo.ui.components.TertiaryButton
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -61,7 +58,6 @@ fun NotesScreen(
     viewModel: NotesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showSortBottomSheet by remember { mutableStateOf(false) }
 
     BackHandler {
         Log.i("NotesScreen", "Back button is disabled for Notes Screen")
@@ -81,43 +77,24 @@ fun NotesScreen(
                 searchQuery = uiState.searchQuery,
                 onSearchQueryChange = viewModel::searchNotes,
                 onClearSearch = { viewModel.searchNotes("") },
-                viewMode = uiState.viewMode,
-                onViewModeChange = viewModel::changeViewMode,
-                onSortClick = { showSortBottomSheet = true },
                 onCategoriesClick = onNavigateToCategories,
                 onSettingsClick = onNavigateToSettings,
             )
         },
     ) { paddingValues ->
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Filter chips
-            if (uiState.categories.isNotEmpty() || uiState.tags.isNotEmpty()) {
-                FilterSection(
-                    categories = uiState.categories,
-                    tags = uiState.tags,
-                    selectedCategory = uiState.selectedCategory,
-                    selectedTags = uiState.selectedTags,
-                    onCategorySelected = viewModel::filterByCategory,
-                    onTagSelected = { tag ->
-                        val currentTags = uiState.selectedTags.toMutableList()
-                        if (currentTags.contains(tag)) {
-                            currentTags.remove(tag)
-                        } else {
-                            currentTags.add(tag)
-                        }
-                        viewModel.filterByTags(currentTags)
-                    },
-                    onClearFilters = viewModel::clearFilters,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
-            }
+            Spacer(modifier = Modifier.height(0.dp))
+            
+            // Search, Sort, View Mode and Filters Controls
+            var showFiltersSheet by remember { mutableStateOf(false) }
 
-            // Notes content
+            // Notes content (controls move into scroll via header)
             when {
                 uiState.isLoading -> {
                     Box(
@@ -133,6 +110,9 @@ fun NotesScreen(
                         hasNotes = uiState.notes.isNotEmpty(),
                         searchQuery = uiState.searchQuery,
                         onCreateNote = onNavigateToCreateNote,
+                        onClearFilters = {
+                            viewModel.clearFilters()
+                        },
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
@@ -141,28 +121,67 @@ fun NotesScreen(
                     NotesContent(
                         notes = uiState.filteredNotes,
                         viewMode = uiState.viewMode,
+                        header = {
+                            NotesControls(
+                                searchQuery = uiState.searchQuery,
+                                onSearchQueryChange = viewModel::searchNotes,
+                                onClearSearch = { viewModel.searchNotes("") },
+                                viewMode = uiState.viewMode,
+                                onViewModeChange = viewModel::changeViewMode,
+                                currentSortOrder = uiState.sortOrder,
+                                onSortOrderSelected = viewModel::changeSortOrder,
+                                selectedCategory = uiState.selectedCategory,
+                                selectedTags = uiState.selectedTags,
+                                onCategorySelected = viewModel::filterByCategory,
+                                onTagSelected = { tag ->
+                                    val currentTags = uiState.selectedTags.toMutableList()
+                                    if (currentTags.contains(tag)) {
+                                        currentTags.remove(tag)
+                                    } else {
+                                        currentTags.add(tag)
+                                    }
+                                    viewModel.filterByTags(currentTags)
+                                },
+                                onClearFilters = viewModel::clearFilters,
+                                onManageFiltersClick = { showFiltersSheet = true },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding()
+                            )
+                        },
                         onNoteClick = onNavigateToEditNote,
                         onTogglePin = viewModel::toggleNotePin,
                         onToggleFavorite = viewModel::toggleNoteFavorite,
                         onArchive = viewModel::archiveNote,
                         onDelete = viewModel::deleteNote,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
+            // Filters bottom sheet host
+            if (showFiltersSheet) {
+                FiltersBottomSheet(
+                    allCategories = uiState.categories,
+                    allTags = uiState.tags,
+                    selectedCategory = uiState.selectedCategory,
+                    selectedTags = uiState.selectedTags,
+                    onUpdateSelectedTags = { tags ->
+                        viewModel.filterByTags(tags)
+                    },
+                    onApply = { category, tags ->
+                        viewModel.filterByCategory(category)
+                        viewModel.filterByTags(tags)
+                        showFiltersSheet = false
+                    },
+                    onClearAll = {
+                        viewModel.clearFilters()
+                        showFiltersSheet = false
+                    },
+                    onDismiss = { showFiltersSheet = false }
+                )
+            }
         }
 
-        // Sort bottom sheet
-        if (showSortBottomSheet) {
-            SortBottomSheet(
-                currentSortOrder = uiState.sortOrder,
-                onSortOrderSelected = { sortOrder ->
-                    viewModel.changeSortOrder(sortOrder)
-                    showSortBottomSheet = false
-                },
-                onDismiss = { showSortBottomSheet = false },
-            )
-        }
     }
 
     // Handle error messages
@@ -173,6 +192,26 @@ fun NotesScreen(
     }
 }
 
+/*// Filters management bottom sheet
+@Composable
+private fun FiltersSheetHost(
+    uiState: NotesUiState,
+    show: Boolean,
+    onDismiss: () -> Unit,
+    onApply: (Category?, List<Tag>) -> Unit,
+) {
+    if (!show) return
+    FiltersBottomSheet(
+        allCategories = uiState.categories,
+        allTags = uiState.tags,
+        selectedCategory = uiState.selectedCategory,
+        selectedTags = uiState.selectedTags,
+        onApply = onApply,
+        onClearAll = onDismiss,
+        onDismiss = onDismiss
+    )
+}*/
+
 @Composable
 private fun FilterSection(
     categories: List<Category>,
@@ -182,76 +221,28 @@ private fun FilterSection(
     onCategorySelected: (Category?) -> Unit,
     onTagSelected: (Tag) -> Unit,
     onClearFilters: () -> Unit,
+    onManageFiltersClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            AppLabel(text = "Filters", modifier = Modifier.padding(vertical = 16.dp))
-
-            if (selectedCategory != null || selectedTags.isNotEmpty()) {
-                TertiaryButton(
-                    "Clear All",
-                    onClick = onClearFilters,
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (categories.isNotEmpty()) {
-                item {
-                    AppLabel(text = "Categories")
-                    Spacer(modifier = Modifier.height(4.dp))
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(categories) { category ->
-                            FilterChip(
-                                selected = selectedCategory?.id == category.id,
-                                onClick = {
-                                    onCategorySelected(if (selectedCategory?.id == category.id) null else category)
-                                },
-                                label = category.name,
-                                color = category.color,
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (tags.isNotEmpty()) {
-                item {
-                    AppLabel(text = "Tags")
-                    Spacer(modifier = Modifier.height(4.dp))
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(tags) { tag ->
-                            FilterChip(
-                                selected = selectedTags.any { it.id == tag.id },
-                                onClick = { onTagSelected(tag) },
-                                label = "#${tag.name}",
-                                color = tag.color,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // Legacy implementation removed. Use ImprovedFilterSection instead.
+    ImprovedFilterSection(
+        categories = categories,
+        tags = tags,
+        selectedCategory = selectedCategory,
+        selectedTags = selectedTags,
+        onCategorySelected = onCategorySelected,
+        onTagSelected = onTagSelected,
+        onClearFilters = onClearFilters,
+        onManageFiltersClick = onManageFiltersClick,
+        modifier = modifier,
+    )
 }
 
 @Composable
 private fun NotesContent(
     notes: List<Note>,
     viewMode: ViewMode,
+    header: (@Composable () -> Unit)? = null,
     onNoteClick: (Int) -> Unit,
     onTogglePin: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
@@ -263,9 +254,12 @@ private fun NotesContent(
         ViewMode.LIST -> {
             LazyColumn(
                 modifier = modifier,
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
+                if (header != null) {
+                    item { header(); Spacer(Modifier.height(8.dp)) }
+                }
                 items(notes) { note ->
                     NoteCard(
                         note = note,
@@ -283,10 +277,13 @@ private fun NotesContent(
             LazyVerticalStaggeredGrid(
                 columns = Fixed(2),
                 modifier = modifier,
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalItemSpacing = 8.dp,
             ) {
+                if (header != null) {
+                    item(span = StaggeredGridItemSpan.FullLine) { header() }
+                }
                 items(notes) { note ->
                     NoteCard(
                         note = note,
@@ -304,9 +301,12 @@ private fun NotesContent(
         ViewMode.COMPACT -> {
             LazyColumn(
                 modifier = modifier,
-                contentPadding = PaddingValues(4.dp),
+                contentPadding = PaddingValues(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                if (header != null) {
+                    item { header(); Spacer(Modifier.height(8.dp)) }
+                }
                 items(notes) { note ->
                     NoteCardCompact(
                         note = note,
@@ -322,235 +322,171 @@ private fun NotesContent(
     }
 }
 
-// Preview-specific version of NotesScreen that takes UI state directly
 @Composable
-private fun NotesScreenContent(
-    uiState: NotesUiState,
-    onNavigateToCreateNote: () -> Unit,
-    onNavigateToEditNote: (noteId: Int) -> Unit,
-    onNavigateToCategories: () -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onSearchQueryChange: (String) -> Unit,
-    onClearSearch: () -> Unit,
-    onViewModeChange: (ViewMode) -> Unit,
-    onSortClick: () -> Unit,
-    onCategorySelected: (Category?) -> Unit,
-    onTagSelected: (Tag) -> Unit,
-    onClearFilters: () -> Unit,
-    onTogglePin: (Int) -> Unit,
-    onToggleFavorite: (Int) -> Unit,
-    onArchive: (Int) -> Unit,
-    onDelete: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var showSortBottomSheet by remember { mutableStateOf(false) }
+private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
+    var searchQuery by remember { mutableStateOf(initialUiState.searchQuery) }
+    var viewMode by remember { mutableStateOf(initialUiState.viewMode) }
+    var sortOrder by remember { mutableStateOf(initialUiState.sortOrder) }
+    var selectedCategory by remember { mutableStateOf(initialUiState.selectedCategory) }
+    var selectedTags by remember { mutableStateOf(initialUiState.selectedTags) }
+    var showFiltersSheet by remember { mutableStateOf(false) }
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            NotesAppBar(
-                searchQuery = uiState.searchQuery,
-                onSearchQueryChange = onSearchQueryChange,
-                onClearSearch = onClearSearch,
-                viewMode = uiState.viewMode,
-                onViewModeChange = onViewModeChange,
-                onSortClick = onSortClick,
-                onCategoriesClick = onNavigateToCategories,
-                onSettingsClick = onNavigateToSettings,
-            )
-        },
-    ) { paddingValues ->
-        Column(
-            modifier =
-                Modifier
+    val uiState = initialUiState.copy(
+        searchQuery = searchQuery,
+        viewMode = viewMode,
+        sortOrder = sortOrder,
+        selectedCategory = selectedCategory,
+        selectedTags = selectedTags,
+    )
+
+    MemCloudApplicationTheme {
+        Scaffold(
+            topBar = {
+                NotesAppBar(
+                    searchQuery = searchQuery,
+                    onSearchQueryChange = { searchQuery = it },
+                    onClearSearch = { searchQuery = "" },
+                    onCategoriesClick = {},
+                    onSettingsClick = {},
+                )
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-        ) {
-            // Filters Section
-            FilterSection(
-                categories = uiState.categories,
-                tags = uiState.tags,
-                selectedCategory = uiState.selectedCategory,
-                selectedTags = uiState.selectedTags,
-                onCategorySelected = onCategorySelected,
-                onTagSelected = onTagSelected,
-                onClearFilters = onClearFilters,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            )
-
-            // Loading state
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Content
+                when {
+                    uiState.isLoading -> {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    uiState.filteredNotes.isEmpty() -> {
+                        NotesEmptyState(
+                            hasNotes = uiState.notes.isNotEmpty(),
+                            searchQuery = searchQuery,
+                            onCreateNote = {},
+                            onClearFilters = {},
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                    else -> {
+                        NotesContent(
+                            notes = uiState.filteredNotes,
+                            viewMode = viewMode,
+                            header = {
+                                NotesControls(
+                                    searchQuery = searchQuery,
+                                    onSearchQueryChange = { searchQuery = it },
+                                    onClearSearch = { searchQuery = "" },
+                                    viewMode = viewMode,
+                                    onViewModeChange = { viewMode = it },
+                                    currentSortOrder = sortOrder,
+                                    onSortOrderSelected = { sortOrder = it },
+                                    selectedCategory = selectedCategory,
+                                    selectedTags = selectedTags,
+                                    onCategorySelected = { selectedCategory = it },
+                                    onTagSelected = { tag ->
+                                        selectedTags = selectedTags.toMutableList().also { list ->
+                                            if (list.any { it.id == tag.id }) list.removeAll { it.id == tag.id } else list.add(tag)
+                                        }
+                                    },
+                                    onClearFilters = {
+                                        selectedCategory = null
+                                        selectedTags = emptyList()
+                                    },
+                                    onManageFiltersClick = { showFiltersSheet = true },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding()
+                                )
+                            },
+                            onNoteClick = {},
+                            onTogglePin = {},
+                            onToggleFavorite = {},
+                            onArchive = {},
+                            onDelete = {},
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
-            }
-            // Empty state
-            else if (uiState.filteredNotes.isEmpty() && !uiState.isLoading) {
-                NotesEmptyState(
-                    searchQuery = uiState.searchQuery,
-                    onCreateNote = onNavigateToCreateNote,
-                    hasNotes = true,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-            // Notes content
-            else {
-                NotesContent(
-                    notes = uiState.filteredNotes,
-                    viewMode = uiState.viewMode,
-                    onNoteClick = onNavigateToEditNote,
-                    onTogglePin = onTogglePin,
-                    onToggleFavorite = onToggleFavorite,
-                    onArchive = onArchive,
-                    onDelete = onDelete,
-                    modifier = Modifier.fillMaxSize(),
-                )
+
+                if (showFiltersSheet) {
+                    FiltersBottomSheet(
+                        allCategories = uiState.categories,
+                        allTags = uiState.tags,
+                        selectedCategory = selectedCategory,
+                        selectedTags = selectedTags,
+                        onUpdateSelectedTags = { t ->
+                            selectedTags = t
+                        },
+                        onApply = { c, t ->
+                            selectedCategory = c
+                            selectedTags = t
+                            showFiltersSheet = false
+                        },
+                        onClearAll = {
+                            selectedCategory = null
+                            selectedTags = emptyList()
+                            showFiltersSheet = false
+                        },
+                        onDismiss = { showFiltersSheet = false }
+                    )
+                }
             }
         }
     }
-
-    // Sort Bottom Sheet
-    if (showSortBottomSheet) {
-        SortBottomSheet(
-            currentSortOrder = uiState.sortOrder,
-            onSortOrderSelected = { /* Handle sort order change */ },
-            onDismiss = { showSortBottomSheet = false },
-        )
-    }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Notes • List")
 @Composable
-private fun NotesScreenPreview() {
-    MemCloudApplicationTheme {
-        NotesScreenContent(
-            uiState = previewNotesUiState(),
-            onNavigateToCreateNote = {},
-            onNavigateToEditNote = {},
-            onNavigateToCategories = {},
-            onSearchQueryChange = {},
-            onClearSearch = {},
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategorySelected = {},
-            onTagSelected = {},
-            onClearFilters = {},
-            onTogglePin = {},
-            onToggleFavorite = {},
-            onArchive = {},
-            onNavigateToSettings = {},
-            onDelete = {},
-        )
-    }
+private fun NotesScreenListPreview() {
+    NotesScreenPreviewHost(previewNotesUiState().copy(viewMode = ViewMode.LIST))
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Notes • Grid")
 @Composable
 private fun NotesScreenGridPreview() {
-    MemCloudApplicationTheme {
-        NotesScreenContent(
-            uiState = previewNotesUiState().copy(viewMode = ViewMode.GRID),
-            onNavigateToCreateNote = {},
-            onNavigateToEditNote = {},
-            onNavigateToCategories = {},
-            onSearchQueryChange = {},
-            onClearSearch = {},
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategorySelected = {},
-            onTagSelected = {},
-            onClearFilters = {},
-            onTogglePin = {},
-            onToggleFavorite = {},
-            onArchive = {},
-            onNavigateToSettings = {},
-            onDelete = {},
-        )
-    }
+    NotesScreenPreviewHost(previewNotesUiState().copy(viewMode = ViewMode.GRID))
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Notes • Compact")
 @Composable
 private fun NotesScreenCompactPreview() {
-    MemCloudApplicationTheme {
-        NotesScreenContent(
-            uiState = previewNotesUiState().copy(viewMode = ViewMode.COMPACT),
-            onNavigateToCreateNote = {},
-            onNavigateToEditNote = {},
-            onNavigateToCategories = {},
-            onSearchQueryChange = {},
-            onClearSearch = {},
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategorySelected = {},
-            onTagSelected = {},
-            onClearFilters = {},
-            onTogglePin = {},
-            onToggleFavorite = {},
-            onArchive = {},
-            onNavigateToSettings = {},
-            onDelete = {},
-        )
-    }
+    NotesScreenPreviewHost(previewNotesUiState().copy(viewMode = ViewMode.COMPACT))
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Notes • Empty")
 @Composable
 private fun NotesScreenEmptyPreview() {
-    MemCloudApplicationTheme {
-        NotesScreenContent(
-            uiState =
-                NotesUiState(
-                    isLoading = false,
-                    filteredNotes = emptyList(),
-                    categories = sampleCategories(),
-                    tags = sampleTags(),
-                ),
-            onNavigateToCreateNote = {},
-            onNavigateToEditNote = {},
-            onNavigateToCategories = {},
-            onSearchQueryChange = {},
-            onClearSearch = {},
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategorySelected = {},
-            onTagSelected = {},
-            onClearFilters = {},
-            onTogglePin = {},
-            onToggleFavorite = {},
-            onArchive = {},
-            onNavigateToSettings = {},
-            onDelete = {},
+    NotesScreenPreviewHost(
+        previewNotesUiState().copy(
+            notes = emptyList(),
+            filteredNotes = emptyList(),
         )
-    }
+    )
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Notes • Loading")
 @Composable
 private fun NotesScreenLoadingPreview() {
-    MemCloudApplicationTheme {
-        NotesScreenContent(
-            uiState = NotesUiState(isLoading = true),
-            onNavigateToCreateNote = {},
-            onNavigateToEditNote = {},
-            onNavigateToCategories = {},
-            onSearchQueryChange = {},
-            onClearSearch = {},
-            onViewModeChange = {},
-            onSortClick = {},
-            onCategorySelected = {},
-            onTagSelected = {},
-            onClearFilters = {},
-            onTogglePin = {},
-            onToggleFavorite = {},
-            onArchive = {},
-            onNavigateToSettings = {},
-            onDelete = {},
+    NotesScreenPreviewHost(previewNotesUiState().copy(isLoading = true))
+}
+
+@Preview(showBackground = true, showSystemUi = true, name = "Notes • Filters Applied")
+@Composable
+private fun NotesScreenFiltersAppliedPreview() {
+    val base = previewNotesUiState()
+    NotesScreenPreviewHost(
+        base.copy(
+            selectedCategory = base.categories.firstOrNull(),
+            selectedTags = base.tags.take(3),
         )
-    }
+    )
 }
 
 // Sample data for previews

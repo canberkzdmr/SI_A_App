@@ -228,10 +228,10 @@ fun BottomNavigationBar(
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            CenterLabel(
+                            /*CenterLabel(
                                 isExpanded = isExpanded,
                                 onClick = { onTabClick(tab.id) }
-                            )
+                            )*/
                         }
                     } else {
                         Box(
@@ -377,7 +377,6 @@ fun NavigationTab(
                     )
             )
         } else {
-            Log.d("BottomNavigation", "NavigationTab/showIndicator is false")
             // Invisible spacer to maintain consistent height
             Spacer(modifier = Modifier.height(4.dp))
         }
@@ -468,7 +467,7 @@ fun CenterButton(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
             .zIndex(1f)
-            .offset(y = (-18).dp)
+            .offset(y = (-38).dp)
     ) {
         FloatingActionButton(
             onClick = onClick,
@@ -484,7 +483,7 @@ fun CenterButton(
             )
         ) {
             Icon(
-                imageVector = Icons.Default.Add,
+                imageVector = Icons.Default.Menu,
                 contentDescription = "Create",
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(28.dp)

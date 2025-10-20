@@ -207,10 +207,7 @@ class CategoriesViewModel @Inject constructor(
                         )
                     },
                     onFailure = { error ->
-                        _uiState.update { it.copy(isCreating = false) }
-                        snackbarManager.showMessage(
-                            SnackbarMessage.Error("Failed to save category: ${error.message}")
-                        )
+                        _uiState.update { it.copy(isCreating = false, dialogValidationErrorMessage = error.message?: "") }
                     }
                 )
             }
@@ -250,5 +247,6 @@ data class CategoriesUiState(
     val dialogTitle: String = "",
     val dialogDescription: String = "",
     val dialogColor: String? = null,
+    val dialogValidationErrorMessage: String = "",
     val errorMessage: String? = null
 )

@@ -35,7 +35,6 @@ import androidx.core.graphics.toColorInt
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Tag
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteCard(
     note: Note,
@@ -69,7 +68,7 @@ fun NoteCard(
                 ),
         ) {
             Column(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(16.dp),
             ) {
                 // Header row with title and actions
                 Row(

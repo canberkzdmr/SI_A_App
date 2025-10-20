@@ -72,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cbo.core.domain.FieldValidationRules
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.viewmodel.CategoriesUiState
@@ -223,6 +224,7 @@ fun CategoriesContent(
             description = uiState.dialogDescription,
             color = uiState.dialogColor,
             isCreating = uiState.isCreating,
+            validationErrorMessage = uiState.dialogValidationErrorMessage,
             onNameChange = updateDialogTitle,
             onDescriptionChange = updateDialogDescription,
             onColorChange = updateDialogColor,
@@ -382,8 +384,8 @@ fun CategoryItem(
     // Show swipe hint only for the first item
     val showHint = remember { mutableStateOf(isFirstItem) }
     val offsetX by animateDpAsState(
-        targetValue = if (showHint.value) (-48).dp else 0.dp,
-        animationSpec = tween(durationMillis = 125, easing = LinearEasing)
+        targetValue = if (showHint.value) (-60).dp else 0.dp,
+        animationSpec = tween(durationMillis = 200, easing = LinearEasing, delayMillis = 100)
     )
     val hintBackgroundVisible = isFirstItem && (showHint.value || offsetX < 0.dp)
 
@@ -549,6 +551,7 @@ private fun CategoryDialog(
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onColorChange: (String?) -> Unit,
+    validationErrorMessage: String = "",
     onSave: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -566,8 +569,10 @@ private fun CategoryDialog(
                     label = "Category Name",
                     placeholder = "Enter category name...",
                     modifier = Modifier.fillMaxWidth(),
+                    isValid = name.length <= FieldValidationRules.MAX_CATEGORY_NAME_LENGTH,
+                    validationErrorMessage = validationErrorMessage,//"Category name must be less than ${FieldValidationRules.MAX_CATEGORY_NAME_LENGTH} characters",
                     singleLine = true,
-                    isError = name.isBlank(),
+                    isError = name.isBlank() || name.length > FieldValidationRules.MAX_CATEGORY_NAME_LENGTH || validationErrorMessage.isNotEmpty(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { descriptionFocusRequester.requestFocus() }),
                 )
@@ -602,7 +607,7 @@ private fun CategoryDialog(
         confirmButton = {
             Button(
                 onClick = onSave,
-                enabled = !isCreating && name.isNotBlank(),
+                enabled = !isCreating && name.isNotBlank() && name.length <= FieldValidationRules.MAX_CATEGORY_NAME_LENGTH,
             ) {
                 if (isCreating) {
                     CircularProgressIndicator(

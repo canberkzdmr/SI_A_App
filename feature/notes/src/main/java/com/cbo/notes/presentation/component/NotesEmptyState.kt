@@ -19,6 +19,7 @@ fun NotesEmptyState(
     hasNotes: Boolean,
     searchQuery: String,
     onCreateNote: () -> Unit,
+    onClearFilters: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -78,6 +79,18 @@ fun NotesEmptyState(
                     )
                 }
             )
+        } else {
+            PrimaryButton(
+                text = "Clear Filters",
+                onClick = onClearFilters,
+                modifier = Modifier.fillMaxWidth(0.6f),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.FilterListOff,
+                        contentDescription = null
+                    )
+                }
+            )
         }
     }
 }
@@ -89,7 +102,8 @@ fun PreviewNotesEmptyState_NoNotes() {
         NotesEmptyState(
             hasNotes = false,
             searchQuery = "",
-            onCreateNote = {}
+            onCreateNote = {},
+            onClearFilters = {},
         )
     }
 }
@@ -101,7 +115,8 @@ fun PreviewNotesEmptyState_WithNotesFiltered() {
         NotesEmptyState(
             hasNotes = true,
             searchQuery = "",
-            onCreateNote = {}
+            onCreateNote = {},
+            onClearFilters = {},
         )
     }
 }
@@ -113,7 +128,8 @@ fun PreviewNotesEmptyState_SearchNoResult() {
         NotesEmptyState(
             hasNotes = true,
             searchQuery = "Meeting notes",
-            onCreateNote = {}
+            onCreateNote = {},
+            onClearFilters = {},
         )
     }
 }
