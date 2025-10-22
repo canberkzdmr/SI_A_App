@@ -9,4 +9,7 @@ class Converters {
 
     @TypeConverter
     fun toByteArray(encoded: String): ByteArray = Base64.decode(encoded, Base64.DEFAULT)
+    
+    // Note: NoteContent will be stored as a JSON string
+    // The conversion between domain model and JSON happens in the mapper layer
 }

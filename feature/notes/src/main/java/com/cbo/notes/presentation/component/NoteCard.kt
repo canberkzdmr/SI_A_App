@@ -34,6 +34,7 @@ import java.util.*
 import androidx.core.graphics.toColorInt
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Tag
+import com.cbo.notes.presentation.component.richtext.RichContentPreview
 
 @Composable
 fun NoteCard(
@@ -162,8 +163,15 @@ fun NoteCard(
                 }
 
                 // Content preview
-                if (note.content.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+                if (note.richContent != null && note.richContent.blocks.isNotEmpty()) {
+                    // Show rich content preview
+                    RichContentPreview(
+                        content = note.richContent,
+                        maxLines = if (isCompact) 2 else 3
+                    )
+                } else if (note.content.isNotBlank()) {
+                    // Fallback to plain text
                     AppBody(
                         text = note.content,
                         maxLines = if (isCompact) 5 else 7,

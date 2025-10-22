@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
+import com.cbo.notes.domain.model.NoteContent
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.usecase.CreateNoteUseCase
 import com.cbo.notes.domain.usecase.CreateTagUseCase
@@ -68,11 +69,14 @@ class EditNoteViewModel @Inject constructor(
                     if (isEditing) {
                         val note = getNoteByIdUseCase(noteId)
                         if (note != null) {
+                            val displayContent = note.getDisplayContent()
                             _uiState.update { currentState ->
                                 currentState.copy(
                                     isLoading = false,
                                     title = note.title,
                                     content = note.content,
+                                    richContent = displayContent,
+                                    useRichTextEditor = true, // Always use rich text editor
                                     selectedCategory = note.category,
                                     selectedTags = note.tags,
                                     availableCategories = categories,
@@ -86,9 +90,12 @@ class EditNoteViewModel @Inject constructor(
                             }
                         }
                     } else {
+                        // For new notes, initialize with empty rich content
                         _uiState.update { currentState ->
                             currentState.copy(
                                 isLoading = false,
+                                richContent = NoteContent(emptyList()),
+                                useRichTextEditor = true,
                                 availableCategories = categories,
                                 availableTags = tags
                             )
@@ -109,6 +116,84 @@ class EditNoteViewModel @Inject constructor(
 
     fun updateContent(content: String) {
         _uiState.update { it.copy(content = content, hasUnsavedChanges = true) }
+    }
+    
+    fun updateRichContent(richContent: NoteContent) {
+        _uiState.update { it.copy(richContent = richContent, hasUnsavedChanges = true) }
+    }
+    
+    fun toggleEditorMode() {
+        val currentState = _uiState.value
+        if (currentState.useRichTextEditor) {
+            // Convert rich content to plain text
+            val plainText = currentState.richContent?.let { 
+                NoteContent.Companion.run { it.toPlainText() }
+            } ?: currentState.content
+            _uiState.update { 
+                it.copy(
+                    useRichTextEditor = false,
+                    content = plainText
+                )
+            }
+        } else {
+            // Convert plain text to rich content, trying to preserve structure
+            val richContent = parseTextToRichContent(currentState.content)
+            _uiState.update { 
+                it.copy(
+                    useRichTextEditor = true,
+                    richContent = richContent
+                )
+            }
+        }
+    }
+    
+    /**
+     * Parse plain text into rich content, detecting todo items
+     */
+    private fun parseTextToRichContent(text: String): NoteContent {
+        if (text.isEmpty()) return NoteContent(emptyList())
+        
+        val blocks = mutableListOf<com.cbo.notes.domain.model.ContentBlock>()
+        val lines = text.split("\n")
+        
+        lines.forEach { line ->
+            when {
+                // Detect todo items (☐ or ☑)
+                line.startsWith("☐ ") || line.startsWith("☑ ") -> {
+                    blocks.add(
+                        com.cbo.notes.domain.model.ContentBlock.TodoBlock(
+                            id = System.currentTimeMillis().toString() + blocks.size,
+                            text = line.substring(2), // Remove checkbox symbol
+                            isChecked = line.startsWith("☑"),
+                            styles = emptyList()
+                        )
+                    )
+                }
+                // Regular text line
+                line.isNotBlank() -> {
+                    blocks.add(
+                        com.cbo.notes.domain.model.ContentBlock.TextBlock(
+                            id = System.currentTimeMillis().toString() + blocks.size,
+                            text = line,
+                            styles = emptyList()
+                        )
+                    )
+                }
+            }
+        }
+        
+        // If no blocks were created, create a single text block
+        if (blocks.isEmpty()) {
+            blocks.add(
+                com.cbo.notes.domain.model.ContentBlock.TextBlock(
+                    id = System.currentTimeMillis().toString(),
+                    text = text,
+                    styles = emptyList()
+                )
+            )
+        }
+        
+        return NoteContent(blocks)
     }
 
     fun selectCategory(category: Category?) {
@@ -143,7 +228,12 @@ class EditNoteViewModel @Inject constructor(
                 val noteToSave = if (isEditing) {
                     currentState.originalNote!!.copy(
                         title = currentState.title,
-                        content = currentState.content,
+                        content = if (currentState.useRichTextEditor) {
+                            currentState.richContent?.let { NoteContent.Companion.run { it.toPlainText() } } ?: currentState.content
+                        } else {
+                            currentState.content
+                        },
+                        richContent = if (currentState.useRichTextEditor) currentState.richContent else null,
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags
                     )
@@ -151,7 +241,12 @@ class EditNoteViewModel @Inject constructor(
                     Note(
                         userId = user.id,
                         title = currentState.title,
-                        content = currentState.content,
+                        content = if (currentState.useRichTextEditor) {
+                            currentState.richContent?.let { NoteContent.Companion.run { it.toPlainText() } } ?: ""
+                        } else {
+                            currentState.content
+                        },
+                        richContent = if (currentState.useRichTextEditor) currentState.richContent else null,
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags
                     )
@@ -365,6 +460,8 @@ data class EditNoteUiState(
     val isSaving: Boolean = false,
     val title: String = "",
     val content: String = "",
+    val richContent: com.cbo.notes.domain.model.NoteContent? = null, // Rich content for editing
+    val useRichTextEditor: Boolean = false, // Toggle between plain and rich editor
     val selectedCategory: Category? = null,
     val selectedTags: List<Tag> = emptyList(),
     val availableCategories: List<Category> = emptyList(),

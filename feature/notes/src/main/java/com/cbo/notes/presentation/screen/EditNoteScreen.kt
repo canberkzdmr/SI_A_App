@@ -4,15 +4,18 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,15 +24,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
+import com.cbo.notes.domain.model.NoteContent
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.component.CreateTagDialog
 import com.cbo.notes.presentation.component.FilterChip
+import com.cbo.notes.presentation.component.richtext.RichTextEditor
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
@@ -37,6 +43,8 @@ import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.cbo.notes.presentation.component.richtext.FormattingHandlers
+import com.cbo.notes.presentation.component.richtext.ImprovedFormattingToolbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +55,7 @@ fun EditNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDiscardDialog by remember { mutableStateOf(false) }
+    var formattingHandlers by remember { mutableStateOf<FormattingHandlers?>(null) }
 
     // Handle navigation events
     LaunchedEffect(Unit) {
@@ -61,8 +70,35 @@ fun EditNoteScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { 
-                    Text(if (uiState.originalNote != null) "Edit Note" else "Create Note") 
+                title = {
+                    // Title input in the app bar
+                    BasicTextField(
+                        value = uiState.title,
+                        onValueChange = viewModel::updateTitle,
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (uiState.title.isEmpty()) {
+                                    Text(
+                                        text = "Note title...",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -75,7 +111,7 @@ fun EditNoteScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -96,6 +132,22 @@ fun EditNoteScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            formattingHandlers?.let { handlers ->
+                Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)) {
+                    ImprovedFormattingToolbar(
+                        activeStyles = handlers.activeStyles,
+                        onToggleStyle = handlers.onToggleStyle,
+                        onAddTodo = handlers.onAddTodo,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .imePadding()
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+                HorizontalDivider()
+            }
         }
     ) { paddingValues ->
         if (uiState.isLoading) {
@@ -109,61 +161,48 @@ fun EditNoteScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(paddingValues),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                val focusRequestContent = remember { FocusRequester() }
-
-                // Title field
-                AppOutlinedTextField(
-                    value = uiState.title,
-                    onValueChange = viewModel::updateTitle,
-                    label = "Title",
-                    placeholder = "Enter note title...",
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = uiState.title.isBlank(),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { focusRequestContent.requestFocus() })
-                )
-
-                // Content field
-                AppOutlinedTextField(
-                    value = uiState.content,
-                    onValueChange = viewModel::updateContent,
-                    label = "Content",
-                    placeholder = "Start writing your note...",
+                // Content field - Always use rich text editor
+                val richContent = uiState.richContent ?: NoteContent(emptyList())
+                RichTextEditor(
+                    content = richContent,
+                    onContentChange = viewModel::updateRichContent,
                     modifier = Modifier
                         .fillMaxWidth()
-//                        .defaultMinSize(minHeight = 200.dp)
-                        .height(200.dp)
-                        .focusRequester(remember { focusRequestContent })
-                    ,
-                    minLines = 8,
-                    singleLine = false
+                        .weight(1f), // Take available space
+                    onProvideFormattingHandlers = { handlers -> formattingHandlers = handlers }
                 )
 
-                // Category selection
-                if (uiState.availableCategories.isNotEmpty()) {
-                    CategorySelection(
-                        categories = uiState.availableCategories,
-                        selectedCategory = uiState.selectedCategory,
-                        onCategorySelected = viewModel::selectCategory
+
+                // Category and Tag selection at bottom
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Category selection
+                    if (uiState.availableCategories.isNotEmpty()) {
+                        CategorySelection(
+                            categories = uiState.availableCategories,
+                            selectedCategory = uiState.selectedCategory,
+                            onCategorySelected = viewModel::selectCategory
+                        )
+                    }
+
+                    // Tag selection
+                    TagSelection(
+                        tags = uiState.availableTags,
+                        selectedTags = uiState.selectedTags,
+                        tagInputText = uiState.tagInputText,
+                        onTagToggle = viewModel::toggleTag,
+                        onTagInputChange = viewModel::updateTagInputText,
+                        onCreateTagFromInput = viewModel::createTagFromInput,
+                        onCreateTag = viewModel::showCreateTagDialog
                     )
                 }
-
-                // Tag selection
-                TagSelection(
-                    tags = uiState.availableTags,
-                    selectedTags = uiState.selectedTags,
-                    tagInputText = uiState.tagInputText,
-                    onTagToggle = viewModel::toggleTag,
-                    onTagInputChange = viewModel::updateTagInputText,
-                    onCreateTagFromInput = viewModel::createTagFromInput,
-                    onCreateTag = viewModel::showCreateTagDialog
-                )
             }
         }
     }
@@ -318,7 +357,7 @@ private fun TagSelection(
                     onTagInputChange(newValue)
                 }
             },
-            placeholder = "Type tag name and press Enter or Space...",
+            placeholder = "Type tag name & press Enter/Space",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
@@ -391,10 +430,13 @@ private fun EditNoteScreenContent(
     uiState: EditNoteUiState,
     onNavigateBack: () -> Unit,
     onTitleChange: (String) -> Unit,
-    onContentChange: (String) -> Unit,
+    onRichContentChange: (NoteContent) -> Unit,
     onSave: () -> Unit,
     onCategorySelected: (Category?) -> Unit,
     onTagToggle: (Tag) -> Unit,
+    onTagInputChange: (String) -> Unit,
+    onCreateTagFromInput: () -> Unit,
+    onCreateTag: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
@@ -403,8 +445,35 @@ private fun EditNoteScreenContent(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { 
-                    Text(if (uiState.originalNote != null) "Edit Note" else "Create Note") 
+                title = {
+                    // Title input in the app bar
+                    BasicTextField(
+                        value = uiState.title,
+                        onValueChange = onTitleChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (uiState.title.isEmpty()) {
+                                    Text(
+                                        text = "Note title...",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -417,7 +486,7 @@ private fun EditNoteScreenContent(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -425,11 +494,12 @@ private fun EditNoteScreenContent(
                 actions = {
                     TextButton(
                         onClick = onSave,
-                        enabled = uiState.title.isNotBlank() && !uiState.isSaving
+                        enabled = !uiState.isSaving && uiState.title.isNotBlank()
                     ) {
                         if (uiState.isSaving) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
                             )
                         } else {
                             Text("Save")
@@ -441,9 +511,7 @@ private fun EditNoteScreenContent(
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
@@ -452,52 +520,63 @@ private fun EditNoteScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
+                    .padding(paddingValues),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                // Title input
-                AppOutlinedTextField(
-                    value = uiState.title,
-                    onValueChange = onTitleChange,
-                    label = "Title",
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Content input
-                AppOutlinedTextField(
-                    value = uiState.content,
-                    onValueChange = onContentChange,
-                    label = "Content",
-                    singleLine = false,
-                    minLines = 3,
+                // Content field - Always use rich text editor
+                val richContent = uiState.richContent ?: NoteContent(emptyList())
+                var formattingHandlers by remember { mutableStateOf<FormattingHandlers?>(null) }
+                RichTextEditor(
+                    content = richContent,
+                    onContentChange = onRichContentChange,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp),
+                        .weight(1f), // Take available space
+                    onProvideFormattingHandlers = { handlers -> formattingHandlers = handlers }
                 )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                CategorySelection(
-                    selectedCategory = uiState.selectedCategory,
-                    categories = uiState.availableCategories,
-                    onCategorySelected = onCategorySelected
-                )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                TagSelection(
-                    selectedTags = uiState.selectedTags,
-                    tags = uiState.availableTags,
-                    tagInputText = uiState.tagInputText,
-                    onTagToggle = onTagToggle,
-                    onTagInputChange = { /* Handle tag input change in preview */ },
-                    onCreateTagFromInput = { /* Handle create tag from input in preview */ },
-                    onCreateTag = { /* Handle create tag in preview */ }
-                )
+
+                // Formatting toolbar outside content, above categories
+                formattingHandlers?.let { handlers ->
+                    Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)) {
+                        ImprovedFormattingToolbar(
+                            activeStyles = handlers.activeStyles,
+                            onToggleStyle = handlers.onToggleStyle,
+                            onAddTodo = handlers.onAddTodo,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                    HorizontalDivider()
+                }
+
+                // Category and Tag selection at bottom
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Category selection
+                    if (uiState.availableCategories.isNotEmpty()) {
+                        CategorySelection(
+                            categories = uiState.availableCategories,
+                            selectedCategory = uiState.selectedCategory,
+                            onCategorySelected = onCategorySelected
+                        )
+                    }
+
+                    // Tag selection
+                    TagSelection(
+                        tags = uiState.availableTags,
+                        selectedTags = uiState.selectedTags,
+                        tagInputText = uiState.tagInputText,
+                        onTagToggle = onTagToggle,
+                        onTagInputChange = onTagInputChange,
+                        onCreateTagFromInput = onCreateTagFromInput,
+                        onCreateTag = onCreateTag
+                    )
+                }
             }
         }
     }
@@ -537,7 +616,7 @@ private fun EditNoteScreenCreatePreview() {
             uiState = EditNoteUiState(
                 isLoading = false,
                 title = "",
-                content = "",
+                richContent = NoteContent(emptyList()),
                 selectedCategory = null,
                 selectedTags = emptyList(),
                 availableCategories = sampleEditCategories(),
@@ -547,10 +626,13 @@ private fun EditNoteScreenCreatePreview() {
             ),
             onNavigateBack = {},
             onTitleChange = {},
-            onContentChange = {},
+            onRichContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
+            onTagInputChange = {},
+            onCreateTagFromInput = {},
+            onCreateTag = {}
         )
     }
 }
@@ -563,7 +645,7 @@ private fun EditNoteScreenEditPreview() {
             uiState = EditNoteUiState(
                 isLoading = false,
                 title = "Project Meeting Notes",
-                content = "Discussed the new features for Q4. Need to finalize the design by Friday. John will handle the backend integration while Sarah focuses on the UI components.\n\nAction items:\n• Complete wireframes\n• Review technical specs\n• Schedule follow-up meeting",
+                richContent = NoteContent.fromPlainText("Discussed the new features for Q4. Need to finalize the design by Friday. John will handle the backend integration while Sarah focuses on the UI components.\n\nAction items:\n• Complete wireframes\n• Review technical specs\n• Schedule follow-up meeting"),
                 selectedCategory = sampleEditCategories()[0], // Work category
                 selectedTags = listOf(sampleEditTags()[1], sampleEditTags()[2]), // meeting, project
                 availableCategories = sampleEditCategories(),
@@ -581,10 +663,13 @@ private fun EditNoteScreenEditPreview() {
             ),
             onNavigateBack = {},
             onTitleChange = {},
-            onContentChange = {},
+            onRichContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
+            onTagInputChange = {},
+            onCreateTagFromInput = {},
+            onCreateTag = {}
         )
     }
 }
@@ -599,10 +684,13 @@ private fun EditNoteScreenLoadingPreview() {
             ),
             onNavigateBack = {},
             onTitleChange = {},
-            onContentChange = {},
+            onRichContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
+            onTagInputChange = {},
+            onCreateTagFromInput = {},
+            onCreateTag = {}
         )
     }
 }
@@ -616,7 +704,7 @@ private fun EditNoteScreenSavingPreview() {
                 isLoading = false,
                 isSaving = true,
                 title = "Quick Note",
-                content = "This is a quick note that I'm currently saving...",
+                richContent = NoteContent.fromPlainText("This is a quick note that I'm currently saving..."),
                 selectedCategory = sampleEditCategories()[1], // Personal
                 selectedTags = listOf(sampleEditTags()[4]), // todo
                 availableCategories = sampleEditCategories(),
@@ -626,10 +714,13 @@ private fun EditNoteScreenSavingPreview() {
             ),
             onNavigateBack = {},
             onTitleChange = {},
-            onContentChange = {},
+            onRichContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
+            onTagInputChange = {},
+            onCreateTagFromInput = {},
+            onCreateTag = {}
         )
     }
 }
@@ -642,7 +733,7 @@ private fun EditNoteScreenCreateTagPreview() {
             uiState = EditNoteUiState(
                 isLoading = false,
                 title = "My Shopping List",
-                content = "Need to buy groceries for the weekend party",
+                richContent = NoteContent.fromPlainText("Need to buy groceries for the weekend party"),
                 selectedCategory = sampleEditCategories()[1], // Personal
                 selectedTags = listOf(sampleEditTags()[4]), // todo
                 availableCategories = sampleEditCategories(),
@@ -655,10 +746,13 @@ private fun EditNoteScreenCreateTagPreview() {
             ),
             onNavigateBack = {},
             onTitleChange = {},
-            onContentChange = {},
+            onRichContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
+            onTagInputChange = {},
+            onCreateTagFromInput = {},
+            onCreateTag = {}
         )
     }
 }
