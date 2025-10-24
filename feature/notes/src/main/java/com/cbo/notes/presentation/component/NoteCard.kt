@@ -20,15 +20,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cbo.notes.domain.model.Note
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppCaption
 import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppOutlinedCard
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.AppTitleMedium
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.cbo.notes.presentation.component.RichTextPreview
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.graphics.toColorInt
@@ -54,14 +57,10 @@ fun NoteCard(
             .fillMaxWidth(),
         contentAlignment = Alignment.TopEnd,
     ) {
-        Card(
+        AppOutlinedCard(
             onClick = onClick,
             modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
             elevation =
                 CardDefaults.cardElevation(
                     defaultElevation = if (note.isPinned) 4.dp else 2.dp,
@@ -161,11 +160,18 @@ fun NoteCard(
                     }
                 }
 
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    thickness = Dp.Hairline,
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+
                 // Content preview
                 if (note.content.isNotBlank()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    AppBody(
-                        text = note.content,
+                    RichTextPreview(
+                        html = note.content,
                         maxLines = if (isCompact) 5 else 7,
                         overflow = TextOverflow.Ellipsis,
                     )

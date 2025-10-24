@@ -14,11 +14,12 @@ activityCompose = "1.8.0"
 composeBom = "2024.04.01"
 appcompat = "1.6.1"
 material = "1.10.0"
+richeditorCompose = "1.0.0-rc13"
 room = "2.6.1"
 viewmodel = "2.6.1"
-hilt = "2.48"
-hilt-navigation = "1.1.0"
-ksp = "2.0.0-1.0.23"
+hilt = "2.51.1"
+hilt-navigation = "1.2.0"
+ksp = "2.0.0-1.0.24"
 kapt = "2.0.0"
 nav = "2.7.3"
 material3 = "1.2.0"
@@ -45,6 +46,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version = "2.6.0" }
+richeditor-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose", version.ref = "richeditorCompose" }
 viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "viewmodel"}
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }

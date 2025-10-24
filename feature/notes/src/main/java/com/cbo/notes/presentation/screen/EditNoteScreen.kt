@@ -1,25 +1,50 @@
 package com.cbo.notes.presentation.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,13 +55,15 @@ import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.component.CreateTagDialog
 import com.cbo.notes.presentation.component.FilterChip
+import com.cbo.notes.presentation.component.RichTextEditor
+import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
-import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.mohamedrejeb.richeditor.model.rememberRichTextState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,6 +74,24 @@ fun EditNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDiscardDialog by remember { mutableStateOf(false) }
+    
+    // Rich text state for content
+    val richTextState = rememberRichTextState()
+    
+    // Initialize rich text state with content when UI state changes
+    LaunchedEffect(uiState.contentHtml) {
+        if (richTextState.toHtml() != uiState.contentHtml) {
+            richTextState.setHtml(uiState.contentHtml)
+        }
+    }
+    
+    // Update ViewModel when rich text changes
+    LaunchedEffect(richTextState.annotatedString) {
+        val html = richTextState.toHtml()
+        if (html != uiState.contentHtml) {
+            viewModel.updateContentHtml(html)
+        }
+    }
 
     // Handle navigation events
     LaunchedEffect(Unit) {
@@ -62,7 +107,28 @@ fun EditNoteScreen(
         topBar = {
             TopAppBar(
                 title = { 
-                    Text(if (uiState.originalNote != null) "Edit Note" else "Create Note") 
+                    // Editable title in TopAppBar
+                    BasicTextField(
+                        value = uiState.title,
+                        onValueChange = viewModel::updateTitle,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp),
+                        textStyle = MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            if (uiState.title.isEmpty()) {
+                                Text(
+                                    text = "Note Title",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                )
+                            }
+                            innerTextField()
+                        }
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -114,35 +180,13 @@ fun EditNoteScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val focusRequestContent = remember { FocusRequester() }
-
-                // Title field
-                AppOutlinedTextField(
-                    value = uiState.title,
-                    onValueChange = viewModel::updateTitle,
-                    label = "Title",
-                    placeholder = "Enter note title...",
+                // Rich Text Content Editor
+                RichTextEditor(
+                    state = richTextState,
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = uiState.title.isBlank(),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { focusRequestContent.requestFocus() })
-                )
-
-                // Content field
-                AppOutlinedTextField(
-                    value = uiState.content,
-                    onValueChange = viewModel::updateContent,
                     label = "Content",
-                    placeholder = "Start writing your note...",
-                    modifier = Modifier
-                        .fillMaxWidth()
-//                        .defaultMinSize(minHeight = 200.dp)
-                        .height(200.dp)
-                        .focusRequester(remember { focusRequestContent })
-                    ,
-                    minLines = 8,
-                    singleLine = false
+                    placeholder = "Start writing your note with rich formatting...",
+                    minHeight = 300
                 )
 
                 // Category selection
@@ -399,12 +443,42 @@ private fun EditNoteScreenContent(
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
 
+    val richTextState = rememberRichTextState()
+    
+    // Initialize rich text state with content when UI state changes
+    LaunchedEffect(uiState.contentHtml) {
+        if (richTextState.toHtml() != uiState.contentHtml) {
+            richTextState.setHtml(uiState.contentHtml)
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { 
-                    Text(if (uiState.originalNote != null) "Edit Note" else "Create Note") 
+                    // Editable title in TopAppBar
+                    BasicTextField(
+                        value = uiState.title,
+                        onValueChange = onTitleChange,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp),
+                        textStyle = MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        singleLine = true,
+                        decorationBox = { innerTextField ->
+                            if (uiState.title.isEmpty()) {
+                                Text(
+                                    text = "Note Title",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                )
+                            }
+                            innerTextField()
+                        }
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -429,7 +503,8 @@ private fun EditNoteScreenContent(
                     ) {
                         if (uiState.isSaving) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp
                             )
                         } else {
                             Text("Save")
@@ -453,30 +528,17 @@ private fun EditNoteScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp)
                     .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Title input
-                AppOutlinedTextField(
-                    value = uiState.title,
-                    onValueChange = onTitleChange,
-                    label = "Title",
+                // Rich Text Content Editor
+                RichTextEditor(
+                    state = richTextState,
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Content input
-                AppOutlinedTextField(
-                    value = uiState.content,
-                    onValueChange = onContentChange,
                     label = "Content",
-                    singleLine = false,
-                    minLines = 3,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                    placeholder = "Start writing your note with rich formatting...",
+                    minHeight = 300
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -529,7 +591,7 @@ private fun EditNoteScreenContent(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Create Note - Empty")
 @Composable
 private fun EditNoteScreenCreatePreview() {
     MemCloudApplicationTheme {
@@ -538,6 +600,7 @@ private fun EditNoteScreenCreatePreview() {
                 isLoading = false,
                 title = "",
                 content = "",
+                contentHtml = "",
                 selectedCategory = null,
                 selectedTags = emptyList(),
                 availableCategories = sampleEditCategories(),
@@ -555,7 +618,7 @@ private fun EditNoteScreenCreatePreview() {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Edit Note - Rich Text")
 @Composable
 private fun EditNoteScreenEditPreview() {
     MemCloudApplicationTheme {
@@ -563,7 +626,8 @@ private fun EditNoteScreenEditPreview() {
             uiState = EditNoteUiState(
                 isLoading = false,
                 title = "Project Meeting Notes",
-                content = "Discussed the new features for Q4. Need to finalize the design by Friday. John will handle the backend integration while Sarah focuses on the UI components.\n\nAction items:\n• Complete wireframes\n• Review technical specs\n• Schedule follow-up meeting",
+                content = "<p><strong>Discussed the new features for Q4.</strong> Need to finalize the design by <em>Friday</em>.</p><p>John will handle the backend integration while Sarah focuses on the UI components.</p><h1>Action Items:</h1><ul><li>Complete wireframes</li><li>Review technical specs</li><li>Schedule follow-up meeting</li></ul>",
+                contentHtml = "<p><strong>Discussed the new features for Q4.</strong> Need to finalize the design by <em>Friday</em>.</p><p>John will handle the backend integration while Sarah focuses on the UI components.</p><h1>Action Items:</h1><ul><li>Complete wireframes</li><li>Review technical specs</li><li>Schedule follow-up meeting</li></ul>",
                 selectedCategory = sampleEditCategories()[0], // Work category
                 selectedTags = listOf(sampleEditTags()[1], sampleEditTags()[2]), // meeting, project
                 availableCategories = sampleEditCategories(),
@@ -573,7 +637,7 @@ private fun EditNoteScreenEditPreview() {
                     id = 1,
                     userId = 1,
                     title = "Project Meeting Notes",
-                    content = "Original content...",
+                    content = "<p><strong>Discussed the new features for Q4.</strong> Need to finalize the design by <em>Friday</em>.</p>",
                     isPinned = false,
                     isFavorite = false,
                     isArchived = false
@@ -589,13 +653,14 @@ private fun EditNoteScreenEditPreview() {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Loading State")
 @Composable
 private fun EditNoteScreenLoadingPreview() {
     MemCloudApplicationTheme {
         EditNoteScreenContent(
             uiState = EditNoteUiState(
-                isLoading = true
+                isLoading = true,
+                contentHtml = ""
             ),
             onNavigateBack = {},
             onTitleChange = {},
@@ -607,7 +672,7 @@ private fun EditNoteScreenLoadingPreview() {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Saving State")
 @Composable
 private fun EditNoteScreenSavingPreview() {
     MemCloudApplicationTheme {
@@ -616,7 +681,8 @@ private fun EditNoteScreenSavingPreview() {
                 isLoading = false,
                 isSaving = true,
                 title = "Quick Note",
-                content = "This is a quick note that I'm currently saving...",
+                content = "<p>This is a <strong>quick note</strong> that I'm currently saving...</p>",
+                contentHtml = "<p>This is a <strong>quick note</strong> that I'm currently saving...</p>",
                 selectedCategory = sampleEditCategories()[1], // Personal
                 selectedTags = listOf(sampleEditTags()[4]), // todo
                 availableCategories = sampleEditCategories(),
@@ -634,7 +700,7 @@ private fun EditNoteScreenSavingPreview() {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, name = "Create Tag Dialog")
 @Composable
 private fun EditNoteScreenCreateTagPreview() {
     MemCloudApplicationTheme {
@@ -642,7 +708,8 @@ private fun EditNoteScreenCreateTagPreview() {
             uiState = EditNoteUiState(
                 isLoading = false,
                 title = "My Shopping List",
-                content = "Need to buy groceries for the weekend party",
+                content = "<p>Need to buy groceries for the weekend party</p>",
+                contentHtml = "<p>Need to buy groceries for the weekend party</p>",
                 selectedCategory = sampleEditCategories()[1], // Personal
                 selectedTags = listOf(sampleEditTags()[4]), // todo
                 availableCategories = sampleEditCategories(),
@@ -652,6 +719,60 @@ private fun EditNoteScreenCreateTagPreview() {
                 newTagName = "shopping",
                 newTagColor = "#FF6B6B",
                 isCreatingTag = false
+            ),
+            onNavigateBack = {},
+            onTitleChange = {},
+            onContentChange = {},
+            onSave = {},
+            onCategorySelected = {},
+            onTagToggle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true, name = "Rich Text - Code & Lists")
+@Composable
+private fun EditNoteScreenRichTextPreview() {
+    MemCloudApplicationTheme {
+        EditNoteScreenContent(
+            uiState = EditNoteUiState(
+                isLoading = false,
+                title = "Development Notes",
+                content = "<h1>Kotlin Tips</h1><p>Here are some <em>important</em> things to remember:</p><ol><li><strong>Use data classes</strong> for models</li><li>Leverage <code>sealed classes</code> for state</li><li>Apply <u>coroutines</u> for async operations</li></ol><h2>Code Example</h2><p><code>fun greet() = println(\"Hello\")</code></p>",
+                contentHtml = "<h1>Kotlin Tips</h1><p>Here are some <em>important</em> things to remember:</p><ol><li><strong>Use data classes</strong> for models</li><li>Leverage <code>sealed classes</code> for state</li><li>Apply <u>coroutines</u> for async operations</li></ol><h2>Code Example</h2><p><code>fun greet() = println(\"Hello\")</code></p>",
+                selectedCategory = sampleEditCategories()[3], // Learning
+                selectedTags = listOf(sampleEditTags()[0], sampleEditTags()[3]), // urgent, idea
+                availableCategories = sampleEditCategories(),
+                availableTags = sampleEditTags(),
+                hasUnsavedChanges = true,
+                originalNote = null
+            ),
+            onNavigateBack = {},
+            onTitleChange = {},
+            onContentChange = {},
+            onSave = {},
+            onCategorySelected = {},
+            onTagToggle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true, name = "Rich Text - Formatting Styles")
+@Composable
+private fun EditNoteScreenFormattingPreview() {
+    MemCloudApplicationTheme {
+        EditNoteScreenContent(
+            uiState = EditNoteUiState(
+                isLoading = false,
+                title = "Formatting Examples",
+                content = "<h1>Text Formatting Demo</h1><p>This text has <strong>bold</strong>, <em>italic</em>, <u>underline</u>, and <s>strikethrough</s> formatting.</p><h2>Mixed Formatting</h2><p><strong><em>Bold and italic</em></strong> combined together.</p><ul><li>Bullet point one</li><li>Bullet point two with <strong>bold text</strong></li><li>Bullet point three with <em>italic text</em></li></ul>",
+                contentHtml = "<h1>Text Formatting Demo</h1><p>This text has <strong>bold</strong>, <em>italic</em>, <u>underline</u>, and <s>strikethrough</s> formatting.</p><h2>Mixed Formatting</h2><p><strong><em>Bold and italic</em></strong> combined together.</p><ul><li>Bullet point one</li><li>Bullet point two with <strong>bold text</strong></li><li>Bullet point three with <em>italic text</em></li></ul>",
+                selectedCategory = sampleEditCategories()[2], // Ideas
+                selectedTags = emptyList(),
+                availableCategories = sampleEditCategories(),
+                availableTags = sampleEditTags(),
+                hasUnsavedChanges = false,
+                originalNote = null
             ),
             onNavigateBack = {},
             onTitleChange = {},

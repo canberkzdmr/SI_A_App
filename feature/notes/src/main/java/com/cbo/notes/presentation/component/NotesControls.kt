@@ -17,6 +17,7 @@ import com.cbo.core.domain.model.ViewMode
 import com.cbo.notes.presentation.SortOrder
 import com.cbo.ui.components.AppOutlinedTextField
 import androidx.compose.ui.tooling.preview.Preview
+import com.cbo.ui.components.AppOutlinedCard
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Tag
@@ -41,12 +42,10 @@ fun NotesControls(
     onManageFiltersClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    AppOutlinedCard(
+        onClick={},
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier

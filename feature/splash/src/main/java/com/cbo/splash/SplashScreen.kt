@@ -383,7 +383,7 @@ private fun drawMemCloudIcon(
     }
 }
 
-@Preview
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
 fun SplashScreenPreview() {
     MemCloudApplicationTheme {

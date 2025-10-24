@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.cbo.notes"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 26
@@ -83,4 +83,7 @@ dependencies {
     // ViewModel
     implementation(libs.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
+
+    // compose-rich-editor
+    implementation(libs.richeditor.compose)
 }

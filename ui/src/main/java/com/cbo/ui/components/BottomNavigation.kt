@@ -199,7 +199,7 @@ fun BottomNavigationBar(
     
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         shadowElevation = 8.dp
     ) {
         Box(
@@ -467,7 +467,7 @@ fun CenterButton(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
             .zIndex(1f)
-            .offset(y = (-38).dp)
+            .offset(y = (-18).dp)
     ) {
         FloatingActionButton(
             onClick = onClick,

@@ -79,6 +79,7 @@ import com.cbo.notes.presentation.viewmodel.CategoriesUiState
 import com.cbo.notes.presentation.viewmodel.CategoriesViewModel
 import com.cbo.ui.components.AppAlertDialog
 import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.AppCard
 import com.cbo.ui.components.AppInfoDialog
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitleMedium
@@ -436,105 +437,105 @@ fun CategoryItem(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Card(
-            onClick = onOpen,
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(x = offsetX),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        ) {
-            Row(
+            AppCard(
+                onClick = onOpen,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                    .offset(x = offsetX),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Row(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // Color indicator
-                    val backgroundColor =
-                        category.color?.let { Color(it.toColorInt()) }
-                            ?: MaterialTheme.colorScheme.primaryContainer
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        // Color indicator
+                        val backgroundColor =
+                            category.color?.let { Color(it.toColorInt()) }
+                                ?: MaterialTheme.colorScheme.primaryContainer
 
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(backgroundColor, RoundedCornerShape(6.dp)),
-                    )
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        AppTitleMedium(
-                            text = category.name,
-                            fontWeight = FontWeight.SemiBold,
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(backgroundColor, RoundedCornerShape(6.dp)),
                         )
 
-                        category.description?.takeIf { it.isNotBlank() }?.let { desc ->
-                            AppBody(
-                                text = desc,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        Column(modifier = Modifier.weight(1f)) {
+                            AppTitleMedium(
+                                text = category.name,
+                                fontWeight = FontWeight.SemiBold,
                             )
-                        }
 
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            StatChip(text = "${category.notesCount} notes")
-                            val lastUpdated = lastUpdatedMillis
-                            if (lastUpdated != null && lastUpdated > 0L) {
-                                StatChip(text = "updated ")
-                                RelativeTimeText(epochMillis = lastUpdated)
-                            } else {
-                                RelativeTimeText(epochMillis = category.createdAt)
+                            category.description?.takeIf { it.isNotBlank() }?.let { desc ->
+                                AppBody(
+                                    text = desc,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
-                        }
 
-                        if (previewTags.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                previewTags.forEach { tag ->
-                                    StatChip(text = "#${tag.name}")
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                StatChip(text = "${category.notesCount} notes")
+                                val lastUpdated = lastUpdatedMillis
+                                if (lastUpdated != null && lastUpdated > 0L) {
+                                    StatChip(text = "updated ")
+                                    RelativeTimeText(epochMillis = lastUpdated)
+                                } else {
+                                    RelativeTimeText(epochMillis = category.createdAt)
+                                }
+                            }
+
+                            if (previewTags.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    previewTags.forEach { tag ->
+                                        StatChip(text = "#${tag.name}")
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                var expanded by remember { mutableStateOf(false) }
-                Box {
-                    IconButton(onClick = { expanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More actions"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = {
-                                expanded = false
-                                onEdit()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = {
-                                expanded = false
-                                onDelete()
-                            }
-                        )
+                    var expanded by remember { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More actions"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Edit") },
+                                onClick = {
+                                    expanded = false
+                                    onEdit()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    expanded = false
+                                    onDelete()
+                                }
+                            )
+                        }
                     }
                 }
-            }
             }
         }
     }

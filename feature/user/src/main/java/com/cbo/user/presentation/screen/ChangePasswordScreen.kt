@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,8 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.AppCard
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.HeaderCard
 import com.cbo.ui.components.PrimaryButton
 import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -103,37 +104,11 @@ fun ChangePasswordScreen(
                 verticalArrangement = Arrangement.Top,
             ) {
                 // Header text
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
-                        ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 8.dp),
-                        )
-                        AppTitle(
-                            text = "Update Your Password",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        AppBody(
-                            text ="Enter your current password and choose a new secure password",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
-                }
+                HeaderCard(
+                    iconSelected = Icons.Default.Lock,
+                    title = "Update Your Password",
+                    content = "Enter your current password and choose a new secure password",
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -258,7 +233,7 @@ fun ChangePasswordScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Password Requirements
-                Card(
+                AppCard(
                     modifier = Modifier.fillMaxWidth(),
                     colors =
                         CardDefaults.cardColors(

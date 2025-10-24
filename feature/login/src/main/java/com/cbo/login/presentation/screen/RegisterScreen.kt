@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -53,6 +52,7 @@ import com.cbo.core.common.base.UiState
 import com.cbo.core.common.validation.FieldValidation
 import com.cbo.login.presentation.viewmodel.RegisterState
 import com.cbo.login.presentation.viewmodel.RegisterViewModel
+import com.cbo.ui.components.AppCard
 import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.AppTitle
@@ -180,8 +180,9 @@ fun RegisterScreenContent(
                     .fillMaxSize()
                     .padding(24.dp),
         ) {
-            Card(
-                colors = CardColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onSecondary, disabledContentColor = MaterialTheme.colorScheme.surfaceDim, disabledContainerColor = MaterialTheme.colorScheme.inversePrimary),
+            AppCard(
+                onClick={},
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onSecondary),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 shape = MaterialTheme.shapes.medium,
                 modifier =

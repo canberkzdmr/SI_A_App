@@ -1,5 +1,6 @@
 package com.cbo.notes.presentation.screen
 
+import android.content.res.Configuration
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -402,7 +404,7 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                                     onManageFiltersClick = { showFiltersSheet = true },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding()
+                                        .padding(top = 8.dp)
                                 )
                             },
                             onNoteClick = {},
@@ -442,7 +444,9 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true, name = "Notes • List")
+@Preview(showBackground = true, showSystemUi = true, name = "Notes • List",
+    wallpaper = Wallpapers.NONE, uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun NotesScreenListPreview() {
     NotesScreenPreviewHost(previewNotesUiState().copy(viewMode = ViewMode.LIST))

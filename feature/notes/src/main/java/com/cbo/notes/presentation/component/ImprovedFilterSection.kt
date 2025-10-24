@@ -14,6 +14,7 @@ import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.TertiaryButton
 import com.cbo.ui.components.SecondaryButton
 import androidx.compose.ui.tooling.preview.Preview
+import com.cbo.ui.components.AppOutlinedCard
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -30,7 +31,8 @@ fun ImprovedFilterSection(
     modifier: Modifier = Modifier,
 ) {
     if (categories.isNotEmpty() || tags.isNotEmpty()) {
-        Card(
+        AppOutlinedCard(
+            onClick={},
             modifier = modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface

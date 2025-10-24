@@ -73,6 +73,7 @@ class EditNoteViewModel @Inject constructor(
                                     isLoading = false,
                                     title = note.title,
                                     content = note.content,
+                                    contentHtml = note.content, // Initialize HTML from stored content
                                     selectedCategory = note.category,
                                     selectedTags = note.tags,
                                     availableCategories = categories,
@@ -111,6 +112,10 @@ class EditNoteViewModel @Inject constructor(
         _uiState.update { it.copy(content = content, hasUnsavedChanges = true) }
     }
 
+    fun updateContentHtml(html: String) {
+        _uiState.update { it.copy(contentHtml = html, content = html, hasUnsavedChanges = true) }
+    }
+
     fun selectCategory(category: Category?) {
         _uiState.update { it.copy(selectedCategory = category, hasUnsavedChanges = true) }
     }
@@ -143,7 +148,7 @@ class EditNoteViewModel @Inject constructor(
                 val noteToSave = if (isEditing) {
                     currentState.originalNote!!.copy(
                         title = currentState.title,
-                        content = currentState.content,
+                        content = currentState.contentHtml, // Save HTML content
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags
                     )
@@ -151,7 +156,7 @@ class EditNoteViewModel @Inject constructor(
                     Note(
                         userId = user.id,
                         title = currentState.title,
-                        content = currentState.content,
+                        content = currentState.contentHtml, // Save HTML content
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags
                     )
@@ -196,6 +201,7 @@ class EditNoteViewModel @Inject constructor(
                 it.copy(
                     title = originalNote.title,
                     content = originalNote.content,
+                    contentHtml = originalNote.content,
                     selectedCategory = originalNote.category,
                     selectedTags = originalNote.tags,
                     hasUnsavedChanges = false
@@ -206,6 +212,7 @@ class EditNoteViewModel @Inject constructor(
                 it.copy(
                     title = "",
                     content = "",
+                    contentHtml = "",
                     selectedCategory = null,
                     selectedTags = emptyList(),
                     hasUnsavedChanges = false
@@ -365,6 +372,7 @@ data class EditNoteUiState(
     val isSaving: Boolean = false,
     val title: String = "",
     val content: String = "",
+    val contentHtml: String = "", // Store HTML for rich text
     val selectedCategory: Category? = null,
     val selectedTags: List<Tag> = emptyList(),
     val availableCategories: List<Category> = emptyList(),
