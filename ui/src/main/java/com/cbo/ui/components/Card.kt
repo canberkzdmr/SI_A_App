@@ -16,7 +16,22 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.components.cards.HeaderCard as NewHeaderCard
+import com.cbo.ui.components.cards.CardVariant
 
+/**
+ * Legacy HeaderCard - DEPRECATED
+ * Use com.cbo.ui.components.cards.HeaderCard instead
+ * 
+ * This function is kept for backward compatibility but delegates to the new card system.
+ * Consider migrating to the new HeaderCard for better design system integration.
+ */
+@Deprecated(
+    message = "Use com.cbo.ui.components.cards.HeaderCard instead",
+    replaceWith = ReplaceWith(
+        "HeaderCard(modifier, iconSelected, title, content, CardVariant.DEFAULT, CardSize.MEDIUM, elevation)"
+    )
+)
 @Composable
 fun HeaderCard(
     modifier: Modifier = Modifier,
@@ -25,41 +40,13 @@ fun HeaderCard(
     content: String = "",
     elevation: Dp = 0.dp,
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
-            ),
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            if (iconSelected != null) {
-                Icon(
-                    imageVector = iconSelected,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-            }
-            if (title.isNotEmpty()) {
-                AppTitle(
-                    text = title,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            if (content.isNotEmpty()) {
-                AppBody(
-                    text =content,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-        }
-    }
+    NewHeaderCard(
+        modifier = modifier,
+        icon = iconSelected,
+        title = title,
+        content = content,
+        variant = CardVariant.DEFAULT,
+        size = com.cbo.ui.components.cards.CardSize.MEDIUM,
+        elevation = elevation
+    )
 }

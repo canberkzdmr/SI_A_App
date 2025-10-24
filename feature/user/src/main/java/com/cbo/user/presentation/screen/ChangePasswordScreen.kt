@@ -44,6 +44,8 @@ import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.PrimaryButton
+import com.cbo.ui.components.cards.AppCard
+import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.user.presentation.viewmodel.ChangePasswordViewModel
@@ -103,13 +105,9 @@ fun ChangePasswordScreen(
                 verticalArrangement = Arrangement.Top,
             ) {
                 // Header text
-                Card(
+                AppCard(
                     modifier = Modifier.fillMaxWidth(),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
-                        ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    variant = CardVariant.TONAL
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -258,13 +256,9 @@ fun ChangePasswordScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Password Requirements
-                Card(
+                AppCard(
                     modifier = Modifier.fillMaxWidth(),
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                        ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    variant = CardVariant.SURFACE
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),

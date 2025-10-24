@@ -22,6 +22,8 @@ import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Tag
 import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.TertiaryButton
+import com.cbo.ui.components.cards.AppCard
+import com.cbo.ui.components.cards.CardVariant
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -41,12 +43,9 @@ fun NotesControls(
     onManageFiltersClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    AppCard(
+        modifier = modifier,
+        variant = CardVariant.SURFACE
     ) {
         Column(
             modifier = Modifier

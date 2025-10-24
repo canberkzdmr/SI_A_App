@@ -65,7 +65,8 @@ import com.cbo.notes.presentation.viewmodel.TagsViewModel
 import com.cbo.notes.presentation.viewmodel.ViewMode
 import com.cbo.ui.components.AppAlertDialog
 import com.cbo.ui.components.AppTitle
-import com.cbo.ui.components.HeaderCard
+import com.cbo.ui.components.cards.HeaderCard
+import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -236,7 +237,8 @@ fun TagsContent(
                         modifier = Modifier
                             .padding(paddingValues)
                             .padding(16.dp),
-                        iconSelected = Icons.Default.Tag,
+                        variant = CardVariant.DEFAULT,
+                        icon = Icons.Default.Tag,
                         title = "Manage Your Tags",
                         content = "Switch to 🗑 Delete mode using the top button.\n" +
                                 "In ✏ Edit mode, tap a tag to update it.\n" +

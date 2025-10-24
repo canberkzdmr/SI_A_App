@@ -83,7 +83,8 @@ import com.cbo.ui.components.AppInfoDialog
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitleMedium
 import com.cbo.ui.components.ColorPicker
-import com.cbo.ui.components.HeaderCard
+import com.cbo.ui.components.cards.HeaderCard
+import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.components.RelativeTimeText
 import com.cbo.ui.components.StatChip
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -196,8 +197,9 @@ fun CategoriesContent(
                     item {
                         HeaderCard(
                             title = "Organize your notes with categories",
+                            icon = Icons.Default.Category,
                             content = "Tap a category to view its notes. Swipe right to edit, left to delete.",
-                            elevation = 0.dp,
+                            variant = CardVariant.DEFAULT,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }

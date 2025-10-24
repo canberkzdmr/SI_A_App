@@ -57,6 +57,8 @@ import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppRegular
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.PrimaryButton
+import com.cbo.ui.components.cards.AppCard
+import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -180,10 +182,8 @@ fun RegisterScreenContent(
                     .fillMaxSize()
                     .padding(24.dp),
         ) {
-            Card(
-                colors = CardColors(containerColor = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onSecondary, disabledContentColor = MaterialTheme.colorScheme.surfaceDim, disabledContainerColor = MaterialTheme.colorScheme.inversePrimary),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                shape = MaterialTheme.shapes.medium,
+            AppCard(
+                variant = CardVariant.DEFAULT,
                 modifier =
                     Modifier
                         .align(Alignment.Center),
