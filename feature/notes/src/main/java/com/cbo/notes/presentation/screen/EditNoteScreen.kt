@@ -33,6 +33,7 @@ import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
+import com.cbo.ui.components.AppBasicTextField
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
@@ -61,8 +62,18 @@ fun EditNoteScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { 
-                    Text(if (uiState.originalNote != null) "Edit Note" else "Create Note") 
+                title = {
+                    // Title input in the app bar
+                    AppBasicTextField(
+                        value = uiState.title,
+                        onValueChange = viewModel::updateTitle,
+                        placeholder = "Note title...",
+                        textStyle = MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -115,19 +126,6 @@ fun EditNoteScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 val focusRequestContent = remember { FocusRequester() }
-
-                // Title field
-                AppOutlinedTextField(
-                    value = uiState.title,
-                    onValueChange = viewModel::updateTitle,
-                    label = "Title",
-                    placeholder = "Enter note title...",
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = uiState.title.isBlank(),
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(onNext = { focusRequestContent.requestFocus() })
-                )
 
                 // Content field
                 AppOutlinedTextField(
@@ -403,8 +401,18 @@ private fun EditNoteScreenContent(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { 
-                    Text(if (uiState.originalNote != null) "Edit Note" else "Create Note") 
+                title = {
+                    // Title input in the app bar
+                    AppBasicTextField(
+                        value = uiState.title,
+                        onValueChange = onTitleChange,
+                        placeholder = "Note title...",
+                        textStyle = MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
                 },
                 navigationIcon = {
                     IconButton(
@@ -456,17 +464,6 @@ private fun EditNoteScreenContent(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Title input
-                AppOutlinedTextField(
-                    value = uiState.title,
-                    onValueChange = onTitleChange,
-                    label = "Title",
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
                 // Content input
                 AppOutlinedTextField(
                     value = uiState.content,
