@@ -87,6 +87,11 @@ import com.cbo.ui.components.cards.HeaderCard
 import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.components.RelativeTimeText
 import com.cbo.ui.components.StatChip
+import com.cbo.ui.components.states.AppLoadingScreen
+import com.cbo.ui.components.states.AppErrorState
+import com.cbo.ui.components.states.AppEmptyState
+import com.cbo.ui.components.dialogs.AppConfirmationDialog
+import com.cbo.ui.components.dialogs.DialogType
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -167,21 +172,25 @@ fun CategoriesContent(
     ) { paddingValues ->
         when {
             uiState.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+                AppLoadingScreen(
+                    message = "Loading categories...",
+                    showProgress = true
+                )
+            }
+            
+            uiState.errorMessage != null -> {
+                AppErrorState(
+                    error = uiState.errorMessage ?: "Failed to load categories",
+                    onRetry = { /* Retry loading categories */ }
+                )
             }
 
             uiState.categories.isEmpty() -> {
-                EmptyCategoriesState(
-                    onCreateCategory = onCreateCategory,
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
+                AppEmptyState(
+                    title = "No categories yet",
+                    message = "Create your first category to organize your notes better",
+                    actionText = "Create Category",
+                    onAction = onCreateCategory
                 )
             }
 

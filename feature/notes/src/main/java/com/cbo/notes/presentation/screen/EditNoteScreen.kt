@@ -37,6 +37,12 @@ import com.cbo.ui.components.AppBasicTextField
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.states.AppLoadingScreen
+import com.cbo.ui.components.states.AppErrorState
+import com.cbo.ui.components.forms.AppFormFieldGroup
+import com.cbo.ui.components.forms.AppFormActions
+import com.cbo.ui.components.dialogs.AppConfirmationDialog
+import com.cbo.ui.components.dialogs.DialogType
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,14 +115,22 @@ fun EditNoteScreen(
             )
         }
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        when {
+            uiState.isLoading -> {
+                AppLoadingScreen(
+                    message = "Loading note...",
+                    showProgress = true
+                )
             }
-        } else {
+            
+            uiState.errorMessage != null -> {
+                AppErrorState(
+                    error = uiState.errorMessage ?: "Failed to load note",
+                    onRetry = { /* Retry loading note */ }
+                )
+            }
+            
+            else -> {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -165,30 +179,21 @@ fun EditNoteScreen(
             }
         }
     }
+    }
 
-    // Discard changes dialog
+    // INTEGRATED: Use new dialog component
     if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            title = { Text("Discard changes?") },
-            text = { Text("You have unsaved changes. Are you sure you want to go back?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDiscardDialog = false
-                        onNavigateBack()
-                    }
-                ) {
-                    Text("Discard")
-                }
+        AppConfirmationDialog(
+            type = DialogType.WARNING,
+            title = "Discard changes?",
+            message = "You have unsaved changes. Are you sure you want to go back?",
+            onConfirm = {
+                showDiscardDialog = false
+                onNavigateBack()
             },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDiscardDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showDiscardDialog = false },
+            confirmText = "Discard",
+            dismissText = "Cancel"
         )
     }
 

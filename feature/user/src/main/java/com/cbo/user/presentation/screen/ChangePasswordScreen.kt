@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -43,9 +44,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.AppTitleMedium
 import com.cbo.ui.components.PrimaryButton
 import com.cbo.ui.components.cards.AppCard
 import com.cbo.ui.components.cards.CardVariant
+import com.cbo.ui.components.cards.HeaderCard
 import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.user.presentation.viewmodel.ChangePasswordViewModel
@@ -105,7 +108,15 @@ fun ChangePasswordScreen(
                 verticalArrangement = Arrangement.Top,
             ) {
                 // Header text
-                AppCard(
+                HeaderCard(
+                    modifier = Modifier
+                        .padding(paddingValues),
+                    variant = CardVariant.DEFAULT,
+                    icon = Icons.Default.Lock,
+                    title = "Update Your Password",
+                    content = "Enter your current password and choose a new secure password"
+                )
+                /*AppCard(
                     modifier = Modifier.fillMaxWidth(),
                     variant = CardVariant.TONAL
                 ) {
@@ -131,7 +142,7 @@ fun ChangePasswordScreen(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
-                }
+                }*/
 
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -263,10 +274,9 @@ fun ChangePasswordScreen(
                     Column(
                         modifier = Modifier.padding(16.dp),
                     ) {
-                        Text(
+                        AppTitleMedium(
                             text = "Password Requirements:",
                             style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -280,7 +290,7 @@ fun ChangePasswordScreen(
                             )
 
                         requirements.forEach { requirement ->
-                            Text(
+                            AppBody(
                                 text = "• $requirement",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),

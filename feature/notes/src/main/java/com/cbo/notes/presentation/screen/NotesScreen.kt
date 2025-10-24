@@ -19,6 +19,9 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import com.cbo.ui.components.states.AppLoadingScreen
+import com.cbo.ui.components.states.AppEmptyState
+import com.cbo.ui.components.states.AppErrorState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,23 +100,37 @@ fun NotesScreen(
             // Notes content (controls move into scroll via header)
             when {
                 uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    AppLoadingScreen(
+                        message = "Loading your notes...",
+                        showProgress = true
+                    )
                 }
 
                 uiState.filteredNotes.isEmpty() -> {
-                    NotesEmptyState(
-                        hasNotes = uiState.notes.isNotEmpty(),
-                        searchQuery = uiState.searchQuery,
-                        onCreateNote = onNavigateToCreateNote,
-                        onClearFilters = {
-                            viewModel.clearFilters()
+                    AppEmptyState(
+                        title = if (uiState.searchQuery.isNotEmpty()) "No matching notes" else "No notes yet",
+                        message = if (uiState.searchQuery.isNotEmpty()) {
+                            "Try adjusting your search criteria or clear the search to see all notes"
+                        } else {
+                            "Start creating your first note to get organized"
                         },
-                        modifier = Modifier.fillMaxSize(),
+                        actionText = "Create Note",
+                        onAction = onNavigateToCreateNote,
+                        secondaryActionText = if (uiState.searchQuery.isNotEmpty()) "Clear Search" else null,
+                        onSecondaryAction = { 
+                            viewModel.searchNotes("")
+                            viewModel.clearFilters()
+                        }
+                    )
+                }
+
+                uiState.errorMessage != null -> {
+                    AppErrorState(
+                        error = uiState.errorMessage ?: "An unexpected error occurred",
+                        onRetry = { 
+                            // Retry loading notes - refresh by clearing filters
+                            viewModel.clearFilters()
+                        }
                     )
                 }
 
