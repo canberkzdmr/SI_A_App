@@ -1,6 +1,5 @@
 package com.cbo.login.di
 
-import com.cbo.core.database.dao.UserDao
 import com.cbo.core.data.mapper.UserEntityMapper
 import com.cbo.core.domain.usecase.GetUserSettingsUseCase
 import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase

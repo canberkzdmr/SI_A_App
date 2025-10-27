@@ -6,7 +6,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.cbo.core.navigation.AppDestination
 import com.cbo.login.presentation.screen.LoginScreen
-import com.cbo.login.presentation.screen.LoginScreenContent
 import com.cbo.login.presentation.screen.RegisterScreen
 
 fun NavGraphBuilder.loginNavGraph(

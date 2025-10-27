@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
@@ -13,7 +14,6 @@ import com.cbo.notes.domain.usecase.GetCategoriesUseCase
 import com.cbo.notes.domain.usecase.GetNoteByIdUseCase
 import com.cbo.notes.domain.usecase.GetTagsUseCase
 import com.cbo.notes.domain.usecase.UpdateNoteUseCase
-import com.cbo.core.session.UserSession
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,8 +21,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update

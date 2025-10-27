@@ -2,34 +2,30 @@ package com.cbo.memcloud.presentation.screen
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.cbo.notes.presentation.navigation.navigateToCategories
-import com.cbo.notes.presentation.navigation.navigateToNotes
-import com.cbo.notes.presentation.navigation.navigateToTags
-import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.CategoriesScreen
+import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
-import com.cbo.user.presentation.screen.ProfileScreen
 import com.cbo.ui.components.AppBottomNavigation
 import com.cbo.ui.components.BottomNavDestination
 import com.cbo.ui.components.BottomNavigationOverlay
 import com.cbo.ui.components.CenterButton
+import com.cbo.user.presentation.screen.ProfileScreen
 
 /**
  * Main screen that hosts the bottom navigation and main app content

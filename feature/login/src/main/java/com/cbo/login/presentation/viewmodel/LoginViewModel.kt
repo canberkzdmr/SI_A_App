@@ -90,7 +90,7 @@ class LoginViewModel
         fun setFirstLoginDone() {
             viewModelScope.launch {
                 val user = getUser()
-                user?.let { it ->
+                user?.let {
                     setFirstLoginDoneUseCase.invoke(it.id, true)
                 } ?: run {
                     Log.e("LoginViewModel", "User is null!")

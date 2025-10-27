@@ -2,6 +2,7 @@ package com.cbo.notes.presentation.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppHeadline
 import com.cbo.ui.components.PrimaryButton
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
 fun NotesEmptyState(
@@ -32,7 +34,7 @@ fun NotesEmptyState(
             imageVector = when {
                 searchQuery.isNotEmpty() -> Icons.Default.SearchOff
                 hasNotes -> Icons.Default.FilterList
-                else -> Icons.Default.NoteAdd
+                else -> Icons.AutoMirrored.Filled.NoteAdd
             },
             contentDescription = null,
             modifier = Modifier.size(80.dp),
@@ -98,7 +100,7 @@ fun NotesEmptyState(
 @Preview(showBackground = true, name = "Empty Notes - No Notes Yet")
 @Composable
 fun PreviewNotesEmptyState_NoNotes() {
-    MaterialTheme {
+    MemCloudApplicationTheme {
         NotesEmptyState(
             hasNotes = false,
             searchQuery = "",

@@ -1,6 +1,5 @@
 package com.cbo.core.domain.usecase
 
-import com.cbo.core.domain.model.PasswordVerifyModel
 import com.cbo.core.domain.repository.UserRepository
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec

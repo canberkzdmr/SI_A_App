@@ -2,6 +2,7 @@
 agp = "8.7.2"
 biometric = "1.2.0-alpha05"
 coilCompose = "2.4.0"
+coreTesting = "2.2.0"
 hiltNavigationCompose = "..."
 javapoet = "1.13.0"
 kotlin = "2.0.0"
@@ -14,6 +15,7 @@ activityCompose = "1.8.0"
 composeBom = "2024.04.01"
 appcompat = "1.6.1"
 material = "1.10.0"
+mockitoKotlin = "5.1.0"
 room = "2.6.1"
 viewmodel = "2.6.1"
 hilt = "2.48"
@@ -36,6 +38,7 @@ roomCommonJvm = "2.8.1"
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-hilt-navigation-compose-vx = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }
@@ -45,6 +48,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version = "2.6.0" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "viewmodel"}
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }

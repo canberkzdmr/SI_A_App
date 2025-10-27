@@ -77,7 +77,7 @@ class TagsViewModel
                             resetStateToEdit()
                             snackbarManager.showMessage(SnackbarMessage.Success("Tag updated"))
                         },
-                        onFailure = { error ->
+                        onFailure = {
                             resetStateToEdit()
                             snackbarManager.showMessage(SnackbarMessage.Error("Failed to update tag."))
                         },

@@ -2,10 +2,15 @@ package com.cbo.ui.components.display
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.Note
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Tag
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,7 +29,7 @@ fun StatCardsPreview() {
                 title = "Total Notes",
                 value = "1,234",
                 subtitle = "+12% from last month",
-                icon = Icons.Default.Note
+                icon = Icons.AutoMirrored.Filled.Note
             )
             
             AppStatCard(
@@ -46,7 +51,7 @@ fun StatGridPreview() {
                 title = "Notes",
                 value = "1,234",
                 subtitle = "+12%",
-                icon = Icons.Default.Note
+                icon = Icons.AutoMirrored.Filled.Note
             ),
             StatData(
                 title = "Categories",
@@ -132,7 +137,7 @@ fun TimelinePreview() {
                 title = "First Note Created",
                 description = "You created your first note",
                 timestamp = "1 hour ago",
-                icon = Icons.Default.Note,
+                icon = Icons.AutoMirrored.Filled.Note,
                 isCompleted = true
             ),
             TimelineItem(
@@ -159,7 +164,7 @@ fun ActivityFeedPreview() {
                 title = "Note Created",
                 description = "New note 'Meeting Notes' was created",
                 timestamp = "2 hours ago",
-                icon = Icons.Default.Note,
+                icon = Icons.AutoMirrored.Filled.Note,
                 type = ActivityType.SUCCESS
             ),
             ActivityItem(

@@ -209,26 +209,6 @@ fun NotesScreen(
     }
 }
 
-/*// Filters management bottom sheet
-@Composable
-private fun FiltersSheetHost(
-    uiState: NotesUiState,
-    show: Boolean,
-    onDismiss: () -> Unit,
-    onApply: (Category?, List<Tag>) -> Unit,
-) {
-    if (!show) return
-    FiltersBottomSheet(
-        allCategories = uiState.categories,
-        allTags = uiState.tags,
-        selectedCategory = uiState.selectedCategory,
-        selectedTags = uiState.selectedTags,
-        onApply = onApply,
-        onClearAll = onDismiss,
-        onDismiss = onDismiss
-    )
-}*/
-
 @Composable
 private fun FilterSection(
     categories: List<Category>,
@@ -596,7 +576,7 @@ private fun sampleNotes(
             title = "Grocery List",
             content = "• Milk\n• Bread\n• Eggs\n• Apples\n• Chicken\n• Rice\n• Yogurt\n• Bananas",
             category = categories[1], // Personal
-            tags = listOf(tags[4]), // todo
+            tags = listOf(tags[4]), // to-do
             createdAt = System.currentTimeMillis() - 172800000, // 2 days ago
             updatedAt = System.currentTimeMillis() - 1800000, // 30 minutes ago
             isPinned = false,
@@ -648,7 +628,7 @@ private fun sampleNotes(
             title = "Weekend Plans",
             content = "Saturday:\n• Visit the farmers market\n• Movie night with friends\n\nSunday:\n• Hiking at Green Mountain\n• Meal prep for the week",
             category = categories[1], // Personal
-            tags = listOf(tags[4]), // todo
+            tags = listOf(tags[4]), // to-do
             createdAt = System.currentTimeMillis() - 518400000, // 6 days ago
             updatedAt = System.currentTimeMillis() - 86400000, // 1 day ago
             isPinned = false,

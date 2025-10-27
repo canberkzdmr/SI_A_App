@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -373,7 +374,7 @@ private fun SortSelector(
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Sort,
+                imageVector = Icons.AutoMirrored.Filled.Sort,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )

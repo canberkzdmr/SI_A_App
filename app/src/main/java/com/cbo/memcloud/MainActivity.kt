@@ -1,15 +1,14 @@
 package com.cbo.memcloud
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.rememberNavController
 import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.fragment.app.FragmentActivity
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {

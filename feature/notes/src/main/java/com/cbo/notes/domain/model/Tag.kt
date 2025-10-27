@@ -1,7 +1,5 @@
 package com.cbo.notes.domain.model
 
-import com.cbo.core.domain.FieldValidationRules
-
 data class Tag(
     val id: Int = 0,
     val userId: Int,
