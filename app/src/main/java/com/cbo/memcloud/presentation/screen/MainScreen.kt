@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,24 +44,12 @@ fun MainScreen(
     var selectedCategoryIdForNotes by remember { mutableStateOf<Int?>(null) }
     
     Box(modifier = modifier.fillMaxSize()) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            bottomBar = {
-                AppBottomNavigation(
-                    navController = navController,
-                    isExpanded = isBottomNavExpanded,
-                    onExpandedChange = { isBottomNavExpanded = it },
-                    showCenterButton = false
-                )
-            }
-        ) { paddingValues ->
+        // Navigation content - no Scaffold wrapper to avoid nesting
         Log.d("MainScreen", "current destination (${navController.currentDestination?.route})")
         NavHost(
             navController = navController,
             startDestination = BottomNavDestination.Notes.route,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             composable(BottomNavDestination.Notes.route) {
                 NotesScreen(
@@ -131,7 +118,20 @@ fun MainScreen(
                 )
             }
         }
-    }
+        
+        // Bottom navigation bar as overlay
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            AppBottomNavigation(
+                navController = navController,
+                isExpanded = isBottomNavExpanded,
+                onExpandedChange = { isBottomNavExpanded = it },
+                showCenterButton = false
+            )
+        }
         
         // Center floating action button rendered as an overlay so it can overflow the bar
         Box(

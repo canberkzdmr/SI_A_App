@@ -88,7 +88,9 @@ fun SplashScreen(
         }
     }
 
-    SplashContent(isLoading = state.isLoading)
+    MemCloudApplicationTheme {
+        SplashContent(isLoading = state.isLoading)
+    }
 }
 
 @Composable
@@ -383,7 +385,7 @@ private fun drawMemCloudIcon(
     }
 }
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 fun SplashScreenPreview() {
     MemCloudApplicationTheme {

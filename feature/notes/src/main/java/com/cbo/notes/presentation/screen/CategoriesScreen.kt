@@ -168,15 +168,21 @@ fun CategoriesContent(
             )
         },
     ) { paddingValues ->
-        when {
-            uiState.isLoading -> {
-                AppLoadingScreen(
-                    message = "Loading categories...",
-                    showProgress = true
-                )
-            }
-            
-            uiState.errorMessage != null -> {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(bottom = 80.dp) // Space for bottom navigation overlay
+        ) {
+            when {
+                uiState.isLoading -> {
+                    AppLoadingScreen(
+                        message = "Loading categories...",
+                        showProgress = true
+                    )
+                }
+                
+                uiState.errorMessage != null -> {
                 AppErrorState(
                     error = uiState.errorMessage ?: "Failed to load categories",
                     onRetry = { /* Retry loading categories */ }
@@ -224,7 +230,8 @@ fun CategoriesContent(
                 }
             }
         }
-    }
+        } // End Box
+    } // End Scaffold
 
     if (uiState.showCreateDialog) {
         CategoryDialog(

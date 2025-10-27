@@ -89,7 +89,8 @@ fun NotesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 80.dp), // Space for bottom navigation overlay
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Spacer(modifier = Modifier.height(0.dp))
@@ -279,7 +280,7 @@ private fun NotesContent(
                 verticalItemSpacing = 8.dp,
             ) {
                 if (header != null) {
-                    item(span = StaggeredGridItemSpan.FullLine) { header() }
+                    item(span = StaggeredGridItemSpan.FullLine) { header(); Spacer(Modifier.height(8.dp)) }
                 }
                 items(notes) { note ->
                     NoteCard(

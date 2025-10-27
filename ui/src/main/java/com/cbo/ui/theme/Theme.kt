@@ -266,7 +266,7 @@ fun MemCloudApplicationTheme(
         colorScheme = colorScheme,
         typography = Typography
     ) {
-        ApplySystemBarColors()
+//        ApplySystemBarColors()
         content()
     }
 }
@@ -281,14 +281,18 @@ fun Context.findActivity(): Activity? = when (this) {
 fun ApplySystemBarColors() {
     val view = LocalView.current
     val darkTheme = isSystemInDarkTheme()
-    val color = MaterialTheme.colorScheme.primary
 
     SideEffect {
         val activity = view.context.findActivity()
         activity?.window?.let { window ->
-            window.statusBarColor = color.toArgb()
-            WindowInsetsControllerCompat(window, window.decorView)
-                .isAppearanceLightStatusBars = !darkTheme
+            // Make system bars transparent for edge-to-edge display
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightNavigationBars = !darkTheme
+            }
         }
     }
 }

@@ -154,7 +154,8 @@ fun ProfileScreenContent(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .padding(bottom = 80.dp), // Space for bottom navigation overlay
         ) {
             // ------------------------
             // Profile Header

@@ -98,8 +98,8 @@ fun TagsScreen(
         onHideCreateTagDialog = viewModel::hideCreateTagDialog,
         onDeleteSelectedTags = viewModel::deleteSelectedTags,
         onResetStateToEdit = viewModel::resetStateToEdit,
-        onTagNameChange = viewModel::updateTagName, // 👈 add this
-        onColorChange = viewModel::updateTagColor,  // 👈 add this
+        onTagNameChange = viewModel::updateTagName,
+        onColorChange = viewModel::updateTagColor,
         modifier = modifier
     )
 }
@@ -216,11 +216,16 @@ fun TagsContent(
             }
         }
     ) { paddingValues ->
-        when {
-            uiState.isLoading -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(), // Space for bottom navigation overlay
+        ) {
+            when {
+                uiState.isLoading -> Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                 CircularProgressIndicator()
             }
 
@@ -232,11 +237,13 @@ fun TagsContent(
             )
 
             else -> {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
+                Column(
+                    Modifier.verticalScroll(rememberScrollState()),
+                ) {
                     HeaderCard(
                         modifier = Modifier
                             .padding(paddingValues)
-                            .padding(16.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         variant = CardVariant.DEFAULT,
                         icon = Icons.Default.Tag,
                         title = "Manage Your Tags",
@@ -245,13 +252,13 @@ fun TagsContent(
                                 "In 🗑 Delete mode, select tags you don’t need and tap the delete FAB."
                     )
 
-                    Spacer(Modifier.height(32.dp))
+                    Spacer(Modifier.height(8.dp))
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                     ) {
                         uiState.tags.forEach { tag ->
@@ -269,6 +276,7 @@ fun TagsContent(
                 }
             }
         }
+        } // End Box
     }
 
     if (uiState.showCreateDialog) {
