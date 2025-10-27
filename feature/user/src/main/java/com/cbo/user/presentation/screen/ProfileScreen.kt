@@ -42,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -135,20 +136,18 @@ fun ProfileScreenContent(
     onEnableBiometrics: () -> Unit,
     onContactSupport: () -> Unit,
 ) {
-    Scaffold(
+    ScreenWithTopBarAndInsets(
         topBar = {
             CenterAlignedTopAppBar(
-                colors =
-                    TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                    ),
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                ),
                 title = {
-                    Text("Profile", color = MaterialTheme.colorScheme.onPrimary)
+                    Text("Profile", color = MaterialTheme.colorScheme.onSurface)
                 },
             )
-        },
+        }
     ) { innerPadding ->
-
         LazyColumn(
             modifier =
                 Modifier

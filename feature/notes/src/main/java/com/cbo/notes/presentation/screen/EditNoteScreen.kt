@@ -1,5 +1,6 @@
 package com.cbo.notes.presentation.screen
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -62,6 +62,7 @@ import com.cbo.ui.components.AppBasicTextField
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import com.cbo.ui.components.dialogs.AppConfirmationDialog
 import com.cbo.ui.components.dialogs.DialogType
 import com.cbo.ui.components.states.AppErrorState
@@ -73,7 +74,7 @@ import com.cbo.ui.theme.MemCloudApplicationTheme
 fun EditNoteScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: EditNoteViewModel = hiltViewModel()
+    viewModel: EditNoteViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDiscardDialog by remember { mutableStateOf(false) }
@@ -87,7 +88,7 @@ fun EditNoteScreen(
         }
     }
 
-    Scaffold(
+    ScreenWithTopBarAndInsets(
         modifier = modifier,
         topBar = {
             TopAppBar(
@@ -97,11 +98,12 @@ fun EditNoteScreen(
                         value = uiState.title,
                         onValueChange = viewModel::updateTitle,
                         placeholder = "Note title...",
-                        textStyle = MaterialTheme.typography.titleLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
+                        textStyle =
+                            MaterialTheme.typography.titleLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface,
+                            ),
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
                     )
                 },
                 navigationIcon = {
@@ -112,96 +114,97 @@ fun EditNoteScreen(
                             } else {
                                 onNavigateBack()
                             }
-                        }
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
                         )
                     }
                 },
                 actions = {
                     TextButton(
                         onClick = viewModel::saveNote,
-                        enabled = !uiState.isSaving && uiState.title.isNotBlank()
+                        enabled = !uiState.isSaving && uiState.title.isNotBlank(),
                     ) {
                         if (uiState.isSaving) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp
+                                strokeWidth = 2.dp,
                             )
                         } else {
                             Text("Save")
                         }
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         when {
             uiState.isLoading -> {
                 AppLoadingScreen(
                     message = "Loading note...",
-                    showProgress = true
+                    showProgress = true,
                 )
             }
-            
+
             uiState.errorMessage != null -> {
                 AppErrorState(
                     error = uiState.errorMessage ?: "Failed to load note",
-                    onRetry = { /* Retry loading note */ }
+                    onRetry = { /* Retry loading note */ },
                 )
             }
-            
+
             else -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                val focusRequestContent = remember { FocusRequester() }
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    val focusRequestContent = remember { FocusRequester() }
 
-                // Content field
-                AppOutlinedTextField(
-                    value = uiState.content,
-                    onValueChange = viewModel::updateContent,
-                    label = "Content",
-                    placeholder = "Start writing your note...",
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    // Content field
+                    AppOutlinedTextField(
+                        value = uiState.content,
+                        onValueChange = viewModel::updateContent,
+                        label = "Content",
+                        placeholder = "Start writing your note...",
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
 //                        .defaultMinSize(minHeight = 200.dp)
-                        .height(200.dp)
-                        .focusRequester(remember { focusRequestContent })
-                    ,
-                    minLines = 8,
-                    singleLine = false
-                )
+                                .height(200.dp)
+                                .focusRequester(remember { focusRequestContent }),
+                        minLines = 8,
+                        singleLine = false,
+                    )
 
-                // Category selection
-                if (uiState.availableCategories.isNotEmpty()) {
-                    CategorySelection(
-                        categories = uiState.availableCategories,
-                        selectedCategory = uiState.selectedCategory,
-                        onCategorySelected = viewModel::selectCategory
+                    // Category selection
+                    if (uiState.availableCategories.isNotEmpty()) {
+                        CategorySelection(
+                            categories = uiState.availableCategories,
+                            selectedCategory = uiState.selectedCategory,
+                            onCategorySelected = viewModel::selectCategory,
+                        )
+                    }
+
+                    // Tag selection
+                    TagSelection(
+                        tags = uiState.availableTags,
+                        selectedTags = uiState.selectedTags,
+                        tagInputText = uiState.tagInputText,
+                        onTagToggle = viewModel::toggleTag,
+                        onTagInputChange = viewModel::updateTagInputText,
+                        onCreateTagFromInput = viewModel::createTagFromInput,
+                        onCreateTag = viewModel::showCreateTagDialog,
                     )
                 }
-
-                // Tag selection
-                TagSelection(
-                    tags = uiState.availableTags,
-                    selectedTags = uiState.selectedTags,
-                    tagInputText = uiState.tagInputText,
-                    onTagToggle = viewModel::toggleTag,
-                    onTagInputChange = viewModel::updateTagInputText,
-                    onCreateTagFromInput = viewModel::createTagFromInput,
-                    onCreateTag = viewModel::showCreateTagDialog
-                )
             }
         }
-    }
     }
 
     // INTEGRATED: Use new dialog component
@@ -216,7 +219,7 @@ fun EditNoteScreen(
             },
             onDismiss = { showDiscardDialog = false },
             confirmText = "Discard",
-            dismissText = "Cancel"
+            dismissText = "Cancel",
         )
     }
 
@@ -247,24 +250,24 @@ private fun CategorySelection(
     categories: List<Category>,
     selectedCategory: Category?,
     onCategorySelected: (Category?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         AppTitle(
             text = "Category",
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
+            contentPadding = PaddingValues(horizontal = 4.dp),
         ) {
             // "None" option
             item {
                 FilterChip(
                     selected = selectedCategory == null,
                     onClick = { onCategorySelected(null) },
-                    label = "None"
+                    label = "None",
                 )
             }
 
@@ -289,28 +292,28 @@ private fun TagSelection(
     onTagInputChange: (String) -> Unit,
     onCreateTagFromInput: () -> Unit,
     onCreateTag: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             AppTitle(text = "Tags")
-            
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (selectedTags.isNotEmpty()) {
                     Text(
                         text = "${selectedTags.size} selected",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                
+
                 // Add tag button - kept for custom colors if needed
                 AppIconButton(
                     onClick = onCreateTag,
@@ -319,9 +322,9 @@ private fun TagSelection(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Create custom tag",
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
-                    }
+                    },
                 )
             }
         }
@@ -345,56 +348,59 @@ private fun TagSelection(
                 }
             },
             placeholder = "Type tag name and press Enter or Space...",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-                .onKeyEvent { keyEvent ->
-                    if (keyEvent.type == KeyEventType.KeyDown &&
-                        (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) &&
-                        tagInputText.isNotBlank()
-                    ) {
-                        onCreateTagFromInput()
-                        true
-                    } else {
-                        false
-                    }
-                },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.type == KeyEventType.KeyDown &&
+                            (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) &&
+                            tagInputText.isNotBlank()
+                        ) {
+                            onCreateTagFromInput()
+                            true
+                        } else {
+                            false
+                        }
+                    },
             singleLine = true,
             trailingIcon = {
                 if (tagInputText.isNotBlank()) {
                     IconButton(onClick = onCreateTagFromInput) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add tag"
+                            contentDescription = "Add tag",
                         )
                     }
                 }
             },
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (tagInputText.isNotBlank()) {
-                        onCreateTagFromInput()
-                    }
-                }
-            ),
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Done
-            )
+            keyboardActions =
+                KeyboardActions(
+                    onDone = {
+                        if (tagInputText.isNotBlank()) {
+                            onCreateTagFromInput()
+                        }
+                    },
+                ),
+            keyboardOptions =
+                KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                ),
         )
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
+            contentPadding = PaddingValues(horizontal = 4.dp),
         ) {
             items(tags.sortedByDescending { it in selectedTags }) { tag ->
                 FilterChip(
                     selected = selectedTags.any { it.id == tag.id },
                     onClick = { onTagToggle(tag) },
                     label = "#${tag.name}",
-                    color = tag.color
+                    color = tag.color,
                 )
             }
-            
+
             // If no tags, show helpful message
             if (tags.isEmpty()) {
                 item {
@@ -402,7 +408,7 @@ private fun TagSelection(
                         text = "No tags yet. Type in the field above to create your first tag!",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
             }
@@ -421,11 +427,11 @@ private fun EditNoteScreenContent(
     onSave: () -> Unit,
     onCategorySelected: (Category?) -> Unit,
     onTagToggle: (Tag) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
+    ScreenWithTopBarAndInsets(
         modifier = modifier,
         topBar = {
             TopAppBar(
@@ -435,11 +441,12 @@ private fun EditNoteScreenContent(
                         value = uiState.title,
                         onValueChange = onTitleChange,
                         placeholder = "Note title...",
-                        textStyle = MaterialTheme.typography.titleLarge.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
+                        textStyle =
+                            MaterialTheme.typography.titleLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface,
+                            ),
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
                     )
                 },
                 navigationIcon = {
@@ -450,47 +457,49 @@ private fun EditNoteScreenContent(
                             } else {
                                 onNavigateBack()
                             }
-                        }
+                        },
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
                         )
                     }
                 },
                 actions = {
                     TextButton(
                         onClick = onSave,
-                        enabled = uiState.title.isNotBlank() && !uiState.isSaving
+                        enabled = uiState.title.isNotBlank() && !uiState.isSaving,
                     ) {
                         if (uiState.isSaving) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(16.dp),
                             )
                         } else {
                             Text("Save")
                         }
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         if (uiState.isLoading) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
         } else {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
             ) {
                 // Content input
                 AppOutlinedTextField(
@@ -499,21 +508,22 @@ private fun EditNoteScreenContent(
                     label = "Content",
                     singleLine = false,
                     minLines = 3,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 CategorySelection(
                     selectedCategory = uiState.selectedCategory,
                     categories = uiState.availableCategories,
-                    onCategorySelected = onCategorySelected
+                    onCategorySelected = onCategorySelected,
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 TagSelection(
                     selectedTags = uiState.selectedTags,
                     tags = uiState.availableTags,
@@ -521,7 +531,7 @@ private fun EditNoteScreenContent(
                     onTagToggle = onTagToggle,
                     onTagInputChange = { /* Handle tag input change in preview */ },
                     onCreateTagFromInput = { /* Handle create tag from input in preview */ },
-                    onCreateTag = { /* Handle create tag in preview */ }
+                    onCreateTag = { /* Handle create tag in preview */ },
                 )
             }
         }
@@ -538,44 +548,45 @@ private fun EditNoteScreenContent(
                     onClick = {
                         showDiscardDialog = false
                         onNavigateBack()
-                    }
+                    },
                 ) {
                     Text("Discard")
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showDiscardDialog = false }
+                    onClick = { showDiscardDialog = false },
                 ) {
                     Text("Cancel")
                 }
-            }
+            },
         )
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun EditNoteScreenCreatePreview() {
     MemCloudApplicationTheme {
         EditNoteScreenContent(
-            uiState = EditNoteUiState(
-                isLoading = false,
-                title = "",
-                content = "",
-                selectedCategory = null,
-                selectedTags = emptyList(),
-                availableCategories = sampleEditCategories(),
-                availableTags = sampleEditTags(),
-                hasUnsavedChanges = false,
-                originalNote = null
-            ),
+            uiState =
+                EditNoteUiState(
+                    isLoading = false,
+                    title = "",
+                    content = "",
+                    selectedCategory = null,
+                    selectedTags = emptyList(),
+                    availableCategories = sampleEditCategories(),
+                    availableTags = sampleEditTags(),
+                    hasUnsavedChanges = false,
+                    originalNote = null,
+                ),
             onNavigateBack = {},
             onTitleChange = {},
             onContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
         )
     }
 }
@@ -585,31 +596,33 @@ private fun EditNoteScreenCreatePreview() {
 private fun EditNoteScreenEditPreview() {
     MemCloudApplicationTheme {
         EditNoteScreenContent(
-            uiState = EditNoteUiState(
-                isLoading = false,
-                title = "Project Meeting Notes",
-                content = "Discussed the new features for Q4. Need to finalize the design by Friday. John will handle the backend integration while Sarah focuses on the UI components.\n\nAction items:\n• Complete wireframes\n• Review technical specs\n• Schedule follow-up meeting",
-                selectedCategory = sampleEditCategories()[0], // Work category
-                selectedTags = listOf(sampleEditTags()[1], sampleEditTags()[2]), // meeting, project
-                availableCategories = sampleEditCategories(),
-                availableTags = sampleEditTags(),
-                hasUnsavedChanges = true,
-                originalNote = Note(
-                    id = 1,
-                    userId = 1,
+            uiState =
+                EditNoteUiState(
+                    isLoading = false,
                     title = "Project Meeting Notes",
-                    content = "Original content...",
-                    isPinned = false,
-                    isFavorite = false,
-                    isArchived = false
-                )
-            ),
+                    content = "Discussed the new features for Q4. Need to finalize the design by Friday. John will handle the backend integration while Sarah focuses on the UI components.\n\nAction items:\n• Complete wireframes\n• Review technical specs\n• Schedule follow-up meeting",
+                    selectedCategory = sampleEditCategories()[0], // Work category
+                    selectedTags = listOf(sampleEditTags()[1], sampleEditTags()[2]), // meeting, project
+                    availableCategories = sampleEditCategories(),
+                    availableTags = sampleEditTags(),
+                    hasUnsavedChanges = true,
+                    originalNote =
+                        Note(
+                            id = 1,
+                            userId = 1,
+                            title = "Project Meeting Notes",
+                            content = "Original content...",
+                            isPinned = false,
+                            isFavorite = false,
+                            isArchived = false,
+                        ),
+                ),
             onNavigateBack = {},
             onTitleChange = {},
             onContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
         )
     }
 }
@@ -619,15 +632,16 @@ private fun EditNoteScreenEditPreview() {
 private fun EditNoteScreenLoadingPreview() {
     MemCloudApplicationTheme {
         EditNoteScreenContent(
-            uiState = EditNoteUiState(
-                isLoading = true
-            ),
+            uiState =
+                EditNoteUiState(
+                    isLoading = true,
+                ),
             onNavigateBack = {},
             onTitleChange = {},
             onContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
         )
     }
 }
@@ -637,24 +651,25 @@ private fun EditNoteScreenLoadingPreview() {
 private fun EditNoteScreenSavingPreview() {
     MemCloudApplicationTheme {
         EditNoteScreenContent(
-            uiState = EditNoteUiState(
-                isLoading = false,
-                isSaving = true,
-                title = "Quick Note",
-                content = "This is a quick note that I'm currently saving...",
-                selectedCategory = sampleEditCategories()[1], // Personal
-                selectedTags = listOf(sampleEditTags()[4]), // to-do
-                availableCategories = sampleEditCategories(),
-                availableTags = sampleEditTags(),
-                hasUnsavedChanges = false,
-                originalNote = null
-            ),
+            uiState =
+                EditNoteUiState(
+                    isLoading = false,
+                    isSaving = true,
+                    title = "Quick Note",
+                    content = "This is a quick note that I'm currently saving...",
+                    selectedCategory = sampleEditCategories()[1], // Personal
+                    selectedTags = listOf(sampleEditTags()[4]), // to-do
+                    availableCategories = sampleEditCategories(),
+                    availableTags = sampleEditTags(),
+                    hasUnsavedChanges = false,
+                    originalNote = null,
+                ),
             onNavigateBack = {},
             onTitleChange = {},
             onContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
         )
     }
 }
@@ -664,71 +679,74 @@ private fun EditNoteScreenSavingPreview() {
 private fun EditNoteScreenCreateTagPreview() {
     MemCloudApplicationTheme {
         EditNoteScreenContent(
-            uiState = EditNoteUiState(
-                isLoading = false,
-                title = "My Shopping List",
-                content = "Need to buy groceries for the weekend party",
-                selectedCategory = sampleEditCategories()[1], // Personal
-                selectedTags = listOf(sampleEditTags()[4]), // to-do
-                availableCategories = sampleEditCategories(),
-                availableTags = sampleEditTags(),
-                hasUnsavedChanges = true,
-                showCreateTagDialog = true,
-                newTagName = "shopping",
-                newTagColor = "#FF6B6B",
-                isCreatingTag = false
-            ),
+            uiState =
+                EditNoteUiState(
+                    isLoading = false,
+                    title = "My Shopping List",
+                    content = "Need to buy groceries for the weekend party",
+                    selectedCategory = sampleEditCategories()[1], // Personal
+                    selectedTags = listOf(sampleEditTags()[4]), // to-do
+                    availableCategories = sampleEditCategories(),
+                    availableTags = sampleEditTags(),
+                    hasUnsavedChanges = true,
+                    showCreateTagDialog = true,
+                    newTagName = "shopping",
+                    newTagColor = "#FF6B6B",
+                    isCreatingTag = false,
+                ),
             onNavigateBack = {},
             onTitleChange = {},
             onContentChange = {},
             onSave = {},
             onCategorySelected = {},
-            onTagToggle = {}
+            onTagToggle = {},
         )
     }
 }
 
 // Sample data functions
-private fun sampleEditCategories(): List<Category> = listOf(
-    Category(
-        id = 1,
-        userId = 1,
-        name = "Work",
-        color = "#FF6B6B",
-        description = "Work-related notes",
-        notesCount = 5
-    ),
-    Category(
-        id = 2,
-        userId = 1,
-        name = "Personal",
-        color = "#4ECDC4",
-        description = "Personal notes and reminders",
-        notesCount = 3
-    ),
-    Category(
-        id = 3,
-        userId = 1,
-        name = "Ideas",
-        color = "#45B7D1",
-        description = "Creative ideas and inspiration",
-        notesCount = 2
-    ),
-    Category(
-        id = 4,
-        userId = 1,
-        name = "Learning",
-        color = "#FFA07A",
-        description = "Study notes and learning materials",
-        notesCount = 4
+private fun sampleEditCategories(): List<Category> =
+    listOf(
+        Category(
+            id = 1,
+            userId = 1,
+            name = "Work",
+            color = "#FF6B6B",
+            description = "Work-related notes",
+            notesCount = 5,
+        ),
+        Category(
+            id = 2,
+            userId = 1,
+            name = "Personal",
+            color = "#4ECDC4",
+            description = "Personal notes and reminders",
+            notesCount = 3,
+        ),
+        Category(
+            id = 3,
+            userId = 1,
+            name = "Ideas",
+            color = "#45B7D1",
+            description = "Creative ideas and inspiration",
+            notesCount = 2,
+        ),
+        Category(
+            id = 4,
+            userId = 1,
+            name = "Learning",
+            color = "#FFA07A",
+            description = "Study notes and learning materials",
+            notesCount = 4,
+        ),
     )
-)
 
-private fun sampleEditTags(): List<Tag> = listOf(
-    Tag(id = 1, userId = 1, name = "urgent", color = "#FF6B6B", usageCount = 3),
-    Tag(id = 2, userId = 1, name = "meeting", color = "#4ECDC4", usageCount = 2),
-    Tag(id = 3, userId = 1, name = "project", color = "#45B7D1", usageCount = 5),
-    Tag(id = 4, userId = 1, name = "idea", color = "#FFA07A", usageCount = 4),
-    Tag(id = 5, userId = 1, name = "todo", color = "#DDA0DD", usageCount = 6),
-    Tag(id = 6, userId = 1, name = "research", color = "#98D8C8", usageCount = 2)
-)
+private fun sampleEditTags(): List<Tag> =
+    listOf(
+        Tag(id = 1, userId = 1, name = "urgent", color = "#FF6B6B", usageCount = 3),
+        Tag(id = 2, userId = 1, name = "meeting", color = "#4ECDC4", usageCount = 2),
+        Tag(id = 3, userId = 1, name = "project", color = "#45B7D1", usageCount = 5),
+        Tag(id = 4, userId = 1, name = "idea", color = "#FFA07A", usageCount = 4),
+        Tag(id = 5, userId = 1, name = "todo", color = "#DDA0DD", usageCount = 6),
+        Tag(id = 6, userId = 1, name = "research", color = "#98D8C8", usageCount = 2),
+    )

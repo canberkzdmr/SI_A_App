@@ -281,12 +281,12 @@ fun Context.findActivity(): Activity? = when (this) {
 fun ApplySystemBarColors() {
     val view = LocalView.current
     val darkTheme = isSystemInDarkTheme()
-    val color = MaterialTheme.colorScheme.primary
 
     SideEffect {
         val activity = view.context.findActivity()
         activity?.window?.let { window ->
-            window.statusBarColor = color.toArgb()
+            // Keep status bar transparent for edge-to-edge
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
             WindowInsetsControllerCompat(window, window.decorView)
                 .isAppearanceLightStatusBars = !darkTheme
         }

@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -138,7 +139,7 @@ fun CategoriesContent(
     hideDialog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    ScreenWithTopBarAndInsets(
         modifier = modifier,
         topBar = {
             TopAppBar(
@@ -166,7 +167,7 @@ fun CategoriesContent(
                     }
                 },
             )
-        },
+        }
     ) { paddingValues ->
         when {
             uiState.isLoading -> {

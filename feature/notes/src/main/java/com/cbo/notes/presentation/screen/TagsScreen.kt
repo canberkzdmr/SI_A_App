@@ -43,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -131,7 +132,7 @@ fun TagsContent(
         }
     }
 
-    Scaffold(
+    ScreenWithTopBarAndInsets(
         modifier = modifier,
         topBar = {
             TopAppBar(
@@ -245,13 +246,13 @@ fun TagsContent(
                                 "In 🗑 Delete mode, select tags you don’t need and tap the delete FAB."
                     )
 
-                    Spacer(Modifier.height(32.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = 16.dp)
                             .fillMaxWidth()
                     ) {
                         uiState.tags.forEach { tag ->

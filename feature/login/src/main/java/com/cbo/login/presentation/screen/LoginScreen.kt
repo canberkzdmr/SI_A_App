@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,8 +46,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.login.presentation.viewmodel.LoginUiState
 import com.cbo.login.presentation.viewmodel.LoginViewModel
 import com.cbo.ui.components.AppHeadline
+import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppRegular
+import com.cbo.ui.components.PrimaryButton
 import com.cbo.ui.components.dialogs.AppConfirmationDialog
 import com.cbo.ui.components.dialogs.DialogType
 import com.cbo.ui.components.forms.AppFormActions
@@ -141,59 +144,75 @@ fun LoginScreenContent(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // INTEGRATED: Use form field group for better organization
-                    AppFormFieldGroup(
-                        title = "Login",
-                        description = "Enter your credentials to access your notes"
-                    ) {
-                        AppOutlinedTextField(
-                            value = state.username,
-                            onValueChange = onUserNameChange,
-                            label = "Username",
-                            placeholder = "Your username",
-                            singleLine = true,
-                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                            keyboardActions = KeyboardActions(onNext = { focusRequesterPassword.requestFocus() })
-                        )
+                    AppOutlinedTextField(
+                        value = state.username,
+                        onValueChange = onUserNameChange,
+                        label = "Username",
+                        placeholder = "Your username",
+                        singleLine = true,
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusRequesterPassword.requestFocus() }),
+                    )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                        val keyboardController = LocalSoftwareKeyboardController.current
-                        AppOutlinedTextField(
-                            value = state.password,
-                            onValueChange = onPasswordChange,
-                            label = "Password",
-                            placeholder = "Enter your password",
-                            singleLine = true,
-                            visualTransformation = PasswordVisualTransformation(),
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
-                            modifier = Modifier.focusRequester(remember { focusRequesterPassword }),
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Send),
-                            keyboardActions = KeyboardActions(
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    AppOutlinedTextField(
+                        value = state.password,
+                        onValueChange = onPasswordChange,
+                        label = "Password",
+                        placeholder = "Enter your password",
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                                .focusRequester(remember { focusRequesterPassword }),
+                        keyboardOptions =
+                            KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Send,
+                            ),
+                        keyboardActions =
+                            KeyboardActions(
                                 onSend = {
                                     keyboardController?.hide()
                                     onLoginClick()
-                                }
-                            )
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // INTEGRATED: Use form actions for better button organization
-                    AppFormActions(
-                        onSave = onLoginClick,
-                        onCancel = onRegisterClick,
-                        saveText = "Login",
-                        cancelText = "Register",
-                        isLoading = state.isLoading
+                                },
+                            ),
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    PrimaryButton(
+                        text = "Login",
+                        onClick = {
+                            onLoginClick()
+                        },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    TextButton(
+                        onClick = onRegisterClick,
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    ) {
+                        AppLabel("Don't have an account? Register here!")
+                    }
                 }
             }
         }
 
-        // INTEGRATED: Use new dialog component
         if (state.showBiometricDialog) {
             AppConfirmationDialog(
                 type = DialogType.INFO,

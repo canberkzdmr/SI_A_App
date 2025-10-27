@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -137,7 +138,7 @@ fun EditProfileScreenContent(
     val focusRequesterPhoneNumber = remember { FocusRequester() }
     val focusRequesterAddress = remember { FocusRequester() }
 
-    Scaffold(
+    ScreenWithTopBarAndInsets(
         topBar = {
             CenterAlignedTopAppBar(
                 colors =

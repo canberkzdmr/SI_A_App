@@ -19,7 +19,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 /**
- * Provides a Scaffold with a global SnackbarHost that listens to SnackbarManager.
+ * Provides a global SnackbarHost that listens to SnackbarManager.
+ * This component no longer uses Scaffold to avoid nesting issues.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,17 +44,18 @@ fun SnackbarHostProvider(
         }
     }
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = { snackbarData ->
-                    CustomSnackbar(snackbarData)
-                }
-            )
-        }
-    ) { paddingValues ->
-        content(paddingValues)
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Main content
+        content(PaddingValues())
+        
+        // Snackbar host positioned at the bottom
+        SnackbarHost(
+            hostState = snackbarHostState,
+            snackbar = { snackbarData ->
+                CustomSnackbar(snackbarData)
+            },
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 

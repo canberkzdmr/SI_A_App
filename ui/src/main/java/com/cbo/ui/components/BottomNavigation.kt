@@ -230,7 +230,7 @@ fun BottomNavigationBar(
     ) {
         Box(
             modifier = Modifier
-                .padding()
+                .padding(bottom = 8.dp)
                 .fillMaxWidth(),
             contentAlignment = Alignment.TopEnd
         ) {
@@ -493,7 +493,7 @@ fun CenterButton(
         contentAlignment = Alignment.TopCenter,
         modifier = Modifier
             .zIndex(1f)
-            .offset(y = (-38).dp)
+            .offset(y = (-16).dp)
     ) {
         FloatingActionButton(
             onClick = onClick,

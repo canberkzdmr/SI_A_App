@@ -18,10 +18,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Scaffold
 import com.cbo.ui.components.states.AppLoadingScreen
 import com.cbo.ui.components.states.AppEmptyState
 import com.cbo.ui.components.states.AppErrorState
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,7 +73,7 @@ fun NotesScreen(
         }
     }
 
-    Scaffold(
+    ScreenWithTopBarAndInsets(
         modifier = modifier,
         topBar = {
             NotesAppBar(
@@ -83,12 +83,11 @@ fun NotesScreen(
                 onCategoriesClick = onNavigateToCategories,
                 onSettingsClick = onNavigateToSettings,
             )
-        },
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -198,7 +197,6 @@ fun NotesScreen(
                 )
             }
         }
-
     }
 
     // Handle error messages
@@ -337,7 +335,7 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
     )
 
     MemCloudApplicationTheme {
-        Scaffold(
+        ScreenWithTopBarAndInsets(
             topBar = {
                 NotesAppBar(
                     searchQuery = searchQuery,

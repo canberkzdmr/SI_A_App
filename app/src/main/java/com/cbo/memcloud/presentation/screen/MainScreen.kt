@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,9 +21,11 @@ import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
 import com.cbo.ui.components.AppBottomNavigation
+import com.cbo.ui.components.AppScaffoldWithInsets
 import com.cbo.ui.components.BottomNavDestination
 import com.cbo.ui.components.BottomNavigationOverlay
 import com.cbo.ui.components.CenterButton
+import com.cbo.ui.components.EdgeToEdgeWrapper
 import com.cbo.user.presentation.screen.ProfileScreen
 
 /**
@@ -44,8 +45,8 @@ fun MainScreen(
     var isBottomNavExpanded by remember { mutableStateOf(false) }
     var selectedCategoryIdForNotes by remember { mutableStateOf<Int?>(null) }
     
-    Box(modifier = modifier.fillMaxSize()) {
-        Scaffold(
+    EdgeToEdgeWrapper(modifier = modifier) {
+        AppScaffoldWithInsets(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
                 AppBottomNavigation(

@@ -46,12 +46,12 @@ fun NotesControls(
 ) {
     AppCard(
         modifier = modifier,
-        variant = CardVariant.SURFACE
+        variant = CardVariant.DEFAULT
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Search moved to TopAppBar; keep vertical space minimal
