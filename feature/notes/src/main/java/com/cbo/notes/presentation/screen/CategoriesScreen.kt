@@ -207,7 +207,6 @@ fun CategoriesContent(
                             title = "Organize your notes with categories",
                             icon = Icons.Default.Category,
                             content = "Tap a category to view its notes. Swipe right to edit, left to delete.",
-                            variant = CardVariant.DEFAULT,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }

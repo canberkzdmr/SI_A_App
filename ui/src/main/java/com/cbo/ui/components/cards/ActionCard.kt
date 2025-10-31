@@ -34,7 +34,7 @@ fun ActionCard(
     onPrimaryAction: (() -> Unit)? = null,
     secondaryActionText: String? = null,
     onSecondaryAction: (() -> Unit)? = null,
-    variant: CardVariant = CardVariant.DEFAULT,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM
 ) {
     AppCard(
@@ -106,7 +106,7 @@ fun SimpleActionCard(
     actionText: String,
     onAction: () -> Unit,
     icon: ImageVector? = null,
-    variant: CardVariant = CardVariant.DEFAULT,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM
 ) {
     AppCard(
@@ -163,7 +163,7 @@ fun SettingsCard(
     content: String? = null,
     icon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
-    variant: CardVariant = CardVariant.SURFACE,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM,
     onClick: (() -> Unit)? = null
 ) {

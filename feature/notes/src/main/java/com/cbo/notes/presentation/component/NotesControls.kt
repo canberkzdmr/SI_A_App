@@ -46,7 +46,7 @@ fun NotesControls(
 ) {
     AppCard(
         modifier = modifier,
-        variant = CardVariant.DEFAULT
+        variant = CardVariant.GLASS
     ) {
         Column(
             modifier = Modifier

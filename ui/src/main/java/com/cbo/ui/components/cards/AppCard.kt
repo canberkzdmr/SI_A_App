@@ -1,5 +1,6 @@
 package com.cbo.ui.components.cards
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -17,9 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.AppGradients
+import com.cbo.ui.theme.gradientBackground
 
 /**
  * Card variant enum for different visual styles
@@ -30,7 +34,8 @@ enum class CardVariant {
     OUTLINED,       // Card with border instead of elevation
     FILLED,         // Card with filled background
     TONAL,          // Card with tonal background
-    SURFACE        // Card matching surface color
+    SURFACE,        // Card matching surface color
+    GLASS          // Liquid glass effect
 }
 
 /**
@@ -48,7 +53,7 @@ enum class CardSize {
 @Composable
 fun AppCard(
     modifier: Modifier = Modifier,
-    variant: CardVariant = CardVariant.DEFAULT,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM,
     shape: Shape = RoundedCornerShape(12.dp),
     colors: CardColors? = null,
@@ -60,8 +65,29 @@ fun AppCard(
     val cardElevation = elevation ?: getCardElevation(variant)
     val padding = getCardPadding(size)
 
+    val glassModifier = if (variant == CardVariant.GLASS) {
+        modifier
+            .fillMaxWidth()
+            .gradientBackground(
+                brush = AppGradients.surface(),
+                shape = shape
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    listOf(
+                        Color.White.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.08f)
+                    )
+                ),
+                shape = shape
+            )
+    } else {
+        modifier.fillMaxWidth()
+    }
+
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = glassModifier,
         shape = shape,
         colors = cardColors,
         elevation = cardElevation,
@@ -136,6 +162,10 @@ private fun getCardColors(variant: CardVariant): CardColors {
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
+        CardVariant.GLASS -> CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.04f),
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
@@ -151,6 +181,7 @@ private fun getCardElevation(variant: CardVariant): CardElevation {
         CardVariant.FILLED -> CardDefaults.cardElevation(defaultElevation = 0.dp)
         CardVariant.TONAL -> CardDefaults.cardElevation(defaultElevation = 0.dp)
         CardVariant.SURFACE -> CardDefaults.cardElevation(defaultElevation = 1.dp)
+        CardVariant.GLASS -> CardDefaults.cardElevation(defaultElevation = 0.dp)
     }
 }
 

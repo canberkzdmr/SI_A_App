@@ -30,12 +30,9 @@ fun ImprovedFilterSection(
     modifier: Modifier = Modifier,
 ) {
     if (categories.isNotEmpty() || tags.isNotEmpty()) {
-        Card(
+        com.cbo.ui.components.cards.AppCard(
             modifier = modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            variant = com.cbo.ui.components.cards.CardVariant.GLASS
         ) {
             Column(
                 modifier = Modifier

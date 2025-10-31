@@ -61,6 +61,8 @@ import coil.compose.SubcomposeAsyncImage
 import com.cbo.ui.components.SectionHeader
 import com.cbo.ui.components.ShimmerBox
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.cbo.ui.components.cards.AppCard
+import com.cbo.ui.components.cards.CardVariant
 import com.cbo.user.R
 import com.cbo.user.presentation.viewmodel.ProfileEvent
 import com.cbo.user.presentation.viewmodel.ProfileUiState
@@ -361,15 +363,14 @@ fun ProfileListItem(
     val textColor =
         if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
 
-    Surface(
+    AppCard(
         modifier =
             modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
                 .padding(vertical = 4.dp),
-        color = MaterialTheme.colorScheme.surface,
+        variant = CardVariant.GLASS,
         shape = RoundedCornerShape(8.dp),
-        tonalElevation = 1.dp,
     ) {
         Row(
             modifier =

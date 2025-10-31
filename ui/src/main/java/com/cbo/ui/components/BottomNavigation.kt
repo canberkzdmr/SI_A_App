@@ -54,6 +54,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,6 +68,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlin.math.cos
 import kotlin.math.sin
+import com.cbo.ui.theme.AppGradients
+import com.cbo.ui.theme.gradientBackground
 
 /**
  * Bottom navigation destinations for the main app screens
@@ -223,10 +228,27 @@ fun BottomNavigationBar(
         else -> activeTabIndex
     }
     
+    val barShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+
     Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 8.dp
+        modifier = modifier
+            .fillMaxWidth()
+            .gradientBackground(
+                brush = AppGradients.surface(),
+                shape = barShape
+            )
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    listOf(
+                        Color.White.copy(alpha = 0.25f),
+                        Color.White.copy(alpha = 0.06f)
+                    )
+                ),
+                shape = barShape
+            ),
+        color = Color.Transparent,
+        shadowElevation = 0.dp
     ) {
         Box(
             modifier = Modifier

@@ -28,7 +28,7 @@ fun ContentCard(
     content: String? = null,
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
-    variant: CardVariant = CardVariant.DEFAULT,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM,
     onClick: (() -> Unit)? = null
 ) {
@@ -97,7 +97,7 @@ fun ContentCard(
 fun SimpleContentCard(
     modifier: Modifier = Modifier,
     content: String,
-    variant: CardVariant = CardVariant.DEFAULT,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM,
     onClick: (() -> Unit)? = null
 ) {
@@ -120,7 +120,7 @@ fun InfoCard(
     title: String,
     content: String,
     icon: ImageVector? = null,
-    variant: CardVariant = CardVariant.TONAL,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM,
     onClick: (() -> Unit)? = null
 ) {

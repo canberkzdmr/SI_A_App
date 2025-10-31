@@ -55,6 +55,8 @@ import com.cbo.ui.components.AppCaption
 import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppTitleMedium
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.cbo.ui.components.cards.AppCard
+import com.cbo.ui.components.cards.CardVariant
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -78,18 +80,11 @@ fun NoteCard(
             .fillMaxWidth(),
         contentAlignment = Alignment.TopEnd,
     ) {
-        Card(
-            onClick = onClick,
+        AppCard(
             modifier = modifier.fillMaxWidth(),
+            variant = CardVariant.GLASS,
             shape = RoundedCornerShape(12.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
-            elevation =
-                CardDefaults.cardElevation(
-                    defaultElevation = if (note.isPinned) 4.dp else 2.dp,
-                ),
+            onClick = onClick,
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),

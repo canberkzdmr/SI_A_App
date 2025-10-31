@@ -19,10 +19,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.cbo.ui.theme.AppGradients
+import com.cbo.ui.theme.gradientBackground
 
 @Composable
 fun PrimaryButton(
@@ -36,8 +39,16 @@ fun PrimaryButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier
+            .gradientBackground(
+                brush = AppGradients.primary(),
+                shape = MaterialTheme.shapes.medium
+            ),
         enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
     ) {
         if (isLoading) {
             CircularProgressIndicator(

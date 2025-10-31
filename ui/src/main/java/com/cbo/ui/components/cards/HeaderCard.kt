@@ -28,7 +28,7 @@ fun HeaderCard(
     icon: ImageVector? = null,
     title: String = "",
     content: String = "",
-    variant: CardVariant = CardVariant.DEFAULT,
+    variant: CardVariant = CardVariant.GLASS,
     size: CardSize = CardSize.MEDIUM,
     elevation: Dp? = null,
     onClick: (() -> Unit)? = null

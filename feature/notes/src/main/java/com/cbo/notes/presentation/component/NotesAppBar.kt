@@ -13,6 +13,9 @@ import com.cbo.ui.components.AppSearchField
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.graphics.Color
+import com.cbo.ui.theme.AppGradients
+import androidx.compose.foundation.background
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,7 +32,7 @@ fun NotesAppBar(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     TopAppBar(
-        modifier = modifier,
+        modifier = modifier.background(AppGradients.primary()),
         title = {
             if (isSearchActive) {
                 AppSearchField(
@@ -110,7 +113,7 @@ fun NotesAppBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = Color.Transparent,
             titleContentColor = MaterialTheme.colorScheme.onSurface
         )
     )

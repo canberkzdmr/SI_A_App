@@ -104,7 +104,7 @@ fun ChangePasswordScreen(
                 HeaderCard(
                     modifier = Modifier
                         .padding(paddingValues),
-                    variant = CardVariant.DEFAULT,
+                    variant = CardVariant.GLASS,
                     icon = Icons.Default.Lock,
                     title = "Update Your Password",
                     content = "Enter your current password and choose a new secure password"
@@ -262,7 +262,7 @@ fun ChangePasswordScreen(
                 // Password Requirements
                 AppCard(
                     modifier = Modifier.fillMaxWidth(),
-                    variant = CardVariant.SURFACE
+                    variant = CardVariant.GLASS
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
