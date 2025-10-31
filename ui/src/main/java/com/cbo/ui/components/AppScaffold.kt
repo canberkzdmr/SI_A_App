@@ -36,7 +36,6 @@ fun AppScaffold(
  * AppScaffold variant for screens that need system window insets handling
  * for edge-to-edge display support.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppScaffoldWithInsets(
     modifier: Modifier = Modifier,

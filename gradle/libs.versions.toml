@@ -35,6 +35,8 @@ foundation = "1.8.0"
 appcompatVersion = "1.7.1"
 roomCommonJvm = "2.8.1"
 
+richeditor = "1.0.0-rc05-k2"
+
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -75,6 +77,8 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
+
+richeditorCompose = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version.ref = "richeditor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

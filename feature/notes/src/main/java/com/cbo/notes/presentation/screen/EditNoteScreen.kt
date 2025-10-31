@@ -61,6 +61,7 @@ import com.cbo.notes.presentation.viewmodel.NavigationEvent
 import com.cbo.ui.components.AppBasicTextField
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
+import com.cbo.ui.components.richtext.RichTextEditorField
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import com.cbo.ui.components.dialogs.AppConfirmationDialog
@@ -161,47 +162,46 @@ fun EditNoteScreen(
                         Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .verticalScroll(rememberScrollState())
-                            .padding(16.dp),
+                            .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     val focusRequestContent = remember { FocusRequester() }
 
-                    // Content field
-                    AppOutlinedTextField(
-                        value = uiState.content,
+                    // Rich text content editor (stores HTML in uiState.content)
+                    RichTextEditorField(
+                        valueHtml = uiState.content,
                         onValueChange = viewModel::updateContent,
-                        label = "Content",
-                        placeholder = "Start writing your note...",
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-//                        .defaultMinSize(minHeight = 200.dp)
-                                .height(200.dp)
                                 .focusRequester(remember { focusRequestContent }),
-                        minLines = 8,
-                        singleLine = false,
+                        placeholder = "Start writing your note...",
                     )
 
-                    // Category selection
-                    if (uiState.availableCategories.isNotEmpty()) {
-                        CategorySelection(
-                            categories = uiState.availableCategories,
-                            selectedCategory = uiState.selectedCategory,
-                            onCategorySelected = viewModel::selectCategory,
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                        // Category selection
+                        if (uiState.availableCategories.isNotEmpty()) {
+                            CategorySelection(
+                                categories = uiState.availableCategories,
+                                selectedCategory = uiState.selectedCategory,
+                                onCategorySelected = viewModel::selectCategory,
+                            )
+                        }
+
+                        // Tag selection
+                        TagSelection(
+                            tags = uiState.availableTags,
+                            selectedTags = uiState.selectedTags,
+                            tagInputText = uiState.tagInputText,
+                            onTagToggle = viewModel::toggleTag,
+                            onTagInputChange = viewModel::updateTagInputText,
+                            onCreateTagFromInput = viewModel::createTagFromInput,
+                            onCreateTag = viewModel::showCreateTagDialog,
                         )
                     }
 
-                    // Tag selection
-                    TagSelection(
-                        tags = uiState.availableTags,
-                        selectedTags = uiState.selectedTags,
-                        tagInputText = uiState.tagInputText,
-                        onTagToggle = viewModel::toggleTag,
-                        onTagInputChange = viewModel::updateTagInputText,
-                        onCreateTagFromInput = viewModel::createTagFromInput,
-                        onCreateTag = viewModel::showCreateTagDialog,
-                    )
                 }
             }
         }
@@ -498,41 +498,39 @@ private fun EditNoteScreenContent(
                     Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(16.dp)
+                        .padding()
                         .verticalScroll(rememberScrollState()),
             ) {
-                // Content input
-                AppOutlinedTextField(
-                    value = uiState.content,
+                // Content input (rich text)
+                RichTextEditorField(
+                    valueHtml = uiState.content,
                     onValueChange = onContentChange,
-                    label = "Content",
-                    singleLine = false,
-                    minLines = 3,
                     modifier =
                         Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
+                            .fillMaxWidth(),
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                CategorySelection(
-                    selectedCategory = uiState.selectedCategory,
-                    categories = uiState.availableCategories,
-                    onCategorySelected = onCategorySelected,
-                )
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    CategorySelection(
+                        selectedCategory = uiState.selectedCategory,
+                        categories = uiState.availableCategories,
+                        onCategorySelected = onCategorySelected,
+                    )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                TagSelection(
-                    selectedTags = uiState.selectedTags,
-                    tags = uiState.availableTags,
-                    tagInputText = uiState.tagInputText,
-                    onTagToggle = onTagToggle,
-                    onTagInputChange = { /* Handle tag input change in preview */ },
-                    onCreateTagFromInput = { /* Handle create tag from input in preview */ },
-                    onCreateTag = { /* Handle create tag in preview */ },
-                )
+                    TagSelection(
+                        selectedTags = uiState.selectedTags,
+                        tags = uiState.availableTags,
+                        tagInputText = uiState.tagInputText,
+                        onTagToggle = onTagToggle,
+                        onTagInputChange = { /* Handle tag input change in preview */ },
+                        onCreateTagFromInput = { /* Handle create tag from input in preview */ },
+                        onCreateTag = { /* Handle create tag in preview */ },
+                    )
+                }
             }
         }
     }

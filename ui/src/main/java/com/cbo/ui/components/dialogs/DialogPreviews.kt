@@ -12,7 +12,7 @@ import com.cbo.ui.theme.MemCloudApplicationTheme
 @Composable
 fun FormDialogsPreview() {
     MemCloudApplicationTheme {
-        var showDialog by remember { mutableStateOf(false) }
+        var showDialog by remember { mutableStateOf(true) }
         
         if (showDialog) {
             val fields = listOf(
@@ -48,7 +48,7 @@ fun FormDialogsPreview() {
 @Composable
 fun ConfirmationDialogsPreview() {
     MemCloudApplicationTheme {
-        var showDialog by remember { mutableStateOf(false) }
+        var showDialog by remember { mutableStateOf(true) }
         
         if (showDialog) {
             AppConfirmationDialog(
@@ -68,7 +68,7 @@ fun ConfirmationDialogsPreview() {
 @Composable
 fun DeleteDialogPreview() {
     MemCloudApplicationTheme {
-        var showDialog by remember { mutableStateOf(false) }
+        var showDialog by remember { mutableStateOf(true) }
         
         if (showDialog) {
             AppDeleteDialog(
@@ -86,7 +86,7 @@ fun DeleteDialogPreview() {
 @Composable
 fun SuccessDialogPreview() {
     MemCloudApplicationTheme {
-        var showDialog by remember { mutableStateOf(false) }
+        var showDialog by remember { mutableStateOf(true) }
         
         if (showDialog) {
             AppSuccessDialog(

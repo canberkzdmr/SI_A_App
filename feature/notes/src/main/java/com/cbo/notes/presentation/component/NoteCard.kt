@@ -50,6 +50,7 @@ import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.richtext.RichTextViewer
 import com.cbo.ui.components.AppCaption
 import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppTitleMedium
@@ -184,13 +185,13 @@ fun NoteCard(
                     }
                 }
 
-                // Content preview
+                // Content preview (render rich text HTML)
                 if (note.content.isNotBlank()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    AppBody(
-                        text = note.content,
+                    RichTextViewer(
+                        html = note.content,
                         maxLines = if (isCompact) 5 else 7,
-                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
 

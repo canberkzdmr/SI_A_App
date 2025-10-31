@@ -34,7 +34,7 @@ Testing: JUnit, Mockito, Espresso.
 Do not introduce new libraries without justification (e.g., no Retrofit if not needed for networking).
 
 
-SDK Levels: Ensure compatibility with minSdk 26, targetSdk 34. Use BuildCompat for version-specific features.
+SDK Levels: Ensure compatibility with minSdk 26, targetSdk 35. Use BuildCompat for version-specific features.
 
 4. Feature Development Rules
 
