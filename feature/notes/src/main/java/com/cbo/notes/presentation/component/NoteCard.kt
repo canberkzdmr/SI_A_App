@@ -190,7 +190,7 @@ fun NoteCard(
                     Spacer(modifier = Modifier.height(8.dp))
                     RichTextViewer(
                         html = note.content,
-                        maxLines = if (isCompact) 5 else 7,
+                        maxLines = if (isCompact) 3 else 4,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

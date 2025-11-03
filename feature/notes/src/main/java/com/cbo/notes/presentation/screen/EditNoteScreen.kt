@@ -347,7 +347,7 @@ private fun TagSelection(
                     onTagInputChange(newValue)
                 }
             },
-            placeholder = "Type tag name and press Enter or Space...",
+            placeholder = "Type tag name & press Enter/Space",
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -374,6 +374,7 @@ private fun TagSelection(
                     }
                 }
             },
+            maxLines = 1,
             keyboardActions =
                 KeyboardActions(
                     onDone = {
