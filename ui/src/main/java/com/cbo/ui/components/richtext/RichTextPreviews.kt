@@ -2,7 +2,6 @@ package com.cbo.ui.components.richtext
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,7 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Preview(name = "RichTextEditor – Empty", showBackground = true)
@@ -20,7 +18,7 @@ private fun RichTextEditorFieldPreview_Empty() {
     MemCloudApplicationTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             var html by remember { mutableStateOf("") }
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column {
                 RichTextEditorField(
                     valueHtml = html,
                     onValueChange = { html = it },
@@ -47,7 +45,7 @@ private fun RichTextEditorFieldPreview_WithContent() {
                     """.trimIndent()
                 )
             }
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column {
                 RichTextEditorField(
                     valueHtml = html,
                     onValueChange = { html = it },
@@ -62,7 +60,7 @@ private fun RichTextEditorFieldPreview_WithContent() {
 private fun RichTextViewerPreview() {
     MemCloudApplicationTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column {
                 RichTextViewer(
                     html = """
                         <p>This is <b>bold</b> and <i>italic</i> text with a link to 
@@ -77,6 +75,3 @@ private fun RichTextViewerPreview() {
         }
     }
 }
-
-
-

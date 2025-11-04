@@ -106,6 +106,7 @@ class EditNoteViewModel @Inject constructor(
     }
 
     fun updateContent(content: String) {
+        Log.d("EditNoteViewModel", "updateContent: $content")
         _uiState.update { it.copy(content = content, hasUnsavedChanges = true) }
     }
 

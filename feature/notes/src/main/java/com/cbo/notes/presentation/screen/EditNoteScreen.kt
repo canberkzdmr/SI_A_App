@@ -176,6 +176,7 @@ fun EditNoteScreen(
                                 .fillMaxWidth()
                                 .focusRequester(remember { focusRequestContent }),
                         placeholder = "Start writing your note...",
+                        minHeight = 300,
                     )
 
                     Spacer(modifier = Modifier.weight(1f))
