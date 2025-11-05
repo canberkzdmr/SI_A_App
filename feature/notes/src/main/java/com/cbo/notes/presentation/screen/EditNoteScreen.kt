@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,17 +56,18 @@ import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.component.CreateTagDialog
 import com.cbo.notes.presentation.component.FilterChip
+import com.cbo.notes.presentation.component.SelectionBottomSheet
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
 import com.cbo.ui.components.AppBasicTextField
 import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
-import com.cbo.ui.components.richtext.RichTextEditorField
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import com.cbo.ui.components.dialogs.AppConfirmationDialog
 import com.cbo.ui.components.dialogs.DialogType
+import com.cbo.ui.components.richtext.RichTextEditorField
 import com.cbo.ui.components.states.AppErrorState
 import com.cbo.ui.components.states.AppLoadingScreen
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -79,6 +81,7 @@ fun EditNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDiscardDialog by remember { mutableStateOf(false) }
+    var showSelectionSheet by remember { mutableStateOf(false) }
 
     // Handle navigation events
     LaunchedEffect(Unit) {
@@ -124,6 +127,9 @@ fun EditNoteScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showSelectionSheet = !showSelectionSheet }) {
+                        Icon(imageVector = Icons.Default.CollectionsBookmark, contentDescription = "Filter")
+                    }
                     TextButton(
                         onClick = viewModel::saveNote,
                         enabled = !uiState.isSaving && uiState.title.isNotBlank(),
@@ -181,7 +187,7 @@ fun EditNoteScreen(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                    /*Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
                         // Category selection
                         if (uiState.availableCategories.isNotEmpty()) {
                             CategorySelection(
@@ -201,8 +207,7 @@ fun EditNoteScreen(
                             onCreateTagFromInput = viewModel::createTagFromInput,
                             onCreateTag = viewModel::showCreateTagDialog,
                         )
-                    }
-
+                    }*/
                 }
             }
         }
@@ -242,6 +247,22 @@ fun EditNoteScreen(
             onColorChange = viewModel::updateNewTagColor,
             onConfirm = viewModel::createTag,
             onDismiss = viewModel::hideCreateTagDialog,
+        )
+    }
+
+    // SelectionBottomSheet
+    if (showSelectionSheet) {
+        SelectionBottomSheet(
+            allCategories = uiState.availableCategories,
+            allTags = uiState.availableTags,
+            selectedCategory = uiState.selectedCategory,
+            selectedTags = uiState.selectedTags,
+            onApply = { category, tags, ->
+                viewModel.selectTags(tags)
+                viewModel.selectCategory(category)
+            },
+            onClearAll = {},
+            onDismiss = { showSelectionSheet = !showSelectionSheet}
         )
     }
 }
@@ -432,6 +453,7 @@ private fun EditNoteScreenContent(
     modifier: Modifier = Modifier,
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
+    var showSelectionSheet by remember { mutableStateOf(false) }
 
     ScreenWithTopBarAndInsets(
         modifier = modifier,
@@ -468,6 +490,9 @@ private fun EditNoteScreenContent(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showSelectionSheet = !showSelectionSheet }) {
+                        Icon(imageVector = Icons.Default.CollectionsBookmark, contentDescription = "Filter")
+                    }
                     TextButton(
                         onClick = onSave,
                         enabled = uiState.title.isNotBlank() && !uiState.isSaving,
@@ -500,8 +525,7 @@ private fun EditNoteScreenContent(
                     Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding()
-                        .verticalScroll(rememberScrollState()),
+                        .padding(),
             ) {
                 // Content input (rich text)
                 RichTextEditorField(
@@ -509,12 +533,12 @@ private fun EditNoteScreenContent(
                     onValueChange = onContentChange,
                     modifier =
                         Modifier
-                            .fillMaxWidth(),
+                            .fillMaxSize(),
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                /*Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                     CategorySelection(
                         selectedCategory = uiState.selectedCategory,
                         categories = uiState.availableCategories,
@@ -528,11 +552,11 @@ private fun EditNoteScreenContent(
                         tags = uiState.availableTags,
                         tagInputText = uiState.tagInputText,
                         onTagToggle = onTagToggle,
-                        onTagInputChange = { /* Handle tag input change in preview */ },
-                        onCreateTagFromInput = { /* Handle create tag from input in preview */ },
-                        onCreateTag = { /* Handle create tag in preview */ },
+                        onTagInputChange = { *//* Handle tag input change in preview *//* },
+                        onCreateTagFromInput = { *//* Handle create tag from input in preview *//* },
+                        onCreateTag = { *//* Handle create tag in preview *//* },
                     )
-                }
+                }*/
             }
         }
     }
@@ -560,6 +584,19 @@ private fun EditNoteScreenContent(
                     Text("Cancel")
                 }
             },
+        )
+    }
+
+    // SelectionBottomSheet
+    if (showSelectionSheet) {
+        SelectionBottomSheet(
+            allCategories = uiState.availableCategories,
+            allTags = uiState.availableTags,
+            selectedCategory = uiState.selectedCategory,
+            selectedTags = uiState.selectedTags,
+            onApply = { _, _, -> },
+            onClearAll = {},
+            onDismiss = {}
         )
     }
 }

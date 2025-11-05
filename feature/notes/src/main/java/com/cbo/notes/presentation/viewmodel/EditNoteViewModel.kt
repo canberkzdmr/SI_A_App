@@ -125,6 +125,10 @@ class EditNoteViewModel @Inject constructor(
         _uiState.update { it.copy(selectedTags = currentTags, hasUnsavedChanges = true) }
     }
 
+    fun selectTags(tags: List<Tag>) {
+        _uiState.update { it.copy(selectedTags = tags, hasUnsavedChanges = true) }
+    }
+
     fun saveNote() {
         val currentState = _uiState.value
         if (currentState.title.isBlank()) {
