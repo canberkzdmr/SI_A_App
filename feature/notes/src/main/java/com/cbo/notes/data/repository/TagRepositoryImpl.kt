@@ -2,6 +2,7 @@ package com.cbo.notes.data.repository
 
 import android.util.Log
 import com.cbo.notes.data.mapper.TagEntityMapper
+import com.cbo.core.common.util.TagColorPalette
 import com.cbo.core.database.dao.TagDao
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.repository.TagRepository
@@ -50,9 +51,12 @@ class TagRepositoryImpl @Inject constructor(
 
     override suspend fun insertTag(tag: Tag): Result<Tag> {
         return try {
-            val entity = tagEntityMapper.toEntity(tag)
+            val tagWithColor = if (tag.color.isNullOrBlank()) {
+                tag.copy(color = TagColorPalette.pickForTagName(tag.name))
+            } else tag
+            val entity = tagEntityMapper.toEntity(tagWithColor)
             val insertedId: Long = tagDao.insert(entity)
-            val insertedTag = tag.copy(id = insertedId.toInt())
+            val insertedTag = tagWithColor.copy(id = insertedId.toInt())
             Result.success(insertedTag)
         } catch (e: Exception) {
             Log.e("TagRepositoryImpl", "Error inserting tag: ${e.message}")

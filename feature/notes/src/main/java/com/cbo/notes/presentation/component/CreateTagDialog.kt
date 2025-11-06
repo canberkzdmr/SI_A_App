@@ -3,7 +3,11 @@ package com.cbo.notes.presentation.component
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cbo.core.domain.FieldValidationRules
@@ -24,10 +28,16 @@ internal fun CreateTagDialog(
     onDismiss: () -> Unit,
     isEdit: Boolean,
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     CustomAlertDialog(
         onDismiss = { onDismiss() },
         title = if (isEdit) "Edit Tag" else "Create New Tag",
         content = {
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+            }
+
             AppOutlinedTextField(
                 value = tagName,
                 onValueChange = { newValue ->
@@ -44,7 +54,9 @@ internal fun CreateTagDialog(
                 isValid = tagName.length <= FieldValidationRules.MAX_TAG_NAME_LENGTH,
                 validationErrorMessage = "Tag name must be less than ${FieldValidationRules.MAX_TAG_NAME_LENGTH} characters",
                 placeholder = "Enter tag name...",
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .focusRequester(focusRequester),
                 singleLine = true,
                 isError = tagName.isBlank() || tagName.length > FieldValidationRules.MAX_TAG_NAME_LENGTH,
             )
