@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -51,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle.Companion.Italic
@@ -63,7 +65,7 @@ import com.cbo.ui.components.dialogs.AppFormDialog
 import com.cbo.ui.components.dialogs.FormField
 import com.mohamedrejeb.richeditor.model.RichTextState
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
-import com.mohamedrejeb.richeditor.ui.material3.RichTextEditor
+import com.mohamedrejeb.richeditor.ui.BasicRichTextEditor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -91,17 +93,14 @@ fun RichTextEditorField(
         EditorToolbar(richTextState)
         HorizontalDivider()
         Surface(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = modifier
+                .fillMaxSize()
                 .heightIn(min = minHeight.dp),
             tonalElevation = 1.dp,
         ) {
             Column(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .height(400.dp)
-                        .verticalScroll(rememberScrollState())
                         .padding(bottom = 12.dp),
             ) {
                 if (richTextState.toHtml().isBlank()) {
@@ -111,9 +110,13 @@ fun RichTextEditorField(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                RichTextEditor(
+                BasicRichTextEditor(
                     state = richTextState,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
                 )
             }
         }

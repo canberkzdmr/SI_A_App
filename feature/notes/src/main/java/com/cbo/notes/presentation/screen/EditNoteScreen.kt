@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -80,8 +81,6 @@ fun EditNoteScreen(
     viewModel: EditNoteViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showDiscardDialog by remember { mutableStateOf(false) }
-    var showSelectionSheet by remember { mutableStateOf(false) }
 
     // Handle navigation events
     LaunchedEffect(Unit) {
@@ -92,179 +91,23 @@ fun EditNoteScreen(
         }
     }
 
-    ScreenWithTopBarAndInsets(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    // Title input in the app bar
-                    AppBasicTextField(
-                        value = uiState.title,
-                        onValueChange = viewModel::updateTitle,
-                        placeholder = "Note title...",
-                        textStyle =
-                            MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface,
-                            ),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            if (uiState.hasUnsavedChanges) {
-                                showDiscardDialog = true
-                            } else {
-                                onNavigateBack()
-                            }
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showSelectionSheet = !showSelectionSheet }) {
-                        Icon(imageVector = Icons.Default.CollectionsBookmark, contentDescription = "Filter")
-                    }
-                    TextButton(
-                        onClick = viewModel::saveNote,
-                        enabled = !uiState.isSaving && uiState.title.isNotBlank(),
-                    ) {
-                        if (uiState.isSaving) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                            )
-                        } else {
-                            Text("Save")
-                        }
-                    }
-                },
-            )
+    // Delegate to the unified UI composable
+    EditNoteScreen(
+        uiState = uiState,
+        onNavigateBack = onNavigateBack,
+        onTitleChange = viewModel::updateTitle,
+        onContentChange = viewModel::updateContent,
+        onSave = viewModel::saveNote,
+        onCategorySelected = viewModel::selectCategory,
+        onTagToggle = viewModel::toggleTag,
+        onClearError = viewModel::clearError,
+        onDiscardChanges = viewModel::discardChanges,
+        onApplySelection = { category, tags ->
+            viewModel.selectTags(tags)
+            viewModel.selectCategory(category)
         },
-    ) { paddingValues ->
-        when {
-            uiState.isLoading -> {
-                AppLoadingScreen(
-                    message = "Loading note...",
-                    showProgress = true,
-                )
-            }
-
-            uiState.errorMessage != null -> {
-                AppErrorState(
-                    error = uiState.errorMessage ?: "Failed to load note",
-                    onRetry = { /* Retry loading note */ },
-                )
-            }
-
-            else -> {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    val focusRequestContent = remember { FocusRequester() }
-
-                    // Rich text content editor (stores HTML in uiState.content)
-                    RichTextEditorField(
-                        valueHtml = uiState.content,
-                        onValueChange = viewModel::updateContent,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .focusRequester(remember { focusRequestContent }),
-                        placeholder = "Start writing your note...",
-                        minHeight = 300,
-                    )
-
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    /*Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-                        // Category selection
-                        if (uiState.availableCategories.isNotEmpty()) {
-                            CategorySelection(
-                                categories = uiState.availableCategories,
-                                selectedCategory = uiState.selectedCategory,
-                                onCategorySelected = viewModel::selectCategory,
-                            )
-                        }
-
-                        // Tag selection
-                        TagSelection(
-                            tags = uiState.availableTags,
-                            selectedTags = uiState.selectedTags,
-                            tagInputText = uiState.tagInputText,
-                            onTagToggle = viewModel::toggleTag,
-                            onTagInputChange = viewModel::updateTagInputText,
-                            onCreateTagFromInput = viewModel::createTagFromInput,
-                            onCreateTag = viewModel::showCreateTagDialog,
-                        )
-                    }*/
-                }
-            }
-        }
-    }
-
-    // INTEGRATED: Use new dialog component
-    if (showDiscardDialog) {
-        AppConfirmationDialog(
-            type = DialogType.WARNING,
-            title = "Discard changes?",
-            message = "You have unsaved changes. Are you sure you want to go back?",
-            onConfirm = {
-                showDiscardDialog = false
-                onNavigateBack()
-            },
-            onDismiss = { showDiscardDialog = false },
-            confirmText = "Discard",
-            dismissText = "Cancel",
-        )
-    }
-
-    // Handle error messages
-    uiState.errorMessage?.let { errorMessage ->
-        LaunchedEffect(errorMessage) {
-            viewModel.clearError()
-        }
-    }
-
-    // Tag creation dialog
-    if (uiState.showCreateTagDialog) {
-        CreateTagDialog(
-            tagName = uiState.newTagName,
-            selectedColor = uiState.newTagColor,
-            isCreating = uiState.isCreatingTag,
-            isEdit = false,
-            onTagNameChange = viewModel::updateNewTagName,
-            onColorChange = viewModel::updateNewTagColor,
-            onConfirm = viewModel::createTag,
-            onDismiss = viewModel::hideCreateTagDialog,
-        )
-    }
-
-    // SelectionBottomSheet
-    if (showSelectionSheet) {
-        SelectionBottomSheet(
-            allCategories = uiState.availableCategories,
-            allTags = uiState.availableTags,
-            selectedCategory = uiState.selectedCategory,
-            selectedTags = uiState.selectedTags,
-            onApply = { category, tags, ->
-                viewModel.selectTags(tags)
-                viewModel.selectCategory(category)
-            },
-            onClearAll = {},
-            onDismiss = { showSelectionSheet = !showSelectionSheet}
-        )
-    }
+        modifier = modifier,
+    )
 }
 
 @Composable
@@ -442,7 +285,7 @@ private fun TagSelection(
 // Preview-specific version of EditNoteScreen that takes UI state directly
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EditNoteScreenContent(
+fun EditNoteScreen(
     uiState: EditNoteUiState,
     onNavigateBack: () -> Unit,
     onTitleChange: (String) -> Unit,
@@ -450,17 +293,28 @@ private fun EditNoteScreenContent(
     onSave: () -> Unit,
     onCategorySelected: (Category?) -> Unit,
     onTagToggle: (Tag) -> Unit,
+    onClearError: () -> Unit = {},
+    onDiscardChanges: () -> Unit = {},
+    onApplySelection: (Category?, List<Tag>) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showSelectionSheet by remember { mutableStateOf(false) }
+
+    // Intercept system back to respect unsaved changes
+    BackHandler(enabled = true) {
+        if (uiState.hasUnsavedChanges) {
+            showDiscardDialog = true
+        } else {
+            onNavigateBack()
+        }
+    }
 
     ScreenWithTopBarAndInsets(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
-                    // Title input in the app bar
                     AppBasicTextField(
                         value = uiState.title,
                         onValueChange = onTitleChange,
@@ -500,6 +354,7 @@ private fun EditNoteScreenContent(
                         if (uiState.isSaving) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
                             )
                         } else {
                             Text("Save")
@@ -509,94 +364,93 @@ private fun EditNoteScreenContent(
             )
         },
     ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
+        when {
+            uiState.isLoading -> {
+                AppLoadingScreen(
+                    message = "Loading note...",
+                    showProgress = true,
+                )
             }
-        } else {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(),
-            ) {
-                // Content input (rich text)
-                RichTextEditorField(
-                    valueHtml = uiState.content,
-                    onValueChange = onContentChange,
+
+            uiState.errorMessage != null -> {
+                AppErrorState(
+                    error = uiState.errorMessage ?: "Failed to load note",
+                    onRetry = { onClearError() },
+                )
+            }
+
+            else -> {
+                Column(
                     modifier =
                         Modifier
-                            .fillMaxSize(),
-                )
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    val focusRequestContent = remember { FocusRequester() }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                /*Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    CategorySelection(
-                        selectedCategory = uiState.selectedCategory,
-                        categories = uiState.availableCategories,
-                        onCategorySelected = onCategorySelected,
+                    RichTextEditorField(
+                        valueHtml = uiState.content,
+                        onValueChange = onContentChange,
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .focusRequester(remember { focusRequestContent }),
+                        placeholder = "Start writing your note...",
+                        minHeight = 300,
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.weight(1f))
 
-                    TagSelection(
-                        selectedTags = uiState.selectedTags,
-                        tags = uiState.availableTags,
-                        tagInputText = uiState.tagInputText,
-                        onTagToggle = onTagToggle,
-                        onTagInputChange = { *//* Handle tag input change in preview *//* },
-                        onCreateTagFromInput = { *//* Handle create tag from input in preview *//* },
-                        onCreateTag = { *//* Handle create tag in preview *//* },
-                    )
-                }*/
+                    /*Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                        if (uiState.availableCategories.isNotEmpty()) {
+                            CategorySelection(
+                                categories = uiState.availableCategories,
+                                selectedCategory = uiState.selectedCategory,
+                                onCategorySelected = onCategorySelected,
+                            )
+                        }
+
+                        TagSelection(
+                            tags = uiState.availableTags,
+                            selectedTags = uiState.selectedTags,
+                            tagInputText = uiState.tagInputText,
+                            onTagToggle = onTagToggle,
+                            onTagInputChange = { },
+                            onCreateTagFromInput = { },
+                            onCreateTag = { },
+                        )
+                    }*/
+                }
             }
         }
     }
 
-    // Discard dialog
     if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            title = { Text("Discard changes?") },
-            text = { Text("You have unsaved changes. Are you sure you want to discard them?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDiscardDialog = false
-                        onNavigateBack()
-                    },
-                ) {
-                    Text("Discard")
-                }
+        AppConfirmationDialog(
+            type = DialogType.WARNING,
+            title = "Discard changes?",
+            message = "You have unsaved changes. Are you sure you want to go back?",
+            onConfirm = {
+                showDiscardDialog = false
+                onDiscardChanges()
+                onNavigateBack()
             },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDiscardDialog = false },
-                ) {
-                    Text("Cancel")
-                }
-            },
+            onDismiss = { showDiscardDialog = false },
+            confirmText = "Discard",
+            dismissText = "Cancel",
         )
     }
 
-    // SelectionBottomSheet
     if (showSelectionSheet) {
         SelectionBottomSheet(
             allCategories = uiState.availableCategories,
             allTags = uiState.availableTags,
             selectedCategory = uiState.selectedCategory,
             selectedTags = uiState.selectedTags,
-            onApply = { _, _, -> },
+            onApply = { category, tags, -> onApplySelection(category, tags) },
             onClearAll = {},
-            onDismiss = {}
+            onDismiss = { showSelectionSheet = !showSelectionSheet }
         )
     }
 }
@@ -605,7 +459,7 @@ private fun EditNoteScreenContent(
 @Composable
 private fun EditNoteScreenCreatePreview() {
     MemCloudApplicationTheme {
-        EditNoteScreenContent(
+        EditNoteScreen(
             uiState =
                 EditNoteUiState(
                     isLoading = false,
@@ -632,7 +486,7 @@ private fun EditNoteScreenCreatePreview() {
 @Composable
 private fun EditNoteScreenEditPreview() {
     MemCloudApplicationTheme {
-        EditNoteScreenContent(
+        EditNoteScreen(
             uiState =
                 EditNoteUiState(
                     isLoading = false,
@@ -668,7 +522,7 @@ private fun EditNoteScreenEditPreview() {
 @Composable
 private fun EditNoteScreenLoadingPreview() {
     MemCloudApplicationTheme {
-        EditNoteScreenContent(
+        EditNoteScreen(
             uiState =
                 EditNoteUiState(
                     isLoading = true,
@@ -687,7 +541,7 @@ private fun EditNoteScreenLoadingPreview() {
 @Composable
 private fun EditNoteScreenSavingPreview() {
     MemCloudApplicationTheme {
-        EditNoteScreenContent(
+        EditNoteScreen(
             uiState =
                 EditNoteUiState(
                     isLoading = false,
@@ -715,7 +569,7 @@ private fun EditNoteScreenSavingPreview() {
 @Composable
 private fun EditNoteScreenCreateTagPreview() {
     MemCloudApplicationTheme {
-        EditNoteScreenContent(
+        EditNoteScreen(
             uiState =
                 EditNoteUiState(
                     isLoading = false,

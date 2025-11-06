@@ -73,7 +73,7 @@ private fun SelectionSheetBody(
 ) {
     var tempCategory by remember { mutableStateOf(selectedCategory) }
     var tempTags by remember { mutableStateOf(selectedTags) }
-    var activePanel by remember { mutableStateOf(Panel.Category as Panel?) }
+    var activePanel by remember { mutableStateOf(null as Panel?) }
 
     Column(
         modifier = Modifier
