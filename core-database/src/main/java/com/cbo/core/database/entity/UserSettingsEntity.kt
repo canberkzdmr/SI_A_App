@@ -13,6 +13,12 @@ import com.cbo.core.domain.model.ViewMode
             parentColumns = ["id"],
             childColumns = ["userId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = SupportedLanguageEntity::class,
+            parentColumns = ["code"],
+            childColumns = ["preferredLanguage"],
+            onDelete = ForeignKey.CASCADE
         )
     ]
 )
@@ -20,5 +26,6 @@ data class UserSettingsEntity(
     @PrimaryKey val userId: Int,
     val isFirstLoginDone: Boolean = false,
     val isBiometricsEnabled: Boolean = false,
-    val notesViewMode: ViewMode = ViewMode.LIST
+    val notesViewMode: ViewMode = ViewMode.LIST,
+    val preferredLanguage: String = "en" // Set english as default
 )

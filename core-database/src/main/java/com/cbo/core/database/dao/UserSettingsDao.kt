@@ -34,9 +34,17 @@ interface UserSettingsDao {
     @Query("UPDATE user_settings SET isBiometricsEnabled = :enabled WHERE userId = :userId")
     suspend fun updateBiometricsEnabled(userId: Int, enabled: Boolean)
 
+    // notesViewMode
     @Query("SELECT notesViewMode from user_settings WHERE userId = :userId LIMIT 1")
     suspend fun getNotesViewMode(userId: Int): ViewMode
 
     @Query("UPDATE user_settings SET notesViewMode = :viewMode WHERE userId = :userId")
     suspend fun setNotesViewMode(userId: Int, viewMode: ViewMode)
+
+    // preferredLanguage
+    @Query("SELECT preferredLanguage FROM user_settings WHERE userId = :userId LIMIT 1")
+    suspend fun getPreferredLanguage(userId: Int): String
+
+    @Query("UPDATE user_settings SET preferredLanguage = :languageCode WHERE userId = :userId")
+    suspend fun setPreferredLanguage(userId: Int, languageCode: String)
 }

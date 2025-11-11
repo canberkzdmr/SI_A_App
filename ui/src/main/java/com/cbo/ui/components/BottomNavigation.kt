@@ -204,11 +204,11 @@ fun BottomNavigationBar(
     showCenterButton: Boolean = true
 ) {
     val mainTabs = listOf(
-        TabItem("main_notes", Icons.AutoMirrored.Filled.Note, "Notes"),
-        TabItem("main_categories", Icons.Default.Category, "Categories"),
-        TabItem("center", Icons.Default.Add, "Create"),
-        TabItem("main_tags", Icons.Default.Tag, "Tags"),
-        TabItem("main_profile", Icons.Default.Person, "Profile"),
+        TabItem("main_notes", Icons.AutoMirrored.Filled.Note, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_notes)),
+        TabItem("main_categories", Icons.Default.Category, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_categories)),
+        TabItem("center", Icons.Default.Add, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_create)),
+        TabItem("main_tags", Icons.Default.Tag, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_tags)),
+        TabItem("main_profile", Icons.Default.Person, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_profile)),
     )
     
     // Find the index of the active tab (excluding center button)

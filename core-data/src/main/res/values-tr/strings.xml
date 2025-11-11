@@ -1,0 +1,7 @@
+<resources>
+    <string name="biometric_login_title">Biyometrik Giriş</string>
+    <string name="biometric_login_subtitle">Giriş için parmak izi veya yüzünüzü kullanın</string>
+    <string name="cancel">İptal</string>
+    <string name="authentication_failed">Kimlik doğrulama başarısız</string>
+</resources>
+

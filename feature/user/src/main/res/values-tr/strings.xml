@@ -1,0 +1,69 @@
+<resources>
+    <string name="profile_title">Profil</string>
+    <string name="guest">Misafir</string>
+    <string name="not_available">Mevcut değil</string>
+    <string name="profile_picture">Profil Resmi</string>
+    <string name="default_profile_picture">Varsayılan Profil Resmi</string>
+
+    <string name="section_account">Hesap</string>
+    <string name="section_preferences">Tercihler</string>
+    <string name="section_notes">Notlar</string>
+    <string name="section_security">Güvenlik</string>
+    <string name="section_about">Hakkında</string>
+
+    <string name="edit_profile">Profili Düzenle</string>
+    <string name="change_password">Şifreyi Değiştir</string>
+    <string name="logout">Çıkış Yap</string>
+    <string name="delete_account">Hesabı Sil</string>
+
+    <string name="theme">Tema</string>
+    <string name="language">Dil</string>
+
+    <string name="my_notes">Notlarım</string>
+    <string name="manage_categories">Kategorileri Yönet</string>
+    <string name="manage_tags">Etiketleri Yönet</string>
+    <string name="export_notes">Notları Dışa Aktar</string>
+
+    <string name="enable_biometrics">Biyometriyi Etkinleştir</string>
+
+    <string name="app_version">Uygulama Sürümü: %1$s</string>
+    <string name="contact_support">Destek ile İletişime Geç</string>
+
+    <string name="edit_profile_title">Profili Düzenle</string>
+    <string name="full_name">Ad Soyad</string>
+    <string name="gender">Cinsiyet</string>
+    <string name="date_of_birth">Doğum tarihi</string>
+    <string name="bio">Biyografi</string>
+    <string name="phone_number">Telefon Numarası</string>
+    <string name="address">Adres</string>
+    <string name="save">Kaydet</string>
+    <string name="back">Geri</string>
+    <string name="change_avatar">Avatarı Değiştir</string>
+
+    <string name="male">Erkek</string>
+    <string name="female">Kadın</string>
+
+    <string name="change_password_title">Şifreyi Değiştir</string>
+    <string name="update_your_password">Şifrenizi Güncelleyin</string>
+    <string name="password_help">Mevcut şifrenizi girin ve yeni güvenli bir şifre seçin</string>
+    <string name="current_password">Mevcut Şifre</string>
+    <string name="enter_current_password">Mevcut şifrenizi girin</string>
+    <string name="new_password">Yeni Şifre</string>
+    <string name="enter_new_password">Yeni şifreyi girin</string>
+    <string name="confirm_new_password">Yeni Şifreyi Onayla</string>
+    <string name="confirm_new_password_placeholder">Yeni şifreyi onaylayın</string>
+    <string name="hide_password">Şifreyi gizle</string>
+    <string name="show_password">Şifreyi göster</string>
+    <string name="password_requirements">Şifre Gereksinimleri:</string>
+    <string name="req_len">En az 8 karakter</string>
+    <string name="req_upper">En az bir büyük harf</string>
+    <string name="req_lower">En az bir küçük harf</string>
+    <string name="req_number">En az bir rakam</string>
+    <string name="changing_password">Şifre Değiştiriliyor...</string>
+    <string name="change_password_action">Şifreyi Değiştir</string>
+    <string name="change_language_title">Dil Ayarları</string>
+    <string name="about_languages">Dil Hakkında</string>
+    <string name="language_help">Dil değişikliği uygulamanın tümünde geçerli olur. Değişikliği kaydettiğinizde seçtiğiniz dil korunacaktır.</string>
+    <string name="language_options">Dil Seçenekleri</string>
+</resources>
+

@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.res.stringResource
 import com.cbo.core.common.base.UiState
 import com.cbo.core.common.validation.FieldValidation
 import com.cbo.login.presentation.viewmodel.RegisterState
@@ -126,14 +127,14 @@ fun RegisterScreenContent(
     val termsAnnotatedText =
         buildAnnotatedString {
             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                append("I accept the")
+                append(stringResource(id = com.cbo.login.R.string.terms_prefix))
             }
             pushStringAnnotation("TERMS", annotation = "terms_and_conditions")
             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onPrimaryContainer)) {
-                append(" terms and conditions ")
+                append(stringResource(id = com.cbo.login.R.string.terms_link_text))
             }
             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                append("as well as the privacy policy of application")
+                append(stringResource(id = com.cbo.login.R.string.privacy_suffix))
             }
             pop()
         }
@@ -141,11 +142,11 @@ fun RegisterScreenContent(
     val alreadyHaveAnAccountAnnotatedText =
         buildAnnotatedString {
             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary)) {
-                append("Already have an account? ")
+                append(stringResource(id = com.cbo.login.R.string.already_have_account_prefix))
             }
             pushStringAnnotation("ACCOUNT", annotation = "already_have_an_account")
             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                append("Login.")
+                append(stringResource(id = com.cbo.login.R.string.login_link_text))
             }
             pop()
         }
@@ -190,9 +191,9 @@ fun RegisterScreenContent(
                         Modifier
                             .padding(16.dp),
                 ) {
-                    AppRegular("Registration")
+                    AppRegular(stringResource(id = com.cbo.login.R.string.registration_title))
 
-                    AppTitle("Create an account")
+                    AppTitle(stringResource(id = com.cbo.login.R.string.create_account_title))
 
                     // Username Field
                     OutlinedTextField(
@@ -201,9 +202,9 @@ fun RegisterScreenContent(
                             onUserNameChange(it)
                             usernameValidation = validateUserName()
                         },
-                        label = { Text("Username") },
+                        label = { Text(stringResource(id = com.cbo.login.R.string.username_label)) },
                         singleLine = true,
-                        placeholder = { Text("Username") },
+                        placeholder = { Text(stringResource(id = com.cbo.login.R.string.username_placeholder)) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Person,
@@ -232,9 +233,9 @@ fun RegisterScreenContent(
                             onEmailChange(it)
                             emailValidation = validateEmail()
                         },
-                        label = { Text("Email") },
+                        label = { Text(stringResource(id = com.cbo.login.R.string.email_label)) },
                         singleLine = true,
-                        placeholder = { Text("Email") },
+                        placeholder = { Text(stringResource(id = com.cbo.login.R.string.email_placeholder)) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Email,
@@ -266,9 +267,9 @@ fun RegisterScreenContent(
                             onPasswordChange(it)
                             passwordValidation = validatePassword()
                         },
-                        label = { Text("Password") },
+                        label = { Text(stringResource(id = com.cbo.login.R.string.password_label)) },
                         singleLine = true,
-                        placeholder = { Text("Password") },
+                        placeholder = { Text(stringResource(id = com.cbo.login.R.string.password_placeholder)) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Lock,
@@ -293,14 +294,14 @@ fun RegisterScreenContent(
                                 IconButton(onClick = { showPassword = false }) {
                                     Icon(
                                         imageVector = Icons.Filled.Visibility,
-                                        contentDescription = "hide password"
+                                        contentDescription = stringResource(id = com.cbo.login.R.string.hide_password_cd)
                                     )
                                 }
                             } else {
                                 IconButton(onClick = { showPassword = true }) {
                                     Icon(
                                         imageVector = Icons.Filled.VisibilityOff,
-                                        contentDescription = "show password"
+                                        contentDescription = stringResource(id = com.cbo.login.R.string.show_password_cd)
                                     )
                                 }
                             }
@@ -323,9 +324,9 @@ fun RegisterScreenContent(
                             onRetypePasswordChange(it)
                             reTypePasswordValidation = validateRetypePassword()
                         },
-                        label = { Text("Retype Password") },
+                        label = { Text(stringResource(id = com.cbo.login.R.string.retype_password_label)) },
                         singleLine = true,
-                        placeholder = { Text("Retype Password") },
+                        placeholder = { Text(stringResource(id = com.cbo.login.R.string.retype_password_placeholder)) },
                         leadingIcon = {
                             Icon(
                                 Icons.Default.Lock,
@@ -350,14 +351,14 @@ fun RegisterScreenContent(
                                 IconButton(onClick = { showReTypePassword = false }) {
                                     Icon(
                                         imageVector = Icons.Filled.Visibility,
-                                        contentDescription = "hide password"
+                                        contentDescription = stringResource(id = com.cbo.login.R.string.hide_password_cd)
                                     )
                                 }
                             } else {
                                 IconButton(onClick = { showReTypePassword = true }) {
                                     Icon(
                                         imageVector = Icons.Filled.VisibilityOff,
-                                        contentDescription = "show password"
+                                        contentDescription = stringResource(id = com.cbo.login.R.string.show_password_cd)
                                     )
                                 }
                             }
@@ -407,7 +408,7 @@ fun RegisterScreenContent(
                     }
 
                     PrimaryButton(
-                        "Register",
+                        stringResource(id = com.cbo.login.R.string.register_cta),
                         onClick = {
                             onRegister()
                         },

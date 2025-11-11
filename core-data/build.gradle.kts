@@ -40,10 +40,12 @@ dependencies {
     implementation(project(":core-database"))
     
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.kotlinx.coroutines.core)
     
     // Hilt for dependency injection
     implementation(libs.hilt.android)
+    implementation(libs.appcompat)
     ksp(libs.hilt.compiler)
 
     implementation (libs.androidx.biometric)

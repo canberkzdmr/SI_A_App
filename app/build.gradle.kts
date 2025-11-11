@@ -49,6 +49,7 @@ dependencies {
     implementation(project(":feature:splash"))
     implementation(project(":feature:notes"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

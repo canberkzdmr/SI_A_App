@@ -15,6 +15,7 @@ sealed class AppDestination(val route: String) {
     object Tags : AppDestination("tags")
     object EditProfile : AppDestination("edit_profile")
     object ChangePassword : AppDestination("change_password")
+    object ChangeLanguage : AppDestination("change_language")
     object Splash: AppDestination("splash")
     object Main: AppDestination("main")
 }

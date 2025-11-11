@@ -1,0 +1,8 @@
+<resources>
+    <string name="nav_notes">Notes</string>
+    <string name="nav_categories">Categories</string>
+    <string name="nav_tags">Tags</string>
+    <string name="nav_profile">Profile</string>
+    <string name="nav_create">Create</string>
+</resources>
+

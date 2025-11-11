@@ -1,0 +1,80 @@
+<resources>
+    <string name="profile_title">Profile</string>
+    <string name="guest">Guest</string>
+    <string name="not_available">Not available</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="default_profile_picture">Default Profile Picture</string>
+    
+    <!-- Sections -->
+    <string name="section_account">Account</string>
+    <string name="section_preferences">Preferences</string>
+    <string name="section_notes">Notes</string>
+    <string name="section_security">Security</string>
+    <string name="section_about">About</string>
+
+    <!-- Account Items -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="change_password">Change Password</string>
+    <string name="logout">Logout</string>
+    <string name="delete_account">Delete Account</string>
+
+    <!-- Preferences Items -->
+    <string name="theme">Theme</string>
+    <string name="language">Language</string>
+
+    <!-- Notes Items -->
+    <string name="my_notes">My Notes</string>
+    <string name="manage_categories">Manage Categories</string>
+    <string name="manage_tags">Manage Tags</string>
+    <string name="export_notes">Export Notes</string>
+
+    <!-- Security Items -->
+    <string name="enable_biometrics">Enable Biometrics</string>
+
+    <!-- About Items -->
+    <string name="app_version">App Version: %1$s</string>
+    <string name="contact_support">Contact Support</string>
+
+    <!-- Edit Profile -->
+    <string name="edit_profile_title">Edit Profile</string>
+    <string name="full_name">Full Name</string>
+    <string name="gender">Gender</string>
+    <string name="date_of_birth">Date of birth</string>
+    <string name="bio">Bio</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="address">Address</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="change_avatar">Change Avatar</string>
+
+    <!-- Gender Options -->
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+
+    <!-- Change Password -->
+    <string name="change_password_title">Change Password</string>
+    <string name="update_your_password">Update Your Password</string>
+    <string name="password_help">Enter your current password and choose a new secure password</string>
+    <string name="current_password">Current Password</string>
+    <string name="enter_current_password">Enter your current password</string>
+    <string name="new_password">New Password</string>
+    <string name="enter_new_password">Enter new password</string>
+    <string name="confirm_new_password">Confirm New Password</string>
+    <string name="confirm_new_password_placeholder">Confirm new password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="password_requirements">Password Requirements:</string>
+    <string name="req_len">At least 8 characters long</string>
+    <string name="req_upper">At least one uppercase letter</string>
+    <string name="req_lower">At least one lowercase letter</string>
+    <string name="req_number">At least one number</string>
+    <string name="changing_password">Changing Password...</string>
+    <string name="change_password_action">Change Password</string>
+
+    <!-- Change Language -->
+    <string name="change_language_title">Change Language</string>
+    <string name="about_languages">About Languages</string>
+    <string name="language_help">The language change will apply to the entire application. Once you save the change, your selected language will be retained.</string>
+    <string name="language_options">Language Options</string>
+</resources>
+

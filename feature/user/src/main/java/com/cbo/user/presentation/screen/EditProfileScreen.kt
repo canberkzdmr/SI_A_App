@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
@@ -145,14 +146,14 @@ fun EditProfileScreenContent(
                     TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                     ),
-                title = { AppTitle("Edit Profile", color = MaterialTheme.colorScheme.onPrimary) },
+                title = { AppTitle(stringResource(id = com.cbo.user.R.string.edit_profile_title), color = MaterialTheme.colorScheme.onPrimary) },
                 navigationIcon = {
                     AppIconButton(
                         onClick = { onCancel() },
                         icon = {
                             Icon(
                                 Icons.AutoMirrored.Default.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(id = com.cbo.user.R.string.back),
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )
                         },
@@ -210,7 +211,7 @@ fun EditProfileScreenContent(
                                 uiState.avatarUrl.isNotEmpty() -> {
                                     SubcomposeAsyncImage(
                                         model = uiState.avatarUrl,
-                                        contentDescription = "Avatar",
+                                        contentDescription = stringResource(id = com.cbo.user.R.string.profile_picture),
                                         modifier = Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop,
                                         loading = {
@@ -235,7 +236,7 @@ fun EditProfileScreenContent(
                         }
 
                         // Change Avatar Button - positioned outside the clipped avatar
-                        IconButton(
+                                IconButton(
                             onClick = {
                                 if (!uiState.isImageLoading) {
                                     launcher.launch("image/*")
@@ -257,7 +258,7 @@ fun EditProfileScreenContent(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Change Avatar",
+                                contentDescription = stringResource(id = com.cbo.user.R.string.change_avatar),
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )
                         }
@@ -290,7 +291,7 @@ fun EditProfileScreenContent(
                 AppOutlinedTextField(
                     value = uiState.fullName,
                     onValueChange = updateFullName,
-                    label = "Full Name",
+                    label = stringResource(id = com.cbo.user.R.string.full_name),
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -317,7 +318,7 @@ fun EditProfileScreenContent(
                 AppOutlinedTextField(
                     value = uiState.bio,
                     onValueChange = updateBio,
-                    label = "Bio",
+                    label = stringResource(id = com.cbo.user.R.string.bio),
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -326,7 +327,7 @@ fun EditProfileScreenContent(
                 AppOutlinedTextField(
                     value = uiState.phoneNumber,
                     onValueChange = updatePhoneNumber,
-                    label = "Phone Number",
+                    label = stringResource(id = com.cbo.user.R.string.phone_number),
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -335,7 +336,7 @@ fun EditProfileScreenContent(
                 AppOutlinedTextField(
                     value = uiState.address,
                     onValueChange = updateAddress,
-                    label = "Address",
+                    label = stringResource(id = com.cbo.user.R.string.address),
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -349,7 +350,7 @@ fun EditProfileScreenContent(
             item {
                 Spacer(Modifier.height(16.dp))
                 PrimaryButton(
-                    text = "Save",
+                    text = stringResource(id = com.cbo.user.R.string.save),
                     onClick = save,
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading,
@@ -368,7 +369,7 @@ fun GenderSelector(
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    val options = listOf("Male", "Female")
+    val options = listOf(stringResource(id = com.cbo.user.R.string.male), stringResource(id = com.cbo.user.R.string.female))
     var expanded by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -389,7 +390,7 @@ fun GenderSelector(
                         keyboardController?.hide()
                     }
                 },
-            label = "Gender",
+            label = stringResource(id = com.cbo.user.R.string.gender),
             readOnly = true,
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -441,7 +442,7 @@ fun DateOfBirthPicker(
     AppOutlinedTextField(
         value = dob,
         onValueChange = {},
-        label = "Date of birth",
+        label = stringResource(id = com.cbo.user.R.string.date_of_birth),
         readOnly = true,
         onClick = { datePickerDialog.show() },
         modifier = modifier

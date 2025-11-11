@@ -1,0 +1,7 @@
+<resources>
+    <string name="biometric_login_title">Biometric Login</string>
+    <string name="biometric_login_subtitle">Use your fingerprint or face to login</string>
+    <string name="cancel">Cancel</string>
+    <string name="authentication_failed">Authentication failed</string>
+</resources>
+

@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.core.domain.model.ViewMode
@@ -100,22 +101,22 @@ fun NotesScreen(
             when {
                 uiState.isLoading -> {
                     AppLoadingScreen(
-                        message = "Loading your notes...",
+                        message = stringResource(id = com.cbo.notes.R.string.loading_notes),
                         showProgress = true
                     )
                 }
 
                 uiState.filteredNotes.isEmpty() -> {
                     AppEmptyState(
-                        title = if (uiState.searchQuery.isNotEmpty()) "No matching notes" else "No notes yet",
+                        title = if (uiState.searchQuery.isNotEmpty()) stringResource(id = com.cbo.notes.R.string.no_matching_notes) else stringResource(id = com.cbo.notes.R.string.no_notes_yet),
                         message = if (uiState.searchQuery.isNotEmpty()) {
-                            "Try adjusting your search criteria or clear the search to see all notes"
+                            stringResource(id = com.cbo.notes.R.string.try_adjusting_search)
                         } else {
-                            "Start creating your first note to get organized"
+                            stringResource(id = com.cbo.notes.R.string.start_creating_note)
                         },
-                        actionText = "Create Note",
+                        actionText = stringResource(id = com.cbo.notes.R.string.create_note),
                         onAction = onNavigateToCreateNote,
-                        secondaryActionText = if (uiState.searchQuery.isNotEmpty()) "Clear Search" else null,
+                        secondaryActionText = if (uiState.searchQuery.isNotEmpty()) stringResource(id = com.cbo.notes.R.string.clear_search) else null,
                         onSecondaryAction = { 
                             viewModel.searchNotes("")
                             viewModel.clearFilters()
@@ -125,7 +126,7 @@ fun NotesScreen(
 
                 uiState.errorMessage != null -> {
                     AppErrorState(
-                        error = uiState.errorMessage ?: "An unexpected error occurred",
+                        error = uiState.errorMessage ?: stringResource(id = com.cbo.notes.R.string.unexpected_error),
                         onRetry = { 
                             // Retry loading notes - refresh by clearing filters
                             viewModel.clearFilters()

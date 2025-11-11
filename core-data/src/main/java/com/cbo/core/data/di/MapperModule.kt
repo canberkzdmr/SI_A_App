@@ -1,5 +1,6 @@
 package com.cbo.core.data.di
 
+import com.cbo.core.data.mapper.SupportedLanguageEntityMapper
 import com.cbo.core.data.mapper.UserEntityMapper
 import dagger.Module
 import dagger.Provides
@@ -15,5 +16,11 @@ object MapperModule {
     @Singleton
     fun provideUserEntityMapper(): UserEntityMapper {
         return UserEntityMapper()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupportedLanguageEntityMapper(): SupportedLanguageEntityMapper {
+        return SupportedLanguageEntityMapper()
     }
 }

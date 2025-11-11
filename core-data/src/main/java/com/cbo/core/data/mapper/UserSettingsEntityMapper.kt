@@ -10,7 +10,8 @@ class UserSettingsEntityMapper @Inject constructor() {
         return UserSettings(
             userId = entity.userId,
             isFirstLoginDone = entity.isFirstLoginDone,
-            isBiometricsEnabled = entity.isBiometricsEnabled
+            isBiometricsEnabled = entity.isBiometricsEnabled,
+            preferredLanguage = entity.preferredLanguage
         )
     }
 
@@ -19,6 +20,7 @@ class UserSettingsEntityMapper @Inject constructor() {
             userId = domain.userId,
             isBiometricsEnabled = domain.isBiometricsEnabled,
             isFirstLoginDone = domain.isFirstLoginDone,
+            preferredLanguage = domain.preferredLanguage,
         )
     }
 }

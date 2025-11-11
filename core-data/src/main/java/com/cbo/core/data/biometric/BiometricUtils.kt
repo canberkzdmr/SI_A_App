@@ -30,14 +30,14 @@ object BiometricUtils {
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    onFail("Authentication failed")
+                    onFail(activity.getString(com.cbo.core.data.R.string.authentication_failed))
                 }
             })
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Biometric Login")
-            .setSubtitle("Use your fingerprint or face to login")
-            .setNegativeButtonText("Cancel")
+            .setTitle(activity.getString(com.cbo.core.data.R.string.biometric_login_title))
+            .setSubtitle(activity.getString(com.cbo.core.data.R.string.biometric_login_subtitle))
+            .setNegativeButtonText(activity.getString(com.cbo.core.data.R.string.cancel))
             .build()
 
         biometricPrompt.authenticate(promptInfo)

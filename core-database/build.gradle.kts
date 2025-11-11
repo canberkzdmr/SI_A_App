@@ -51,4 +51,10 @@ dependencies {
     
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.core.testing)
+    
+    // Room testing
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation("androidx.room:room-testing:2.6.1")
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }

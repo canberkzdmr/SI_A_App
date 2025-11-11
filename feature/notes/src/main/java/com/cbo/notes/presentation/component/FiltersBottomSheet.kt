@@ -40,6 +40,7 @@ import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.PrimaryButton
 import com.cbo.ui.components.SecondaryButton
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,22 +103,22 @@ private fun FiltersSheetBody(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(imageVector = Icons.Default.FilterList, contentDescription = null)
-            Text("Manage Filters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(id = com.cbo.notes.R.string.manage_filters_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
             TextButton(onClick = {
                 // Reset local temp states so UI updates immediately
                 tempSelectedCategory = null
                 tempSelectedTags = mutableListOf()
                 onClearAll()
-            }) { Text("Clear all") }
+            }) { Text(stringResource(id = com.cbo.notes.R.string.clear_all)) }
         }
 
         // Category search + list
-        Text(text = "Category", style = MaterialTheme.typography.labelLarge)
+        Text(text = stringResource(id = com.cbo.notes.R.string.category), style = MaterialTheme.typography.labelLarge)
         AppOutlinedTextField(
             value = categoryQuery,
             onValueChange = { categoryQuery = it },
-            placeholder = "Search categories…",
+            placeholder = stringResource(id = com.cbo.notes.R.string.search_categories),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -131,7 +132,7 @@ private fun FiltersSheetBody(
         ) {
             item {
                 ListItem(
-                    headlineContent = { Text("None") },
+                    headlineContent = { Text(stringResource(id = com.cbo.notes.R.string.none)) },
                     trailingContent = {
                         if (tempSelectedCategory == null) Icon(Icons.Default.Check, contentDescription = null)
                     },
@@ -152,11 +153,11 @@ private fun FiltersSheetBody(
         }
 
         // Tag search + list
-        Text(text = "Tags", style = MaterialTheme.typography.labelLarge)
+        Text(text = stringResource(id = com.cbo.notes.R.string.tags), style = MaterialTheme.typography.labelLarge)
         AppOutlinedTextField(
             value = tagQuery,
             onValueChange = { tagQuery = it },
-            placeholder = "Search tags…",
+            placeholder = stringResource(id = com.cbo.notes.R.string.search_tags),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -194,13 +195,13 @@ private fun FiltersSheetBody(
             verticalAlignment = Alignment.CenterVertically
         ) {
             SecondaryButton(
-                text = "Cancel",
+                text = stringResource(id = com.cbo.notes.R.string.cancel),
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 leadingIcon = { Icon(imageVector = Icons.Default.Close, contentDescription = null) }
             )
             PrimaryButton(
-                text = "Apply",
+                text = stringResource(id = com.cbo.notes.R.string.apply),
                 onClick = { onApply(tempSelectedCategory, tempSelectedTags) },
                 modifier = Modifier.weight(1f)
             )

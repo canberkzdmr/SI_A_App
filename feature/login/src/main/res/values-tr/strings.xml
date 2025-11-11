@@ -1,0 +1,42 @@
+<resources>
+    <string name="registration_title">Kayıt</string>
+    <string name="create_account_title">Hesap oluştur</string>
+
+    <string name="username_label">Kullanıcı adı</string>
+    <string name="username_placeholder">Kullanıcı adı</string>
+
+    <string name="email_label">E-posta</string>
+    <string name="email_placeholder">E-posta</string>
+
+    <string name="password_label">Şifre</string>
+    <string name="password_placeholder">Şifre</string>
+
+    <string name="retype_password_label">Şifreyi tekrar gir</string>
+    <string name="retype_password_placeholder">Şifreyi tekrar gir</string>
+
+    <string name="hide_password_cd">şifreyi gizle</string>
+    <string name="show_password_cd">şifreyi göster</string>
+
+    <string name="register_cta">Kayıt ol</string>
+
+    <string name="terms_prefix">Kabul ediyorum</string>
+    <string name="terms_link_text"> hüküm ve koşulları </string>
+    <string name="privacy_suffix">ve uygulamanın gizlilik politikasını</string>
+
+    <string name="already_have_account_prefix">Zaten bir hesabın var mı? </string>
+    <string name="login_link_text">Giriş yap.</string>
+
+    <!-- Login Screen -->
+    <string name="welcome">Hoş geldiniz!</string>
+    <string name="your_style_of_notes">Notlarınızın tarzı!</string>
+    <string name="capture_thoughts">Düşüncelerinizi ve fikirlerinizi kaydedin.</string>
+    <string name="username_placeholder_login">Kullanıcı adınız</string>
+    <string name="password_placeholder_login">Şifrenizi girin</string>
+    <string name="login_cta">Giriş yap</string>
+    <string name="dont_have_account">Hesabınız yok mu? Buradan kayıt olun!</string>
+    <string name="enable_biometric_title">Biyometrik Giriş Etkinleştirilsin mi?</string>
+    <string name="enable_biometric_message">Bir dahaki sefere parmak izi veya yüz ile daha hızlı giriş yapabilirsiniz.</string>
+    <string name="enable">Etkinleştir</string>
+    <string name="not_now">Şimdi değil</string>
+</resources>
+

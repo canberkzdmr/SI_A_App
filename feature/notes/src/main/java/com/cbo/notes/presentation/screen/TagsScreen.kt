@@ -69,6 +69,7 @@ import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.cards.HeaderCard
 import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun TagsScreen(
@@ -136,10 +137,10 @@ fun TagsContent(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { AppTitle("Tags") },
+                title = { AppTitle(stringResource(id = com.cbo.notes.R.string.tags_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = com.cbo.notes.R.string.back))
                     }
                 },
                 actions = {
@@ -153,18 +154,18 @@ fun TagsContent(
                         when (uiState.viewMode) {
                             ViewMode.EDIT -> Icon(
                                 Icons.Default.Delete,
-                                contentDescription = "Delete tags mode",
+                                contentDescription = stringResource(id = com.cbo.notes.R.string.delete_tags_mode),
                                 tint = MaterialTheme.colorScheme.error
                             )
                             ViewMode.DELETE -> Icon(
                                 Icons.Default.Cancel,
-                                contentDescription = "Cancel delete mode",
+                                contentDescription = stringResource(id = com.cbo.notes.R.string.cancel_delete_mode),
                                 tint = MaterialTheme.colorScheme.error
                             )
                         }
                     }
                     IconButton(onClick = onShowCreateTagDialog) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Tag")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(id = com.cbo.notes.R.string.add_tag_cd))
                     }
                 }
             )
@@ -240,10 +241,8 @@ fun TagsContent(
                             .padding(16.dp),
                         variant = CardVariant.DEFAULT,
                         icon = Icons.Default.Tag,
-                        title = "Manage Your Tags",
-                        content = "Switch to 🗑 Delete mode using the top button.\n" +
-                                "In ✏ Edit mode, tap a tag to update it.\n" +
-                                "In 🗑 Delete mode, select tags you don’t need and tap the delete FAB."
+                        title = stringResource(id = com.cbo.notes.R.string.manage_your_tags),
+                        content = stringResource(id = com.cbo.notes.R.string.tags_help_text)
                     )
 
                     Spacer(Modifier.height(16.dp))
@@ -288,10 +287,10 @@ fun TagsContent(
     if (uiState.showDeleteTagDialog) {
         val count = uiState.selectedTags.size
         AppAlertDialog(
-            title = "Delete Tags",
+            title = stringResource(id = com.cbo.notes.R.string.delete_tags_title),
             message = if (count > 1)
-                "Are you sure you want to delete $count tags? This action cannot be undone."
-            else "Are you sure you want to delete this tag?",
+                stringResource(id = com.cbo.notes.R.string.delete_tags_message_multiple, count)
+            else stringResource(id = com.cbo.notes.R.string.delete_tags_message_single),
             onConfirm = onDeleteSelectedTags,
             onDismiss = onResetStateToEdit
         )

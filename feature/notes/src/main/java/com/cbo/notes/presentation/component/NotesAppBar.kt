@@ -13,6 +13,7 @@ import com.cbo.ui.components.AppSearchField
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,20 +37,20 @@ fun NotesAppBar(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
                     onClear = onClearSearch,
-                    placeholder = "Search notes...",
+                    placeholder = stringResource(id = com.cbo.notes.R.string.search_notes_placeholder),
                     modifier = Modifier
                         .padding(top = 8.dp)
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
                 )
             } else {
-                AppHeadline(text = "Notes")
+                AppHeadline(text = stringResource(id = com.cbo.notes.R.string.notes_title))
             }
         },
         actions = {
             if (!isSearchActive) {
                 IconButton(onClick = { isSearchActive = true }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+                    Icon(Icons.Default.Search, contentDescription = stringResource(id = com.cbo.notes.R.string.search))
                 }
             }
 
@@ -59,7 +60,7 @@ fun NotesAppBar(
                 IconButton(onClick = { showMenu = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options"
+                        contentDescription = stringResource(id = com.cbo.notes.R.string.more_options)
                     )
                 }
 
@@ -68,7 +69,7 @@ fun NotesAppBar(
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Manage Categories") },
+                        text = { Text(stringResource(id = com.cbo.notes.R.string.manage_categories)) },
                         onClick = {
                             onCategoriesClick()
                             showMenu = false
@@ -81,7 +82,7 @@ fun NotesAppBar(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Archive") },
+                        text = { Text(stringResource(id = com.cbo.notes.R.string.archive)) },
                         onClick = {
                             // Handle archive navigation
                             showMenu = false
@@ -94,7 +95,7 @@ fun NotesAppBar(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Settings") },
+                        text = { Text(stringResource(id = com.cbo.notes.R.string.settings)) },
                         onClick = {
                             onSettingsClick()
                             showMenu = false

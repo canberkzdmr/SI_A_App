@@ -41,4 +41,29 @@ class UserSettingsRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun getPreferredLanguage(userId: Int): Result<String> {
+        return try {
+            val language = userSettingsDao.getPreferredLanguage(userId)
+            return Result.success(language)
+        } catch (e: Exception) {
+            Log.e("UserSettingsRepositoryImpl", "Error getPreferredLanguage: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun setPreferredLanguage(userId: Int, languageCode: String?): Result<Unit> {
+        return try {
+            Log.d("UserSettingsRepositoryImpl", "setPreferredLanguage: $languageCode")
+            languageCode?.let {
+                userSettingsDao.setPreferredLanguage(userId, languageCode)
+            } ?: run {
+                userSettingsDao.setPreferredLanguage(userId, "en")
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("UserSettingsRepositoryImpl", "Error setPreferredLanguage: ${e.message}")
+            Result.failure(e)
+        }
+    }
 }

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -133,12 +134,12 @@ fun LoginScreenContent(
                             ).padding(vertical = 24.dp),
                 ) {
                     AppHeadline(
-                        "Your style of notes!",
+                        stringResource(id = com.cbo.login.R.string.your_style_of_notes),
                         modifier = Modifier.padding(horizontal = 24.dp),
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     AppRegular(
-                        "Capture your thoughts and any ideas.",
+                        stringResource(id = com.cbo.login.R.string.capture_thoughts),
                         modifier = Modifier.padding(horizontal = 24.dp),
                     )
 
@@ -147,8 +148,8 @@ fun LoginScreenContent(
                     AppOutlinedTextField(
                         value = state.username,
                         onValueChange = onUserNameChange,
-                        label = "Username",
-                        placeholder = "Your username",
+                        label = stringResource(id = com.cbo.login.R.string.username_label),
+                        placeholder = stringResource(id = com.cbo.login.R.string.username_placeholder_login),
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                         modifier =
@@ -165,8 +166,8 @@ fun LoginScreenContent(
                     AppOutlinedTextField(
                         value = state.password,
                         onValueChange = onPasswordChange,
-                        label = "Password",
-                        placeholder = "Enter your password",
+                        label = stringResource(id = com.cbo.login.R.string.password_label),
+                        placeholder = stringResource(id = com.cbo.login.R.string.password_placeholder_login),
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
@@ -191,7 +192,7 @@ fun LoginScreenContent(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     PrimaryButton(
-                        text = "Login",
+                        text = stringResource(id = com.cbo.login.R.string.login_cta),
                         onClick = {
                             onLoginClick()
                         },
@@ -207,7 +208,7 @@ fun LoginScreenContent(
                         onClick = onRegisterClick,
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                     ) {
-                        AppLabel("Don't have an account? Register here!")
+                        AppLabel(stringResource(id = com.cbo.login.R.string.dont_have_account))
                     }
                 }
             }
@@ -216,8 +217,8 @@ fun LoginScreenContent(
         if (state.showBiometricDialog) {
             AppConfirmationDialog(
                 type = DialogType.INFO,
-                title = "Enable Biometric Login?",
-                message = "You can log in faster next time using fingerprint or face.",
+                title = stringResource(id = com.cbo.login.R.string.enable_biometric_title),
+                message = stringResource(id = com.cbo.login.R.string.enable_biometric_message),
                 onConfirm = {
                     onBiometricLoginEnabled(true)
                     Log.d("LoginScreen", "Biometric Login Enabled")
@@ -229,8 +230,8 @@ fun LoginScreenContent(
                     Log.d("LoginScreen", "Biometric Login is Not Enabled")
                     onLoginClick()
                 },
-                confirmText = "Enable",
-                dismissText = "Not now"
+                confirmText = stringResource(id = com.cbo.login.R.string.enable),
+                dismissText = stringResource(id = com.cbo.login.R.string.not_now)
             )
         }
     }
@@ -254,7 +255,7 @@ fun WelcomeMessage(modifier: Modifier = Modifier) {
                 ),
     ) {
         AppHeadline(
-            "Welcome!",
+            stringResource(id = com.cbo.login.R.string.welcome),
             modifier = modifier,
             color = MaterialTheme.colorScheme.primaryContainer,
             textAlign = TextAlign.Center,

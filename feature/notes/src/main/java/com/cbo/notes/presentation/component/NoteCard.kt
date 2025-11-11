@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import androidx.compose.ui.res.stringResource
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
@@ -112,7 +113,7 @@ fun NoteCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More options",
+                                contentDescription = stringResource(id = com.cbo.notes.R.string.more_options_cd),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -123,7 +124,7 @@ fun NoteCard(
                         ) {
                             DropdownMenuItem(
                                 text = {
-                                    Text(if (note.isPinned) "Unpin" else "Pin")
+                                    Text(if (note.isPinned) stringResource(id = com.cbo.notes.R.string.unpin) else stringResource(id = com.cbo.notes.R.string.pin))
                                 },
                                 onClick = {
                                     onTogglePin()
@@ -139,7 +140,7 @@ fun NoteCard(
                             )
                             DropdownMenuItem(
                                 text = {
-                                    Text(if (note.isFavorite) "Remove from favorites" else "Add to favorites")
+                                    Text(if (note.isFavorite) stringResource(id = com.cbo.notes.R.string.remove_from_favorites) else stringResource(id = com.cbo.notes.R.string.add_to_favorites))
                                 },
                                 onClick = {
                                     onToggleFavorite()
@@ -154,7 +155,7 @@ fun NoteCard(
                                 },
                             )
                             DropdownMenuItem(
-                                text = { Text("Archive") },
+                                text = { Text(stringResource(id = com.cbo.notes.R.string.archive)) },
                                 onClick = {
                                     onArchive()
                                     showMenu = false
@@ -168,7 +169,7 @@ fun NoteCard(
                                 },
                             )
                             DropdownMenuItem(
-                                text = { Text("Delete") },
+                                text = { Text(stringResource(id = com.cbo.notes.R.string.delete)) },
                                 onClick = {
                                     onDelete()
                                     showMenu = false

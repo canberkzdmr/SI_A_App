@@ -5,10 +5,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MeetingRoom
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Update
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,7 +26,7 @@ import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Preview(showBackground = true, name = "Card Variants")
 @Composable
-fun CardVariantsPreview() {
+private fun CardVariantsPreview() {
     MemCloudApplicationTheme {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -63,7 +69,7 @@ fun CardVariantsPreview() {
 
 @Preview(showBackground = true, name = "Card Sizes")
 @Composable
-fun CardSizesPreview() {
+private fun CardSizesPreview() {
     MemCloudApplicationTheme {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -91,7 +97,7 @@ fun CardSizesPreview() {
 
 @Preview(showBackground = true, name = "Header Cards")
 @Composable
-fun HeaderCardsPreview() {
+private fun HeaderCardsPreview() {
     MemCloudApplicationTheme {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -125,7 +131,7 @@ fun HeaderCardsPreview() {
 
 @Preview(showBackground = true, name = "Content Cards")
 @Composable
-fun ContentCardsPreview() {
+private fun ContentCardsPreview() {
     MemCloudApplicationTheme {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -164,7 +170,7 @@ fun ContentCardsPreview() {
 
 @Preview(showBackground = true, name = "Action Cards")
 @Composable
-fun ActionCardsPreview() {
+private fun ActionCardsPreview() {
     MemCloudApplicationTheme {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -205,7 +211,7 @@ fun ActionCardsPreview() {
 
 @Preview(showBackground = true, name = "Horizontal Cards")
 @Composable
-fun HorizontalCardsPreview() {
+private fun HorizontalCardsPreview() {
     MemCloudApplicationTheme {
         Column(
             modifier = Modifier.padding(16.dp),

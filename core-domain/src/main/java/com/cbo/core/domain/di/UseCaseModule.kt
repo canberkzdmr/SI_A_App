@@ -1,11 +1,15 @@
 package com.cbo.core.domain.di
 
+import com.cbo.core.domain.repository.SupportedLanguageRepository
 import com.cbo.core.domain.repository.UserRepository
 import com.cbo.core.domain.repository.UserSettingsRepository
 import com.cbo.core.domain.usecase.GetUserSettingsUseCase
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
 import com.cbo.core.domain.usecase.VerifyPasswordUseCase
+import com.cbo.core.domain.usecase.language.GetAllSupportedLanguagesUseCase
+import com.cbo.core.domain.usecase.language.GetSupportedLanguagesSyncUseCase
+import com.cbo.core.domain.usecase.language.GetSupportedLanguagesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,5 +50,26 @@ object UseCaseModule {
         userSettingsRepository: UserSettingsRepository
     ): SetBiometricEnabledUseCase {
         return SetBiometricEnabledUseCase(userSettingsRepository)
+    }
+
+    @Provides
+    fun provideGetSupportedLanguagesUseCase(
+        repository: SupportedLanguageRepository
+    ): GetSupportedLanguagesUseCase {
+        return GetSupportedLanguagesUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetAllSupportedLanguagesUseCase(
+        repository: SupportedLanguageRepository
+    ): GetAllSupportedLanguagesUseCase {
+        return GetAllSupportedLanguagesUseCase(repository)
+    }
+
+    @Provides
+    fun provideGetSupportedLanguagesSyncUseCase(
+        repository: SupportedLanguageRepository
+    ): GetSupportedLanguagesSyncUseCase {
+        return GetSupportedLanguagesSyncUseCase(repository)
     }
 }

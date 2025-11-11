@@ -70,6 +70,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -143,12 +144,12 @@ fun CategoriesContent(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Manage Categories") },
+                title = { Text(stringResource(id = com.cbo.notes.R.string.manage_categories_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(id = com.cbo.notes.R.string.back),
                         )
                     }
                 },
@@ -156,13 +157,13 @@ fun CategoriesContent(
                     IconButton(onClick = onClickDialog) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = "Info"
+                            contentDescription = stringResource(id = com.cbo.notes.R.string.info)
                         )
                     }
                     IconButton(onClick = onCreateCategory) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add category",
+                            contentDescription = stringResource(id = com.cbo.notes.R.string.add_category),
                         )
                     }
                 },
@@ -172,23 +173,23 @@ fun CategoriesContent(
         when {
             uiState.isLoading -> {
                 AppLoadingScreen(
-                    message = "Loading categories...",
+                    message = stringResource(id = com.cbo.notes.R.string.loading_categories),
                     showProgress = true
                 )
             }
             
             uiState.errorMessage != null -> {
                 AppErrorState(
-                    error = uiState.errorMessage ?: "Failed to load categories",
+                    error = uiState.errorMessage ?: stringResource(id = com.cbo.notes.R.string.failed_to_load_categories),
                     onRetry = { /* Retry loading categories */ }
                 )
             }
 
             uiState.categories.isEmpty() -> {
                 AppEmptyState(
-                    title = "No categories yet",
-                    message = "Create your first category to organize your notes better",
-                    actionText = "Create Category",
+                    title = stringResource(id = com.cbo.notes.R.string.no_categories_yet),
+                    message = stringResource(id = com.cbo.notes.R.string.create_first_category),
+                    actionText = stringResource(id = com.cbo.notes.R.string.create_category),
                     onAction = onCreateCategory
                 )
             }
@@ -204,9 +205,9 @@ fun CategoriesContent(
                 ) {
                     item {
                         HeaderCard(
-                            title = "Organize your notes with categories",
+                            title = stringResource(id = com.cbo.notes.R.string.organize_notes_categories),
                             icon = Icons.Default.Category,
-                            content = "Tap a category to view its notes. Swipe right to edit, left to delete.",
+                            content = stringResource(id = com.cbo.notes.R.string.swipe_hint),
                             variant = CardVariant.DEFAULT,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -245,9 +246,9 @@ fun CategoriesContent(
 
     if (uiState.showInfoDialog) {
         AppInfoDialog(
-            title = "Info",
+            title = stringResource(id = com.cbo.notes.R.string.info),
             onDismiss = hideDialog,
-            message = "\uD83D\uDCA1 Tip: Swipe right to edit, left to delete",
+            message = stringResource(id = com.cbo.notes.R.string.info_tip),
         )
     }
 }
@@ -408,10 +409,10 @@ fun CategoryItem(
 
     if (showDeleteDialog) {
         AppAlertDialog(
-            title = "Delete ${category.name}",
-            message = "Are you sure you want to delete ${category.name} category.\nThis action cannot be undone.",
-            confirmText = "Delete",
-            dismissText = "Cancel",
+            title = stringResource(id = com.cbo.notes.R.string.delete_category_title, category.name),
+            message = stringResource(id = com.cbo.notes.R.string.delete_category_message, category.name),
+            confirmText = stringResource(id = com.cbo.notes.R.string.delete),
+            dismissText = stringResource(id = com.cbo.notes.R.string.cancel),
             onConfirm = {
                 showDeleteDialog = false
                 onDelete()

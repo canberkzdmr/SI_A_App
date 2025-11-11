@@ -6,6 +6,7 @@ import com.cbo.user.presentation.screen.EditProfileScreen
 import com.cbo.user.presentation.screen.ProfileScreen
 import com.cbo.user.presentation.screen.ChangePasswordScreen
 import com.cbo.core.navigation.AppDestination
+import com.cbo.user.presentation.screen.ChangeLanguageScreen
 
 fun NavGraphBuilder.userNavGraph(
     onLogOut: () -> Unit,
@@ -13,6 +14,8 @@ fun NavGraphBuilder.userNavGraph(
     onProfileUpdated: () -> Unit,
     onEditProfileCancelled: () -> Unit,
     onChangePassword: () -> Unit,
+    onChangeLanguage: () -> Unit,
+    onNavigateBack: () -> Unit,
     onPasswordChanged: () -> Unit,
     onChangePasswordCancelled: () -> Unit,
     onDeleteUserClicked: () -> Unit,
@@ -25,6 +28,7 @@ fun NavGraphBuilder.userNavGraph(
             onLogOut = { onLogOut() },
             onEditProfile = { onEditProfile() },
             onChangePassword = { onChangePassword() },
+            onChangeLanguage = { onChangeLanguage() },
             onDeleteAccount = { onDeleteUserClicked() },
             onNotesClicked = { onNotesClicked() },
             onCategoriesClicked = { onCategoriesClicked() },
@@ -51,6 +55,12 @@ fun NavGraphBuilder.userNavGraph(
             onPasswordChanged = {
                 onPasswordChanged()
             }
+        )
+    }
+
+    composable(AppDestination.ChangeLanguage.route) {
+        ChangeLanguageScreen(
+            onNavigateBack = { onNavigateBack() }
         )
     }
 }

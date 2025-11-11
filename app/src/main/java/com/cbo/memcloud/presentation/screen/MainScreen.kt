@@ -36,6 +36,7 @@ fun MainScreen(
     onLogOut: () -> Unit,
     onEditProfile: () -> Unit,
     onChangePassword: () -> Unit,
+    onChangeLanguage: () -> Unit,
     onDeleteAccount: () -> Unit,
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
@@ -104,6 +105,10 @@ fun MainScreen(
                     onChangePassword = {
                         Log.d("MainScreen", "PS onChangePassword")
                         onChangePassword()
+                    },
+                    onChangeLanguage = {
+                        Log.d("MainScreen", "PS onChangeLanguage")
+                        onChangeLanguage()
                     },
                     onDeleteAccount = {
                         Log.d("MainScreen", "PS onDeleteAccount")

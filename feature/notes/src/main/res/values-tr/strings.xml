@@ -1,0 +1,117 @@
+<resources>
+    <!-- Notes Screen -->
+    <string name="notes_title">Notlar</string>
+    <string name="search_notes_placeholder">Notlarda ara...</string>
+    <string name="loading_notes">Notlarınız yükleniyor...</string>
+    <string name="no_matching_notes">Eşleşen not yok</string>
+    <string name="no_notes_yet">Henüz not yok</string>
+    <string name="try_adjusting_search">Arama kriterlerinizi ayarlayın veya tüm notları görmek için aramayı temizleyin</string>
+    <string name="start_creating_note">Düzenli olmak için ilk notunuzu oluşturmaya başlayın</string>
+    <string name="create_note">Not Oluştur</string>
+    <string name="clear_search">Aramayı Temizle</string>
+    <string name="unexpected_error">Beklenmeyen bir hata oluştu</string>
+    
+    <!-- Notes App Bar -->
+    <string name="manage_categories">Kategorileri Yönet</string>
+    <string name="archive">Arşiv</string>
+    <string name="settings">Ayarlar</string>
+    <string name="search">Ara</string>
+    <string name="more_options">Daha fazla seçenek</string>
+    
+    <!-- Notes Controls -->
+    <string name="filters">Filtreler</string>
+    <string name="clear_all">Tümünü Temizle</string>
+    <string name="manage_filters">Filtreleri yönet</string>
+    <string name="no_filters_applied">Filtre uygulanmadı</string>
+    <string name="view">Görünüm:</string>
+    <string name="list_view">Liste görünümü</string>
+    <string name="grid_view">Izgara görünümü</string>
+    <string name="compact_view">Kompakt görünüm</string>
+    
+    <!-- Sort Options -->
+    <string name="recent">Son</string>
+    <string name="oldest">En Eski</string>
+    <string name="new_first">Yeni Önce</string>
+    <string name="old_first">Eski Önce</string>
+    <string name="a_to_z">A-Z</string>
+    <string name="z_to_a">Z-A</string>
+    <string name="recently_updated">Son Güncellenen</string>
+    <string name="oldest_updated">En Eski Güncellenen</string>
+    <string name="recently_created">Son Oluşturulan</string>
+    <string name="oldest_created">En Eski Oluşturulan</string>
+    <string name="title_a_z">Başlık A-Z</string>
+    <string name="title_z_a">Başlık Z-A</string>
+    
+    <!-- Note Card -->
+    <string name="pin">Sabitle</string>
+    <string name="unpin">Sabitlemeyi Kaldır</string>
+    <string name="add_to_favorites">Favorilere ekle</string>
+    <string name="remove_from_favorites">Favorilerden çıkar</string>
+    <string name="delete">Sil</string>
+    <string name="more_options_cd">Daha fazla seçenek</string>
+    
+    <!-- Edit Note Screen -->
+    <string name="back">Geri</string>
+    <string name="save">Kaydet</string>
+    <string name="note_title_placeholder">Not başlığı...</string>
+    <string name="start_writing_note">Notunuzu yazmaya başlayın...</string>
+    <string name="loading_note">Not yükleniyor...</string>
+    <string name="failed_to_load_note">Not yüklenemedi</string>
+    <string name="discard_changes_title">Değişiklikleri iptal et?</string>
+    <string name="discard_changes_message">Kaydedilmemiş değişiklikleriniz var. Geri dönmek istediğinizden emin misiniz?</string>
+    <string name="discard">İptal Et</string>
+    <string name="cancel">İptal</string>
+    <string name="filter">Filtre</string>
+    <string name="category">Kategori</string>
+    <string name="tags">Etiketler</string>
+    <string name="none">Yok</string>
+    <string name="type_tag_name_enter">Etiket adını yazın &amp; Enter/Boşluk tuşuna basın</string>
+    <string name="add_tag">Etiket ekle</string>
+    <string name="create_custom_tag">Özel etiket oluştur</string>
+    <string name="no_tags_yet_message">Henüz etiket yok. İlk etiketinizi oluşturmak için yukarıdaki alana yazın!</string>
+    <string name="selected_count">%1$d seçildi</string>
+    
+    <!-- Categories Screen -->
+    <string name="manage_categories_title">Kategorileri Yönet</string>
+    <string name="info">Bilgi</string>
+    <string name="add_category">Kategori ekle</string>
+    <string name="loading_categories">Kategoriler yükleniyor...</string>
+    <string name="failed_to_load_categories">Kategoriler yüklenemedi</string>
+    <string name="no_categories_yet">Henüz kategori yok</string>
+    <string name="create_first_category">Notlarınızı daha iyi organize etmek için ilk kategorinizi oluşturun</string>
+    <string name="create_category">Kategori Oluştur</string>
+    <string name="organize_notes_categories">Notlarınızı kategorilerle organize edin</string>
+    <string name="swipe_hint">Notlarını görüntülemek için bir kategoriye dokunun. Düzenlemek için sağa, silmek için sola kaydırın.</string>
+    <string name="info_tip">💡 İpucu: Düzenlemek için sağa, silmek için sola kaydırın</string>
+    <string name="edit_category">Kategoriyi Düzenle</string>
+    <string name="create_category_dialog">Kategori Oluştur</string>
+    <string name="category_name">Kategori Adı</string>
+    <string name="enter_category_name">Kategori adını girin...</string>
+    <string name="description_optional">Açıklama (isteğe bağlı)</string>
+    <string name="enter_description">Açıklama girin...</string>
+    <string name="notes_count">%1$d not</string>
+    <string name="updated">güncellendi</string>
+    <string name="edit">Düzenle</string>
+    <string name="delete_category_title">%1$s Sil</string>
+    <string name="delete_category_message">%1$s kategorisini silmek istediğinizden emin misiniz.\nBu işlem geri alınamaz.</string>
+    
+    <!-- Tags Screen -->
+    <string name="tags_title">Etiketler</string>
+    <string name="delete_tags_mode">Etiket silme modu</string>
+    <string name="cancel_delete_mode">Silme modunu iptal et</string>
+    <string name="add_tag_cd">Etiket Ekle</string>
+    <string name="no_tags_yet">Henüz etiket yok</string>
+    <string name="create_tags_filter">Notlarınızı daha iyi filtrelemek için etiketler oluşturun</string>
+    <string name="manage_your_tags">Etiketlerinizi Yönetin</string>
+    <string name="tags_help_text">Üstteki düğmeyi kullanarak Silme moduna geçin.\nDüzenleme modunda, bir etikete dokunarak güncelleyin.\nSilme modunda, ihtiyacınız olmayan etiketleri seçin ve silme düğmesine dokunun.</string>
+    <string name="delete_tags_title">Etiketleri Sil</string>
+    <string name="delete_tags_message_single">Bu etiketi silmek istediğinizden emin misiniz?</string>
+    <string name="delete_tags_message_multiple">%1$d etiketi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
+    
+    <!-- Filters Bottom Sheet -->
+    <string name="manage_filters_title">Filtreleri Yönet</string>
+    <string name="search_categories">Kategorilerde ara…</string>
+    <string name="search_tags">Etiketlerde ara…</string>
+    <string name="apply">Uygula</string>
+</resources>
+

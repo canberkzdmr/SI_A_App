@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppOutlinedTextField
@@ -76,7 +77,7 @@ fun ChangePasswordScreen(
                             containerColor = MaterialTheme.colorScheme.primary,
                         ),
                     title = {
-                        AppTitle("Change Password", color = MaterialTheme.colorScheme.onPrimary)
+                        AppTitle(stringResource(id = com.cbo.user.R.string.change_password_title), color = MaterialTheme.colorScheme.onPrimary)
                     },
                     navigationIcon = {
                         IconButton(onClick = onNavigateBack) {
@@ -106,8 +107,8 @@ fun ChangePasswordScreen(
                         .padding(paddingValues),
                     variant = CardVariant.DEFAULT,
                     icon = Icons.Default.Lock,
-                    title = "Update Your Password",
-                    content = "Enter your current password and choose a new secure password"
+                    title = stringResource(id = com.cbo.user.R.string.update_your_password),
+                    content = stringResource(id = com.cbo.user.R.string.password_help)
                 )
                 /*AppCard(
                     modifier = Modifier.fillMaxWidth(),
@@ -143,8 +144,8 @@ fun ChangePasswordScreen(
                 AppOutlinedTextField(
                     value = uiState.currentPassword,
                     onValueChange = viewModel::onCurrentPasswordChanged,
-                    label = "Current Password",
-                    placeholder = "Enter your current password",
+                    label = stringResource(id = com.cbo.user.R.string.current_password),
+                    placeholder = stringResource(id = com.cbo.user.R.string.enter_current_password),
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Lock,
@@ -162,9 +163,9 @@ fun ChangePasswordScreen(
                                     },
                                 contentDescription =
                                     if (uiState.isCurrentPasswordVisible) {
-                                        "Hide password"
+                                        stringResource(id = com.cbo.user.R.string.hide_password)
                                     } else {
-                                        "Show password"
+                                        stringResource(id = com.cbo.user.R.string.show_password)
                                     },
                             )
                         }
@@ -183,8 +184,8 @@ fun ChangePasswordScreen(
                 AppOutlinedTextField(
                     value = uiState.newPassword,
                     onValueChange = viewModel::onNewPasswordChanged,
-                    label = "New Password",
-                    placeholder = "Enter new password",
+                    label = stringResource(id = com.cbo.user.R.string.new_password),
+                    placeholder = stringResource(id = com.cbo.user.R.string.enter_new_password),
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Lock,
@@ -202,9 +203,9 @@ fun ChangePasswordScreen(
                                     },
                                 contentDescription =
                                     if (uiState.isNewPasswordVisible) {
-                                        "Hide password"
+                                        stringResource(id = com.cbo.user.R.string.hide_password)
                                     } else {
-                                        "Show password"
+                                        stringResource(id = com.cbo.user.R.string.show_password)
                                     },
                             )
                         }
@@ -223,8 +224,8 @@ fun ChangePasswordScreen(
                 AppOutlinedTextField(
                     value = uiState.confirmPassword,
                     onValueChange = viewModel::onConfirmPasswordChanged,
-                    label = "Confirm New Password",
-                    placeholder = "Confirm new password",
+                    label = stringResource(id = com.cbo.user.R.string.confirm_new_password),
+                    placeholder = stringResource(id = com.cbo.user.R.string.confirm_new_password_placeholder),
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Lock,
@@ -242,9 +243,9 @@ fun ChangePasswordScreen(
                                     },
                                 contentDescription =
                                     if (uiState.isConfirmPasswordVisible) {
-                                        "Hide password"
+                                        stringResource(id = com.cbo.user.R.string.hide_password)
                                     } else {
-                                        "Show password"
+                                        stringResource(id = com.cbo.user.R.string.show_password)
                                     },
                             )
                         }
@@ -268,7 +269,7 @@ fun ChangePasswordScreen(
                         modifier = Modifier.padding(16.dp),
                     ) {
                         AppTitleMedium(
-                            text = "Password Requirements:",
+                            text = stringResource(id = com.cbo.user.R.string.password_requirements),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -276,10 +277,10 @@ fun ChangePasswordScreen(
 
                         val requirements =
                             listOf(
-                                "At least 8 characters long",
-                                "At least one uppercase letter",
-                                "At least one lowercase letter",
-                                "At least one number",
+                                stringResource(id = com.cbo.user.R.string.req_len),
+                                stringResource(id = com.cbo.user.R.string.req_upper),
+                                stringResource(id = com.cbo.user.R.string.req_lower),
+                                stringResource(id = com.cbo.user.R.string.req_number),
                             )
 
                         requirements.forEach { requirement ->
@@ -297,7 +298,7 @@ fun ChangePasswordScreen(
 
                 // Change Password Button
                 PrimaryButton(
-                    text = if (uiState.isLoading) "Changing Password..." else "Change Password",
+                    text = if (uiState.isLoading) stringResource(id = com.cbo.user.R.string.changing_password) else stringResource(id = com.cbo.user.R.string.change_password_action),
                     onClick = viewModel::changePassword,
                     modifier = Modifier
                         .fillMaxWidth()

@@ -1,0 +1,8 @@
+<resources>
+    <string name="nav_notes">Notlar</string>
+    <string name="nav_categories">Kategoriler</string>
+    <string name="nav_tags">Etiketler</string>
+    <string name="nav_profile">Profil</string>
+    <string name="nav_create">Oluştur</string>
+</resources>
+

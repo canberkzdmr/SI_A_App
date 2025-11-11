@@ -2,8 +2,11 @@ package com.cbo.core.database.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cbo.core.database.dao.CategoryDao
 import com.cbo.core.database.dao.NoteDao
+import com.cbo.core.database.dao.SupportedLanguageDao
 import com.cbo.core.database.dao.TagDao
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.database.dao.UserDetailDao
@@ -31,6 +34,21 @@ object DatabaseModule {
                 AppDatabase::class.java,
                 "app_database",
             ).addMigrations(*ALL_MIGRATIONS)
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    super.onCreate(db)
+                    // Populate supported languages when database is first created
+                    db.execSQL(
+                        """
+                        INSERT INTO `supported_languages` (`code`, `displayName`, `nativeName`, `isEnabled`, `sortOrder`)
+                        VALUES
+                            ('tr', 'Turkish', 'Türkçe', 1, 0),
+                            ('en', 'English', 'English', 1, 1),
+                            ('de', 'German', 'Deutsch', 0, 2)
+                        """.trimIndent()
+                    )
+                }
+            })
             .build()
 
     @Provides
@@ -50,4 +68,7 @@ object DatabaseModule {
 
     @Provides
     fun provideTagDao(database: AppDatabase): TagDao = database.tagDao()
+    
+    @Provides
+    fun provideSupportedLanguageDao(database: AppDatabase): SupportedLanguageDao = database.supportedLanguageDao()
 }

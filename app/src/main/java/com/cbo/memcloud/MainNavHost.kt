@@ -38,7 +38,6 @@ fun MainNavHost(
 
             onRegisterClick = {
                 navController.navigate(AppDestination.Register.route) {
-
                 }
             },
 
@@ -83,6 +82,14 @@ fun MainNavHost(
             },
             onChangePasswordCancelled = {
                 Log.d("MainNavHost", "(userNavGraph) Change password cancelled")
+                navController.popBackStack()
+            },
+            onChangeLanguage = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Change Language")
+                navController.navigate(AppDestination.ChangeLanguage.route)
+            },
+            onNavigateBack = {
+                Log.d("MainNavHost", "(userNavGraph) Change Language back")
                 navController.popBackStack()
             },
             onDeleteUserClicked = {
@@ -135,6 +142,10 @@ fun MainNavHost(
                 onChangePassword = {
                     Log.d("MainNavHost", "(MainScreen) Navigated to Change Password")
                     navController.navigate(AppDestination.ChangePassword.route)
+                },
+                onChangeLanguage = {
+                    Log.d("MainNavHost", "(MainScreen) Navigated to Change Language")
+                    navController.navigate(AppDestination.ChangeLanguage.route)
                 },
                 onDeleteAccount = {
                     Log.d("MainNavHost", "(MainScreen) Delete Account clicked")

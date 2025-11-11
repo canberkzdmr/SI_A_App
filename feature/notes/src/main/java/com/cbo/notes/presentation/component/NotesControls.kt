@@ -18,6 +18,7 @@ import com.cbo.core.domain.model.ViewMode
 import com.cbo.notes.presentation.SortOrder
 import com.cbo.ui.components.AppOutlinedTextField
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Tag
@@ -85,16 +86,16 @@ fun NotesControls(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    AppLabel(text = "Filters")
+                    AppLabel(text = stringResource(id = com.cbo.notes.R.string.filters))
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (selectedCategory != null || selectedTags.isNotEmpty()) {
-                            TertiaryButton("Clear All", onClick = onClearFilters)
+                            TertiaryButton(stringResource(id = com.cbo.notes.R.string.clear_all), onClick = onClearFilters)
                         }
                         OutlinedButton(onClick = onManageFiltersClick) {
                             Icon(imageVector = Icons.Default.FilterList, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Manage filters")
+                            Text(stringResource(id = com.cbo.notes.R.string.manage_filters))
                         }
                     }
                 }
@@ -132,7 +133,7 @@ fun NotesControls(
                     }
                 } else {
                     Text(
-                        text = "No filters applied",
+                        text = stringResource(id = com.cbo.notes.R.string.no_filters_applied),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -289,7 +290,7 @@ private fun ViewModeSelector(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "View:",
+            text = stringResource(id = com.cbo.notes.R.string.view),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -300,21 +301,21 @@ private fun ViewModeSelector(
         ) {
             ViewModeButton(
                 icon = Icons.Default.ViewStream,
-                contentDescription = "List view",
+                contentDescription = stringResource(id = com.cbo.notes.R.string.list_view),
                 isSelected = viewMode == ViewMode.LIST,
                 onClick = { onViewModeChange(ViewMode.LIST) }
             )
 
             ViewModeButton(
                 icon = Icons.Default.GridView,
-                contentDescription = "Grid view",
+                contentDescription = stringResource(id = com.cbo.notes.R.string.grid_view),
                 isSelected = viewMode == ViewMode.GRID,
                 onClick = { onViewModeChange(ViewMode.GRID) }
             )
 
             ViewModeButton(
                 icon = Icons.AutoMirrored.Filled.ViewList,
-                contentDescription = "Compact view",
+                contentDescription = stringResource(id = com.cbo.notes.R.string.compact_view),
                 isSelected = viewMode == ViewMode.COMPACT,
                 onClick = { onViewModeChange(ViewMode.COMPACT) }
             )
@@ -396,7 +397,7 @@ private fun SortSelector(
             onDismissRequest = { expanded = false }
         ) {
             SortOption(
-                text = "Recently Updated",
+                text = stringResource(id = com.cbo.notes.R.string.recently_updated),
                 icon = Icons.Default.Schedule,
                 isSelected = currentSortOrder == SortOrder.UPDATED_DESC,
                 onClick = {
@@ -406,7 +407,7 @@ private fun SortSelector(
             )
 
             SortOption(
-                text = "Oldest Updated",
+                text = stringResource(id = com.cbo.notes.R.string.oldest_updated),
                 icon = Icons.Default.Schedule,
                 isSelected = currentSortOrder == SortOrder.UPDATED_ASC,
                 onClick = {
@@ -416,7 +417,7 @@ private fun SortSelector(
             )
 
             SortOption(
-                text = "Recently Created",
+                text = stringResource(id = com.cbo.notes.R.string.recently_created),
                 icon = Icons.Default.Add,
                 isSelected = currentSortOrder == SortOrder.CREATED_DESC,
                 onClick = {
@@ -426,7 +427,7 @@ private fun SortSelector(
             )
 
             SortOption(
-                text = "Oldest Created",
+                text = stringResource(id = com.cbo.notes.R.string.oldest_created),
                 icon = Icons.Default.Add,
                 isSelected = currentSortOrder == SortOrder.CREATED_ASC,
                 onClick = {
@@ -436,7 +437,7 @@ private fun SortSelector(
             )
 
             SortOption(
-                text = "Title A-Z",
+                text = stringResource(id = com.cbo.notes.R.string.title_a_z),
                 icon = Icons.Default.SortByAlpha,
                 isSelected = currentSortOrder == SortOrder.TITLE_ASC,
                 onClick = {
@@ -446,7 +447,7 @@ private fun SortSelector(
             )
 
             SortOption(
-                text = "Title Z-A",
+                text = stringResource(id = com.cbo.notes.R.string.title_z_a),
                 icon = Icons.Default.SortByAlpha,
                 isSelected = currentSortOrder == SortOrder.TITLE_DESC,
                 onClick = {
@@ -507,14 +508,15 @@ private fun SortOption(
     )
 }
 
+@Composable
 private fun getSortOrderDisplayText(sortOrder: SortOrder): String {
     return when (sortOrder) {
-        SortOrder.UPDATED_DESC -> "Recent"
-        SortOrder.UPDATED_ASC -> "Oldest"
-        SortOrder.CREATED_DESC -> "New First"
-        SortOrder.CREATED_ASC -> "Old First"
-        SortOrder.TITLE_ASC -> "A-Z"
-        SortOrder.TITLE_DESC -> "Z-A"
+        SortOrder.UPDATED_DESC -> stringResource(com.cbo.notes.R.string.recent)
+        SortOrder.UPDATED_ASC -> stringResource(com.cbo.notes.R.string.oldest)
+        SortOrder.CREATED_DESC -> stringResource(com.cbo.notes.R.string.new_first)
+        SortOrder.CREATED_ASC -> stringResource(com.cbo.notes.R.string.old_first)
+        SortOrder.TITLE_ASC -> stringResource(com.cbo.notes.R.string.a_to_z)
+        SortOrder.TITLE_DESC -> stringResource(com.cbo.notes.R.string.z_to_a)
     }
 }
 

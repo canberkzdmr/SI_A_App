@@ -53,11 +53,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
+import com.cbo.ui.components.AppBody
+import com.cbo.ui.components.AppLabel
+import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.SectionHeader
 import com.cbo.ui.components.ShimmerBox
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -72,6 +76,7 @@ fun ProfileScreen(
     onLogOut: () -> Unit,
     onEditProfile: () -> Unit,
     onChangePassword: () -> Unit,
+    onChangeLanguage: () -> Unit,
     onDeleteAccount: () -> Unit,
     onNotesClicked: () -> Unit = {},
     onCategoriesClicked: () -> Unit = {},
@@ -105,12 +110,10 @@ fun ProfileScreen(
         onLogout = viewModel::logout,
         onEditProfile = { onEditProfile() },
         onChangePassword = { onChangePassword() },
-        onDeleteAccount = {
-            onDeleteAccount()
-        },
+        onDeleteAccount = { onDeleteAccount() },
         onNotesClicked = { onNotesClicked() },
         onThemeChange = {},
-        onLanguageChange = {},
+        onLanguageChange = { onChangeLanguage() },
         onManageCategories = { onCategoriesClicked() },
         onManageTags = { onTagsClicked() },
         onExportNotes = {},
@@ -143,11 +146,38 @@ fun ProfileScreenContent(
                     containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
                 ),
                 title = {
-                    Text("Profile", color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(id = R.string.profile_title), color = MaterialTheme.colorScheme.onSurface)
                 },
             )
         }
     ) { innerPadding ->
+        // Build sections and items using string resource IDs (not calling composables in LazyListScope)
+        val sections: List<Pair<Int, List<Pair<ImageVector, Int>>>> = listOf(
+            R.string.section_account to listOf(
+                Icons.Default.Edit to R.string.edit_profile,
+                Icons.Default.Lock to R.string.change_password,
+                Icons.AutoMirrored.Filled.ExitToApp to R.string.logout,
+                Icons.Default.Delete to R.string.delete_account,
+            ),
+            R.string.section_preferences to listOf(
+                Icons.Default.DarkMode to R.string.theme,
+                Icons.Default.Language to R.string.language,
+            ),
+            R.string.section_notes to listOf(
+                Icons.AutoMirrored.Filled.Note to R.string.my_notes,
+                Icons.Default.Category to R.string.manage_categories,
+                Icons.Default.Tag to R.string.manage_tags,
+                Icons.Default.UploadFile to R.string.export_notes,
+            ),
+            R.string.section_security to listOf(
+                Icons.Default.Fingerprint to R.string.enable_biometrics,
+            ),
+            R.string.section_about to listOf(
+                Icons.Default.Info to R.string.app_version,
+                Icons.Default.SupportAgent to R.string.contact_support,
+            ),
+        )
+
         LazyColumn(
             modifier =
                 Modifier
@@ -237,14 +267,12 @@ fun ProfileScreenContent(
                                         .fillMaxWidth(0.4f),
                             )
                         } else {
-                            Text(
-                                text = uiState.username ?: "Guest",
-                                style = MaterialTheme.typography.titleMedium,
+                            AppTitle(
+                                text = uiState.username ?: stringResource(id = R.string.guest),
                             )
                             Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = uiState.email ?: "Not available",
-                                style = MaterialTheme.typography.bodyMedium,
+                            AppLabel(
+                                text = uiState.email ?: stringResource(id = R.string.not_available),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -261,50 +289,21 @@ fun ProfileScreenContent(
                 )
             }
 
-            // ------------------------
             // Sections with list items
-            // ------------------------
-            val sections =
-                listOf(
-                    "Account" to
-                        listOf(
-                            Pair(Icons.Default.Edit, "Edit Profile"),
-                            Pair(Icons.Default.Lock, "Change Password"),
-                            Pair(Icons.AutoMirrored.Filled.ExitToApp, "Logout"),
-                            Pair(Icons.Default.Delete, "Delete Account"),
-                        ),
-                    "Preferences" to
-                        listOf(
-                            Pair(Icons.Default.DarkMode, "Theme"),
-                            Pair(Icons.Default.Language, "Language"),
-                        ),
-                    "Notes" to
-                        listOf(
-                            Pair(Icons.AutoMirrored.Filled.Note, "My Notes"),
-                            Pair(Icons.Default.Category, "Manage Categories"),
-                            Pair(Icons.Default.Tag, "Manage Tags"),
-                            Pair(Icons.Default.UploadFile, "Export Notes"),
-                        ),
-                    "Security" to
-                        listOf(
-                            Pair(Icons.Default.Fingerprint, "Enable Biometrics"),
-                        ),
-                    "About" to
-                        listOf(
-                            Pair(Icons.Default.Info, "App Version: 1.0.0"),
-                            Pair(Icons.Default.SupportAgent, "Contact Support"),
-                        ),
-                )
-
-            sections.forEach { (sectionTitle, items) ->
+            sections.forEach { (sectionTitleResId, items) ->
                 item {
                     SectionHeader(
-                        sectionTitle,
+                        stringResource(id = sectionTitleResId),
                         modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
                     )
                 }
 
                 items(items) { item ->
+                    val label = if (item.second == R.string.app_version) {
+                        stringResource(id = item.second, "1.0.0")
+                    } else {
+                        stringResource(id = item.second)
+                    }
                     if (uiState.isLoading) {
                         ShimmerBox(
                             modifier =
@@ -316,29 +315,27 @@ fun ProfileScreenContent(
                     } else {
                         ProfileListItem(
                             icon = item.first,
-                            text = item.second,
+                            text = label,
                             onClick = {
                                 when (item.second) {
-                                    "Edit Profile" -> onEditProfile()
-                                    "Change Password" -> onChangePassword()
-                                    "Logout" -> onLogout()
-                                    "Delete Account" -> onDeleteAccount()
-                                    "My Notes" -> onNotesClicked()
-                                    "Theme" -> onThemeChange()
-                                    "Language" -> onLanguageChange()
-                                    "Manage Categories" -> onManageCategories()
-                                    "Manage Tags" -> {
-                                        Log.d("ProfileScreen", "onManageTags()")
-                                        onManageTags()
-                                    }
-                                    "Export Notes" -> onExportNotes()
-                                    "Enable Biometrics" -> onEnableBiometrics()
-                                    "Contact Support" -> onContactSupport()
+                                    R.string.edit_profile -> onEditProfile()
+                                    R.string.change_password -> onChangePassword()
+                                    R.string.logout -> onLogout()
+                                    R.string.delete_account -> onDeleteAccount()
+                                    R.string.my_notes -> onNotesClicked()
+                                    R.string.theme -> onThemeChange()
+                                    R.string.language -> onLanguageChange()
+                                    R.string.manage_categories -> onManageCategories()
+                                    R.string.manage_tags -> onManageTags()
+                                    R.string.export_notes -> onExportNotes()
+                                    R.string.enable_biometrics -> onEnableBiometrics()
+                                    R.string.contact_support -> onContactSupport()
+                                    R.string.app_version -> { /* no-op */ }
                                     else -> {}
                                 }
                             },
-                            isDanger = item.second == "Delete Account",
-                            isSwitch = item.second == "Enable Biometrics",
+                            isDanger = item.second == R.string.delete_account,
+                            isSwitch = item.second == R.string.enable_biometrics,
                             switchState = uiState.isBiometricEnabled,
                         )
                     }
@@ -384,7 +381,7 @@ fun ProfileListItem(
                 tint = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(
+            AppBody(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
                 color = textColor,

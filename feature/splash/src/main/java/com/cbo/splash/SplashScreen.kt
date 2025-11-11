@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.core.data.biometric.BiometricUtils
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun SplashScreen(
@@ -151,7 +152,7 @@ private fun SplashContent(isLoading: Boolean) {
 
             // App Name
             Text(
-                text = "MemCloud",
+                text = stringResource(id = com.cbo.splash.R.string.app_name),
                 style = MaterialTheme.typography.displayMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 36.sp,
@@ -165,7 +166,7 @@ private fun SplashContent(isLoading: Boolean) {
 
             // Tagline
             Text(
-                text = "Your memories in the cloud",
+                text = stringResource(id = com.cbo.splash.R.string.tagline),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontSize = 16.sp,
                     letterSpacing = 0.5.sp

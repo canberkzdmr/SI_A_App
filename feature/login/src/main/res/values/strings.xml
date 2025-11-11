@@ -1,0 +1,42 @@
+<resources>
+    <string name="registration_title">Registration</string>
+    <string name="create_account_title">Create an account</string>
+
+    <string name="username_label">Username</string>
+    <string name="username_placeholder">Username</string>
+
+    <string name="email_label">Email</string>
+    <string name="email_placeholder">Email</string>
+
+    <string name="password_label">Password</string>
+    <string name="password_placeholder">Password</string>
+
+    <string name="retype_password_label">Retype Password</string>
+    <string name="retype_password_placeholder">Retype Password</string>
+
+    <string name="hide_password_cd">hide password</string>
+    <string name="show_password_cd">show password</string>
+
+    <string name="register_cta">Register</string>
+
+    <string name="terms_prefix">I accept the</string>
+    <string name="terms_link_text"> terms and conditions </string>
+    <string name="privacy_suffix">as well as the privacy policy of application</string>
+
+    <string name="already_have_account_prefix">Already have an account? </string>
+    <string name="login_link_text">Login.</string>
+
+    <!-- Login Screen -->
+    <string name="welcome">Welcome!</string>
+    <string name="your_style_of_notes">Your style of notes!</string>
+    <string name="capture_thoughts">Capture your thoughts and any ideas.</string>
+    <string name="username_placeholder_login">Your username</string>
+    <string name="password_placeholder_login">Enter your password</string>
+    <string name="login_cta">Login</string>
+    <string name="dont_have_account">Don\'t have an account? Register here!</string>
+    <string name="enable_biometric_title">Enable Biometric Login?</string>
+    <string name="enable_biometric_message">You can log in faster next time using fingerprint or face.</string>
+    <string name="enable">Enable</string>
+    <string name="not_now">Not now</string>
+</resources>
+
