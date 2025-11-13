@@ -57,7 +57,7 @@ class ChangeLanguageViewModel @Inject constructor(
             user?.let {
                 getAllSupportedLanguages()
                     .catch { error ->
-                        Log.e("ChangeLanguageViewModel", "Error lodaing languages", error)
+                        Log.e("ChangeLanguageViewModel", "Error loading languages", error)
                         _uiState.update { it.copy(
                             isLoading = false,
                             errorMessage = "Failed to load languages"

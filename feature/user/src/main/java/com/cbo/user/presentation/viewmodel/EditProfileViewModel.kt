@@ -4,8 +4,9 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cbo.core.database.entity.UserDetailEntity
+import com.cbo.core.domain.model.Gender
 import com.cbo.core.domain.model.User
+import com.cbo.core.domain.model.UserDetail
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.SaveImageUseCase
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,27 +42,36 @@ constructor(
                 .collect { user: User? ->
                     user?.let { user ->
                         Log.d("EditProfileViewModel", "Retrieved User: ${user.username}(${user.id})")
-                        getUserWithDetailUseCase(user.id).fold(
-                            onSuccess = { userWithDetail ->
-                                _uiState.value = EditUserProfileUiState(
-                                    id = userWithDetail.userDetail?.id,
-                                    userId = userWithDetail.user.id,
-                                    username = userWithDetail.user.username,
-                                    email = userWithDetail.user.email,
-                                    fullName = userWithDetail.userDetail?.fullName.orEmpty(),
-                                    gender = userWithDetail.userDetail?.gender.orEmpty(),
-                                    dateOfBirth = userWithDetail.userDetail?.dateOfBirth.orEmpty(),
-                                    avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
-                                    bio = userWithDetail.userDetail?.bio.orEmpty(),
-                                    phoneNumber = userWithDetail.userDetail?.phoneNumber.orEmpty(),
-                                    address = userWithDetail.userDetail?.address.orEmpty(),
-                                    isLoading = false
-                                )
-                            },
-                            onFailure = {
-                                _uiState.value = _uiState.value.copy(isLoading = false, error = it.message)
+                        getUserWithDetailUseCase.invoke(user.id)
+                            .catch { error ->
+                                _uiState.value = _uiState.value.copy(isLoading = false, error = error.message)
                             }
-                        )
+                            .map { userWithDetail ->
+                                userWithDetail?.let {
+                                    Log.d("EditProfileViewModel", "dateOfBirth: ${userWithDetail.userDetail?.dateOfBirth}")
+                                    Log.d("EditProfileViewModel", "gender: ${userWithDetail.userDetail?.gender}")
+                                    EditUserProfileUiState(
+                                        id = userWithDetail.userDetail?.id,
+                                        userId = userWithDetail.user.id,
+                                        username = userWithDetail.user.username,
+                                        email = userWithDetail.user.email,
+                                        fullName = userWithDetail.userDetail?.fullName.orEmpty(),
+                                        gender = userWithDetail.userDetail?.gender,
+                                        dateOfBirth = userWithDetail.userDetail?.dateOfBirth,
+                                        avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
+                                        bio = userWithDetail.userDetail?.bio.orEmpty(),
+                                        phoneNumber = userWithDetail.userDetail?.phoneNumber.orEmpty(),
+                                        address = userWithDetail.userDetail?.address.orEmpty(),
+                                        isLoading = false
+                                    )
+                                } ?: run {
+                                    Log.e("EditProfileViewModel", "Error while retrieving user details. User detail is null")
+                                    EditUserProfileUiState(isLoading = false, error = "Could not get user details")
+                                }
+                            }
+                            .collect { detail ->
+                                _uiState.value = detail
+                            }
                     }
                 }
         }
@@ -128,12 +139,12 @@ constructor(
         )
     }
 
-    fun updateGender(gender: String) {
+    fun updateGender(gender: Gender?) {
         Log.d("EditProfileViewModel", "updateGender: $gender")
         _uiState.value = _uiState.value.copy(gender = gender)
     }
 
-    fun updateDateOfBirth(dob: String) {
+    fun updateDateOfBirth(dob: Long?) {
         Log.d("EditProfileViewModel", "update dob: $dob")
         _uiState.value = _uiState.value.copy(dateOfBirth = dob)
     }
@@ -141,7 +152,7 @@ constructor(
     fun save() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            val detail = UserDetailEntity(
+            val detail = UserDetail(
                 id = _uiState.value.id,
                 userId = _uiState.value.userId,
                 fullName = _uiState.value.fullName,
@@ -155,11 +166,12 @@ constructor(
             upsertUserDetailUseCase.invoke(detail).fold(
                 onSuccess = {
                     Log.i("EditProfileViewModel", "User details updated")
-                    _uiState.value = _uiState.value.copy(isLoading = false, isSaved = true)
+                    _uiState.update { it.copy(isLoading = false, isSaved = true) }
+                    Log.d("EditProfileViewModel", "uiState.isSaved: ${_uiState.value.isSaved}")
                 },
-                onFailure = {
-                    Log.e("EditProfileViewModel", "Failed to update user(id: ${_uiState.value.userId}) -> ${it.message}")
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = it.message)
+                onFailure = { error ->
+                    Log.e("EditProfileViewModel", "Failed to update user(id: ${_uiState.value.userId}) -> ${error.message}")
+                    _uiState.update { it.copy(isLoading = false, error = error.message) }
                 }
             )
         }
@@ -172,8 +184,8 @@ data class EditUserProfileUiState(
     val username: String = "",
     val email: String = "",
     val fullName: String = "",
-    val gender: String = "",
-    val dateOfBirth: String = "",
+    val gender: Gender? = null,
+    val dateOfBirth: Long? = null, // Epoch millis for DatePicker
     val avatarUrl: String = "",
     val bio: String = "",
     val phoneNumber: String = "",

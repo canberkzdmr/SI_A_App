@@ -1,11 +1,15 @@
 package com.cbo.user.data.repository
 
-import com.cbo.user.domain.repository.UserRepository
+import com.cbo.core.data.mapper.UserDetailEntityMapper
+import com.cbo.core.data.mapper.UserWithDetailEntityMapper
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.database.dao.UserDetailDao
-import com.cbo.core.database.entity.UserDetailEntity
 import com.cbo.core.database.entity.UserEntity
-import com.cbo.core.database.entity.UserWithDetail
+import com.cbo.core.domain.model.UserDetail
+import com.cbo.core.domain.model.UserWithDetail
+import com.cbo.user.domain.repository.UserRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.security.SecureRandom
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -16,23 +20,27 @@ import javax.inject.Inject
 class UserRepositoryImpl @Inject constructor(
     private val userDao: UserDao,
     private val userDetailDao: UserDetailDao,
+    private val userWithDetailMapper: UserWithDetailEntityMapper,
+    private val userDetailMapper: UserDetailEntityMapper,
 ) : UserRepository {
 
-    override suspend fun getUserWithDetail(userId: Int): Result<UserWithDetail> = runCatching {
-        userDao.getUserWithDetailById(userId)
-            ?: throw Exception("User not found")
+    override fun getUserWithDetail(userId: Int): Flow<UserWithDetail?> {
+        return userDao.getUserWithDetailById(userId).map { entity ->
+            entity?.let { userWithDetailMapper.toDomain(it) }
+        }
     }
 
     override suspend fun updateUser(user: UserEntity): Result<Unit> = runCatching {
         userDao.update(user)
     }
 
-    override suspend fun upsertUserDetail(detail: UserDetailEntity): Result<Unit> = runCatching {
+    override suspend fun upsertUserDetail(detail: UserDetail): Result<Unit> = runCatching {
         val existingDetail = userDetailDao.getUserDetailByUserId(detail.userId)
+        val entity = userDetailMapper.toEntity(detail)
         if (existingDetail == null) {
-            userDetailDao.insert(detail)
+            userDetailDao.insert(entity)
         } else {
-            userDetailDao.update(detail)
+            userDetailDao.update(entity)
         }
     }
 

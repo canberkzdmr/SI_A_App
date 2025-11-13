@@ -65,5 +65,10 @@
     <string name="about_languages">Dil Hakkında</string>
     <string name="language_help">Dil değişikliği uygulamanın tümünde geçerli olur. Değişikliği kaydettiğinizde seçtiğiniz dil korunacaktır.</string>
     <string name="language_options">Dil Seçenekleri</string>
+    <string name="account_information_section">Account Information</string>
+    <string name="personal_details_section">Kişisel Bilgiler</string>
+    <string name="contact_information_section">İletişim Bilgileri</string>
+    <string name="username">Kullanıcı Adı</string>
+    <string name="email">E-Posta</string>
 </resources>
 

@@ -1,13 +1,14 @@
 package com.cbo.user.domain.usecase
 
+import com.cbo.core.domain.model.UserWithDetail
 import com.cbo.user.domain.repository.UserRepository
-import com.cbo.core.database.entity.UserWithDetail
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetUserWithDetailUseCase @Inject constructor(
     private val repository: UserRepository
 ) {
-    suspend operator fun invoke(userId: Int): Result<UserWithDetail> {
+    operator fun invoke(userId: Int): Flow<UserWithDetail?> {
         return repository.getUserWithDetail(userId)
     }
 }

@@ -37,6 +37,11 @@
 
     <!-- Edit Profile -->
     <string name="edit_profile_title">Edit Profile</string>
+    <string name="account_information_section">Account Information</string>
+    <string name="personal_details_section">Personal Details</string>
+    <string name="contact_information_section">Contact Information</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
     <string name="full_name">Full Name</string>
     <string name="gender">Gender</string>
     <string name="date_of_birth">Date of birth</string>

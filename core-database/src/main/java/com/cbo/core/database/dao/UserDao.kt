@@ -41,7 +41,7 @@ interface UserDao: BaseDao<UserEntity> {
 
     @Transaction
     @Query("SELECT * FROM users WHERE id = :userId")
-    suspend fun getUserWithDetailById(userId: Int): UserWithDetail?
+    fun getUserWithDetailById(userId: Int): Flow<UserWithDetail?>
 
     @Transaction
     @Query("SELECT * FROM users")

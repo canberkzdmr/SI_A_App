@@ -1,5 +1,6 @@
 package com.cbo.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -8,17 +9,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -97,6 +106,7 @@ fun TertiaryButton(
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = null,
     textStyle: TextStyle = MaterialTheme.typography.labelMedium,
+    color: Color = MaterialTheme.colorScheme.primary,
     isInProgress: Boolean = false,
 ) {
     TextButton(
@@ -115,7 +125,7 @@ fun TertiaryButton(
                 leadingIcon()
                 Spacer(Modifier.width(8.dp))
             }
-            Text(text = text)
+            Text(text = text, color = color)
             if (trailingIcon != null) {
                 Spacer(Modifier.width(8.dp))
                 trailingIcon()
@@ -168,7 +178,7 @@ fun AppIconButton(
 
 
 
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun PrimaryButtonPreview() {
     MemCloudApplicationTheme {
@@ -184,6 +194,7 @@ fun PrimaryButtonPreview() {
             TertiaryButton("Tertiary Button", enabled = false, onClick = {})
             DestructiveButton("Destructive Button", onClick = {}, enabled = true)
             DestructiveButton("Destructive Button", onClick = {}, enabled = false)
+            AppIconButton(onClick = {}, icon = { Icon(Icons.Default.AddTask, contentDescription = null) })
         }
     }
 }

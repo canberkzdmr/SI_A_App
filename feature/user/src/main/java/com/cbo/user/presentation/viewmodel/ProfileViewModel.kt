@@ -3,8 +3,9 @@ package com.cbo.user.presentation.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.core.domain.model.User
+import com.cbo.core.domain.model.UserWithDetail
+import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.session.UserSession
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -55,20 +58,8 @@ class ProfileViewModel @Inject constructor(
                 .collect { user: User? ->
                     user?.let { user ->
                         Log.d("ProfileViewModel", "Retrieved User: ${user.username}(${user.id})")
-                        
-                        // Load user with details including avatar
-                        getUserWithDetailUseCase(user.id).fold(
-                            onSuccess = { userWithDetail ->
-                                _uiState.value = ProfileUiState(
-                                    userId = userWithDetail.user.id,
-                                    username = userWithDetail.user.username,
-                                    email = userWithDetail.user.email,
-                                    avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
-                                    isLoading = false,
-                                    isBiometricEnabled = userWithDetail.userSettingsEntity.isBiometricsEnabled
-                                )
-                            },
-                            onFailure = { error ->
+                        getUserWithDetailUseCase(user.id)
+                            .catch { error ->
                                 Log.e("ProfileViewModel", "Failed to load user details", error)
                                 _uiState.value = _uiState.value.copy(
                                     username = user.username,
@@ -77,7 +68,29 @@ class ProfileViewModel @Inject constructor(
                                     errorMessage = "Failed to load profile details"
                                 )
                             }
-                        )
+                            .map { userWithDetail ->
+                                userWithDetail?.let {
+                                    ProfileUiState(
+                                        userId = userWithDetail.user.id,
+                                        username = userWithDetail.user.username,
+                                        email = userWithDetail.user.email,
+                                        avatarUrl = userWithDetail.userDetail?.avatarUrl.orEmpty(),
+                                        isLoading = false,
+                                        isBiometricEnabled = userWithDetail.userSettings.isBiometricsEnabled
+                                    )
+                                } ?: run {
+                                    Log.e("ProfielViewModel", "Error while retrieving user details. User detail is null!")
+                                    ProfileUiState(
+                                        username = user.username,
+                                        email = user.email,
+                                        isLoading = false,
+                                        errorMessage = "Failed to load profile details"
+                                    )
+                                }
+                            }
+                            .collect { newState ->
+                                _uiState.value = newState
+                            }
                     } ?: run {
                         _uiState.value = _uiState.value.copy(isLoading = false)
                     }
