@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Close
@@ -114,6 +115,7 @@ fun DatePickerField(
         isError = error != null,
         readOnly = true,
         enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
         colors = OutlinedTextFieldDefaults.colors()
     )
 
@@ -240,6 +242,7 @@ fun DateRangePickerField(
         isError = error != null,
         readOnly = true,
         enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
         colors = OutlinedTextFieldDefaults.colors()
     )
 

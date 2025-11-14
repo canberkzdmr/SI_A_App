@@ -12,11 +12,13 @@ import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.SaveImageUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,6 +35,9 @@ constructor(
 
     private val _uiState = MutableStateFlow(EditUserProfileUiState(isLoading = true))
     val uiState: StateFlow<EditUserProfileUiState> = _uiState.asStateFlow()
+
+    private val _navigationEvents = Channel<NavigationEvent>()
+    val navigationEvents = _navigationEvents.receiveAsFlow()
 
     fun loadUser() {
         viewModelScope.launch {
@@ -165,8 +170,10 @@ constructor(
             )
             upsertUserDetailUseCase.invoke(detail).fold(
                 onSuccess = {
+                    Log.d("EditProfileViewModel", "uiState.isSaved: ${_uiState.value.isSaved}")
                     Log.i("EditProfileViewModel", "User details updated")
                     _uiState.update { it.copy(isLoading = false, isSaved = true) }
+                    _navigationEvents.trySend(NavigationEvent.SaveSuccess)
                     Log.d("EditProfileViewModel", "uiState.isSaved: ${_uiState.value.isSaved}")
                 },
                 onFailure = { error ->
@@ -195,3 +202,7 @@ data class EditUserProfileUiState(
     val error: String? = null,
     val isSaved: Boolean = false
 )
+
+sealed class NavigationEvent {
+    object SaveSuccess : NavigationEvent()
+}
