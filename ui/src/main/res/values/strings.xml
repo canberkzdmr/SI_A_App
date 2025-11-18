@@ -4,5 +4,7 @@
     <string name="nav_tags">Tags</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_create">Create</string>
+    <string name="phone_number">Enter Phone Number</string>
+    <string name="phone_number_error">Phone number must be 10 digits</string>
 </resources>
 

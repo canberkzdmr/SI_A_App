@@ -133,6 +133,7 @@ constructor(
     }
 
     fun updatePhoneNumber(phoneNumber: String) {
+        Log.d("EditProfileViewModel", "updatePhoneNumber: $phoneNumber")
         _uiState.value = _uiState.value.copy(
             phoneNumber = phoneNumber
         )

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -37,7 +38,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,6 +55,7 @@ import com.cbo.ui.components.AppIconButton
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.DatePickerField
+import com.cbo.ui.components.PhoneNumber
 import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import com.cbo.ui.components.SectionHeader
 import com.cbo.ui.components.SelectionButtonStyle
@@ -93,13 +98,6 @@ fun EditProfileScreen(
         onImageSelected = viewModel::onImageSelected,
         save = { viewModel.save() },
     )
-
-    /*if (uiState.isSaved) {
-        Log.d("EditProfileScreen", "uiState.isSaved set to TRUE")
-        onSaveSuccess()
-    } else {
-        Log.d("EditProfileScreen", "uiState.isSaved set to FALSE")
-    }*/
 
     // Show error
     uiState.error?.let { errorMsg ->
@@ -162,6 +160,10 @@ fun EditProfileScreenContent(
             )
         },
     ) { innerPadding ->
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val focusRequesterBio = remember { FocusRequester() }
+        val focusRequesterPhoneNumber = remember { FocusRequester() }
+        val focusRequesterAddress = remember { FocusRequester() }
 
         LazyColumn(
             modifier =
@@ -228,12 +230,43 @@ fun EditProfileScreenContent(
                         title = stringResource(R.string.personal_details_section).uppercase(),
                         modifier = Modifier.padding(bottom = 16.dp),
                     )
+                    val fullNameMaxLength = 50
                     AppOutlinedTextField(
                         value = uiState.fullName,
                         label = stringResource(R.string.full_name),
-                        onValueChange = updateFullName,
+                        onValueChange = { newText ->
+                            val filtered = newText
+                                .filter { it.isLetter() || it.isWhitespace() || it == '-' }
+                                .take(fullNameMaxLength)
+
+                            // Capitalize words without removing spaces
+                            val capitalized = buildString {
+                                var startOfWord = true
+                                for (c in filtered) {
+                                    append(
+                                        when {
+                                            c.isWhitespace() -> {
+                                                startOfWord = true
+                                                c
+                                            }
+                                            startOfWord -> {
+                                                startOfWord = false
+                                                c.uppercase()
+                                            }
+                                            else -> c.lowercase()
+                                        }
+                                    )
+                                }
+                            }
+
+                            updateFullName(capitalized)
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Words
+                        ),
                         singleLine = true,
                         maxLines = 1,
+                        maxLength = fullNameMaxLength,
                     )
 
                     AppBody(stringResource(R.string.gender))
@@ -262,9 +295,13 @@ fun EditProfileScreenContent(
 
                     AppOutlinedTextField(
                         value = uiState.bio,
-                        label = stringResource(R.string.bio),
+                        label = stringResource(R.string.bio) + "(${uiState.bio.length}/150)",
                         onValueChange = updateBio,
+                        singleLine = false,
                         maxLines = 3,
+                        maxLength = 150,
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                        keyboardActions = KeyboardActions(onNext = { focusRequesterPhoneNumber.requestFocus() }),
                     )
                 }
             }
@@ -281,17 +318,30 @@ fun EditProfileScreenContent(
                         modifier = Modifier.padding(bottom = 16.dp),
                     )
 
-                    AppOutlinedTextField(
-                        value = uiState.phoneNumber,
-                        label = stringResource(R.string.phone_number),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                        onValueChange = updatePhoneNumber,
+                    PhoneNumber(
+                        modifier = Modifier.focusRequester(focusRequesterPhoneNumber),
+                        phoneNumber = uiState.phoneNumber,
+                        onPhoneNumberChange = updatePhoneNumber,
+                        keyboardOptions =
+                            KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Next,
+                                keyboardType = KeyboardType.Phone,
+                            ),
+                        keyboardActions = KeyboardActions(onNext = { focusRequesterAddress.requestFocus() }),
                     )
 
                     AppOutlinedTextField(
+                        modifier = Modifier.focusRequester(focusRequesterAddress),
                         value = uiState.address,
                         label = stringResource(R.string.address),
                         onValueChange = updateAddress,
+                        keyboardOptions =
+                            KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Done,
+                                keyboardType = KeyboardType.Text,
+                            ),
+                        maxLength = 100,
+                        keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
                     )
                 }
             }

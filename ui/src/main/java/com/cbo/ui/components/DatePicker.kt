@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.cbo.core.common.util.DatePattern
 import com.cbo.core.common.util.DateUtil
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import java.util.Locale
 
 /**
  * Date picker field - Click to open date picker dialog
@@ -364,7 +365,8 @@ fun CompactDatePickerButton(
 }
 
 // Previews
-@Preview(name = "Date Picker Field", showBackground = true)
+@Preview(name = "Date Picker Field", showBackground = true, locale = "tr")
+@Preview(name = "Date Picker Field", showBackground = true, locale = "en")
 @Composable
 private fun DatePickerFieldPreview() {
     MemCloudApplicationTheme {
@@ -405,11 +407,19 @@ private fun DatePickerFieldPreview() {
                 label = "Disabled",
                 enabled = false
             )
+
+            CompactDatePickerButton(
+                selectedDate = selectedDate,
+                onDateSelected = { },
+                placeholder = "Date of Birth",
+                datePattern = DatePattern.READABLE,
+                modifier = Modifier.fillMaxWidth()
+                )
         }
     }
 }
 
-@Preview(name = "Date Range Picker", showBackground = true)
+@Preview(name = "Date Range Picker", locale = "tr", showBackground = true)
 @Composable
 private fun DateRangePickerFieldPreview() {
     MemCloudApplicationTheme {

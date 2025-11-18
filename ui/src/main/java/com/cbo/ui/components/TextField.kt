@@ -1,5 +1,6 @@
 package com.cbo.ui.components
 
+import android.health.connect.datatypes.units.Length
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,8 @@ fun AppOutlinedTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
+    minLength: Int = 0,
+    maxLength: Int = Int.MAX_VALUE,
     minLines: Int = 1,
     maxLines: Int = Int.MAX_VALUE,
     onClick: (() -> Unit)? = null,
@@ -63,7 +66,11 @@ fun AppOutlinedTextField(
 
     OutlinedTextField(
         value = value,
-        onValueChange = onValueChange,
+        onValueChange = {
+            if (it.length <= maxLength) {
+                onValueChange(it)
+            }
+        },
         modifier = clickableModifier,
         label = label?.let { { Text(it) } },
         placeholder = placeholder?.let { { Text(it) } },

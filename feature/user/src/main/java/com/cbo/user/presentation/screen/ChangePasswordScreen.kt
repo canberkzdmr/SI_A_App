@@ -110,33 +110,6 @@ fun ChangePasswordScreen(
                     title = stringResource(id = com.cbo.user.R.string.update_your_password),
                     content = stringResource(id = com.cbo.user.R.string.password_help)
                 )
-                /*AppCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    variant = CardVariant.TONAL
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(bottom = 8.dp),
-                        )
-                        AppTitle(
-                            text = "Update Your Password",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        AppBody(
-                            text ="Enter your current password and choose a new secure password",
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                    }
-                }*/
 
                 Spacer(modifier = Modifier.height(32.dp))
 
