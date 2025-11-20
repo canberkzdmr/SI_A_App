@@ -8,6 +8,8 @@ import com.cbo.core.domain.model.Gender
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.model.UserDetail
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
+import com.cbo.ui.snackbar.SnackbarManager
+import com.cbo.ui.snackbar.SnackbarMessage
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.SaveImageUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
@@ -171,15 +173,14 @@ constructor(
             )
             upsertUserDetailUseCase.invoke(detail).fold(
                 onSuccess = {
-                    Log.d("EditProfileViewModel", "uiState.isSaved: ${_uiState.value.isSaved}")
-                    Log.i("EditProfileViewModel", "User details updated")
                     _uiState.update { it.copy(isLoading = false, isSaved = true) }
+                    SnackbarManager.showMessage(SnackbarMessage.Success("User information updated"))
                     _navigationEvents.trySend(NavigationEvent.SaveSuccess)
-                    Log.d("EditProfileViewModel", "uiState.isSaved: ${_uiState.value.isSaved}")
                 },
                 onFailure = { error ->
                     Log.e("EditProfileViewModel", "Failed to update user(id: ${_uiState.value.userId}) -> ${error.message}")
                     _uiState.update { it.copy(isLoading = false, error = error.message) }
+                    SnackbarManager.showMessage(SnackbarMessage.Error("User information could not be updated"))
                 }
             )
         }

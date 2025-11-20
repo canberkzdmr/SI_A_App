@@ -72,6 +72,7 @@ fun DatePickerField(
     datePattern: String = DatePattern.SHORT_DATE,
     leadingIcon: ImageVector = Icons.Default.CalendarToday,
     showClearButton: Boolean = true,
+    yearRange: IntRange = IntRange(1900, 2010),
 ) {
     var showModal by remember { mutableStateOf(false) }
 
@@ -127,7 +128,8 @@ fun DatePickerField(
                 showModal = false
             },
             onDismiss = { showModal = false },
-            initialDate = selectedDate
+            initialDate = selectedDate,
+            yearRange = yearRange
         )
     }
 }
@@ -144,10 +146,12 @@ fun AppDatePickerModal(
     initialDate: Long? = null,
     confirmButtonText: String = "OK",
     dismissButtonText: String = "Cancel",
+    yearRange: IntRange = IntRange(1900, 2025),
     title: String = "Select Date",
 ) {
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = initialDate ?: System.currentTimeMillis()
+        initialSelectedDateMillis = initialDate,
+        yearRange = IntRange(1900, 2010)
     )
 
     DatePickerDialog(
@@ -173,7 +177,7 @@ fun AppDatePickerModal(
                     text = title,
                     modifier = Modifier.padding(start = 24.dp, top = 16.dp)
                 )
-            }
+            },
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.cbo.ui.components.cards
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -60,8 +61,20 @@ fun AppCard(
     val cardElevation = elevation ?: getCardElevation(variant)
     val padding = getCardPadding(size)
 
+    val finalModifier = modifier
+        .fillMaxWidth()
+        .then(
+            if (variant == CardVariant.OUTLINED) {
+                Modifier.border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = shape
+                )
+            } else Modifier
+        )
+
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = finalModifier,
         shape = shape,
         colors = cardColors,
         elevation = cardElevation,
@@ -73,6 +86,7 @@ fun AppCard(
         )
     }
 }
+
 
 /**
  * Horizontal card layout for side-by-side content
@@ -92,8 +106,20 @@ fun AppCardHorizontal(
     val cardElevation = elevation ?: getCardElevation(variant)
     val padding = getCardPadding(size)
 
+    val finalModifier = modifier
+        .fillMaxWidth()
+        .then(
+            if (variant == CardVariant.OUTLINED) {
+                Modifier.border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = shape
+                )
+            } else Modifier
+        )
+
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = finalModifier,
         shape = shape,
         colors = cardColors,
         elevation = cardElevation,
@@ -105,6 +131,7 @@ fun AppCardHorizontal(
         )
     }
 }
+
 
 /**
  * Get card colors based on variant
@@ -121,8 +148,8 @@ private fun getCardColors(variant: CardVariant): CardColors {
             contentColor = MaterialTheme.colorScheme.onSurface
         )
         CardVariant.OUTLINED -> CardDefaults.cardColors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurface
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         )
         CardVariant.FILLED -> CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,

@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -107,23 +108,10 @@ private fun CustomSnackbar(snackbarData: SnackbarData) {
 
     Snackbar(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(16.dp),
         containerColor = backgroundColor,
         contentColor = contentColor,
         shape = RoundedCornerShape(12.dp),
-        dismissAction = {
-            IconButton(
-                onClick = { snackbarData.dismiss() },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Dismiss",
-                    tint = contentColor,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -142,6 +130,68 @@ private fun CustomSnackbar(snackbarData: SnackbarData) {
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )
+            IconButton(
+                onClick = { snackbarData.dismiss() },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Dismiss",
+                    tint = contentColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
+
+@Composable
+private fun SnackbarPreviewTemplate(message: String) {
+    MaterialTheme {
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        LaunchedEffect(Unit) {
+            snackbarHostState.showSnackbar(message)
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Text(
+                text = "Snackbar Preview Content",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+            )
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data -> CustomSnackbar(data) },
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "SUCCESS Snackbar")
+@Composable
+fun SnackbarSuccessPreview() {
+    SnackbarPreviewTemplate("SUCCESS:Operation completed successfully")
+}
+
+@Preview(showBackground = true, name = "ERROR Snackbar")
+@Composable
+fun SnackbarErrorPreview() {
+    SnackbarPreviewTemplate("ERROR:Something went wrong")
+}
+
+@Preview(showBackground = true, name = "WARNING Snackbar")
+@Composable
+fun SnackbarWarningPreview() {
+    SnackbarPreviewTemplate("WARNING:Please check your input")
+}
+
+@Preview(showBackground = true, name = "INFO Snackbar")
+@Composable
+fun SnackbarInfoPreview() {
+    SnackbarPreviewTemplate("INFO:This is an informational message")
+}
+
