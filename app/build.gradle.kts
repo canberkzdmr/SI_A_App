@@ -22,7 +22,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -74,4 +74,5 @@ dependencies {
     // Navigation
     implementation(libs.navigation.compose)
 
+    implementation(libs.javapoet)
 }

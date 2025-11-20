@@ -1,9 +1,9 @@
 package com.cbo.core.session.di
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import com.cbo.core.session.data.datastore.SessionManager
 import com.cbo.core.session.data.repository.SessionRepositoryImpl
 import com.cbo.core.session.domain.repository.SessionRepository
@@ -16,6 +16,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("session")
+
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class SessionModule {
@@ -27,27 +29,16 @@ abstract class SessionModule {
     ): SessionRepository
 
     companion object {
-        
         @Provides
         @Singleton
-        fun provideEncryptedSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-
-            return EncryptedSharedPreferences.create(
-                context,
-                "secure_session_prefs",
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
+        fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+            return context.dataStore
         }
 
         @Provides
         @Singleton
-        fun provideSessionManager(sharedPreferences: SharedPreferences): SessionManager {
-            return SessionManager(sharedPreferences)
+        fun provideSessionManager(dataStore: DataStore<Preferences>): SessionManager {
+            return SessionManager(dataStore)
         }
 
         @Provides
