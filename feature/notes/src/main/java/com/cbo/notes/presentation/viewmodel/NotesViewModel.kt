@@ -24,14 +24,20 @@ import com.cbo.notes.domain.usecase.SetNotesViewModeUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.jetbrains.annotations.VisibleForTesting
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,87 +58,89 @@ class NotesViewModel @Inject constructor(
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(NotesUiState())
-    val uiState: StateFlow<NotesUiState> = _uiState.asStateFlow()
+    @VisibleForTesting
+    var defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 
-    init {
-        Log.d("NotesViewModel", "init")
-        loadData()
-    }
+    // Filter States
+    private val _searchQuery = MutableStateFlow("")
+    private val _selectedCategory = MutableStateFlow<Category?>(null)
+    private val _selectedTags = MutableStateFlow<List<Tag>>(emptyList())
+    private val _sortOrder = MutableStateFlow(SortOrder.UPDATED_DESC)
+    private val _viewMode = MutableStateFlow(ViewMode.LIST)
 
-    private fun loadData() {
-        viewModelScope.launch {
-            val currentUser = userSession.currentUser.first()
-            currentUser?.let { user ->
-                Log.d("NotesViewModel", "current user ${user.username}(${user.id})")
-                _uiState.update { it.copy(isLoading = true) }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<NotesUiState> = userSession.currentUser
+        .flatMapLatest { user ->
+            if (user == null) {
+                flowOf(NotesUiState(isLoading = false))
+            } else {
+                // Initialize view mode
+                _viewMode.value = getNotesViewModeUseCase().getOrNull() ?: ViewMode.LIST
+
+                val filtersFlow = combine(
+                    _searchQuery,
+                    _selectedCategory,
+                    _selectedTags,
+                    _sortOrder,
+                    _viewMode
+                ) { query, category, tags, sort, viewMode ->
+                    FilterState(query, category, tags, sort, viewMode)
+                }
 
                 combine(
                     getNotesUseCase(user.id),
                     getCategoriesUseCase(user.id),
                     getTagsUseCase(user.id),
-                ) { notes, categories, tags ->
-                    Triple(notes, categories, tags)
-                }.catch { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "Failed to load notes: ${throwable.message}"
-                        )
+                    filtersFlow
+                ) { notes, categories, tags, filters ->
+                    val filtered = withContext(defaultDispatcher) {
+                        filterNotes(notes, filters.query, filters.category, filters.tags, filters.sort)
                     }
-                }.collect { (notes, categories, tags) ->
-                    val viewMode = getNotesViewModeUseCase()
-                    Log.d("NotesViewModel", "Notes View Mode retrieved -> $viewMode")
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            isLoading = false,
-                            notes = notes,
-                            categories = categories,
-                            tags = tags,
-                            filteredNotes = filterNotes(notes, currentState.searchQuery, currentState.selectedCategory, currentState.selectedTags),
-                            viewMode = viewMode.getOrNull() ?: ViewMode.LIST
-                        )
-                    }
+                    NotesUiState(
+                        isLoading = false,
+                        notes = notes,
+                        filteredNotes = filtered,
+                        categories = categories,
+                        tags = tags,
+                        searchQuery = filters.query,
+                        selectedCategory = filters.category,
+                        selectedTags = filters.tags,
+                        sortOrder = filters.sort,
+                        viewMode = filters.viewMode
+                    )
                 }
             }
         }
-    }
+        .catch { e ->
+            emit(NotesUiState(errorMessage = e.message))
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = NotesUiState(isLoading = true)
+        )
 
     fun searchNotes(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-        val currentState = _uiState.value
-        val filteredNotes = filterNotes(currentState.notes, query, currentState.selectedCategory, currentState.selectedTags)
-        _uiState.update { it.copy(filteredNotes = filteredNotes) }
+        _searchQuery.value = query
     }
 
     fun filterByCategory(category: Category?) {
-        _uiState.update { it.copy(selectedCategory = category) }
-        val currentState = _uiState.value
-        val filteredNotes = filterNotes(currentState.notes, currentState.searchQuery, category, currentState.selectedTags)
-        _uiState.update { it.copy(filteredNotes = filteredNotes) }
+        _selectedCategory.value = category
     }
 
     fun filterByTags(tags: List<Tag>) {
-        _uiState.update { it.copy(selectedTags = tags) }
-        val currentState = _uiState.value
-        val filteredNotes = filterNotes(currentState.notes, currentState.searchQuery, currentState.selectedCategory, tags)
-        _uiState.update { it.copy(filteredNotes = filteredNotes) }
+        _selectedTags.value = tags
     }
 
     fun clearFilters() {
-        _uiState.update { 
-            it.copy(
-                searchQuery = "", 
-                selectedCategory = null, 
-                selectedTags = emptyList(),
-                filteredNotes = it.notes
-            ) 
-        }
+        _searchQuery.value = ""
+        _selectedCategory.value = null
+        _selectedTags.value = emptyList()
     }
 
     fun toggleNotePin(noteId: Int) {
         viewModelScope.launch {
-            val note = _uiState.value.notes.find { it.id == noteId } ?: return@launch
+            val note = uiState.value.notes.find { it.id == noteId } ?: return@launch
             toggleNotePinnedUseCase(noteId, !note.isPinned).fold(
                 onSuccess = {
                     snackbarManager.showMessage(
@@ -150,7 +158,7 @@ class NotesViewModel @Inject constructor(
 
     fun toggleNoteFavorite(noteId: Int) {
         viewModelScope.launch {
-            val note = _uiState.value.notes.find { it.id == noteId } ?: return@launch
+            val note = uiState.value.notes.find { it.id == noteId } ?: return@launch
             toggleNoteFavoriteUseCase(noteId, !note.isFavorite).fold(
                 onSuccess = {
                     snackbarManager.showMessage(
@@ -196,22 +204,20 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             Log.d("NotesViewModel", "ViewMode Changed to -> $viewMode")
             setNotesViewModeUseCase.invoke(viewMode)
-            _uiState.update { it.copy(viewMode = viewMode) }
+            _viewMode.value = viewMode
         }
     }
 
     fun changeSortOrder(sortOrder: SortOrder) {
-        _uiState.update { it.copy(sortOrder = sortOrder) }
-        val currentState = _uiState.value
-        val sortedNotes = sortNotes(currentState.filteredNotes, sortOrder)
-        _uiState.update { it.copy(filteredNotes = sortedNotes) }
+        _sortOrder.value = sortOrder
     }
 
     private fun filterNotes(
         notes: List<Note>,
         searchQuery: String,
         selectedCategory: Category?,
-        selectedTags: List<Tag>
+        selectedTags: List<Tag>,
+        sortOrder: SortOrder
     ): List<Note> {
         var filtered = notes
 
@@ -239,7 +245,7 @@ class NotesViewModel @Inject constructor(
             }
         }
 
-        return sortNotes(filtered, _uiState.value.sortOrder)
+        return sortNotes(filtered, sortOrder)
     }
 
     private fun sortNotes(notes: List<Note>, sortOrder: SortOrder): List<Note> {
@@ -252,6 +258,14 @@ class NotesViewModel @Inject constructor(
             SortOrder.TITLE_DESC -> notes.sortedWith(compareByDescending<Note> { it.isPinned }.thenByDescending { it.title })
         }
     }
+
+    private data class FilterState(
+        val query: String,
+        val category: Category?,
+        val tags: List<Tag>,
+        val sort: SortOrder,
+        val viewMode: ViewMode
+    )
 }
 
 data class NotesUiState(

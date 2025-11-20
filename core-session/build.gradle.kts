@@ -44,6 +44,7 @@ dependencies {
     // DataStore for session management
     implementation(libs.androidx.datastore.core)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.security.crypto)
     
     // Hilt for dependency injection
     implementation(libs.hilt.android)
