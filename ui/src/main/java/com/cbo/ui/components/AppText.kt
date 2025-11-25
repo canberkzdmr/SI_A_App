@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import kotlin.math.max
 
 @Composable
 fun AppHeadline(
@@ -39,15 +40,19 @@ fun AppTitle(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onBackground,
+    overflow: TextOverflow = TextOverflow.Clip,
+    maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign? = null,
     style: TextStyle = MaterialTheme.typography.titleLarge
 ) {
     Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        color = color,
         modifier = modifier,
-        textAlign = textAlign
+        text = text,
+        style = style,
+        color = color,
+        textAlign = textAlign,
+        overflow = overflow,
+        maxLines = maxLines,
     )
 }
 
@@ -58,17 +63,19 @@ fun AppTitleMedium(
     color: Color = MaterialTheme.colorScheme.onBackground,
     overflow: TextOverflow = TextOverflow.Clip,
     textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
     fontWeight: FontWeight? = null,
     style: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
     Text(
+        modifier = modifier,
         text = text,
         style = style,
         fontWeight = fontWeight,
         color = color,
         overflow = overflow,
         textAlign = textAlign,
-        modifier = modifier,
+        maxLines = maxLines,
     )
 }
 
@@ -118,11 +125,12 @@ fun AppCaption(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     textAlign: TextAlign? = null,
+    style: TextStyle = MaterialTheme.typography.labelSmall,
     maxLines: Int = Int.MAX_VALUE,
 ) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelSmall,
+        style = style,
         color = color,
         modifier = modifier,
         textAlign = textAlign,

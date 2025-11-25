@@ -9,6 +9,8 @@ import com.cbo.notes.data.mapper.TagEntityMapper
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -29,6 +31,11 @@ class NoteRepositoryImpl @Inject constructor(
         return noteDao.getArchivedNotesByUser(userId).map { entities ->
             entities.map { noteEntityMapper.toDomain(it) }
         }
+    }
+
+    override fun getDeletedNotesByUser(userId: Int): Flow<List<Note>> {
+        // TODO this flow will be update once deleted notes logic implemented
+        return flowOf(emptyList())
     }
 
     override fun getFavoriteNotesByUser(userId: Int): Flow<List<Note>> {

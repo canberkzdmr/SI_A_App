@@ -17,3 +17,4 @@ data class UserDetail(
     val gender: Gender?,
 )
 
+

@@ -41,14 +41,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
-import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,12 +63,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -83,9 +81,11 @@ import com.cbo.ui.components.AppAlertDialog
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppInfoDialog
 import com.cbo.ui.components.AppOutlinedTextField
+import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.AppTitleMedium
 import com.cbo.ui.components.ColorPicker
 import com.cbo.ui.components.RelativeTimeText
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import com.cbo.ui.components.StatChip
 import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.components.cards.HeaderCard
@@ -122,7 +122,6 @@ fun CategoriesScreen(
     )
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriesContent(
@@ -144,7 +143,7 @@ fun CategoriesContent(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(id = com.cbo.notes.R.string.manage_categories_title)) },
+                title = { AppTitle(stringResource(id = com.cbo.notes.R.string.manage_categories_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -157,7 +156,7 @@ fun CategoriesContent(
                     IconButton(onClick = onClickDialog) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = stringResource(id = com.cbo.notes.R.string.info)
+                            contentDescription = stringResource(id = com.cbo.notes.R.string.info),
                         )
                     }
                     IconButton(onClick = onCreateCategory) {
@@ -168,20 +167,20 @@ fun CategoriesContent(
                     }
                 },
             )
-        }
+        },
     ) { paddingValues ->
         when {
             uiState.isLoading -> {
                 AppLoadingScreen(
                     message = stringResource(id = com.cbo.notes.R.string.loading_categories),
-                    showProgress = true
+                    showProgress = true,
                 )
             }
-            
+
             uiState.errorMessage != null -> {
                 AppErrorState(
                     error = uiState.errorMessage ?: stringResource(id = com.cbo.notes.R.string.failed_to_load_categories),
-                    onRetry = { /* Retry loading categories */ }
+                    onRetry = { /* Retry loading categories */ },
                 )
             }
 
@@ -190,7 +189,7 @@ fun CategoriesContent(
                     title = stringResource(id = com.cbo.notes.R.string.no_categories_yet),
                     message = stringResource(id = com.cbo.notes.R.string.create_first_category),
                     actionText = stringResource(id = com.cbo.notes.R.string.create_category),
-                    onAction = onCreateCategory
+                    onAction = onCreateCategory,
                 )
             }
 
@@ -253,7 +252,6 @@ fun CategoriesContent(
     }
 }
 
-
 @Composable
 private fun EmptyCategoriesState(
     onCreateCategory: () -> Unit,
@@ -310,18 +308,19 @@ private fun EmptyCategoriesState(
 @Composable
 private fun SwipeBackgroundEdit(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(horizontal = 20.dp),
-        contentAlignment = Alignment.CenterStart
+        modifier =
+            modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(horizontal = 20.dp),
+        contentAlignment = Alignment.CenterStart,
     ) {
         Icon(
             imageVector = Icons.Default.Edit,
             contentDescription = "Edit",
             tint = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(28.dp),
         )
     }
 }
@@ -329,18 +328,19 @@ private fun SwipeBackgroundEdit(modifier: Modifier = Modifier) {
 @Composable
 private fun SwipeBackgroundDelete(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.error)
-            .padding(horizontal = 20.dp),
-        contentAlignment = Alignment.CenterEnd
+        modifier =
+            modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.error)
+                .padding(horizontal = 20.dp),
+        contentAlignment = Alignment.CenterEnd,
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
             contentDescription = "Delete",
             tint = MaterialTheme.colorScheme.onError,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(28.dp),
         )
     }
 }
@@ -361,22 +361,23 @@ fun CategoryItem(
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
 
-    val swipeToDismissBoxState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            when (value) {
-                SwipeToDismissBoxValue.StartToEnd -> {
-                    onEdit()
-                    false
+    val swipeToDismissBoxState =
+        rememberSwipeToDismissBoxState(
+            confirmValueChange = { value ->
+                when (value) {
+                    SwipeToDismissBoxValue.StartToEnd -> {
+                        onEdit()
+                        false
+                    }
+                    SwipeToDismissBoxValue.EndToStart -> {
+                        showDeleteDialog = true
+                        false
+                    }
+                    else -> false
                 }
-                SwipeToDismissBoxValue.EndToStart -> {
-                    showDeleteDialog = true
-                    false
-                }
-                else -> false
-            }
-        },
-        positionalThreshold = { totalDistance -> totalDistance * 0.5f }
-    )
+            },
+            positionalThreshold = { totalDistance -> totalDistance * 0.5f },
+        )
 
     // Haptic feedback on swipe completion fraction
     var hasTriggeredHaptic by remember { mutableStateOf(false) }
@@ -396,7 +397,7 @@ fun CategoryItem(
     val showHint = remember { mutableStateOf(isFirstItem) }
     val offsetX by animateDpAsState(
         targetValue = if (showHint.value) (-60).dp else 0.dp,
-        animationSpec = tween(durationMillis = 200, easing = LinearEasing, delayMillis = 100)
+        animationSpec = tween(durationMillis = 200, easing = LinearEasing, delayMillis = 100),
     )
     val hintBackgroundVisible = isFirstItem && (showHint.value || offsetX < 0.dp)
 
@@ -422,14 +423,15 @@ fun CategoryItem(
                 coroutineScope.launch {
                     swipeToDismissBoxState.snapTo(SwipeToDismissBoxValue.Settled)
                 }
-            }
+            },
         )
     }
 
     Box(
-        modifier = modifier
-            .padding(vertical = 4.dp)
-            .fillMaxWidth()
+        modifier =
+            modifier
+                .padding(vertical = 4.dp)
+                .fillMaxWidth(),
     ) {
         if (hintBackgroundVisible) {
             SwipeBackgroundDelete(Modifier.matchParentSize().clip(RoundedCornerShape(12.dp)))
@@ -445,112 +447,114 @@ fun CategoryItem(
                     else -> {}
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Card(
-            onClick = onOpen,
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(x = offsetX),
-            shape = RoundedCornerShape(12.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
+                onClick = onOpen,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .offset(x = offsetX),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Row(
-                    modifier = Modifier.weight(1f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // Color indicator
-                    val backgroundColor =
-                        category.color?.let { Color(it.toColorInt()) }
-                            ?: MaterialTheme.colorScheme.primaryContainer
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        // Color indicator
+                        val backgroundColor =
+                            category.color?.let { Color(it.toColorInt()) }
+                                ?: MaterialTheme.colorScheme.primaryContainer
 
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(backgroundColor, RoundedCornerShape(6.dp)),
-                    )
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        AppTitleMedium(
-                            text = category.name,
-                            fontWeight = FontWeight.SemiBold,
+                        Box(
+                            modifier =
+                                Modifier
+                                    .size(24.dp)
+                                    .background(backgroundColor, RoundedCornerShape(6.dp)),
                         )
 
-                        category.description?.takeIf { it.isNotBlank() }?.let { desc ->
-                            AppBody(
-                                text = desc,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        Column(modifier = Modifier.weight(1f)) {
+                            AppTitleMedium(
+                                text = category.name,
+                                fontWeight = FontWeight.SemiBold,
                             )
-                        }
 
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            StatChip(text = "${category.notesCount} notes")
-                            val lastUpdated = lastUpdatedMillis
-                            if (lastUpdated != null && lastUpdated > 0L) {
-                                StatChip(text = "updated ")
-                                RelativeTimeText(epochMillis = lastUpdated)
-                            } else {
-                                RelativeTimeText(epochMillis = category.createdAt)
+                            category.description?.takeIf { it.isNotBlank() }?.let { desc ->
+                                AppBody(
+                                    text = desc,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
-                        }
 
-                        if (previewTags.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                previewTags.forEach { tag ->
-                                    StatChip(text = "#${tag.name}")
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                StatChip(text = "${category.notesCount} notes")
+                                val lastUpdated = lastUpdatedMillis
+                                if (lastUpdated != null && lastUpdated > 0L) {
+                                    StatChip(text = "updated ")
+                                    RelativeTimeText(epochMillis = lastUpdated)
+                                } else {
+                                    RelativeTimeText(epochMillis = category.createdAt)
+                                }
+                            }
+
+                            if (previewTags.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    previewTags.forEach { tag ->
+                                        StatChip(text = "#${tag.name}")
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                var expanded by remember { mutableStateOf(false) }
-                Box {
-                    IconButton(onClick = { expanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More actions"
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = {
-                                expanded = false
-                                onEdit()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete") },
-                            onClick = {
-                                expanded = false
-                                onDelete()
-                            }
-                        )
+                    var expanded by remember { mutableStateOf(false) }
+                    Box {
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More actions",
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Edit") },
+                                onClick = {
+                                    expanded = false
+                                    onEdit()
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    expanded = false
+                                    onDelete()
+                                },
+                            )
+                        }
                     }
                 }
-            }
             }
         }
     }
 }
-
 
 @Composable
 private fun CategoryDialog(
@@ -581,9 +585,10 @@ private fun CategoryDialog(
                     placeholder = "Enter category name...",
                     modifier = Modifier.fillMaxWidth(),
                     isValid = name.length <= FieldValidationRules.MAX_CATEGORY_NAME_LENGTH,
-                    validationErrorMessage = validationErrorMessage,//"Category name must be less than ${FieldValidationRules.MAX_CATEGORY_NAME_LENGTH} characters",
+                    validationErrorMessage = validationErrorMessage, // "Category name must be less than ${FieldValidationRules.MAX_CATEGORY_NAME_LENGTH} characters",
                     singleLine = true,
-                    isError = name.isBlank() || name.length > FieldValidationRules.MAX_CATEGORY_NAME_LENGTH || validationErrorMessage.isNotEmpty(),
+                    isError =
+                        name.isBlank() || name.length > FieldValidationRules.MAX_CATEGORY_NAME_LENGTH || validationErrorMessage.isNotEmpty(),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(onNext = { descriptionFocusRequester.requestFocus() }),
                 )
@@ -611,7 +616,7 @@ private fun CategoryDialog(
                 // Color selection
                 ColorPicker(
                     selectedColor = color,
-                    onColorChange = onColorChange
+                    onColorChange = onColorChange,
                 )
             }
         },
@@ -641,11 +646,12 @@ private fun CategoryDialog(
 @Preview(showBackground = true)
 @Composable
 fun CategoriesContentPreview_WithData() {
-    MemCloudApplicationTheme{
+    MemCloudApplicationTheme {
         CategoriesContent(
-            uiState = CategoriesUiState(
-                categories = sampleCategoriesForPreview()
-            ),
+            uiState =
+                CategoriesUiState(
+                    categories = sampleCategoriesForPreview(),
+                ),
             onNavigateBack = {},
             onClickDialog = {},
             onCreateCategory = {},
@@ -666,11 +672,12 @@ fun CategoriesContentPreview_WithData() {
 fun CategoriesContentPreview_Empty() {
     MemCloudApplicationTheme {
         CategoriesContent(
-            uiState = CategoriesUiState(
-                isLoading = false,
-                categories = emptyList(),
-                showCreateDialog = false,
-            ),
+            uiState =
+                CategoriesUiState(
+                    isLoading = false,
+                    categories = emptyList(),
+                    showCreateDialog = false,
+                ),
             onNavigateBack = {},
             onClickDialog = {},
             onCreateCategory = {},
@@ -706,7 +713,6 @@ fun CategoriesContentPreview_Loading() {
         )
     }
 }
-
 
 // Sample data for previews
 private fun sampleCategoriesForPreview(): List<Category> =

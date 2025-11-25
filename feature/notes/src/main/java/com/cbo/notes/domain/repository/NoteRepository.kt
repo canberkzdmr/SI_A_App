@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface NoteRepository {
     fun getNotesByUser(userId: Int): Flow<List<Note>>
     fun getArchivedNotesByUser(userId: Int): Flow<List<Note>>
+    fun getDeletedNotesByUser(userId: Int): Flow<List<Note>>
     fun getFavoriteNotesByUser(userId: Int): Flow<List<Note>>
     fun getNotesByCategory(userId: Int, categoryId: Int): Flow<List<Note>>
     suspend fun getNoteById(noteId: Int): Note?

@@ -11,6 +11,7 @@ import com.cbo.login.presentation.navigation.loginNavGraph
 import com.cbo.memcloud.presentation.screen.MainScreen
 import com.cbo.notes.presentation.navigation.navigateToCategories
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
+import com.cbo.notes.presentation.navigation.navigateToDeletedArchived
 import com.cbo.notes.presentation.navigation.navigateToNotes
 import com.cbo.notes.presentation.navigation.navigateToEditNote
 import com.cbo.notes.presentation.navigation.navigateToTags
@@ -155,6 +156,9 @@ fun MainNavHost(
                 },
                 onNavigateToEditNote = { noteId ->
                     navController.navigateToEditNote(noteId)
+                },
+                onNavigateToDeletedArchived = { tabId ->
+                    navController.navigateToDeletedArchived(tabId)
                 }
             )
         }
@@ -180,6 +184,9 @@ fun MainNavHost(
             },
             onOpenNotesForCategory = { categoryId ->
                 navController.navigateToNotes(categoryId)
+            },
+            onNavigateToDeletedArchived = { tabId ->
+                navController.navigateToDeletedArchived(tabId)
             }
         )
     }

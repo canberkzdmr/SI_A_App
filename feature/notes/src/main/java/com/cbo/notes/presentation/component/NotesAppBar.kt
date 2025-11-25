@@ -22,6 +22,8 @@ fun NotesAppBar(
     onSearchQueryChange: (String) -> Unit,
     onClearSearch: () -> Unit,
     onCategoriesClick: () -> Unit,
+    onArchiveClick: () -> Unit,
+    onTrashClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -84,12 +86,25 @@ fun NotesAppBar(
                     DropdownMenuItem(
                         text = { Text(stringResource(id = com.cbo.notes.R.string.archive)) },
                         onClick = {
-                            // Handle archive navigation
+                            onArchiveClick()
                             showMenu = false
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Archive,
+                                contentDescription = null
+                            )
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = com.cbo.notes.R.string.trash)) },
+                        onClick = {
+                            onTrashClick()
+                            showMenu = false
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.RestoreFromTrash,
                                 contentDescription = null
                             )
                         }
@@ -135,7 +150,9 @@ fun PreviewNotesAppBar() {
             onSearchQueryChange = {},
             onClearSearch = {},
             onCategoriesClick = {},
-            onSettingsClick = {}
+            onSettingsClick = {},
+            onArchiveClick = {},
+            onTrashClick = {}
         )
     }
 }

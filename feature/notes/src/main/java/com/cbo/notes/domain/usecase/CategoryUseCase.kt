@@ -2,16 +2,24 @@ package com.cbo.notes.domain.usecase
 
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
+import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.repository.CategoryRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GetCategoriesUseCase @Inject constructor(
-    private val categoryRepository: CategoryRepository
+    private val categoryRepository: CategoryRepository,
+    private val userSession: UserSession
 ) {
-    operator fun invoke(userId: Int): Flow<List<Category>> {
-        return categoryRepository.getCategoriesByUser(userId)
+    operator fun invoke(): Flow<List<Category>> {
+        return userSession.currentUser.flatMapLatest { user ->
+            user?.let { categoryRepository.getCategoriesByUser(it.id) } ?: flowOf(emptyList())
+        }
     }
 }
 

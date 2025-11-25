@@ -55,47 +55,44 @@ class EditNoteViewModel @Inject constructor(
 
     private fun loadData() {
         viewModelScope.launch {
-            val currentUser = userSession.currentUser.first()
-            currentUser?.let { user ->
-                _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true) }
 
-                try {
-                    val categories = getCategoriesUseCase(user.id).first()
-                    val tags = getTagsUseCase(user.id).first()
+            try {
+                val categories = getCategoriesUseCase().first()
+                val tags = getTagsUseCase().first()
 
-                    if (isEditing) {
-                        val note = getNoteByIdUseCase(noteId)
-                        if (note != null) {
-                            _uiState.update { currentState ->
-                                currentState.copy(
-                                    isLoading = false,
-                                    title = note.title,
-                                    content = note.content,
-                                    selectedCategory = note.category,
-                                    selectedTags = note.tags,
-                                    availableCategories = categories,
-                                    availableTags = tags,
-                                    originalNote = note
-                                )
-                            }
-                        } else {
-                            _uiState.update { 
-                                it.copy(isLoading = false, errorMessage = "Note not found")
-                            }
-                        }
-                    } else {
+                if (isEditing) {
+                    val note = getNoteByIdUseCase(noteId)
+                    if (note != null) {
                         _uiState.update { currentState ->
                             currentState.copy(
                                 isLoading = false,
+                                title = note.title,
+                                content = note.content,
+                                selectedCategory = note.category,
+                                selectedTags = note.tags,
                                 availableCategories = categories,
-                                availableTags = tags
+                                availableTags = tags,
+                                originalNote = note
                             )
                         }
+                    } else {
+                        _uiState.update { 
+                            it.copy(isLoading = false, errorMessage = "Note not found")
+                        }
                     }
-                } catch (e: Exception) {
-                    _uiState.update { 
-                        it.copy(isLoading = false, errorMessage = "Failed to load data: ${e.message}")
+                } else {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            availableCategories = categories,
+                            availableTags = tags
+                        )
                     }
+                }
+            } catch (e: Exception) {
+                _uiState.update { 
+                    it.copy(isLoading = false, errorMessage = "Failed to load data: ${e.message}")
                 }
             }
         }

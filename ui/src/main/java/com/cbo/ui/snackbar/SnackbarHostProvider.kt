@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -30,14 +31,18 @@ fun SnackbarHostProvider(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // Collect snackbar messages from SnackbarManager
     LaunchedEffect(Unit) {
         SnackbarManager.messages.collect { message ->
             scope.launch {
+                // Resolve string resource if textRes is provided, otherwise use text
+                val messageText = message.textRes?.let { context.getString(it) } ?: message.text ?: ""
+
                 snackbarHostState.currentSnackbarData?.dismiss()
                 snackbarHostState.showSnackbar(
-                    message = "${message.type.name}:${message.text}",
+                    message = "${message.type.name}:$messageText",
                     withDismissAction = true,
                     duration = message.duration
                 )

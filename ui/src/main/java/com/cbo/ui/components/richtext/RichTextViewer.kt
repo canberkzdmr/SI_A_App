@@ -1,6 +1,7 @@
 package com.cbo.ui.components.richtext
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -26,6 +27,7 @@ fun RichTextViewer(
         state = state,
         overflow = overflow,
         maxLines = maxLines,
+        style = MaterialTheme.typography.bodyMedium,
         modifier = modifier.fillMaxWidth(),
     )
 }

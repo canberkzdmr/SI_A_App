@@ -102,6 +102,26 @@ object DateUtil {
         val formatter = DateTimeFormatter.ofPattern(DatePattern.ISO_8601)
         return LocalDateTime.now().format(formatter)
     }
+
+    /**
+     * Formats a timestamp as relative time (e.g., "Just now", "5m ago", "3 days ago")
+     * or as a short date if older than a week.
+     * 
+     * @param timestamp The timestamp in milliseconds to format
+     * @return A human-readable relative time string
+     */
+    fun formatRelativeTime(timestamp: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - timestamp
+
+        return when {
+            diff < 60000 -> "Just now" // Less than 1 minute
+            diff < 3600000 -> "${diff / 60000}m ago" // Less than 1 hour
+            diff < 86400000 -> "${diff / 3600000}h ago" // Less than 1 day
+            diff < 604800000 -> "${diff / 86400000}d ago" // Less than 1 week
+            else -> SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(timestamp))
+        }
+    }
 }
 
 /**

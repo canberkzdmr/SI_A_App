@@ -42,28 +42,25 @@ class TagsViewModel
 
         private fun loadData() {
             viewModelScope.launch {
-                val currentUser = userSession.currentUser.first()
-                currentUser?.let { user ->
-                    _uiState.update { it.copy(isLoading = true) }
+                _uiState.update { it.copy(isLoading = true) }
 
-                    getTagsUseCase(user.id)
-                        .catch { throwable ->
-                            SnackbarManager.showMessage(SnackbarMessage.Error("Failed to load tags"))
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    errorMessage = "Failed to load tags: ${throwable.message}",
-                                )
-                            }
-                        }.collect { tags ->
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    tags = tags.sortedByDescending { tag -> tag.createdAt },
-                                )
-                            }
+                getTagsUseCase()
+                    .catch { throwable ->
+                        SnackbarManager.showMessage(SnackbarMessage.Error("Failed to load tags"))
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = "Failed to load tags: ${throwable.message}",
+                            )
                         }
-                }
+                    }.collect { tags ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                tags = tags.sortedByDescending { tag -> tag.createdAt },
+                            )
+                        }
+                    }
             }
         }
 

@@ -40,6 +40,7 @@ fun MainScreen(
     onDeleteAccount: () -> Unit,
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
+    onNavigateToDeletedArchived: (tabId: Int) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -73,6 +74,7 @@ fun MainScreen(
                     onNavigateToCategories = {
                         navController.navigate(BottomNavDestination.Categories.route)
                     },
+                    onNavigateToDeletedArchived = onNavigateToDeletedArchived,
                     onNavigateToSettings = {
                         navController.navigate(BottomNavDestination.Profile.route)
                     },

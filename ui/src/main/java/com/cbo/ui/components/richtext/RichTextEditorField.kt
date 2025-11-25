@@ -112,8 +112,8 @@ fun RichTextEditorField(
                 }
                 BasicRichTextEditor(
                     state = richTextState,
-                    modifier = Modifier.fillMaxSize(),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    modifier = Modifier.padding(horizontal = 4.dp).fillMaxSize(),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)

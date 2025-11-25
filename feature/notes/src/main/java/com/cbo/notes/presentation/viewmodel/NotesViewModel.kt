@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.ViewMode
+import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
@@ -18,7 +19,6 @@ import com.cbo.notes.domain.usecase.SearchNotesUseCase
 import com.cbo.notes.domain.usecase.ToggleNoteFavoriteUseCase
 import com.cbo.notes.domain.usecase.ToggleNotePinnedUseCase
 import com.cbo.notes.presentation.SortOrder
-import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.usecase.GetNotesViewModeUseCase
 import com.cbo.notes.domain.usecase.SetNotesViewModeUseCase
 import com.cbo.ui.snackbar.SnackbarManager
@@ -36,7 +36,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NotesViewModel @Inject constructor(
-    private val userSession: UserSession,
     private val getNotesUseCase: GetNotesUseCase,
     private val getFavoriteNotesUseCase: GetFavoriteNotesUseCase,
     private val getArchivedNotesUseCase: GetArchivedNotesUseCase,
@@ -62,37 +61,33 @@ class NotesViewModel @Inject constructor(
 
     private fun loadData() {
         viewModelScope.launch {
-            val currentUser = userSession.currentUser.first()
-            currentUser?.let { user ->
-                Log.d("NotesViewModel", "current user ${user.username}(${user.id})")
-                _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true) }
 
-                combine(
-                    getNotesUseCase(user.id),
-                    getCategoriesUseCase(user.id),
-                    getTagsUseCase(user.id),
-                ) { notes, categories, tags ->
-                    Triple(notes, categories, tags)
-                }.catch { throwable ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "Failed to load notes: ${throwable.message}"
-                        )
-                    }
-                }.collect { (notes, categories, tags) ->
-                    val viewMode = getNotesViewModeUseCase()
-                    Log.d("NotesViewModel", "Notes View Mode retrieved -> $viewMode")
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            isLoading = false,
-                            notes = notes,
-                            categories = categories,
-                            tags = tags,
-                            filteredNotes = filterNotes(notes, currentState.searchQuery, currentState.selectedCategory, currentState.selectedTags),
-                            viewMode = viewMode.getOrNull() ?: ViewMode.LIST
-                        )
-                    }
+            combine(
+                getNotesUseCase(),
+                getCategoriesUseCase(),
+                getTagsUseCase(),
+            ) { notes, categories, tags ->
+                Triple(notes, categories, tags)
+            }.catch { throwable ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Failed to load notes: ${throwable.message}"
+                    )
+                }
+            }.collect { (notes, categories, tags) ->
+                val viewMode = getNotesViewModeUseCase()
+                Log.d("NotesViewModel", "Notes View Mode retrieved -> $viewMode")
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isLoading = false,
+                        notes = notes,
+                        categories = categories,
+                        tags = tags,
+                        filteredNotes = filterNotes(notes, currentState.searchQuery, currentState.selectedCategory, currentState.selectedTags),
+                        viewMode = viewMode.getOrNull() ?: ViewMode.LIST
+                    )
                 }
             }
         }
@@ -136,12 +131,14 @@ class NotesViewModel @Inject constructor(
             toggleNotePinnedUseCase(noteId, !note.isPinned).fold(
                 onSuccess = {
                     snackbarManager.showMessage(
-                        SnackbarMessage.Success(if (!note.isPinned) "Note pinned" else "Note unpinned")
+                        SnackbarMessage.Success(
+                            messageRes = if (!note.isPinned) R.string.note_pinned else R.string.note_unpinned
+                        )
                     )
                 },
                 onFailure = {
                     snackbarManager.showMessage(
-                        SnackbarMessage.Error("Failed to update note")
+                        SnackbarMessage.Error(messageRes = R.string.failed_to_update_note)
                     )
                 }
             )
@@ -154,12 +151,14 @@ class NotesViewModel @Inject constructor(
             toggleNoteFavoriteUseCase(noteId, !note.isFavorite).fold(
                 onSuccess = {
                     snackbarManager.showMessage(
-                        SnackbarMessage.Success(if (!note.isFavorite) "Added to favorites" else "Removed from favorites")
+                        SnackbarMessage.Success(
+                            messageRes = if (!note.isFavorite) R.string.added_to_favorites else R.string.removed_from_favorites
+                        )
                     )
                 },
                 onFailure = {
                     snackbarManager.showMessage(
-                        SnackbarMessage.Error("Failed to update note")
+                        SnackbarMessage.Error(messageRes = R.string.failed_to_update_note)
                     )
                 }
             )
@@ -170,10 +169,14 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             archiveNoteUseCase(noteId, true).fold(
                 onSuccess = {
-                    snackbarManager.showMessage(SnackbarMessage.Success("Note archived"))
+                    snackbarManager.showMessage(
+                        SnackbarMessage.Success(messageRes = R.string.note_archived)
+                    )
                 },
                 onFailure = {
-                    snackbarManager.showMessage(SnackbarMessage.Error("Failed to archive note"))
+                    snackbarManager.showMessage(
+                        SnackbarMessage.Error(messageRes = R.string.failed_to_archive_note)
+                    )
                 }
             )
         }
@@ -183,10 +186,14 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             deleteNoteUseCase(noteId).fold(
                 onSuccess = {
-                    snackbarManager.showMessage(SnackbarMessage.Success("Note deleted"))
+                    snackbarManager.showMessage(
+                        SnackbarMessage.Success(messageRes = R.string.note_deleted)
+                    )
                 },
                 onFailure = {
-                    snackbarManager.showMessage(SnackbarMessage.Error("Failed to delete note"))
+                    snackbarManager.showMessage(
+                        SnackbarMessage.Error(messageRes = R.string.failed_to_delete_note)
+                    )
                 }
             )
         }

@@ -11,3 +11,4 @@ data class UserWithDetail(
     val userSettings: UserSettings,
 )
 
+

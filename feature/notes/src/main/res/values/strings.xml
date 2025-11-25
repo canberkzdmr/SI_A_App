@@ -10,6 +10,10 @@
     <string name="create_note">Create Note</string>
     <string name="clear_search">Clear Search</string>
     <string name="unexpected_error">An unexpected error occurred</string>
+    <string name="delete_note_title">Deleting Your Note</string>
+    <string name="delete_note_message">Once deleted, your note will be stored in the trash for 7 days. You can restore your note from the trash during this period.\n\nAfter 7 days, the note will be permanently deleted from the trash and cannot be recovered.\n\nDo you confirm the deletion?</string>
+    <string name="created_at">Created:</string>
+    <string name="updated_at">Updated:</string>
     
     <!-- Notes App Bar -->
     <string name="manage_categories">Manage Categories</string>
@@ -70,7 +74,7 @@
     <string name="create_custom_tag">Create custom tag</string>
     <string name="no_tags_yet_message">No tags yet. Type in the field above to create your first tag!</string>
     <string name="selected_count">%1$d selected</string>
-    
+
     <!-- Categories Screen -->
     <string name="manage_categories_title">Manage Categories</string>
     <string name="info">Info</string>
@@ -113,5 +117,37 @@
     <string name="search_categories">Search categories…</string>
     <string name="search_tags">Search tags…</string>
     <string name="apply">Apply</string>
+
+    <!-- Deleted Archived Notes Screen -->
+    <string name="deleted">Deleted</string>
+    <string name="archived">Archived</string>
+    <string name="restore">Restore</string>
+    <string name="restore_note">Restore note</string>
+    <string name="no_deleted_notes_title">No deleted notes</string>
+    <string name="no_deleted_notes_message">Notes you delete will appear here for 7 days before being permanently removed.</string>
+    <string name="no_archived_notes_title">No archived notes</string>
+    <string name="no_archived_notes_message">Archive notes you want to keep but don\'t need in your main list.</string>
+    <string name="deleted_notes_header_title">Trash</string>
+    <string name="deleted_notes_header_message">Notes here will be permanently deleted after 7 days. Restore them anytime before that.</string>
+    <string name="archived_notes_header_title">Archive</string>
+    <string name="archived_notes_header_message">Archived notes are stored here. Restore them to your main notes list whenever needed.</string>
+    <string name="trash">Trash</string>
+    
+    <!-- Snackbar Messages -->
+    <string name="note_pinned">Note pinned</string>
+    <string name="note_unpinned">Note unpinned</string>
+    <string name="added_to_favorites">Added to favorites</string>
+    <string name="removed_from_favorites">Removed from favorites</string>
+    <string name="note_archived">Note archived</string>
+    <string name="note_deleted">Note deleted</string>
+    <string name="failed_to_update_note">Failed to update note</string>
+    <string name="failed_to_archive_note">Failed to archive note</string>
+    <string name="failed_to_delete_note">Failed to delete note</string>
+    <string name="note_restored">Note restored successfully</string>
+    <string name="failed_to_restore_note">Failed to restore note</string>
+    <string name="note_permanently_deleted">Note permanently deleted</string>
+    <string name="failed_to_permanently_delete_note">Failed to permanently delete note</string>
+    <string name="notes_restored">%1$d notes restored</string>
+    <string name="notes_permanently_deleted">%1$d notes permanently deleted</string>
 </resources>
 

@@ -43,14 +43,12 @@ class CategoriesViewModel @Inject constructor(
 
     private fun loadCategories() {
         viewModelScope.launch {
-            val currentUser = userSession.currentUser.first()
-            currentUser?.let { user ->
-                _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isLoading = true) }
 
-                combine(
-                    getCategoriesUseCase(user.id),
-                    getNotesUseCase(user.id)
-                ) { categories, notes ->
+            combine(
+                getCategoriesUseCase(),
+                getNotesUseCase()
+            ) { categories, notes ->
                     val lastUpdated = notes
                         .filter { it.category != null }
                         .groupBy { it.category!!.id }
@@ -71,25 +69,24 @@ class CategoriesViewModel @Inject constructor(
                                 .take(3)
                         }
 
-                    Triple(categories, lastUpdated, topTags)
+                Triple(categories, lastUpdated, topTags)
+            }
+            .catch { throwable ->
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false, 
+                        errorMessage = "Failed to load categories: ${throwable.message}"
+                    ) 
                 }
-                .catch { throwable ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false, 
-                            errorMessage = "Failed to load categories: ${throwable.message}"
-                        ) 
-                    }
-                }
-                .collect { (categories, lastUpdated, topTags) ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false,
-                            categories = categories,
-                            lastUpdatedByCategory = lastUpdated,
-                            topTagsByCategory = topTags
-                        ) 
-                    }
+            }
+            .collect { (categories, lastUpdated, topTags) ->
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        categories = categories,
+                        lastUpdatedByCategory = lastUpdated,
+                        topTagsByCategory = topTags
+                    ) 
                 }
             }
         }
@@ -240,7 +237,7 @@ data class CategoriesUiState(
     val isCreating: Boolean = false,
     val categories: List<Category> = emptyList(),
     val lastUpdatedByCategory: Map<Int, Long> = emptyMap(),
-    val topTagsByCategory: Map<Int, List<com.cbo.notes.domain.model.Tag>> = emptyMap(),
+    val topTagsByCategory: Map<Int, List<Tag>> = emptyMap(),
     val showInfoDialog: Boolean = false,
     val showCreateDialog: Boolean = false,
     val editingCategory: Category? = null,

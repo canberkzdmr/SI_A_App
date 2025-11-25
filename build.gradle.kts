@@ -7,11 +7,3 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.ksp) apply false
 }
-
-subprojects {
-    configurations.all {
-        resolutionStrategy {
-            force("com.squareup:javapoet:1.13.0")
-        }
-    }
-}

@@ -1,23 +1,35 @@
 package com.cbo.notes.domain.usecase
 
+import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.repository.TagRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class GetTagsUseCase @Inject constructor(
-    private val tagRepository: TagRepository
+    private val tagRepository: TagRepository,
+    private val userSession: UserSession
 ) {
-    operator fun invoke(userId: Int): Flow<List<Tag>> {
-        return tagRepository.getTagsByUser(userId)
+    operator fun invoke(): Flow<List<Tag>> {
+        return userSession.currentUser.flatMapLatest { user ->
+            user?.let { tagRepository.getTagsByUser(it.id) } ?: flowOf(emptyList())
+        }
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SearchTagsUseCase @Inject constructor(
-    private val tagRepository: TagRepository
+    private val tagRepository: TagRepository,
+    private val userSession: UserSession
 ) {
-    operator fun invoke(userId: Int, query: String): Flow<List<Tag>> {
-        return tagRepository.searchTags(userId, query)
+    operator fun invoke(query: String): Flow<List<Tag>> {
+        return userSession.currentUser.flatMapLatest { user ->
+            user?.let { tagRepository.searchTags(it.id, query) } ?: flowOf(emptyList())
+        }
     }
 }
 

@@ -10,7 +10,11 @@
     <string name="create_note">Not Oluştur</string>
     <string name="clear_search">Aramayı Temizle</string>
     <string name="unexpected_error">Beklenmeyen bir hata oluştu</string>
-    
+    <string name="delete_note_title">Notunuz siliniyor</string>
+    <string name="delete_note_message">Notunuz silindikten sonra 7 gün boyunca çöp kutusunda saklanacaktır. Bu süre zarfında notunuzu geri yükleyebilirsiniz.\n\n7 günün sonunda notunuz çöp kutusundan kalıcı olarak silinecektir ve bir daha kurtarılamaz.\n\nSilme işlemini onaylıyor musunuz?</string>
+    <string name="created_at">Oluşturuldu:</string>
+    <string name="updated_at">Son güncelleme:</string>
+
     <!-- Notes App Bar -->
     <string name="manage_categories">Kategorileri Yönet</string>
     <string name="archive">Arşiv</string>
@@ -90,7 +94,7 @@
     <string name="description_optional">Açıklama (isteğe bağlı)</string>
     <string name="enter_description">Açıklama girin...</string>
     <string name="notes_count">%1$d not</string>
-    <string name="updated">güncellendi</string>
+    <string name="updated">Güncelleme</string>
     <string name="edit">Düzenle</string>
     <string name="delete_category_title">%1$s Sil</string>
     <string name="delete_category_message">%1$s kategorisini silmek istediğinizden emin misiniz.\nBu işlem geri alınamaz.</string>
@@ -113,5 +117,37 @@
     <string name="search_categories">Kategorilerde ara…</string>
     <string name="search_tags">Etiketlerde ara…</string>
     <string name="apply">Uygula</string>
+
+    <!-- Deleted Archived Notes Screen -->
+    <string name="deleted">Silinmiş</string>
+    <string name="archived">Arşivlenmiş</string>
+    <string name="restore">Geri Yükle</string>
+    <string name="restore_note">Notu geri yükle</string>
+    <string name="no_deleted_notes_title">Silinmiş not yok</string>
+    <string name="no_deleted_notes_message">Sildiğiniz notlar kalıcı olarak kaldırılmadan önce 7 gün boyunca burada görünecektir.</string>
+    <string name="no_archived_notes_title">Arşivlenmiş not yok</string>
+    <string name="no_archived_notes_message">Ana listenizde istemediğiniz ancak saklamak istediğiniz notları arşivleyin.</string>
+    <string name="deleted_notes_header_title">Çöp Kutusu</string>
+    <string name="deleted_notes_header_message">Buradaki notlar 7 gün sonra kalıcı olarak silinecektir. O zamana kadar istediğiniz zaman geri yükleyebilirsiniz.</string>
+    <string name="archived_notes_header_title">Arşiv</string>
+    <string name="archived_notes_header_message">Arşivlenmiş notlar burada saklanır. İhtiyacınız olduğunda ana not listenize geri yükleyebilirsiniz.</string>
+    <string name="trash">Çöp Kutusu</string>
+    
+    <!-- Snackbar Messages -->
+    <string name="note_pinned">Not sabitlendi</string>
+    <string name="note_unpinned">Not sabitleme kaldırıldı</string>
+    <string name="added_to_favorites">Favorilere eklendi</string>
+    <string name="removed_from_favorites">Favorilerden çıkarıldı</string>
+    <string name="note_archived">Not arşivlendi</string>
+    <string name="note_deleted">Not silindi</string>
+    <string name="failed_to_update_note">Not güncellenemedi</string>
+    <string name="failed_to_archive_note">Not arşivlenemedi</string>
+    <string name="failed_to_delete_note">Not silinemedi</string>
+    <string name="note_restored">Not başarıyla geri yüklendi</string>
+    <string name="failed_to_restore_note">Not geri yüklenemedi</string>
+    <string name="note_permanently_deleted">Not kalıcı olarak silindi</string>
+    <string name="failed_to_permanently_delete_note">Not kalıcı olarak silinemedi</string>
+    <string name="notes_restored">%1$d not geri yüklendi</string>
+    <string name="notes_permanently_deleted">%1$d not kalıcı olarak silindi</string>
 </resources>
 

@@ -13,15 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.CircularProgressIndicator
-import com.cbo.ui.components.states.AppLoadingScreen
-import com.cbo.ui.components.states.AppEmptyState
-import com.cbo.ui.components.states.AppErrorState
-import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,9 +27,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.core.domain.model.ViewMode
@@ -40,15 +37,20 @@ import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.SortOrder
-import com.cbo.notes.presentation.component.ImprovedFilterSection
+import com.cbo.notes.presentation.component.CompactNoteCard
 import com.cbo.notes.presentation.component.FiltersBottomSheet
+import com.cbo.notes.presentation.component.ImprovedFilterSection
 import com.cbo.notes.presentation.component.NoteCard
-import com.cbo.notes.presentation.component.NoteCardCompact
 import com.cbo.notes.presentation.component.NotesAppBar
 import com.cbo.notes.presentation.component.NotesControls
 import com.cbo.notes.presentation.component.NotesEmptyState
+import com.cbo.notes.presentation.viewmodel.DeleteArchiveMode
 import com.cbo.notes.presentation.viewmodel.NotesUiState
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
+import com.cbo.ui.components.ScreenWithTopBarAndInsets
+import com.cbo.ui.components.states.AppEmptyState
+import com.cbo.ui.components.states.AppErrorState
+import com.cbo.ui.components.states.AppLoadingScreen
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -56,6 +58,7 @@ fun NotesScreen(
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
     onNavigateToCategories: () -> Unit,
+    onNavigateToDeletedArchived: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     initialCategoryId: Int? = null,
     modifier: Modifier = Modifier,
@@ -82,18 +85,21 @@ fun NotesScreen(
                 onSearchQueryChange = viewModel::searchNotes,
                 onClearSearch = { viewModel.searchNotes("") },
                 onCategoriesClick = onNavigateToCategories,
+                onArchiveClick = { onNavigateToDeletedArchived(DeleteArchiveMode.ARCHIVE.toTabIndex()) },
+                onTrashClick = { onNavigateToDeletedArchived(DeleteArchiveMode.DELETE.toTabIndex()) },
                 onSettingsClick = onNavigateToSettings,
             )
-        }
+        },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Spacer(modifier = Modifier.height(0.dp))
-            
+
             // Search, Sort, View Mode and Filters Controls
             var showFiltersSheet by remember { mutableStateOf(false) }
 
@@ -102,35 +108,50 @@ fun NotesScreen(
                 uiState.isLoading -> {
                     AppLoadingScreen(
                         message = stringResource(id = com.cbo.notes.R.string.loading_notes),
-                        showProgress = true
+                        showProgress = true,
                     )
                 }
 
                 uiState.filteredNotes.isEmpty() -> {
                     AppEmptyState(
-                        title = if (uiState.searchQuery.isNotEmpty()) stringResource(id = com.cbo.notes.R.string.no_matching_notes) else stringResource(id = com.cbo.notes.R.string.no_notes_yet),
-                        message = if (uiState.searchQuery.isNotEmpty()) {
-                            stringResource(id = com.cbo.notes.R.string.try_adjusting_search)
-                        } else {
-                            stringResource(id = com.cbo.notes.R.string.start_creating_note)
-                        },
+                        title =
+                            if (uiState.searchQuery.isNotEmpty()) {
+                                stringResource(
+                                    id = com.cbo.notes.R.string.no_matching_notes,
+                                )
+                            } else {
+                                stringResource(id = com.cbo.notes.R.string.no_notes_yet)
+                            },
+                        message =
+                            if (uiState.searchQuery.isNotEmpty()) {
+                                stringResource(id = com.cbo.notes.R.string.try_adjusting_search)
+                            } else {
+                                stringResource(id = com.cbo.notes.R.string.start_creating_note)
+                            },
                         actionText = stringResource(id = com.cbo.notes.R.string.create_note),
                         onAction = onNavigateToCreateNote,
-                        secondaryActionText = if (uiState.searchQuery.isNotEmpty()) stringResource(id = com.cbo.notes.R.string.clear_search) else null,
-                        onSecondaryAction = { 
+                        secondaryActionText =
+                            if (uiState.searchQuery.isNotEmpty()) {
+                                stringResource(
+                                    id = com.cbo.notes.R.string.clear_search,
+                                )
+                            } else {
+                                null
+                            },
+                        onSecondaryAction = {
                             viewModel.searchNotes("")
                             viewModel.clearFilters()
-                        }
+                        },
                     )
                 }
 
                 uiState.errorMessage != null -> {
                     AppErrorState(
                         error = uiState.errorMessage ?: stringResource(id = com.cbo.notes.R.string.unexpected_error),
-                        onRetry = { 
+                        onRetry = {
                             // Retry loading notes - refresh by clearing filters
                             viewModel.clearFilters()
-                        }
+                        },
                     )
                 }
 
@@ -161,9 +182,10 @@ fun NotesScreen(
                                 },
                                 onClearFilters = viewModel::clearFilters,
                                 onManageFiltersClick = { showFiltersSheet = true },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding()
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(),
                             )
                         },
                         onNoteClick = onNavigateToEditNote,
@@ -194,7 +216,7 @@ fun NotesScreen(
                         viewModel.clearFilters()
                         showFiltersSheet = false
                     },
-                    onDismiss = { showFiltersSheet = false }
+                    onDismiss = { showFiltersSheet = false },
                 )
             }
         }
@@ -254,7 +276,10 @@ private fun NotesContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (header != null) {
-                    item { header(); Spacer(Modifier.height(8.dp)) }
+                    item {
+                        header()
+                        Spacer(Modifier.height(8.dp))
+                    }
                 }
                 items(notes) { note ->
                     NoteCard(
@@ -265,6 +290,14 @@ private fun NotesContent(
                         onArchive = { onArchive(note.id) },
                         onDelete = { onDelete(note.id) },
                     )
+                    /*NoteCard(
+                        note = note,
+                        onClick = { onNoteClick(note.id) },
+                        onTogglePin = { onTogglePin(note.id) },
+                        onToggleFavorite = { onToggleFavorite(note.id) },
+                        onArchive = { onArchive(note.id) },
+                        onDelete = { onDelete(note.id) },
+                    )*/
                 }
             }
         }
@@ -288,7 +321,6 @@ private fun NotesContent(
                         onToggleFavorite = { onToggleFavorite(note.id) },
                         onArchive = { onArchive(note.id) },
                         onDelete = { onDelete(note.id) },
-                        isCompact = true,
                     )
                 }
             }
@@ -301,16 +333,20 @@ private fun NotesContent(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (header != null) {
-                    item { header(); Spacer(Modifier.height(8.dp)) }
+                    item {
+                        header()
+                        Spacer(Modifier.height(8.dp))
+                    }
                 }
-                items(notes) { note ->
-                    NoteCardCompact(
+                itemsIndexed(notes) { index, note ->
+                    CompactNoteCard(
                         note = note,
                         onClick = { onNoteClick(note.id) },
                         onTogglePin = { onTogglePin(note.id) },
                         onToggleFavorite = { onToggleFavorite(note.id) },
                         onArchive = { onArchive(note.id) },
-                        onDelete = { onDelete(note.id) }
+                        onDelete = { onDelete(note.id) },
+                        isFirstItem = index == 0,
                     )
                 }
             }
@@ -327,13 +363,14 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
     var selectedTags by remember { mutableStateOf(initialUiState.selectedTags) }
     var showFiltersSheet by remember { mutableStateOf(false) }
 
-    val uiState = initialUiState.copy(
-        searchQuery = searchQuery,
-        viewMode = viewMode,
-        sortOrder = sortOrder,
-        selectedCategory = selectedCategory,
-        selectedTags = selectedTags,
-    )
+    val uiState =
+        initialUiState.copy(
+            searchQuery = searchQuery,
+            viewMode = viewMode,
+            sortOrder = sortOrder,
+            selectedCategory = selectedCategory,
+            selectedTags = selectedTags,
+        )
 
     MemCloudApplicationTheme {
         ScreenWithTopBarAndInsets(
@@ -342,17 +379,20 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                     searchQuery = searchQuery,
                     onSearchQueryChange = { searchQuery = it },
                     onClearSearch = { searchQuery = "" },
+                    onArchiveClick = {},
+                    onTrashClick = {},
                     onCategoriesClick = {},
                     onSettingsClick = {},
                 )
-            }
+            },
         ) { paddingValues ->
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // Content
                 when {
@@ -387,18 +427,20 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                                     selectedTags = selectedTags,
                                     onCategorySelected = { selectedCategory = it },
                                     onTagSelected = { tag ->
-                                        selectedTags = selectedTags.toMutableList().also { list ->
-                                            if (list.any { it.id == tag.id }) list.removeAll { it.id == tag.id } else list.add(tag)
-                                        }
+                                        selectedTags =
+                                            selectedTags.toMutableList().also { list ->
+                                                if (list.any { it.id == tag.id }) list.removeAll { it.id == tag.id } else list.add(tag)
+                                            }
                                     },
                                     onClearFilters = {
                                         selectedCategory = null
                                         selectedTags = emptyList()
                                     },
                                     onManageFiltersClick = { showFiltersSheet = true },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding()
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(),
                                 )
                             },
                             onNoteClick = {},
@@ -430,7 +472,7 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                             selectedTags = emptyList()
                             showFiltersSheet = false
                         },
-                        onDismiss = { showFiltersSheet = false }
+                        onDismiss = { showFiltersSheet = false },
                     )
                 }
             }
@@ -463,7 +505,7 @@ private fun NotesScreenEmptyPreview() {
         previewNotesUiState().copy(
             notes = emptyList(),
             filteredNotes = emptyList(),
-        )
+        ),
     )
 }
 
@@ -481,7 +523,7 @@ private fun NotesScreenFiltersAppliedPreview() {
         base.copy(
             selectedCategory = base.categories.firstOrNull(),
             selectedTags = base.tags.take(3),
-        )
+        ),
     )
 }
 

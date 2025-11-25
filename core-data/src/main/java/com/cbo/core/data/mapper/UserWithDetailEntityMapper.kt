@@ -19,3 +19,4 @@ class UserWithDetailEntityMapper @Inject constructor(
     }
 }
 
+
