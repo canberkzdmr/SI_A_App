@@ -98,5 +98,17 @@ This structure enables independent evolution of features, improved testability, 
 
 ## License
 
-TBD
+This project is licensed under a **Custom Proprietary License** - see the [LICENSE](LICENSE) file for details.
+
+**⚠️ Important:** This code is publicly available for educational and reference purposes only. **Commercial use is strictly prohibited** without explicit written permission.
+
+### Quick Summary
+- ✅ You can view, study, and learn from this code
+- ✅ You can use it for personal, non-commercial projects
+- ✅ You can reference it in academic work
+- ❌ You **cannot** use it commercially
+- ❌ You **cannot** sell or distribute it
+- ❌ You **cannot** use it as a SaaS offering
+
+For commercial licensing inquiries, please contact: **canberkozdemirr@gmail.com**
 

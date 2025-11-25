@@ -1,0 +1,23 @@
+SI_A_App (MemCloud)
+Copyright (c) 2025 Can Berk Özdemir
+Contact: canberkozdemirr@gmail.com
+
+This application is protected under a Custom Proprietary License.
+Commercial use is strictly prohibited without explicit written permission.
+
+Bu uygulama Özel Yazılım Lisansı altında korunmaktadır.
+Ticari kullanım açık yazılı izin olmadan kesinlikle yasaktır.
+
+For more information, see the LICENSE file.
+Daha fazla bilgi için LICENSE dosyasına bakınız.
+
+---
+
+Third-Party Dependencies:
+This project uses various open-source libraries. See build.gradle.kts files
+for the complete list of dependencies and their respective licenses.
+
+Üçüncü Taraf Bağımlılıklar:
+Bu proje çeşitli açık kaynak kütüphaneler kullanmaktadır. Bağımlılıkların
+tam listesi ve lisansları için build.gradle.kts dosyalarına bakınız.
+
