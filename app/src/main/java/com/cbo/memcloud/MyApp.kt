@@ -2,16 +2,30 @@ package com.cbo.memcloud
 
 import android.app.Application
 import android.content.Context
-import android.content.res.Configuration
-import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
+import com.cbo.notes.worker.DeletedNotesCleanupScheduler
 import dagger.hilt.android.HiltAndroidApp
 import java.util.Locale
+import javax.inject.Inject
 
 @HiltAndroidApp
-class MyApp : Application() {
+class MyApp : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    @Inject
+    lateinit var deletedNotesCleanupScheduler: DeletedNotesCleanupScheduler
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(Log.INFO)
+            .build()
 
     override fun onCreate() {
         super.onCreate()
@@ -19,6 +33,9 @@ class MyApp : Application() {
         
         // Load and apply saved language on app start
         loadSavedLanguage()
+        
+        // Schedule periodic cleanup of deleted notes
+        scheduleDeletedNotesCleanup()
     }
 
     override fun attachBaseContext(base: Context) {
@@ -47,6 +64,15 @@ class MyApp : Application() {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error loading saved language", e)
+        }
+    }
+
+    private fun scheduleDeletedNotesCleanup() {
+        try {
+            deletedNotesCleanupScheduler.schedulePeriodicCleanup()
+            Log.d(TAG, "Deleted notes cleanup scheduled successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error scheduling deleted notes cleanup", e)
         }
     }
 

@@ -20,7 +20,9 @@ class NoteEntityMapper @Inject constructor(
             updatedAt = entity.updatedAt,
             isPinned = entity.isPinned,
             isArchived = entity.isArchived,
-            isFavorite = entity.isFavorite
+            isFavorite = entity.isFavorite,
+            isDeleted = entity.isDeleted,
+            deletedAt = entity.deletedAt
         )
     }
     
@@ -36,7 +38,9 @@ class NoteEntityMapper @Inject constructor(
             updatedAt = noteWithDetails.note.updatedAt,
             isPinned = noteWithDetails.note.isPinned,
             isArchived = noteWithDetails.note.isArchived,
-            isFavorite = noteWithDetails.note.isFavorite
+            isFavorite = noteWithDetails.note.isFavorite,
+            isDeleted = noteWithDetails.note.isDeleted,
+            deletedAt = noteWithDetails.note.deletedAt
         )
     }
     
@@ -51,7 +55,9 @@ class NoteEntityMapper @Inject constructor(
             updatedAt = domain.updatedAt,
             isPinned = domain.isPinned,
             isArchived = domain.isArchived,
-            isFavorite = domain.isFavorite
+            isFavorite = domain.isFavorite,
+            isDeleted = domain.isDeleted,
+            deletedAt = domain.deletedAt
         )
     }
 }

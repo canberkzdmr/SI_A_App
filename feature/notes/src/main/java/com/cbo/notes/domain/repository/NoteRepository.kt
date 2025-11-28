@@ -14,6 +14,20 @@ interface NoteRepository {
     
     suspend fun insertNote(note: Note): Result<Note>
     suspend fun updateNote(note: Note): Result<Note>
+    
+    /** Soft deletes a note - marks it as deleted with a timestamp */
+    suspend fun softDeleteNote(noteId: Int): Result<Unit>
+    
+    /** Restores a soft-deleted note */
+    suspend fun restoreDeletedNote(noteId: Int): Result<Unit>
+    
+    /** Permanently deletes a note from the database */
+    suspend fun permanentlyDeleteNote(noteId: Int): Result<Unit>
+    
+    /** Permanently deletes all notes that have been soft-deleted for longer than the retention period */
+    suspend fun cleanupExpiredDeletedNotes(): Result<Int>
+    
+    @Deprecated("Use softDeleteNote instead for soft delete behavior")
     suspend fun deleteNote(noteId: Int): Result<Unit>
     
     suspend fun updatePinnedStatus(noteId: Int, isPinned: Boolean): Result<Unit>

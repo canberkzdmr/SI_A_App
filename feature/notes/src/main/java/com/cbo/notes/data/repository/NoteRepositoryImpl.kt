@@ -9,8 +9,6 @@ import com.cbo.notes.data.mapper.TagEntityMapper
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.repository.NoteRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -34,8 +32,9 @@ class NoteRepositoryImpl @Inject constructor(
     }
 
     override fun getDeletedNotesByUser(userId: Int): Flow<List<Note>> {
-        // TODO this flow will be update once deleted notes logic implemented
-        return flowOf(emptyList())
+        return noteDao.getDeletedNotesWithDetailsByUser(userId).map { entities ->
+            entities.map { noteEntityMapper.toDomain(it) }
+        }
     }
 
     override fun getFavoriteNotesByUser(userId: Int): Flow<List<Note>> {
@@ -117,6 +116,7 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
+    @Suppress("DEPRECATION")
     override suspend fun deleteNote(noteId: Int): Result<Unit> {
         return try {
             // Get existing tags to update their usage count
@@ -132,6 +132,71 @@ class NoteRepositoryImpl @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e("NoteRepositoryImpl", "Error deleting note: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun softDeleteNote(noteId: Int): Result<Unit> {
+        return try {
+            noteDao.softDeleteNote(noteId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error soft deleting note: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun restoreDeletedNote(noteId: Int): Result<Unit> {
+        return try {
+            noteDao.restoreDeletedNote(noteId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error restoring deleted note: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun permanentlyDeleteNote(noteId: Int): Result<Unit> {
+        return try {
+            // Get existing tags to update their usage count
+            val existingTags = tagDao.getTagsByNote(noteId)
+            
+            noteDao.permanentlyDeleteNote(noteId)
+            
+            // Update tag usage counts
+            existingTags.forEach { tag ->
+                tagDao.updateTagUsageCount(tag.id)
+            }
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error permanently deleting note: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun cleanupExpiredDeletedNotes(): Result<Int> {
+        return try {
+            val expirationTimestamp = Note.getExpirationTimestamp()
+            
+            // Get expired notes to update tag usage counts
+            val expiredNotes = noteDao.getExpiredDeletedNotes(expirationTimestamp)
+            
+            // Update tag usage counts for each expired note
+            expiredNotes.forEach { note ->
+                val tags = tagDao.getTagsByNote(note.id)
+                tags.forEach { tag ->
+                    tagDao.updateTagUsageCount(tag.id)
+                }
+            }
+            
+            // Permanently delete expired notes
+            val deletedCount = noteDao.permanentlyDeleteExpiredNotes(expirationTimestamp)
+            Log.d("NoteRepositoryImpl", "Cleaned up $deletedCount expired deleted notes")
+            
+            Result.success(deletedCount)
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error cleaning up expired deleted notes: ${e.message}")
             Result.failure(e)
         }
     }

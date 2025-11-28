@@ -33,6 +33,7 @@
     <string name="compact_view">Compact view</string>
     
     <!-- Sort Options -->
+    <string name="sort">Sort</string>
     <string name="recent">Recent</string>
     <string name="oldest">Oldest</string>
     <string name="new_first">New First</string>
@@ -149,5 +150,8 @@
     <string name="failed_to_permanently_delete_note">Failed to permanently delete note</string>
     <string name="notes_restored">%1$d notes restored</string>
     <string name="notes_permanently_deleted">%1$d notes permanently deleted</string>
+    <string name="days_until_deletion">%1$d days remaining</string>
+    <string name="delete_today">Deletes today</string>
+    <string name="permanently_delete">Permanently Delete</string>
 </resources>
 

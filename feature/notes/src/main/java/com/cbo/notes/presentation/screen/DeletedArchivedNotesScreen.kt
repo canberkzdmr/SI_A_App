@@ -58,7 +58,7 @@ fun DeletedArchivedNotesScreen(
         uiState = uiState,
         onNavigateBack = onNavigateBack,
         onRestoreNote = viewModel::restoreNote,
-        onTabSelected = viewModel::switchTab
+        onTabSelected = viewModel::switchTab,
     )
 }
 
@@ -71,16 +71,18 @@ private fun ScreenContent(
     onRestoreNote: (Int) -> Unit,
     onTabSelected: (Int) -> Unit,
 ) {
-    val tabs = listOf(
-        AppTabItem(title = DeleteArchiveMode.DELETE.toDisplayName()),
-        AppTabItem(title = DeleteArchiveMode.ARCHIVE.toDisplayName()),
-    )
+    val tabs =
+        listOf(
+            AppTabItem(title = DeleteArchiveMode.DELETE.toDisplayName()),
+            AppTabItem(title = DeleteArchiveMode.ARCHIVE.toDisplayName()),
+        )
 
     val initialPage = uiState.viewMode.toTabIndex()
-    val pagerState = rememberPagerState(
-        initialPage = initialPage,
-        pageCount = { tabs.size }
-    )
+    val pagerState =
+        rememberPagerState(
+            initialPage = initialPage,
+            pageCount = { tabs.size },
+        )
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState.currentPage) {
@@ -100,12 +102,12 @@ private fun ScreenContent(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(id = R.string.back)
+                            contentDescription = stringResource(id = R.string.back),
                         )
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         if (uiState.isLoading) {
             AppLoadingScreen(
@@ -114,9 +116,10 @@ private fun ScreenContent(
             )
         } else {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding())
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(top = paddingValues.calculateTopPadding()),
             ) {
                 AppTabRow(
                     tabs = tabs,
@@ -125,44 +128,48 @@ private fun ScreenContent(
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(index)
                         }
-                    }
+                    },
                 )
 
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) { pageIndex ->
 
                     val pageMode = pageIndex.toDeleteArchiveMode()
 
-                    val notesForPage = when (pageMode) {
-                        DeleteArchiveMode.DELETE -> uiState.filteredDeletedNotes
-                        DeleteArchiveMode.ARCHIVE -> uiState.filteredArchivedNotes
-                    }
+                    val notesForPage =
+                        when (pageMode) {
+                            DeleteArchiveMode.DELETE -> uiState.filteredDeletedNotes
+                            DeleteArchiveMode.ARCHIVE -> uiState.filteredArchivedNotes
+                        }
 
                     if (notesForPage.isEmpty()) {
                         when (pageMode) {
-                            DeleteArchiveMode.DELETE -> AppEmptyState(
-                                icon = Icons.Default.DeleteSweep,
-                                title = stringResource(R.string.no_deleted_notes_title),
-                                message = stringResource(R.string.no_deleted_notes_message),
-                            )
-                            DeleteArchiveMode.ARCHIVE -> AppEmptyState(
-                                icon = Icons.Default.Archive,
-                                title = stringResource(R.string.no_archived_notes_title),
-                                message = stringResource(R.string.no_archived_notes_message),
-                            )
+                            DeleteArchiveMode.DELETE ->
+                                AppEmptyState(
+                                    icon = Icons.Default.DeleteSweep,
+                                    title = stringResource(R.string.no_deleted_notes_title),
+                                    message = stringResource(R.string.no_deleted_notes_message),
+                                )
+                            DeleteArchiveMode.ARCHIVE ->
+                                AppEmptyState(
+                                    icon = Icons.Default.Archive,
+                                    title = stringResource(R.string.no_archived_notes_title),
+                                    message = stringResource(R.string.no_archived_notes_message),
+                                )
                         }
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 16.dp,
-                                bottom = paddingValues.calculateBottomPadding() + 16.dp
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            contentPadding =
+                                PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = 16.dp,
+                                    bottom = paddingValues.calculateBottomPadding() + 16.dp,
+                                ),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             item {
                                 when (pageMode) {
@@ -170,14 +177,14 @@ private fun ScreenContent(
                                         HeaderCard(
                                             icon = Icons.Default.RestoreFromTrash,
                                             title = stringResource(R.string.deleted_notes_header_title),
-                                            content = stringResource(R.string.deleted_notes_header_message)
+                                            content = stringResource(R.string.deleted_notes_header_message),
                                         )
                                     }
                                     DeleteArchiveMode.ARCHIVE -> {
                                         HeaderCard(
                                             icon = Icons.Default.Archive,
                                             title = stringResource(R.string.archived_notes_header_title),
-                                            content = stringResource(R.string.archived_notes_header_message)
+                                            content = stringResource(R.string.archived_notes_header_message),
                                         )
                                     }
                                 }
@@ -191,6 +198,17 @@ private fun ScreenContent(
                                     showPinButton = false,
                                     showMenu = false,
                                     enableSwipe = false,
+                                    captionMessage =
+                                        if (pageMode ==
+                                            DeleteArchiveMode.DELETE
+                                        ) {
+                                            stringResource(
+                                                R.string.days_until_deletion,
+                                                note.getDaysUntilPermanentDeletion() ?: 0,
+                                            )
+                                        } else {
+                                            null
+                                        },
                                 )
                             }
                         }
@@ -203,29 +221,26 @@ private fun ScreenContent(
 
 // Extension to get display name
 @Composable
-fun DeleteArchiveMode.toDisplayName(): String {
-    return when (this) {
+fun DeleteArchiveMode.toDisplayName(): String =
+    when (this) {
         DeleteArchiveMode.DELETE -> stringResource(R.string.deleted)
         DeleteArchiveMode.ARCHIVE -> stringResource(R.string.archive)
     }
-}
 
 // Extension to get tab index
-fun DeleteArchiveMode.toTabIndex(): Int {
-    return when (this) {
+fun DeleteArchiveMode.toTabIndex(): Int =
+    when (this) {
         DeleteArchiveMode.DELETE -> 0
         DeleteArchiveMode.ARCHIVE -> 1
     }
-}
 
 // Extension to convert index back to enum
-internal fun Int.toDeleteArchiveMode(): DeleteArchiveMode {
-    return when (this) {
+internal fun Int.toDeleteArchiveMode(): DeleteArchiveMode =
+    when (this) {
         0 -> DeleteArchiveMode.DELETE
         1 -> DeleteArchiveMode.ARCHIVE
         else -> DeleteArchiveMode.DELETE // default
     }
-}
 
 @Preview(name = "DeletedArchivedNotes-Light")
 @Preview(name = "DeletedArchivedNotes-Light", uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -233,14 +248,15 @@ internal fun Int.toDeleteArchiveMode(): DeleteArchiveMode {
 private fun DeletedArchivedNotes_Preview() {
     MemCloudApplicationTheme {
         ScreenContent(
-            uiState = DeletedArchivedNotesUiState(
-                isLoading = false,
-                deletedNotes = sampleNotes(sampleCategories()),
-                filteredDeletedNotes = sampleNotes(sampleCategories()),
-                archivedNotes = sampleNotes(sampleCategories()),
-                filteredArchivedNotes = sampleNotes(sampleCategories()),
-                viewMode = DeleteArchiveMode.DELETE
-            ),
+            uiState =
+                DeletedArchivedNotesUiState(
+                    isLoading = false,
+                    deletedNotes = sampleNotes(sampleCategories()),
+                    filteredDeletedNotes = sampleNotes(sampleCategories()),
+                    archivedNotes = sampleNotes(sampleCategories()),
+                    filteredArchivedNotes = sampleNotes(sampleCategories()),
+                    viewMode = DeleteArchiveMode.DELETE,
+                ),
             onNavigateBack = {},
             onRestoreNote = {},
             onTabSelected = {},
@@ -248,9 +264,7 @@ private fun DeletedArchivedNotes_Preview() {
     }
 }
 
-private fun sampleNotes(
-    categories: List<Category>,
-): List<Note> =
+private fun sampleNotes(categories: List<Category>): List<Note> =
     listOf(
         Note(
             id = 1,
@@ -342,4 +356,4 @@ private fun sampleCategories(): List<Category> =
             description = "Work-related notes",
             notesCount = 5,
         ),
-        )
+    )

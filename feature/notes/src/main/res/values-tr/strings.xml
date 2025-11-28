@@ -33,6 +33,7 @@
     <string name="compact_view">Kompakt görünüm</string>
     
     <!-- Sort Options -->
+    <string name="sort">Sort</string>
     <string name="recent">Son</string>
     <string name="oldest">En Eski</string>
     <string name="new_first">Yeni Önce</string>
@@ -149,5 +150,8 @@
     <string name="failed_to_permanently_delete_note">Not kalıcı olarak silinemedi</string>
     <string name="notes_restored">%1$d not geri yüklendi</string>
     <string name="notes_permanently_deleted">%1$d not kalıcı olarak silindi</string>
+    <string name="days_until_deletion">%1$d gün kaldı</string>
+    <string name="delete_today">Bugün silinecek</string>
+    <string name="permanently_delete">Kalıcı Olarak Sil</string>
 </resources>
 

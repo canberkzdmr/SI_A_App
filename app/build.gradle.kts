@@ -73,4 +73,9 @@ dependencies {
 
     // Navigation
     implementation(libs.navigation.compose)
+
+    // WorkManager
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.hilt.work)
+    ksp(libs.hilt.work.compiler)
 }

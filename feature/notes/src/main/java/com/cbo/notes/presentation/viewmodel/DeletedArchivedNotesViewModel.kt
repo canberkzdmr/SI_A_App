@@ -10,6 +10,8 @@ import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.usecase.ArchiveNoteUseCase
 import com.cbo.notes.domain.usecase.GetArchivedNotesUseCase
 import com.cbo.notes.domain.usecase.GetDeletedNotesUseCase
+import com.cbo.notes.domain.usecase.PermanentlyDeleteNoteUseCase
+import com.cbo.notes.domain.usecase.RestoreDeletedNoteUseCase
 import com.cbo.notes.presentation.SortOrder
 import com.cbo.notes.presentation.screen.toDeleteArchiveMode
 import com.cbo.notes.presentation.screen.toTabIndex
@@ -34,6 +36,8 @@ class DeletedArchivedNotesViewModel
         private val getArchivedNotesUseCase: GetArchivedNotesUseCase,
         private val getDeletedNotesUseCase: GetDeletedNotesUseCase,
         private val setArchivedStatusUseCase: ArchiveNoteUseCase,
+        private val restoreDeletedNoteUseCase: RestoreDeletedNoteUseCase,
+        private val permanentlyDeleteNoteUseCase: PermanentlyDeleteNoteUseCase,
         private val snackbarManager: SnackbarManager,
     ) : ViewModel() {
         val selectedTab: DeleteArchiveMode =
@@ -90,9 +94,14 @@ class DeletedArchivedNotesViewModel
         }
 
         fun restoreNote(noteId: Int) {
-            Log.d("DeletedArchivedNotesViewModel", "restoreNote Id: $noteId")
+            Log.d("DeletedArchivedNotesViewModel", "restoreNote Id: $noteId, viewMode: ${_uiState.value.viewMode}")
             viewModelScope.launch {
-                setArchivedStatusUseCase.invoke(noteId = noteId, isArchived = false).fold(
+                val result = when (_uiState.value.viewMode) {
+                    DeleteArchiveMode.DELETE -> restoreDeletedNoteUseCase.invoke(noteId)
+                    DeleteArchiveMode.ARCHIVE -> setArchivedStatusUseCase.invoke(noteId = noteId, isArchived = false)
+                }
+                
+                result.fold(
                     onSuccess = {
                         snackbarManager.showMessage(SnackbarMessage.Success(messageRes = R.string.note_restored))
                     },
@@ -100,6 +109,25 @@ class DeletedArchivedNotesViewModel
                         Log.e("DeletedArchivedNotesViewModel", "Failed to restore note: ${error.message}")
                         snackbarManager.showMessage(
                             SnackbarMessage.Error(messageRes = R.string.failed_to_restore_note)
+                        )
+                    }
+                )
+            }
+        }
+
+        fun permanentlyDeleteNote(noteId: Int) {
+            Log.d("DeletedArchivedNotesViewModel", "permanentlyDeleteNote Id: $noteId")
+            viewModelScope.launch {
+                permanentlyDeleteNoteUseCase.invoke(noteId).fold(
+                    onSuccess = {
+                        snackbarManager.showMessage(
+                            SnackbarMessage.Success(messageRes = R.string.note_permanently_deleted)
+                        )
+                    },
+                    onFailure = { error ->
+                        Log.e("DeletedArchivedNotesViewModel", "Failed to permanently delete note: ${error.message}")
+                        snackbarManager.showMessage(
+                            SnackbarMessage.Error(messageRes = R.string.failed_to_permanently_delete_note)
                         )
                     }
                 )

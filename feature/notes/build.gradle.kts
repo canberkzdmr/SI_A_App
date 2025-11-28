@@ -83,4 +83,9 @@ dependencies {
     // ViewModel
     implementation(libs.viewmodel.compose)
     implementation(libs.lifecycle.runtime.compose)
+
+    // WorkManager
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.hilt.work)
+    ksp(libs.hilt.work.compiler)
 }

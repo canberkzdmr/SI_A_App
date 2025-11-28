@@ -86,6 +86,7 @@ fun CompactNoteCard(
     showMenu: Boolean = true,
     enableSwipe: Boolean = true,
     isFirstItem: Boolean = false,
+    captionMessage: String? = null,
 ) {
     val categoryColor =
         note.category?.let { category ->
@@ -209,7 +210,8 @@ fun CompactNoteCard(
                 isMenuExpanded = expandMenu,
                 onMenuExpandedChange = { expandMenu = it },
                 onDeleteClick = { showDeleteDialog = true },
-                offsetX = 0.dp
+                offsetX = 0.dp,
+                captionMessage = captionMessage
             )
         }
     }
@@ -245,6 +247,7 @@ private fun CompactNoteCardContent(
     onMenuExpandedChange: (Boolean) -> Unit,
     onDeleteClick: () -> Unit,
     offsetX: androidx.compose.ui.unit.Dp,
+    captionMessage: String? = null,
 ) {
     AppCardHorizontal(
         modifier = Modifier.offset(x = offsetX),
@@ -269,14 +272,19 @@ private fun CompactNoteCardContent(
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )
-                AppCaption(
-                    text = if (note.createdAt == note.updatedAt) {
-                        stringResource(R.string.created_at) + " " + DateUtil.formatRelativeTime(note.createdAt)
-                    } else {
-                        stringResource(R.string.updated_at) + " " + DateUtil.formatRelativeTime(note.updatedAt)
-                    },
-                    maxLines = 1
-                )
+
+                captionMessage?.let {
+                    AppCaption(it, maxLines = 1)
+                } ?: run {
+                    AppCaption(
+                        text = if (note.createdAt == note.updatedAt) {
+                            stringResource(R.string.created_at) + " " + DateUtil.formatRelativeTime(note.createdAt)
+                        } else {
+                            stringResource(R.string.updated_at) + " " + DateUtil.formatRelativeTime(note.updatedAt)
+                        },
+                        maxLines = 1
+                    )
+                }
             }
 
             Row(
