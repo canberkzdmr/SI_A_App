@@ -267,11 +267,22 @@ private fun CompactNoteCardContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                AppTitleMedium(
-                    text = note.title,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    AppTitleMedium(
+                        text = note.title,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    
+                    // Reminder indicator
+                    if (note.hasActiveReminder()) {
+                        ReminderIndicator(hasReminder = true)
+                    }
+                }
 
                 captionMessage?.let {
                     AppCaption(it, maxLines = 1)

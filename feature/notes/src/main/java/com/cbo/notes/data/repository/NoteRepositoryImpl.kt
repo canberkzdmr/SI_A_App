@@ -322,4 +322,44 @@ class NoteRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    // Reminder operations
+    override suspend fun setReminder(noteId: Int, reminderTime: Long): Result<Unit> {
+        return try {
+            noteDao.updateReminder(noteId, reminderTime)
+            Log.d("NoteRepositoryImpl", "Reminder set for note $noteId at $reminderTime")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error setting reminder: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun removeReminder(noteId: Int): Result<Unit> {
+        return try {
+            noteDao.updateReminder(noteId, null)
+            Log.d("NoteRepositoryImpl", "Reminder removed for note $noteId")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error removing reminder: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override fun getNotesWithActiveReminders(): Flow<List<Note>> {
+        return noteDao.getNotesWithActiveReminders().map { entities ->
+            entities.map { noteEntityMapper.toDomain(it) }
+        }
+    }
+
+    override suspend fun getNotesWithRemindersBetween(startTime: Long, endTime: Long): List<Note> {
+        return try {
+            noteDao.getNotesWithRemindersBetween(startTime, endTime).map { 
+                noteEntityMapper.toDomain(it) 
+            }
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error getting notes with reminders: ${e.message}")
+            emptyList()
+        }
+    }
 }

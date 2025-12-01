@@ -32,7 +32,7 @@ import com.cbo.core.database.entity.UserSettingsEntity
         UserSettingsEntity::class,
         SupportedLanguageEntity::class,
     ], 
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(Converters::class, ViewModeConverter::class)

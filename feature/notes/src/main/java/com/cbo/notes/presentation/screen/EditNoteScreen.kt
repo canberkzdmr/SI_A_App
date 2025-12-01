@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CollectionsBookmark
+import androidx.compose.material.icons.filled.NotificationAdd
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,6 +59,8 @@ import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.presentation.component.CreateTagDialog
 import com.cbo.notes.presentation.component.FilterChip
+import com.cbo.notes.presentation.component.ReminderChip
+import com.cbo.notes.presentation.component.ReminderDialog
 import com.cbo.notes.presentation.component.SelectionBottomSheet
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
@@ -106,6 +110,10 @@ fun EditNoteScreen(
             viewModel.selectTags(tags)
             viewModel.selectCategory(category)
         },
+        onShowReminderDialog = viewModel::showReminderDialog,
+        onHideReminderDialog = viewModel::hideReminderDialog,
+        onSetReminder = viewModel::setReminder,
+        onRemoveReminder = viewModel::removeReminder,
         modifier = modifier,
     )
 }
@@ -296,6 +304,10 @@ fun EditNoteScreen(
     onClearError: () -> Unit = {},
     onDiscardChanges: () -> Unit = {},
     onApplySelection: (Category?, List<Tag>) -> Unit = { _, _ -> },
+    onShowReminderDialog: () -> Unit = {},
+    onHideReminderDialog: () -> Unit = {},
+    onSetReminder: (Long) -> Unit = {},
+    onRemoveReminder: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
@@ -344,6 +356,20 @@ fun EditNoteScreen(
                     }
                 },
                 actions = {
+                    // Reminder button
+                    IconButton(onClick = onShowReminderDialog) {
+                        Icon(
+                            imageVector = if (uiState.reminderTime != null) 
+                                Icons.Default.NotificationsActive 
+                            else 
+                                Icons.Default.NotificationAdd, 
+                            contentDescription = "Set Reminder",
+                            tint = if (uiState.reminderTime != null) 
+                                MaterialTheme.colorScheme.primary 
+                            else 
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     IconButton(onClick = { showSelectionSheet = !showSelectionSheet }) {
                         Icon(imageVector = Icons.Default.CollectionsBookmark, contentDescription = "Filter")
                     }
@@ -387,6 +413,15 @@ fun EditNoteScreen(
                             .padding(paddingValues),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
+                    // Show reminder chip if a reminder is set
+                    if (uiState.reminderTime != null) {
+                        ReminderChip(
+                            reminderTime = uiState.reminderTime,
+                            onClick = onShowReminderDialog,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
                     val focusRequestContent = remember { FocusRequester() }
 
                     RichTextEditorField(
@@ -451,6 +486,16 @@ fun EditNoteScreen(
             onApply = { category, tags, -> onApplySelection(category, tags) },
             onClearAll = {},
             onDismiss = { showSelectionSheet = !showSelectionSheet }
+        )
+    }
+
+    // Reminder Dialog
+    if (uiState.showReminderDialog) {
+        ReminderDialog(
+            existingReminderTime = uiState.reminderTime,
+            onConfirm = onSetReminder,
+            onRemove = if (uiState.reminderTime != null) onRemoveReminder else null,
+            onDismiss = onHideReminderDialog
         )
     }
 }

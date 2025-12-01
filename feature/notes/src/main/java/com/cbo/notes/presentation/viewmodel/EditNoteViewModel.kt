@@ -13,7 +13,10 @@ import com.cbo.notes.domain.usecase.CreateTagUseCase
 import com.cbo.notes.domain.usecase.GetCategoriesUseCase
 import com.cbo.notes.domain.usecase.GetNoteByIdUseCase
 import com.cbo.notes.domain.usecase.GetTagsUseCase
+import com.cbo.notes.domain.usecase.RemoveReminderUseCase
+import com.cbo.notes.domain.usecase.SetReminderUseCase
 import com.cbo.notes.domain.usecase.UpdateNoteUseCase
+import com.cbo.notes.worker.ReminderScheduler
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +40,9 @@ class EditNoteViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val getTagsUseCase: GetTagsUseCase,
     private val createTagUseCase: CreateTagUseCase,
+    private val setReminderUseCase: SetReminderUseCase,
+    private val removeReminderUseCase: RemoveReminderUseCase,
+    private val reminderScheduler: ReminderScheduler,
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
@@ -73,7 +79,8 @@ class EditNoteViewModel @Inject constructor(
                                 selectedTags = note.tags,
                                 availableCategories = categories,
                                 availableTags = tags,
-                                originalNote = note
+                                originalNote = note,
+                                reminderTime = note.reminderTime
                             )
                         }
                     } else {
@@ -145,7 +152,8 @@ class EditNoteViewModel @Inject constructor(
                         title = currentState.title,
                         content = currentState.content,
                         category = currentState.selectedCategory,
-                        tags = currentState.selectedTags
+                        tags = currentState.selectedTags,
+                        reminderTime = currentState.reminderTime
                     )
                 } else {
                     Note(
@@ -153,7 +161,8 @@ class EditNoteViewModel @Inject constructor(
                         title = currentState.title,
                         content = currentState.content,
                         category = currentState.selectedCategory,
-                        tags = currentState.selectedTags
+                        tags = currentState.selectedTags,
+                        reminderTime = currentState.reminderTime
                     )
                 }
 
@@ -165,6 +174,9 @@ class EditNoteViewModel @Inject constructor(
 
                 result.fold(
                     onSuccess = { savedNote ->
+                        // Schedule or cancel reminder based on saved note
+                        handleReminderScheduling(savedNote)
+                        
                         _uiState.update { 
                             it.copy(
                                 isSaving = false, 
@@ -303,6 +315,49 @@ class EditNoteViewModel @Inject constructor(
         }
     }
 
+    // Reminder methods
+    fun showReminderDialog() {
+        _uiState.update { it.copy(showReminderDialog = true) }
+    }
+
+    fun hideReminderDialog() {
+        _uiState.update { it.copy(showReminderDialog = false) }
+    }
+
+    fun setReminder(reminderTime: Long) {
+        _uiState.update { 
+            it.copy(
+                reminderTime = reminderTime, 
+                showReminderDialog = false,
+                hasUnsavedChanges = true
+            ) 
+        }
+    }
+
+    fun removeReminder() {
+        _uiState.update { 
+            it.copy(
+                reminderTime = null, 
+                showReminderDialog = false,
+                hasUnsavedChanges = true
+            ) 
+        }
+    }
+
+    private fun handleReminderScheduling(savedNote: Note) {
+        if (savedNote.reminderTime != null && savedNote.reminderTime > System.currentTimeMillis()) {
+            // Schedule the reminder
+            reminderScheduler.scheduleReminder(
+                noteId = savedNote.id,
+                noteTitle = savedNote.title,
+                reminderTime = savedNote.reminderTime
+            )
+        } else {
+            // Cancel any existing reminder
+            reminderScheduler.cancelReminder(savedNote.id)
+        }
+    }
+
     // Tag input field methods
     fun updateTagInputText(text: String) {
         _uiState.update { it.copy(tagInputText = text) }
@@ -378,7 +433,10 @@ data class EditNoteUiState(
     val newTagName: String = "",
     val newTagColor: String? = null,
     // Tag input field state
-    val tagInputText: String = ""
+    val tagInputText: String = "",
+    // Reminder state
+    val reminderTime: Long? = null,
+    val showReminderDialog: Boolean = false
 )
 
 sealed class NavigationEvent {

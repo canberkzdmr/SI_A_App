@@ -22,7 +22,8 @@ class NoteEntityMapper @Inject constructor(
             isArchived = entity.isArchived,
             isFavorite = entity.isFavorite,
             isDeleted = entity.isDeleted,
-            deletedAt = entity.deletedAt
+            deletedAt = entity.deletedAt,
+            reminderTime = entity.reminderTime
         )
     }
     
@@ -40,7 +41,8 @@ class NoteEntityMapper @Inject constructor(
             isArchived = noteWithDetails.note.isArchived,
             isFavorite = noteWithDetails.note.isFavorite,
             isDeleted = noteWithDetails.note.isDeleted,
-            deletedAt = noteWithDetails.note.deletedAt
+            deletedAt = noteWithDetails.note.deletedAt,
+            reminderTime = noteWithDetails.note.reminderTime
         )
     }
     
@@ -57,7 +59,8 @@ class NoteEntityMapper @Inject constructor(
             isArchived = domain.isArchived,
             isFavorite = domain.isFavorite,
             isDeleted = domain.isDeleted,
-            deletedAt = domain.deletedAt
+            deletedAt = domain.deletedAt,
+            reminderTime = domain.reminderTime
         )
     }
 }

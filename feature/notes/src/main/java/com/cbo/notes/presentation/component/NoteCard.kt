@@ -185,6 +185,14 @@ fun NoteCardContent(
                     maxLines = 1
                 )
 
+                // Reminder indicator
+                if (note.hasActiveReminder()) {
+                    ReminderIndicator(
+                        hasReminder = true,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+
                 // Tag indicators as colored dots
                 if (note.tags.isNotEmpty()) {
                     Row(

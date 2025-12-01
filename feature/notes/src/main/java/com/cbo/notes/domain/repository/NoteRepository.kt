@@ -42,4 +42,17 @@ interface NoteRepository {
     suspend fun getNotesCount(userId: Int): Int
     suspend fun getNotesCountByCategory(userId: Int, categoryId: Int): Int
     suspend fun deleteAllArchivedNotes(userId: Int): Result<Unit>
+    
+    // Reminder operations
+    /** Sets or updates the reminder time for a note */
+    suspend fun setReminder(noteId: Int, reminderTime: Long): Result<Unit>
+    
+    /** Removes the reminder from a note */
+    suspend fun removeReminder(noteId: Int): Result<Unit>
+    
+    /** Gets all notes with active reminders (future reminders) */
+    fun getNotesWithActiveReminders(): Flow<List<Note>>
+    
+    /** Gets notes with reminders scheduled between the specified times */
+    suspend fun getNotesWithRemindersBetween(startTime: Long, endTime: Long): List<Note>
 }

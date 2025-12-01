@@ -153,5 +153,25 @@
     <string name="days_until_deletion">%1$d days remaining</string>
     <string name="delete_today">Deletes today</string>
     <string name="permanently_delete">Permanently Delete</string>
+    
+    <!-- Reminder -->
+    <string name="reminder">Reminder</string>
+    <string name="set_reminder">Set Reminder</string>
+    <string name="edit_reminder">Edit Reminder</string>
+    <string name="remove_reminder">Remove Reminder</string>
+    <string name="reminder_set">Reminder set</string>
+    <string name="reminder_removed">Reminder removed</string>
+    <string name="reminder_updated">Reminder updated</string>
+    <string name="failed_to_set_reminder">Failed to set reminder</string>
+    <string name="failed_to_remove_reminder">Failed to remove reminder</string>
+    <string name="pick_date">Pick Date</string>
+    <string name="pick_time">Pick Time</string>
+    <string name="reminder_time_past">Reminder time must be in the future</string>
+    <string name="reminder_scheduled_for">Reminder scheduled for %1$s</string>
+    <string name="has_reminder">Has reminder</string>
+    
+    <!-- Notification Channel -->
+    <string name="reminder_channel_name">Note Reminders</string>
+    <string name="reminder_channel_description">Notifications for note reminders</string>
 </resources>
 

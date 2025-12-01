@@ -27,7 +27,8 @@ import androidx.room.PrimaryKey
         Index(value = ["createdAt"]),
         Index(value = ["updatedAt"]),
         Index(value = ["isDeleted"]),
-        Index(value = ["deletedAt"])
+        Index(value = ["deletedAt"]),
+        Index(value = ["reminderTime"])
     ]
 )
 data class NoteEntity(
@@ -42,5 +43,6 @@ data class NoteEntity(
     val isArchived: Boolean = false,
     val isFavorite: Boolean = false,
     val isDeleted: Boolean = false,
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    val reminderTime: Long? = null
 )

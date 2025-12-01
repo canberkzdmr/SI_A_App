@@ -13,8 +13,15 @@ data class Note(
     val isArchived: Boolean = false,
     val isFavorite: Boolean = false,
     val isDeleted: Boolean = false,
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    val reminderTime: Long? = null
 ) {
+    /** Returns true if this note has an active reminder set for the future */
+    fun hasActiveReminder(): Boolean = reminderTime != null && reminderTime > System.currentTimeMillis()
+
+    /** Returns true if the reminder time has passed */
+    fun isReminderExpired(): Boolean = reminderTime != null && reminderTime <= System.currentTimeMillis()
+
     companion object {
         /** Duration in milliseconds after which soft-deleted notes are permanently removed (7 days) */
         const val DELETION_RETENTION_PERIOD_MS = 7L * 24 * 60 * 60 * 1000

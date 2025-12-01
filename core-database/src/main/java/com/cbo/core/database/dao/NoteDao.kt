@@ -103,4 +103,17 @@ interface NoteDao : BaseDao<NoteEntity> {
 
     @Query("DELETE FROM notes WHERE id = :id")
     suspend fun deleteById(id: Int)
+
+    // Reminder operations
+    @Query("UPDATE notes SET reminderTime = :reminderTime, updatedAt = :updatedAt WHERE id = :noteId")
+    suspend fun updateReminder(noteId: Int, reminderTime: Long?, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("SELECT * FROM notes WHERE reminderTime IS NOT NULL AND reminderTime > :currentTime AND isDeleted = 0 ORDER BY reminderTime ASC")
+    fun getNotesWithActiveReminders(currentTime: Long = System.currentTimeMillis()): Flow<List<NoteEntity>>
+
+    @Query("SELECT * FROM notes WHERE id = :noteId AND reminderTime IS NOT NULL")
+    suspend fun getNoteWithReminder(noteId: Int): NoteEntity?
+
+    @Query("SELECT * FROM notes WHERE reminderTime BETWEEN :startTime AND :endTime AND isDeleted = 0")
+    suspend fun getNotesWithRemindersBetween(startTime: Long, endTime: Long): List<NoteEntity>
 }
