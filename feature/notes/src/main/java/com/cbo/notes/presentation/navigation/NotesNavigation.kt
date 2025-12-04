@@ -6,6 +6,9 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.cbo.notes.presentation.component.FilterDetailScreen
+import com.cbo.notes.presentation.component.FilterListScreen
+import com.cbo.notes.presentation.component.FilterType
 import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.DeletedArchivedNotesScreen
 import com.cbo.notes.presentation.screen.EditNoteScreen
@@ -20,6 +23,8 @@ const val EDIT_NOTE_ROUTE = "edit_note"
 const val CATEGORIES_ROUTE = "categories"
 const val TAGS_ROUTE = "tags"
 const val DELETED_ARCHIVED_ROUTE = "deleted_archived"
+const val FILTER_LIST_ROUTE = "filter_list"
+const val FILTER_DETAIL_ROUTE = "filter_detail"
 
 fun NavController.navigateToNotes(navOptions: NavOptions? = null) {
     this.navigate(NOTES_ROUTE, navOptions)
@@ -47,6 +52,14 @@ fun NavController.navigateToTags(navOptions: NavOptions? = null) {
 
 fun NavController.navigateToDeletedArchived(tabId: Int, navOptions: NavOptions? = null) {
     this.navigate("$DELETED_ARCHIVED_ROUTE/$tabId", navOptions)
+}
+
+fun NavController.navigateToFilterList(navOptions: NavOptions? = null) {
+    this.navigate(FILTER_LIST_ROUTE, navOptions)
+}
+
+fun NavController.navigateToFilterDetail(filterType: String, navOptions: NavOptions? = null) {
+    this.navigate("$FILTER_DETAIL_ROUTE/$filterType", navOptions)
 }
 
 fun NavGraphBuilder.notesGraph(
@@ -135,4 +148,6 @@ sealed class NotesDestination(val route: String) {
     data class EditNote(val noteId: Int) : NotesDestination("$EDIT_NOTE_ROUTE/$noteId")
     object Categories : NotesDestination(CATEGORIES_ROUTE)
     data class DeletedArchived(val tabId: Int) : NotesDestination("$DELETED_ARCHIVED_ROUTE/$tabId")
+    object FilterList : NotesDestination(FILTER_LIST_ROUTE)
+    data class FilterDetail(val filterType: String) : NotesDestination("$FILTER_DETAIL_ROUTE/$filterType")
 }

@@ -43,7 +43,8 @@ fun AppTitle(
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign? = null,
-    style: TextStyle = MaterialTheme.typography.titleLarge
+    style: TextStyle = MaterialTheme.typography.titleLarge,
+    fontWeight: FontWeight? = null
 ) {
     Text(
         modifier = modifier,
@@ -53,6 +54,7 @@ fun AppTitle(
         textAlign = textAlign,
         overflow = overflow,
         maxLines = maxLines,
+        fontWeight = fontWeight,
     )
 }
 

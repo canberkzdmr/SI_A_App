@@ -362,7 +362,7 @@ private fun ViewModeButton(
 }
 
 @Composable
-private fun SortSelector(
+fun SortSelector(
     currentSortOrder: SortOrder,
     onSortOrderSelected: (SortOrder) -> Unit,
     modifier: Modifier = Modifier
@@ -371,8 +371,9 @@ private fun SortSelector(
 
     Box(modifier = modifier) {
         OutlinedButton(
+            modifier = modifier,
             onClick = { expanded = true },
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Sort,

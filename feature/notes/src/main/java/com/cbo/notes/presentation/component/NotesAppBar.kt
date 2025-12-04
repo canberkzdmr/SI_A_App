@@ -33,6 +33,22 @@ fun NotesAppBar(
 
     TopAppBar(
         modifier = modifier,
+        navigationIcon = {
+            if (isSearchActive) {
+                IconButton(
+                    onClick = {
+                        isSearchActive = false
+                        onClearSearch()
+                        keyboardController?.hide()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(id = com.cbo.notes.R.string.close_search)
+                    )
+                }
+            }
+        },
         title = {
             if (isSearchActive) {
                 AppSearchField(

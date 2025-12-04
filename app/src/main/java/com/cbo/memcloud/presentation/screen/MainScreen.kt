@@ -17,9 +17,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cbo.notes.presentation.component.FilterDetailScreen
+import com.cbo.notes.presentation.component.FilterListScreen
+import com.cbo.notes.presentation.component.FilterType
 import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
+import com.cbo.notes.presentation.viewmodel.NotesViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.ui.components.AppBottomNavigation
 import com.cbo.ui.components.AppScaffoldWithInsets
 import com.cbo.ui.components.BottomNavDestination
@@ -27,6 +33,11 @@ import com.cbo.ui.components.BottomNavigationOverlay
 import com.cbo.ui.components.CenterButton
 import com.cbo.ui.components.EdgeToEdgeWrapper
 import com.cbo.user.presentation.screen.ProfileScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
+private const val FILTER_LIST_ROUTE = "filter_list"
+private const val FILTER_DETAIL_ROUTE = "filter_detail"
 
 /**
  * Main screen that hosts the bottom navigation and main app content
@@ -77,6 +88,9 @@ fun MainScreen(
                     onNavigateToDeletedArchived = onNavigateToDeletedArchived,
                     onNavigateToSettings = {
                         navController.navigate(BottomNavDestination.Profile.route)
+                    },
+                    onNavigateToFilters = {
+                        navController.navigate(FILTER_LIST_ROUTE)
                     },
                     initialCategoryId = selectedCategoryIdForNotes
                 )
@@ -136,6 +150,69 @@ fun MainScreen(
                     onNavigateBack = {
                         navController.navigate(BottomNavDestination.Notes.route)
                     }
+                )
+            }
+
+            // Filter List Screen
+            composable(FILTER_LIST_ROUTE) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(BottomNavDestination.Notes.route)
+                }
+                val notesViewModel: NotesViewModel = hiltViewModel(parentEntry)
+                val uiState by notesViewModel.uiState.collectAsStateWithLifecycle()
+
+                FilterListScreen(
+                    selectedCategories = uiState.selectedCategories,
+                    selectedTags = uiState.selectedTags,
+                    filterPinned = uiState.filterPinned,
+                    filterFavorites = uiState.filterFavorites,
+                    onNavigateBack = { navController.popBackStack() },
+                    onFilterTypeClick = { filterType ->
+                        navController.navigate("$FILTER_DETAIL_ROUTE/${filterType.name}")
+                    },
+                    onPinnedToggle = { notesViewModel.toggleFilterPinned() },
+                    onFavoritesToggle = { notesViewModel.toggleFilterFavorites() },
+                    onClearAllFilters = {
+                        notesViewModel.clearFilters()
+                    }
+                )
+            }
+
+            // Filter Detail Screen
+            composable(
+                route = "$FILTER_DETAIL_ROUTE/{filterType}",
+                arguments = listOf(
+                    navArgument("filterType") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { backStackEntry ->
+                val filterTypeArg = backStackEntry.arguments?.getString("filterType") ?: FilterType.CATEGORY.name
+                val filterType = FilterType.valueOf(filterTypeArg)
+
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(BottomNavDestination.Notes.route)
+                }
+                val notesViewModel: NotesViewModel = hiltViewModel(parentEntry)
+                val uiState by notesViewModel.uiState.collectAsStateWithLifecycle()
+
+                FilterDetailScreen(
+                    filterType = filterType,
+                    categories = uiState.categories,
+                    tags = uiState.tags,
+                    selectedCategories = uiState.selectedCategories,
+                    selectedTags = uiState.selectedTags,
+                    onCategoryToggled = { category ->
+                        notesViewModel.toggleCategory(category)
+                    },
+                    onTagToggled = { tag ->
+                        notesViewModel.toggleTag(tag)
+                    },
+                    onApply = {
+                        // Navigate back to filter list
+                        navController.popBackStack()
+                    },
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

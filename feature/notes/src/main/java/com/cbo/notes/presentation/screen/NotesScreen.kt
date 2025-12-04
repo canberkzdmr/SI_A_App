@@ -2,10 +2,14 @@ package com.cbo.notes.presentation.screen
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +22,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells.Fixed
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,12 +35,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.core.domain.model.ViewMode
+import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
@@ -42,17 +52,19 @@ import com.cbo.notes.presentation.component.FiltersBottomSheet
 import com.cbo.notes.presentation.component.ImprovedFilterSection
 import com.cbo.notes.presentation.component.NoteCard
 import com.cbo.notes.presentation.component.NotesAppBar
-import com.cbo.notes.presentation.component.NotesControls
 import com.cbo.notes.presentation.component.NotesEmptyState
+import com.cbo.notes.presentation.component.SortBottomSheet
 import com.cbo.notes.presentation.viewmodel.DeleteArchiveMode
 import com.cbo.notes.presentation.viewmodel.NotesUiState
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
 import com.cbo.ui.components.ScreenWithTopBarAndInsets
+import com.cbo.ui.components.SecondaryButton
 import com.cbo.ui.components.states.AppEmptyState
 import com.cbo.ui.components.states.AppErrorState
 import com.cbo.ui.components.states.AppLoadingScreen
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NotesScreen(
     onNavigateToCreateNote: () -> Unit,
@@ -60,6 +72,7 @@ fun NotesScreen(
     onNavigateToCategories: () -> Unit,
     onNavigateToDeletedArchived: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToFilters: () -> Unit = {},
     initialCategoryId: Int? = null,
     modifier: Modifier = Modifier,
     viewModel: NotesViewModel = hiltViewModel(),
@@ -73,7 +86,7 @@ fun NotesScreen(
     LaunchedEffect(initialCategoryId, uiState.categories) {
         if (initialCategoryId != null && uiState.categories.isNotEmpty()) {
             val category = uiState.categories.firstOrNull { it.id == initialCategoryId }
-            viewModel.filterByCategory(category)
+            category?.let { viewModel.filterByCategories(listOf(it)) }
         }
     }
 
@@ -102,6 +115,7 @@ fun NotesScreen(
 
             // Search, Sort, View Mode and Filters Controls
             var showFiltersSheet by remember { mutableStateOf(false) }
+            var sortExpanded by remember { mutableStateOf(false) }
 
             // Notes content (controls move into scroll via header)
             when {
@@ -113,31 +127,29 @@ fun NotesScreen(
                 }
 
                 uiState.filteredNotes.isEmpty() -> {
+                    val hasActiveFilters = uiState.selectedCategories.isNotEmpty() || uiState.selectedTags.isNotEmpty() || uiState.filterPinned || uiState.filterFavorites
+                    val hasSearchQuery = uiState.searchQuery.isNotEmpty()
+                    val hasAnyFilter = hasActiveFilters || hasSearchQuery
+
                     AppEmptyState(
-                        title =
-                            if (uiState.searchQuery.isNotEmpty()) {
-                                stringResource(
-                                    id = com.cbo.notes.R.string.no_matching_notes,
-                                )
-                            } else {
-                                stringResource(id = com.cbo.notes.R.string.no_notes_yet)
-                            },
-                        message =
-                            if (uiState.searchQuery.isNotEmpty()) {
-                                stringResource(id = com.cbo.notes.R.string.try_adjusting_search)
-                            } else {
-                                stringResource(id = com.cbo.notes.R.string.start_creating_note)
-                            },
+                        title = when {
+                            hasSearchQuery -> stringResource(id = com.cbo.notes.R.string.no_matching_notes)
+                            hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.no_matching_notes)
+                            else -> stringResource(id = com.cbo.notes.R.string.no_notes_yet)
+                        },
+                        message = when {
+                            hasSearchQuery -> stringResource(id = com.cbo.notes.R.string.try_adjusting_search)
+                            hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.try_adjusting_filters)
+                            else -> stringResource(id = com.cbo.notes.R.string.start_creating_note)
+                        },
                         actionText = stringResource(id = com.cbo.notes.R.string.create_note),
                         onAction = onNavigateToCreateNote,
-                        secondaryActionText =
-                            if (uiState.searchQuery.isNotEmpty()) {
-                                stringResource(
-                                    id = com.cbo.notes.R.string.clear_search,
-                                )
-                            } else {
-                                null
-                            },
+                        secondaryActionText = when {
+                            hasSearchQuery && hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.clear_all_filters)
+                            hasSearchQuery -> stringResource(id = com.cbo.notes.R.string.clear_search)
+                            hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.clear_filters)
+                            else -> null
+                        },
                         onSecondaryAction = {
                             viewModel.searchNotes("")
                             viewModel.clearFilters()
@@ -160,33 +172,40 @@ fun NotesScreen(
                         notes = uiState.filteredNotes,
                         viewMode = uiState.viewMode,
                         header = {
-                            NotesControls(
-                                searchQuery = uiState.searchQuery,
-                                onSearchQueryChange = viewModel::searchNotes,
-                                onClearSearch = { viewModel.searchNotes("") },
-                                viewMode = uiState.viewMode,
-                                onViewModeChange = viewModel::changeViewMode,
-                                currentSortOrder = uiState.sortOrder,
-                                onSortOrderSelected = viewModel::changeSortOrder,
-                                selectedCategory = uiState.selectedCategory,
-                                selectedTags = uiState.selectedTags,
-                                onCategorySelected = viewModel::filterByCategory,
-                                onTagSelected = { tag ->
-                                    val currentTags = uiState.selectedTags.toMutableList()
-                                    if (currentTags.contains(tag)) {
-                                        currentTags.remove(tag)
-                                    } else {
-                                        currentTags.add(tag)
-                                    }
-                                    viewModel.filterByTags(currentTags)
-                                },
-                                onClearFilters = viewModel::clearFilters,
-                                onManageFiltersClick = { showFiltersSheet = true },
-                                modifier =
-                                    Modifier
+                            Row(modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                SecondaryButton(
+                                    text = stringResource(R.string.sort),
+                                    onClick = {
+                                        sortExpanded = true
+                                    },
+                                    leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                                    trailingIcon = {
+                                        val rotation by animateFloatAsState(
+                                            targetValue = if (sortExpanded) 180f else 0f,
+                                            animationSpec = tween(durationMillis = 300),
+                                            label = "sortExpandRotation"
+                                        )
+
+                                        Icon(
+                                            imageVector = Icons.Default.ExpandMore,
+                                            contentDescription = null,
+                                            modifier = Modifier.rotate(rotation)
+                                        )
+                                    },
+                                    modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(),
-                            )
+                                        .weight(1f)
+                                )
+                                SecondaryButton(
+                                    text = stringResource(R.string.filters),
+                                    onClick = onNavigateToFilters,
+                                    leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                )
+                            }
                         },
                         onNoteClick = onNavigateToEditNote,
                         onTogglePin = viewModel::toggleNotePin,
@@ -202,13 +221,16 @@ fun NotesScreen(
                 FiltersBottomSheet(
                     allCategories = uiState.categories,
                     allTags = uiState.tags,
-                    selectedCategory = uiState.selectedCategory,
+                    selectedCategories = uiState.selectedCategories,
                     selectedTags = uiState.selectedTags,
+                    onUpdateSelectedCategories = { categories ->
+                        viewModel.filterByCategories(categories)
+                    },
                     onUpdateSelectedTags = { tags ->
                         viewModel.filterByTags(tags)
                     },
-                    onApply = { category, tags ->
-                        viewModel.filterByCategory(category)
+                    onApply = { categories, tags ->
+                        viewModel.filterByCategories(categories)
                         viewModel.filterByTags(tags)
                         showFiltersSheet = false
                     },
@@ -217,6 +239,17 @@ fun NotesScreen(
                         showFiltersSheet = false
                     },
                     onDismiss = { showFiltersSheet = false },
+                )
+            }
+
+            if (sortExpanded) {
+                SortBottomSheet(
+                    currentSortOrder = uiState.sortOrder,
+                    onSortOrderSelected = { sortOption ->
+                        viewModel.changeSortOrder(sortOption)
+                        sortExpanded = false
+                      },
+                    onDismiss = { sortExpanded = false },
                 )
             }
         }
@@ -290,14 +323,6 @@ private fun NotesContent(
                         onArchive = { onArchive(note.id) },
                         onDelete = { onDelete(note.id) },
                     )
-                    /*NoteCard(
-                        note = note,
-                        onClick = { onNoteClick(note.id) },
-                        onTogglePin = { onTogglePin(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) },
-                        onArchive = { onArchive(note.id) },
-                        onDelete = { onDelete(note.id) },
-                    )*/
                 }
             }
         }
@@ -359,16 +384,17 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
     var searchQuery by remember { mutableStateOf(initialUiState.searchQuery) }
     var viewMode by remember { mutableStateOf(initialUiState.viewMode) }
     var sortOrder by remember { mutableStateOf(initialUiState.sortOrder) }
-    var selectedCategory by remember { mutableStateOf(initialUiState.selectedCategory) }
+    var selectedCategories by remember { mutableStateOf(initialUiState.selectedCategories) }
     var selectedTags by remember { mutableStateOf(initialUiState.selectedTags) }
     var showFiltersSheet by remember { mutableStateOf(false) }
+    var sortExpanded by remember { mutableStateOf(false) }
 
     val uiState =
         initialUiState.copy(
             searchQuery = searchQuery,
             viewMode = viewMode,
             sortOrder = sortOrder,
-            selectedCategory = selectedCategory,
+            selectedCategories = selectedCategories,
             selectedTags = selectedTags,
         )
 
@@ -415,35 +441,42 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                             notes = uiState.filteredNotes,
                             viewMode = viewMode,
                             header = {
-                                NotesControls(
-                                    searchQuery = searchQuery,
-                                    onSearchQueryChange = { searchQuery = it },
-                                    onClearSearch = { searchQuery = "" },
-                                    viewMode = viewMode,
-                                    onViewModeChange = { viewMode = it },
-                                    currentSortOrder = sortOrder,
-                                    onSortOrderSelected = { sortOrder = it },
-                                    selectedCategory = selectedCategory,
-                                    selectedTags = selectedTags,
-                                    onCategorySelected = { selectedCategory = it },
-                                    onTagSelected = { tag ->
-                                        selectedTags =
-                                            selectedTags.toMutableList().also { list ->
-                                                if (list.any { it.id == tag.id }) list.removeAll { it.id == tag.id } else list.add(tag)
-                                            }
-                                    },
-                                    onClearFilters = {
-                                        selectedCategory = null
-                                        selectedTags = emptyList()
-                                    },
-                                    onManageFiltersClick = { showFiltersSheet = true },
-                                    modifier =
-                                        Modifier
+                                Row(modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    SecondaryButton(
+                                        text = stringResource(R.string.sort),
+                                        onClick = {
+                                            sortExpanded = true
+                                        },
+                                        leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                                        trailingIcon = {
+                                            val rotation by animateFloatAsState(
+                                                targetValue = if (sortExpanded) 180f else 0f,
+                                                animationSpec = tween(durationMillis = 300),
+                                                label = "sortExpandRotation"
+                                            )
+
+                                            Icon(
+                                                imageVector = Icons.Default.ExpandMore,
+                                                contentDescription = null,
+                                                modifier = Modifier.rotate(rotation)
+                                            )
+                                        },
+                                        modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(),
+                                            .weight(1f)
+                                    )
+                                SecondaryButton(
+                                    text = stringResource(R.string.filters),
+                                    onClick = { showFiltersSheet = true },
+                                    leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
                                 )
-                            },
-                            onNoteClick = {},
+                            }
+                        },
+                        onNoteClick = {},
                             onTogglePin = {},
                             onToggleFavorite = {},
                             onArchive = {},
@@ -457,22 +490,35 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                     FiltersBottomSheet(
                         allCategories = uiState.categories,
                         allTags = uiState.tags,
-                        selectedCategory = selectedCategory,
+                        selectedCategories = selectedCategories,
                         selectedTags = selectedTags,
+                        onUpdateSelectedCategories = { c ->
+                            selectedCategories = c
+                        },
                         onUpdateSelectedTags = { t ->
                             selectedTags = t
                         },
                         onApply = { c, t ->
-                            selectedCategory = c
+                            selectedCategories = c
                             selectedTags = t
                             showFiltersSheet = false
                         },
                         onClearAll = {
-                            selectedCategory = null
+                            selectedCategories = emptyList()
                             selectedTags = emptyList()
                             showFiltersSheet = false
                         },
                         onDismiss = { showFiltersSheet = false },
+                    )
+                }
+
+                if (sortExpanded) {
+                    SortBottomSheet(
+                        currentSortOrder = uiState.sortOrder,
+                        onSortOrderSelected = {
+                            sortExpanded = false
+                        },
+                        onDismiss = { sortExpanded = false }
                     )
                 }
             }
@@ -521,7 +567,7 @@ private fun NotesScreenFiltersAppliedPreview() {
     val base = previewNotesUiState()
     NotesScreenPreviewHost(
         base.copy(
-            selectedCategory = base.categories.firstOrNull(),
+            selectedCategories = base.categories.take(1),
             selectedTags = base.tags.take(3),
         ),
     )
@@ -540,7 +586,7 @@ private fun previewNotesUiState(): NotesUiState {
         categories = categories,
         tags = tags,
         searchQuery = "",
-        selectedCategory = null,
+        selectedCategories = emptyList(),
         selectedTags = emptyList(),
         viewMode = ViewMode.LIST,
         sortOrder = SortOrder.UPDATED_DESC,

@@ -84,7 +84,14 @@ class NotesViewModel @Inject constructor(
                         notes = notes,
                         categories = categories,
                         tags = tags,
-                        filteredNotes = filterNotes(notes, currentState.searchQuery, currentState.selectedCategory, currentState.selectedTags),
+                        filteredNotes = filterNotes(
+                            notes,
+                            currentState.searchQuery,
+                            currentState.selectedCategories,
+                            currentState.selectedTags,
+                            currentState.filterPinned,
+                            currentState.filterFavorites
+                        ),
                         viewMode = viewMode.getOrNull() ?: ViewMode.LIST
                     )
                 }
@@ -94,22 +101,83 @@ class NotesViewModel @Inject constructor(
 
     fun searchNotes(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
-        val currentState = _uiState.value
-        val filteredNotes = filterNotes(currentState.notes, query, currentState.selectedCategory, currentState.selectedTags)
-        _uiState.update { it.copy(filteredNotes = filteredNotes) }
+        applyFilters()
     }
 
-    fun filterByCategory(category: Category?) {
-        _uiState.update { it.copy(selectedCategory = category) }
-        val currentState = _uiState.value
-        val filteredNotes = filterNotes(currentState.notes, currentState.searchQuery, category, currentState.selectedTags)
-        _uiState.update { it.copy(filteredNotes = filteredNotes) }
+    /**
+     * Toggle a category selection. If already selected, it will be removed.
+     * If not selected, it will be added to the selection.
+     */
+    fun toggleCategory(category: Category) {
+        val currentCategories = _uiState.value.selectedCategories.toMutableList()
+        if (currentCategories.any { it.id == category.id }) {
+            currentCategories.removeAll { it.id == category.id }
+        } else {
+            currentCategories.add(category)
+        }
+        _uiState.update { it.copy(selectedCategories = currentCategories) }
+        applyFilters()
+    }
+
+    /**
+     * Set the selected categories directly (for bulk operations)
+     */
+    fun filterByCategories(categories: List<Category>) {
+        _uiState.update { it.copy(selectedCategories = categories) }
+        applyFilters()
+    }
+
+    /**
+     * Toggle a tag selection. If already selected, it will be removed.
+     * If not selected, it will be added to the selection.
+     */
+    fun toggleTag(tag: Tag) {
+        val currentTags = _uiState.value.selectedTags.toMutableList()
+        if (currentTags.any { it.id == tag.id }) {
+            currentTags.removeAll { it.id == tag.id }
+        } else {
+            currentTags.add(tag)
+        }
+        _uiState.update { it.copy(selectedTags = currentTags) }
+        applyFilters()
     }
 
     fun filterByTags(tags: List<Tag>) {
         _uiState.update { it.copy(selectedTags = tags) }
+        applyFilters()
+    }
+
+    /**
+     * Toggle the pinned filter on/off
+     */
+    fun toggleFilterPinned() {
+        val newValue = !_uiState.value.filterPinned
+        _uiState.update { it.copy(filterPinned = newValue) }
+        applyFilters()
+    }
+
+    /**
+     * Toggle the favorites filter on/off
+     */
+    fun toggleFilterFavorites() {
+        val newValue = !_uiState.value.filterFavorites
+        _uiState.update { it.copy(filterFavorites = newValue) }
+        applyFilters()
+    }
+
+    /**
+     * Apply all current filters to the notes list
+     */
+    private fun applyFilters() {
         val currentState = _uiState.value
-        val filteredNotes = filterNotes(currentState.notes, currentState.searchQuery, currentState.selectedCategory, tags)
+        val filteredNotes = filterNotes(
+            currentState.notes,
+            currentState.searchQuery,
+            currentState.selectedCategories,
+            currentState.selectedTags,
+            currentState.filterPinned,
+            currentState.filterFavorites
+        )
         _uiState.update { it.copy(filteredNotes = filteredNotes) }
     }
 
@@ -117,8 +185,10 @@ class NotesViewModel @Inject constructor(
         _uiState.update { 
             it.copy(
                 searchQuery = "", 
-                selectedCategory = null, 
+                selectedCategories = emptyList(), 
                 selectedTags = emptyList(),
+                filterPinned = false,
+                filterFavorites = false,
                 filteredNotes = it.notes
             ) 
         }
@@ -216,12 +286,14 @@ class NotesViewModel @Inject constructor(
     private fun filterNotes(
         notes: List<Note>,
         searchQuery: String,
-        selectedCategory: Category?,
-        selectedTags: List<Tag>
+        selectedCategories: List<Category>,
+        selectedTags: List<Tag>,
+        filterPinned: Boolean,
+        filterFavorites: Boolean
     ): List<Note> {
         var filtered = notes
 
-        // Filter by search query
+        // Filter by search query (always applied as AND with other filters)
         if (searchQuery.isNotBlank()) {
             filtered = filtered.filter { note ->
                 note.title.contains(searchQuery, ignoreCase = true) ||
@@ -229,23 +301,100 @@ class NotesViewModel @Inject constructor(
             }
         }
 
-        // Filter by category
-        selectedCategory?.let { category ->
+        // Filter by categories, tags, pinned, and favorites using OR logic
+        // A note matches if it satisfies ANY of the active filter criteria
+        val hasFilters = selectedCategories.isNotEmpty() || selectedTags.isNotEmpty() || filterPinned || filterFavorites
+        if (hasFilters) {
             filtered = filtered.filter { note ->
-                note.category?.id == category.id
+                val matchesCategory = selectedCategories.isNotEmpty() && 
+                    selectedCategories.any { category -> note.category?.id == category.id }
+                val matchesTag = selectedTags.isNotEmpty() && 
+                    selectedTags.any { selectedTag -> note.tags.any { noteTag -> noteTag.id == selectedTag.id } }
+                val matchesPinned = filterPinned && note.isPinned
+                val matchesFavorite = filterFavorites && note.isFavorite
+                
+                // OR logic: match if note satisfies ANY active filter
+                matchesCategory || matchesTag || matchesPinned || matchesFavorite
             }
         }
 
-        // Filter by tags
-        if (selectedTags.isNotEmpty()) {
-            filtered = filtered.filter { note ->
-                selectedTags.all { selectedTag ->
-                    note.tags.any { noteTag -> noteTag.id == selectedTag.id }
+        // Apply relevance-based sorting when filters or search are active
+        val hasActiveFilters = searchQuery.isNotBlank() || hasFilters
+        return if (hasActiveFilters) {
+            sortByRelevance(filtered, searchQuery, selectedCategories, selectedTags, filterPinned, filterFavorites)
+        } else {
+            sortNotes(filtered, _uiState.value.sortOrder)
+        }
+    }
+
+    /**
+     * Sorts notes by relevance score (best match first).
+     * Score is calculated based on:
+     * - Search query matches: +2 for title match, +1 for content match
+     * - Category matches: +1 for each matching category
+     * - Tag matches: +1 for each matching tag
+     * - Pinned/Favorites: +1 if filter is active and note matches
+     * Pinned notes always appear first within their relevance tier.
+     */
+    private fun sortByRelevance(
+        notes: List<Note>,
+        searchQuery: String,
+        selectedCategories: List<Category>,
+        selectedTags: List<Tag>,
+        filterPinned: Boolean,
+        filterFavorites: Boolean
+    ): List<Note> {
+        return notes.sortedWith(
+            compareByDescending<Note> { it.isPinned }
+                .thenByDescending { note -> 
+                    calculateRelevanceScore(note, searchQuery, selectedCategories, selectedTags, filterPinned, filterFavorites) 
                 }
+                .thenByDescending { it.updatedAt } // Tiebreaker: most recently updated
+        )
+    }
+
+    /**
+     * Calculates a relevance score for a note based on how well it matches the filters.
+     */
+    private fun calculateRelevanceScore(
+        note: Note,
+        searchQuery: String,
+        selectedCategories: List<Category>,
+        selectedTags: List<Tag>,
+        filterPinned: Boolean,
+        filterFavorites: Boolean
+    ): Int {
+        var score = 0
+
+        // Search query scoring
+        if (searchQuery.isNotBlank()) {
+            if (note.title.contains(searchQuery, ignoreCase = true)) {
+                score += 2 // Title match is more relevant
+            }
+            if (note.content.contains(searchQuery, ignoreCase = true)) {
+                score += 1
             }
         }
 
-        return sortNotes(filtered, _uiState.value.sortOrder)
+        // Category scoring: +1 for each matching category
+        if (selectedCategories.isNotEmpty() && note.category != null) {
+            val categoryMatchCount = selectedCategories.count { it.id == note.category?.id }
+            score += categoryMatchCount
+        }
+
+        // Tag scoring: +1 for each matching tag
+        if (selectedTags.isNotEmpty()) {
+            val tagMatchCount = selectedTags.count { selectedTag ->
+                note.tags.any { noteTag -> noteTag.id == selectedTag.id }
+            }
+            score += tagMatchCount
+        }
+
+        // Pinned/Favorites scoring
+        if (filterPinned && note.isPinned) score += 1
+        if (filterFavorites && note.isFavorite) score += 1
+
+        return score
     }
 
     private fun sortNotes(notes: List<Note>, sortOrder: SortOrder): List<Note> {
@@ -267,8 +416,10 @@ data class NotesUiState(
     val categories: List<Category> = emptyList(),
     val tags: List<Tag> = emptyList(),
     val searchQuery: String = "",
-    val selectedCategory: Category? = null,
+    val selectedCategories: List<Category> = emptyList(),
     val selectedTags: List<Tag> = emptyList(),
+    val filterPinned: Boolean = false,
+    val filterFavorites: Boolean = false,
     val viewMode: ViewMode = ViewMode.LIST,
     val sortOrder: SortOrder = SortOrder.UPDATED_DESC,
     val errorMessage: String? = null

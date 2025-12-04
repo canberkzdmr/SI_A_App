@@ -1,11 +1,20 @@
 package com.cbo.notes.presentation.component
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.NoteAdd
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -113,7 +122,7 @@ fun PreviewNotesEmptyState_NoNotes() {
 @Preview(showBackground = true, name = "Empty Notes - With Notes but Filtered Out")
 @Composable
 fun PreviewNotesEmptyState_WithNotesFiltered() {
-    MaterialTheme {
+    MemCloudApplicationTheme {
         NotesEmptyState(
             hasNotes = true,
             searchQuery = "",
@@ -126,7 +135,7 @@ fun PreviewNotesEmptyState_WithNotesFiltered() {
 @Preview(showBackground = true, name = "Empty Notes - Search No Result")
 @Composable
 fun PreviewNotesEmptyState_SearchNoResult() {
-    MaterialTheme {
+    MemCloudApplicationTheme {
         NotesEmptyState(
             hasNotes = true,
             searchQuery = "Meeting notes",

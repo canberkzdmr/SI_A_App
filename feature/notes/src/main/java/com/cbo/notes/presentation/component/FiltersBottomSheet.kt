@@ -47,10 +47,11 @@ import androidx.compose.ui.res.stringResource
 fun FiltersBottomSheet(
     allCategories: List<Category>,
     allTags: List<Tag>,
-    selectedCategory: Category?,
+    selectedCategories: List<Category>,
     selectedTags: List<Tag>,
+    onUpdateSelectedCategories: (List<Category>) -> Unit,
     onUpdateSelectedTags: (List<Tag>) -> Unit,
-    onApply: (Category?, List<Tag>) -> Unit,
+    onApply: (List<Category>, List<Tag>) -> Unit,
     onClearAll: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
@@ -65,8 +66,9 @@ fun FiltersBottomSheet(
         FiltersSheetBody(
             allCategories = allCategories,
             allTags = allTags,
-            selectedCategory = selectedCategory,
+            selectedCategories = selectedCategories,
             selectedTags = selectedTags,
+            onUpdateSelectedCategories = onUpdateSelectedCategories,
             onUpdateSelectedTags = onUpdateSelectedTags,
             onApply = onApply,
             onClearAll = onClearAll,
@@ -79,9 +81,10 @@ fun FiltersBottomSheet(
 private fun FiltersSheetBody(
     allCategories: List<Category>,
     allTags: List<Tag>,
-    selectedCategory: Category?,
+    selectedCategories: List<Category>,
     selectedTags: List<Tag>,
-    onApply: (Category?, List<Tag>) -> Unit,
+    onApply: (List<Category>, List<Tag>) -> Unit,
+    onUpdateSelectedCategories: (List<Category>) -> Unit,
     onUpdateSelectedTags: (List<Tag>) -> Unit,
     onClearAll: () -> Unit,
     onDismiss: () -> Unit,
@@ -89,7 +92,7 @@ private fun FiltersSheetBody(
     var categoryQuery by remember { mutableStateOf("") }
     var tagQuery by remember { mutableStateOf("") }
 
-    var tempSelectedCategory by remember { mutableStateOf(selectedCategory) }
+    var tempSelectedCategories by remember { mutableStateOf(selectedCategories.toMutableList()) }
     var tempSelectedTags by remember { mutableStateOf(selectedTags.toMutableList()) }
 
     Column(
@@ -107,14 +110,14 @@ private fun FiltersSheetBody(
             Spacer(Modifier.weight(1f))
             TextButton(onClick = {
                 // Reset local temp states so UI updates immediately
-                tempSelectedCategory = null
+                tempSelectedCategories = mutableListOf()
                 tempSelectedTags = mutableListOf()
                 onClearAll()
             }) { Text(stringResource(id = com.cbo.notes.R.string.clear_all)) }
         }
 
-        // Category search + list
-        Text(text = stringResource(id = com.cbo.notes.R.string.category), style = MaterialTheme.typography.labelLarge)
+        // Category search + list (multi-select)
+        Text(text = stringResource(id = com.cbo.notes.R.string.categories), style = MaterialTheme.typography.labelLarge)
         AppOutlinedTextField(
             value = categoryQuery,
             onValueChange = { categoryQuery = it },
@@ -130,29 +133,26 @@ private fun FiltersSheetBody(
         LazyColumn(
             modifier = Modifier.weight(0.4f, fill = false)
         ) {
-            item {
-                ListItem(
-                    headlineContent = { Text(stringResource(id = com.cbo.notes.R.string.none)) },
-                    trailingContent = {
-                        if (tempSelectedCategory == null) Icon(Icons.Default.Check, contentDescription = null)
-                    },
-                    modifier = Modifier.clickable { tempSelectedCategory = null }
-                )
-            }
-            items(filteredCategories) { category ->
+            items(filteredCategories, key = { it.id }) { category ->
+                val isSelected = tempSelectedCategories.any { it.id == category.id }
                 ListItem(
                     headlineContent = { Text(category.name) },
                     trailingContent = {
-                        if (tempSelectedCategory?.id == category.id) Icon(Icons.Default.Check, contentDescription = null)
+                        if (isSelected) Icon(Icons.Default.Check, contentDescription = null)
                     },
                     modifier = Modifier.clickable {
-                        tempSelectedCategory = if (tempSelectedCategory?.id == category.id) null else category
+                        tempSelectedCategories = if (isSelected) {
+                            tempSelectedCategories.filterNot { it.id == category.id }.toMutableList()
+                        } else {
+                            (tempSelectedCategories + category).toMutableList()
+                        }
+                        onUpdateSelectedCategories(tempSelectedCategories)
                     }
                 )
             }
         }
 
-        // Tag search + list
+        // Tag search + list (multi-select)
         Text(text = stringResource(id = com.cbo.notes.R.string.tags), style = MaterialTheme.typography.labelLarge)
         AppOutlinedTextField(
             value = tagQuery,
@@ -202,7 +202,7 @@ private fun FiltersSheetBody(
             )
             PrimaryButton(
                 text = stringResource(id = com.cbo.notes.R.string.apply),
-                onClick = { onApply(tempSelectedCategory, tempSelectedTags) },
+                onClick = { onApply(tempSelectedCategories, tempSelectedTags) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -219,8 +219,9 @@ private fun FiltersBottomSheet_Default_Preview() {
         FiltersSheetBody(
             allCategories = samplePreviewCategories(),
             allTags = samplePreviewTags(),
-            selectedCategory = null,
+            selectedCategories = emptyList(),
             selectedTags = emptyList(),
+            onUpdateSelectedCategories = {},
             onUpdateSelectedTags = {},
             onApply = { _, _ -> },
             onClearAll = { },
@@ -238,8 +239,9 @@ private fun FiltersBottomSheet_Selected_Preview() {
         FiltersSheetBody(
             allCategories = cats,
             allTags = tags,
-            selectedCategory = cats.first(),
+            selectedCategories = cats.take(2),
             selectedTags = tags.take(3),
+            onUpdateSelectedCategories = {},
             onUpdateSelectedTags = {},
             onApply = { _, _ -> },
             onClearAll = { },
@@ -260,5 +262,3 @@ private fun samplePreviewTags(): List<Tag> = listOf(
     Tag(id = 3, userId = 1, name = "project", color = "#45B7D1", usageCount = 5),
     Tag(id = 4, userId = 1, name = "idea", color = "#FFA07A", usageCount = 4),
 )
-
-
