@@ -3,14 +3,14 @@ package com.cbo.ui.components
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddTask
 import androidx.compose.material3.Button
@@ -20,14 +20,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,7 +50,7 @@ fun PrimaryButton(
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
                 strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
             )
         } else {
             if (leadingIcon != null) {
@@ -79,10 +77,11 @@ fun SecondaryButton(
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.primary
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        colors =
+            ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.primary,
+            ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         if (leadingIcon != null) {
             leadingIcon()
@@ -118,7 +117,7 @@ fun TertiaryButton(
         if (isInProgress) {
             CircularProgressIndicator(
                 modifier = Modifier.size(16.dp),
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
             )
         } else {
             if (leadingIcon != null) {
@@ -146,10 +145,11 @@ fun DestructiveButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError
-        )
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError,
+            ),
     ) {
         if (leadingIcon != null) {
             leadingIcon()
@@ -169,24 +169,23 @@ fun AppIconButton(
     IconButton(
         onClick = onClick,
         modifier = modifier,
-        enabled = enabled
+        enabled = enabled,
     ) {
         icon()
     }
 }
 
-
-
-
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)
+@Preview(uiMode = Configuration.UI_MODE_TYPE_NORMAL)
 @Composable
 fun PrimaryButtonPreview() {
     MemCloudApplicationTheme {
         Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             PrimaryButton(text = "Primary button", onClick = {}, isLoading = false)
             SecondaryButton("Secondary button", onClick = {})
@@ -194,7 +193,11 @@ fun PrimaryButtonPreview() {
             TertiaryButton("Tertiary Button", enabled = false, onClick = {})
             DestructiveButton("Destructive Button", onClick = {}, enabled = true)
             DestructiveButton("Destructive Button", onClick = {}, enabled = false)
-            AppIconButton(onClick = {}, icon = { Icon(Icons.Default.AddTask, contentDescription = null) })
+            AppIconButton(
+                onClick = {},
+                icon = { Icon(Icons.Default.AddTask, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape = RoundedCornerShape(12.dp)),
+            )
         }
     }
 }

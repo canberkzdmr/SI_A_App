@@ -58,6 +58,7 @@ fun NoteCard(
     onArchive: () -> Unit = {},
     onDelete: () -> Unit = {},
     onRestore: (() -> Unit)? = null,
+    isListView: Boolean = false,
     showPinButton: Boolean = true,
     showMenu: Boolean = true,
 ) {
@@ -84,6 +85,7 @@ fun NoteCard(
         onRestore = onRestore,
         showPinButton = showPinButton,
         showMenu = showMenu,
+        isListView = isListView,
         isMenuExpanded = expandMenu,
         onMenuExpandedChange = { expandMenu = it },
     )
@@ -114,6 +116,7 @@ fun NoteCardContent(
     onRestore: (() -> Unit)?,
     showPinButton: Boolean,
     showMenu: Boolean,
+    isListView: Boolean = false,
     isMenuExpanded: Boolean,
     onMenuExpandedChange: (Boolean) -> Unit,
     onDeleteClick: () -> Unit,
@@ -130,7 +133,7 @@ fun NoteCardContent(
         pinnedBorderColor = categoryColor,
         onClick = onClick,
     ) {
-        Column() {
+        Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -159,7 +162,7 @@ fun NoteCardContent(
                 Spacer(modifier = Modifier.height(8.dp))
                 RichTextViewer(
                     html = note.content,
-                    maxLines = 4,
+                    maxLines = if (isListView) 4 else 1,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

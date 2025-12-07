@@ -18,23 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -85,6 +78,7 @@ fun CompactNoteCard(
     showPinButton: Boolean = true,
     showMenu: Boolean = true,
     enableSwipe: Boolean = true,
+    swipeHintEnabled: Boolean = true,
     isFirstItem: Boolean = false,
     captionMessage: String? = null,
 ) {
@@ -141,7 +135,7 @@ fun CompactNoteCard(
 
     var showHint by remember { mutableStateOf(isFirstItem && enableSwipe) }
     val offsetX by animateDpAsState(
-        targetValue = if (showHint) (-60.dp) else 0.dp,
+        targetValue = if (showHint && swipeHintEnabled) (-60.dp) else 0.dp,
         animationSpec = tween(durationMillis = 200, easing = LinearEasing, delayMillis = 100),
         label = "swipe_hint_offset"
     )

@@ -3,8 +3,12 @@ package com.cbo.notes.presentation.screen
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -30,17 +35,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlin.math.abs
 import com.cbo.core.domain.model.ViewMode
 import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
@@ -101,6 +110,8 @@ fun NotesScreen(
                 onArchiveClick = { onNavigateToDeletedArchived(DeleteArchiveMode.ARCHIVE.toTabIndex()) },
                 onTrashClick = { onNavigateToDeletedArchived(DeleteArchiveMode.DELETE.toTabIndex()) },
                 onSettingsClick = onNavigateToSettings,
+                viewMode = uiState.viewMode,
+                onViewModeChange = viewModel::changeViewMode,
             )
         },
     ) { paddingValues ->
@@ -127,29 +138,34 @@ fun NotesScreen(
                 }
 
                 uiState.filteredNotes.isEmpty() -> {
-                    val hasActiveFilters = uiState.selectedCategories.isNotEmpty() || uiState.selectedTags.isNotEmpty() || uiState.filterPinned || uiState.filterFavorites
+                    val hasActiveFilters =
+                        uiState.selectedCategories.isNotEmpty() || uiState.selectedTags.isNotEmpty() || uiState.filterPinned ||
+                            uiState.filterFavorites
                     val hasSearchQuery = uiState.searchQuery.isNotEmpty()
                     val hasAnyFilter = hasActiveFilters || hasSearchQuery
 
                     AppEmptyState(
-                        title = when {
-                            hasSearchQuery -> stringResource(id = com.cbo.notes.R.string.no_matching_notes)
-                            hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.no_matching_notes)
-                            else -> stringResource(id = com.cbo.notes.R.string.no_notes_yet)
-                        },
-                        message = when {
-                            hasSearchQuery -> stringResource(id = com.cbo.notes.R.string.try_adjusting_search)
-                            hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.try_adjusting_filters)
-                            else -> stringResource(id = com.cbo.notes.R.string.start_creating_note)
-                        },
-                        actionText = stringResource(id = com.cbo.notes.R.string.create_note),
+                        title =
+                            when {
+                                hasSearchQuery -> stringResource(id = R.string.no_matching_notes)
+                                hasActiveFilters -> stringResource(id = R.string.no_matching_notes)
+                                else -> stringResource(id = R.string.no_notes_yet)
+                            },
+                        message =
+                            when {
+                                hasSearchQuery -> stringResource(id = R.string.try_adjusting_search)
+                                hasActiveFilters -> stringResource(id = R.string.try_adjusting_filters)
+                                else -> stringResource(id = R.string.start_creating_note)
+                            },
+                        actionText = stringResource(id = R.string.create_note),
                         onAction = onNavigateToCreateNote,
-                        secondaryActionText = when {
-                            hasSearchQuery && hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.clear_all_filters)
-                            hasSearchQuery -> stringResource(id = com.cbo.notes.R.string.clear_search)
-                            hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.clear_filters)
-                            else -> null
-                        },
+                        secondaryActionText =
+                            when {
+                                hasSearchQuery && hasActiveFilters -> stringResource(id = com.cbo.notes.R.string.clear_all_filters)
+                                hasSearchQuery -> stringResource(id = R.string.clear_search)
+                                hasActiveFilters -> stringResource(id = R.string.clear_filters)
+                                else -> null
+                            },
                         onSecondaryAction = {
                             viewModel.searchNotes("")
                             viewModel.clearFilters()
@@ -172,8 +188,10 @@ fun NotesScreen(
                         notes = uiState.filteredNotes,
                         viewMode = uiState.viewMode,
                         header = {
-                            Row(modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
                                 SecondaryButton(
                                     text = stringResource(R.string.sort),
                                     onClick = {
@@ -184,26 +202,28 @@ fun NotesScreen(
                                         val rotation by animateFloatAsState(
                                             targetValue = if (sortExpanded) 180f else 0f,
                                             animationSpec = tween(durationMillis = 300),
-                                            label = "sortExpandRotation"
+                                            label = "sortExpandRotation",
                                         )
 
                                         Icon(
                                             imageVector = Icons.Default.ExpandMore,
                                             contentDescription = null,
-                                            modifier = Modifier.rotate(rotation)
+                                            modifier = Modifier.rotate(rotation),
                                         )
                                     },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f),
                                 )
                                 SecondaryButton(
                                     text = stringResource(R.string.filters),
                                     onClick = onNavigateToFilters,
                                     leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f),
                                 )
                             }
                         },
@@ -248,7 +268,7 @@ fun NotesScreen(
                     onSortOrderSelected = { sortOption ->
                         viewModel.changeSortOrder(sortOption)
                         sortExpanded = false
-                      },
+                    },
                     onDismiss = { sortExpanded = false },
                 )
             }
@@ -289,6 +309,128 @@ private fun FilterSection(
     )
 }
 
+/**
+ * 3D Cube rotation animation wrapper for view mode transitions.
+ * Creates a smooth continuous rotation around the Y-axis, simulating
+ * a 3D cube with each view mode on a different face.
+ */
+@Composable
+private fun Cube3DRotationTransition(
+    targetState: ViewMode,
+    modifier: Modifier = Modifier,
+    content: @Composable (ViewMode) -> Unit,
+) {
+    // Track animation state
+    var animationStartRotation by remember { mutableFloatStateOf(0f) }
+    var animationTargetRotation by remember { mutableFloatStateOf(0f) }
+    var rotationDirection by remember { mutableFloatStateOf(1f) }
+    
+    // Track which content to display - old state until midpoint, then new state
+    var displayedState by remember { mutableStateOf(targetState) }
+    var pendingState by remember { mutableStateOf(targetState) }
+    var hasSwitchedContent by remember { mutableStateOf(true) }
+
+    // Detect when target changes and start new animation
+    LaunchedEffect(targetState) {
+        if (targetState != pendingState) {
+            // Determine rotation direction for natural cube spin
+            rotationDirection = when {
+                pendingState == ViewMode.LIST && targetState == ViewMode.GRID -> 1f
+                pendingState == ViewMode.GRID && targetState == ViewMode.COMPACT -> 1f
+                pendingState == ViewMode.COMPACT && targetState == ViewMode.LIST -> 1f
+                else -> -1f
+            }
+            
+            // Set up the new animation segment
+            animationStartRotation = animationTargetRotation
+            animationTargetRotation += 90f * rotationDirection
+            
+            // Remember current displayed state and mark content as not yet switched
+            displayedState = pendingState
+            pendingState = targetState
+            hasSwitchedContent = false
+        }
+    }
+
+    // Smooth easing for the rotation animation
+    val cubeRotationEasing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f)
+
+    // Animate the rotation
+    val animatedRotation by animateFloatAsState(
+        targetValue = animationTargetRotation,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = cubeRotationEasing
+        ),
+        label = "cubeRotation",
+    )
+
+    // Calculate progress through current animation segment (0 to 1)
+    val animationProgress = if (animationTargetRotation != animationStartRotation) {
+        ((animatedRotation - animationStartRotation) / (animationTargetRotation - animationStartRotation))
+            .coerceIn(0f, 1f)
+    } else {
+        1f
+    }
+
+    // Switch content at exactly the midpoint (50% progress)
+    val currentDisplayState = if (animationProgress >= 0.5f) {
+        // After midpoint, show new content
+        if (!hasSwitchedContent) {
+            hasSwitchedContent = true
+        }
+        pendingState
+    } else {
+        // Before midpoint, show old content
+        displayedState
+    }
+
+    // Calculate visual rotation angle for the current face
+    // First half: old content rotates 0° → 90° (out)
+    // Second half: new content rotates -90° → 0° (in)
+    val visualRotation = when {
+        animationProgress >= 1f -> 0f // Animation complete
+        animationProgress < 0.5f -> {
+            // Old content rotating out: 0° → 90°
+            (animationProgress * 2f) * 90f * rotationDirection
+        }
+        else -> {
+            // New content rotating in: -90° → 0°
+            ((animationProgress - 1f) * 2f) * 90f * rotationDirection
+        }
+    }
+
+    // Calculate alpha for smooth fade during the edge-on moment
+    val contentAlpha = run {
+        val absRotation = abs(visualRotation)
+        when {
+            absRotation <= 70f -> 1f
+            absRotation >= 90f -> 0f
+            else -> 1f - ((absRotation - 70f) / 20f)
+        }.coerceIn(0f, 1f)
+    }
+
+    Box(
+        modifier = modifier
+            .graphicsLayer {
+                // Set camera distance for realistic 3D perspective
+                cameraDistance = 12f * density
+
+                // Apply Y-axis rotation for cube spin effect
+                rotationY = visualRotation
+
+                // Subtle scale effect for depth perception
+                val scale = 1f - (abs(visualRotation) / 90f) * 0.08f
+                scaleX = scale
+                scaleY = scale
+            }
+            .alpha(contentAlpha)
+    ) {
+        content(currentDisplayState)
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun NotesContent(
     notes: List<Note>,
@@ -301,78 +443,112 @@ private fun NotesContent(
     onDelete: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    when (viewMode) {
-        ViewMode.LIST -> {
-            LazyColumn(
-                modifier = modifier,
-                contentPadding = PaddingValues(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (header != null) {
-                    item {
-                        header()
-                        Spacer(Modifier.height(8.dp))
+    Cube3DRotationTransition(
+        targetState = viewMode,
+        modifier = modifier,
+    ) { currentViewMode ->
+        when (currentViewMode) {
+            ViewMode.LIST -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (header != null) {
+                        item {
+                            header()
+                            Spacer(Modifier.height(8.dp))
+                        }
+                    }
+                    items(
+                        items = notes,
+                        key = { note -> note.id },
+                    ) { note ->
+                        NoteCard(
+                            note = note,
+                            onClick = { onNoteClick(note.id) },
+                            onTogglePin = { onTogglePin(note.id) },
+                            onToggleFavorite = { onToggleFavorite(note.id) },
+                            onArchive = { onArchive(note.id) },
+                            onDelete = { onDelete(note.id) },
+                            isListView = true,
+                            modifier = Modifier.animateItemPlacement(
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioMediumBouncy
+                                )
+                            ),
+                        )
                     }
                 }
-                items(notes) { note ->
-                    NoteCard(
-                        note = note,
-                        onClick = { onNoteClick(note.id) },
-                        onTogglePin = { onTogglePin(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) },
-                        onArchive = { onArchive(note.id) },
-                        onDelete = { onDelete(note.id) },
-                    )
-                }
             }
-        }
 
-        ViewMode.GRID -> {
-            LazyVerticalStaggeredGrid(
-                columns = Fixed(2),
-                modifier = modifier,
-                contentPadding = PaddingValues(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalItemSpacing = 8.dp,
-            ) {
-                if (header != null) {
-                    item(span = StaggeredGridItemSpan.FullLine) { header() }
-                }
-                items(notes) { note ->
-                    NoteCard(
-                        note = note,
-                        onClick = { onNoteClick(note.id) },
-                        onTogglePin = { onTogglePin(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) },
-                        onArchive = { onArchive(note.id) },
-                        onDelete = { onDelete(note.id) },
-                    )
-                }
-            }
-        }
-
-        ViewMode.COMPACT -> {
-            LazyColumn(
-                modifier = modifier,
-                contentPadding = PaddingValues(),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                if (header != null) {
-                    item {
-                        header()
-                        Spacer(Modifier.height(8.dp))
+            ViewMode.GRID -> {
+                LazyVerticalStaggeredGrid(
+                    columns = Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalItemSpacing = 8.dp,
+                ) {
+                    if (header != null) {
+                        item(span = StaggeredGridItemSpan.FullLine) { header() }
+                    }
+                    items(
+                        items = notes,
+                        key = { note -> note.id },
+                    ) { note ->
+                        NoteCard(
+                            modifier = Modifier.animateItemPlacement(
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioMediumBouncy
+                                )
+                            ),
+                            note = note,
+                            onClick = { onNoteClick(note.id) },
+                            onTogglePin = { onTogglePin(note.id) },
+                            onToggleFavorite = { onToggleFavorite(note.id) },
+                            onArchive = { onArchive(note.id) },
+                            onDelete = { onDelete(note.id) },
+                        )
                     }
                 }
-                itemsIndexed(notes) { index, note ->
-                    CompactNoteCard(
-                        note = note,
-                        onClick = { onNoteClick(note.id) },
-                        onTogglePin = { onTogglePin(note.id) },
-                        onToggleFavorite = { onToggleFavorite(note.id) },
-                        onArchive = { onArchive(note.id) },
-                        onDelete = { onDelete(note.id) },
-                        isFirstItem = index == 0,
-                    )
+            }
+
+            ViewMode.COMPACT -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    if (header != null) {
+                        item {
+                            header()
+                            Spacer(Modifier.height(8.dp))
+                        }
+                    }
+                    itemsIndexed(
+                        items = notes,
+                        key = { _, note -> note.id },
+                    ) { index, note ->
+                        CompactNoteCard(
+                            note = note,
+                            onClick = { onNoteClick(note.id) },
+                            onTogglePin = { onTogglePin(note.id) },
+                            onToggleFavorite = { onToggleFavorite(note.id) },
+                            onArchive = { onArchive(note.id) },
+                            onDelete = { onDelete(note.id) },
+                            swipeHintEnabled = false,
+                            isFirstItem = index == 0,
+                            modifier = Modifier.animateItemPlacement(
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioMediumBouncy
+                                )
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -409,6 +585,8 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                     onTrashClick = {},
                     onCategoriesClick = {},
                     onSettingsClick = {},
+                    viewMode = ViewMode.COMPACT,
+                    onViewModeChange = {},
                 )
             },
         ) { paddingValues ->
@@ -427,6 +605,7 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                             CircularProgressIndicator()
                         }
                     }
+
                     uiState.filteredNotes.isEmpty() -> {
                         NotesEmptyState(
                             hasNotes = uiState.notes.isNotEmpty(),
@@ -436,47 +615,58 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
+
                     else -> {
                         NotesContent(
                             notes = uiState.filteredNotes,
                             viewMode = viewMode,
                             header = {
-                                Row(modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    SecondaryButton(
-                                        text = stringResource(R.string.sort),
-                                        onClick = {
-                                            sortExpanded = true
-                                        },
-                                        leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
-                                        trailingIcon = {
-                                            val rotation by animateFloatAsState(
-                                                targetValue = if (sortExpanded) 180f else 0f,
-                                                animationSpec = tween(durationMillis = 300),
-                                                label = "sortExpandRotation"
-                                            )
+                                LazyRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    item {
+                                        SecondaryButton(
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .weight(1f),
+                                            text = stringResource(R.string.sort),
+                                            onClick = {
+                                                sortExpanded = true
+                                            },
+                                            leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                                            trailingIcon = {
+                                                val rotation by animateFloatAsState(
+                                                    targetValue = if (sortExpanded) 180f else 0f,
+                                                    animationSpec = tween(durationMillis = 300),
+                                                    label = "sortExpandRotation",
+                                                )
 
-                                            Icon(
-                                                imageVector = Icons.Default.ExpandMore,
-                                                contentDescription = null,
-                                                modifier = Modifier.rotate(rotation)
-                                            )
-                                        },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .weight(1f)
-                                    )
-                                SecondaryButton(
-                                    text = stringResource(R.string.filters),
-                                    onClick = { showFiltersSheet = true },
-                                    leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(1f)
-                                )
-                            }
-                        },
-                        onNoteClick = {},
+                                                Icon(
+                                                    imageVector = Icons.Default.ExpandMore,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.rotate(rotation),
+                                                )
+                                            },
+                                        )
+                                    }
+                                    item {
+                                        SecondaryButton(
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .weight(1f),
+                                            text = stringResource(R.string.filters),
+                                            onClick = { showFiltersSheet = true },
+                                            leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) },
+                                        )
+                                    }
+                                    item {
+                                    }
+                                }
+                            },
+                            onNoteClick = {},
                             onTogglePin = {},
                             onToggleFavorite = {},
                             onArchive = {},
@@ -518,7 +708,7 @@ private fun NotesScreenPreviewHost(initialUiState: NotesUiState) {
                         onSortOrderSelected = {
                             sortExpanded = false
                         },
-                        onDismiss = { sortExpanded = false }
+                        onDismiss = { sortExpanded = false },
                     )
                 }
             }
