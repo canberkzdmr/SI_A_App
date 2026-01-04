@@ -3,7 +3,9 @@ package com.cbo.core.data.di
 import android.content.Context
 import com.cbo.core.data.prefs.LanguagePreferencesManager
 import com.cbo.core.data.repository.PreferencesRepositoryImpl
+import com.cbo.core.data.repository.ThemePreferencesRepositoryImpl
 import com.cbo.core.domain.preferences.PreferencesRepository
+import com.cbo.core.domain.preferences.ThemePreferencesRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -21,6 +23,12 @@ abstract class PreferencesModule {
     abstract fun bindPreferencesRepository(
         impl: PreferencesRepositoryImpl
     ): PreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindThemePreferencesRepository(
+        impl: ThemePreferencesRepositoryImpl
+    ): ThemePreferencesRepository
 
     companion object {
         @Provides

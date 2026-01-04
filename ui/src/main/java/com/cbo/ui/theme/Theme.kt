@@ -9,7 +9,10 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -255,6 +258,11 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+/**
+ * Provides the currently-applied app theme (system or user override) to child composables.
+ */
+val LocalIsDarkTheme: ProvidableCompositionLocal<Boolean> = staticCompositionLocalOf { false }
+
 @Composable
 fun MemCloudApplicationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -262,12 +270,14 @@ fun MemCloudApplicationTheme(
 ) {
     val colorScheme = if (darkTheme) darkScheme else lightScheme
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography
-    ) {
-        ApplySystemBarColors()
-        content()
+    CompositionLocalProvider(LocalIsDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography
+        ) {
+            ApplySystemBarColors(darkTheme = darkTheme)
+            content()
+        }
     }
 }
 
@@ -278,9 +288,8 @@ fun Context.findActivity(): Activity? = when (this) {
 }
 
 @Composable
-fun ApplySystemBarColors() {
+fun ApplySystemBarColors(darkTheme: Boolean) {
     val view = LocalView.current
-    val darkTheme = isSystemInDarkTheme()
 
     SideEffect {
         val activity = view.context.findActivity()

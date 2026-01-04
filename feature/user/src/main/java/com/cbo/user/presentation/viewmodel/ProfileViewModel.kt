@@ -7,6 +7,7 @@ import com.cbo.core.domain.model.User
 import com.cbo.core.domain.model.UserWithDetail
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
+import com.cbo.core.domain.usecase.theme.ToggleDarkThemeUseCase
 import com.cbo.core.session.UserSession
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.core.session.domain.usecase.LogoutUseCase
@@ -34,6 +35,7 @@ class ProfileViewModel @Inject constructor(
     private val getActiveUserUseCase: GetActiveUserUseCase,
     private val getUserWithDetailUseCase: GetUserWithDetailUseCase,
     private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
+    private val toggleDarkThemeUseCase: ToggleDarkThemeUseCase,
 ) : ViewModel() {
     val currentUser: Flow<User?> = userSession.currentUser
     private val _uiState = MutableStateFlow(ProfileUiState(isLoading = true))
@@ -130,8 +132,13 @@ class ProfileViewModel @Inject constructor(
         _uiState.value = ProfileUiState(isLoading = true) // show shimmer while processing
     }
 
-    fun themeChange() {
-        // Logic to change theme
+    fun themeChange(currentEffectiveDarkTheme: Boolean) {
+        viewModelScope.launch {
+            // currentEffectiveDarkTheme is provided by the UI (it reflects either system theme or override)
+            // so we can toggle from what the user currently sees.
+            // (Fresh install: override is null -> we will create an override on first toggle.)
+            toggleDarkThemeUseCase(currentEffectiveDarkTheme = currentEffectiveDarkTheme)
+        }
     }
 
     fun languageChange() {

@@ -5,4 +5,5 @@ object PreferenceKeys {
 
     const val LAST_USERNAME = "last_username"
     const val REMEMBER_ME = "remember_me"
+    const val DARK_THEME_ENABLED = "dark_theme_enabled"
 }

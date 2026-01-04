@@ -64,6 +64,7 @@ import com.cbo.ui.components.AppLabel
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.SectionHeader
 import com.cbo.ui.components.ShimmerBox
+import com.cbo.ui.theme.LocalIsDarkTheme
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.user.R
 import com.cbo.user.presentation.viewmodel.ProfileEvent
@@ -105,6 +106,7 @@ fun ProfileScreen(
         Log.i("ProfileScreen", "Back button is disabled for Profile Screen")
     }*/
 
+    val isDarkThemeApplied = LocalIsDarkTheme.current
     ProfileScreenContent(
         uiState = uiState,
         onLogout = viewModel::logout,
@@ -112,7 +114,7 @@ fun ProfileScreen(
         onChangePassword = { onChangePassword() },
         onDeleteAccount = { onDeleteAccount() },
         onNotesClicked = { onNotesClicked() },
-        onThemeChange = {},
+        onThemeChange = { viewModel.themeChange(currentEffectiveDarkTheme = isDarkThemeApplied) },
         onLanguageChange = { onChangeLanguage() },
         onManageCategories = { onCategoriesClicked() },
         onManageTags = { onTagsClicked() },
