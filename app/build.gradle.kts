@@ -43,6 +43,7 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":core-sync"))
     implementation(project(":ui"))
     implementation(project(":feature:login"))
     implementation(project(":feature:user"))

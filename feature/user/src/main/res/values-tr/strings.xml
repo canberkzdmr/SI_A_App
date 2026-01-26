@@ -28,6 +28,7 @@
 
     <string name="app_version">Uygulama Sürümü: %1$s</string>
     <string name="contact_support">Destek ile İletişime Geç</string>
+    <string name="sync_debug">Senkron Hata Ayıklama</string>
 
     <string name="edit_profile_title">Profili Düzenle</string>
     <string name="full_name">Ad Soyad</string>

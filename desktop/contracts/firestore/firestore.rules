@@ -1,0 +1,93 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function hasOnlyKeys(data, allowedKeys) {
+      return data.keys().hasOnly(allowedKeys);
+    }
+
+    function isNonEmptyString(value, maxLen) {
+      return value is string && value.size() > 0 && value.size() <= maxLen;
+    }
+
+    function isStringOrNull(value, maxLen) {
+      return value == null || (value is string && value.size() <= maxLen);
+    }
+
+    // Users root doc: users/{uid}
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+
+      // Create on sign-up (client-side) OR via backend (preferred).
+      allow create: if isOwner(uid)
+        && hasOnlyKeys(request.resource.data, [
+          "schemaVersion",
+          "username",
+          "email",
+          "avatarUrl",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ])
+        && request.resource.data.schemaVersion is number
+        && isNonEmptyString(request.resource.data.username, 64)
+        && isNonEmptyString(request.resource.data.email, 254)
+        && isStringOrNull(request.resource.data.avatarUrl, 2048)
+        && request.resource.data.isActive is bool;
+
+      // Updates: restrict writable fields.
+      allow update: if isOwner(uid)
+        && hasOnlyKeys(request.resource.data, [
+          "schemaVersion",
+          "username",
+          "email",
+          "avatarUrl",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ])
+        && request.resource.data.schemaVersion is number
+        && isNonEmptyString(request.resource.data.username, 64)
+        && isNonEmptyString(request.resource.data.email, 254)
+        && isStringOrNull(request.resource.data.avatarUrl, 2048)
+        && request.resource.data.isActive is bool;
+
+      // Deletion is usually not allowed from clients (avoid account nukes).
+      allow delete: if false;
+
+      // Subcollections: profile/settings/notes/categories/tags
+      match /profile/{profileId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /settings/{settingsId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /categories/{categoryId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /tags/{tagId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /notes/{noteId} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+  }
+}
+
+
+
+

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Lock
@@ -67,6 +68,7 @@ import com.cbo.ui.components.ShimmerBox
 import com.cbo.ui.theme.LocalIsDarkTheme
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.user.R
+import com.cbo.user.BuildConfig
 import com.cbo.user.presentation.viewmodel.ProfileEvent
 import com.cbo.user.presentation.viewmodel.ProfileUiState
 import com.cbo.user.presentation.viewmodel.ProfileViewModel
@@ -79,6 +81,7 @@ fun ProfileScreen(
     onChangePassword: () -> Unit,
     onChangeLanguage: () -> Unit,
     onDeleteAccount: () -> Unit,
+    onSyncDebug: () -> Unit = {},
     onNotesClicked: () -> Unit = {},
     onCategoriesClicked: () -> Unit = {},
     onTagsClicked: () -> Unit = {},
@@ -121,6 +124,7 @@ fun ProfileScreen(
         onExportNotes = {},
         onEnableBiometrics = viewModel::toggleBiometrics,
         onContactSupport = {},
+        onSyncDebug = onSyncDebug,
     )
 }
 
@@ -140,6 +144,7 @@ fun ProfileScreenContent(
     onExportNotes: () -> Unit,
     onEnableBiometrics: () -> Unit,
     onContactSupport: () -> Unit,
+    onSyncDebug: () -> Unit,
 ) {
     ScreenWithTopBarAndInsets(
         topBar = {
@@ -154,6 +159,14 @@ fun ProfileScreenContent(
         }
     ) { innerPadding ->
         // Build sections and items using string resource IDs (not calling composables in LazyListScope)
+        val aboutItems = buildList<Pair<ImageVector, Int>> {
+            add(Icons.Default.Info to R.string.app_version)
+            add(Icons.Default.SupportAgent to R.string.contact_support)
+            if (BuildConfig.DEBUG) {
+                add(Icons.Default.BugReport to R.string.sync_debug)
+            }
+        }
+
         val sections: List<Pair<Int, List<Pair<ImageVector, Int>>>> = listOf(
             R.string.section_account to listOf(
                 Icons.Default.Edit to R.string.edit_profile,
@@ -174,10 +187,7 @@ fun ProfileScreenContent(
             R.string.section_security to listOf(
                 Icons.Default.Fingerprint to R.string.enable_biometrics,
             ),
-            R.string.section_about to listOf(
-                Icons.Default.Info to R.string.app_version,
-                Icons.Default.SupportAgent to R.string.contact_support,
-            ),
+            R.string.section_about to aboutItems,
         )
 
         LazyColumn(
@@ -332,6 +342,7 @@ fun ProfileScreenContent(
                                     R.string.export_notes -> onExportNotes()
                                     R.string.enable_biometrics -> onEnableBiometrics()
                                     R.string.contact_support -> onContactSupport()
+                                    R.string.sync_debug -> onSyncDebug()
                                     R.string.app_version -> { /* no-op */ }
                                     else -> {}
                                 }
@@ -424,6 +435,7 @@ fun ProfileScreenPreview() {
             onExportNotes = {},
             onEnableBiometrics = {},
             onContactSupport = {},
+            onSyncDebug = {},
         )
     }
 }

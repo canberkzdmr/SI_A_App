@@ -7,3 +7,12 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.ksp) apply false
 }
+
+// Windows + OneDrive can lock files under `<module>/build/**` during incremental Android resource packaging.
+// To avoid random build failures, place all build outputs under `%LOCALAPPDATA%/MemCloudBuild/`.
+val memCloudBuildRoot = System.getenv("LOCALAPPDATA")?.let { java.io.File(it, "MemCloudBuild") }
+subprojects {
+    if (memCloudBuildRoot != null) {
+        buildDir = java.io.File(memCloudBuildRoot, project.path.replace(':', '_'))
+    }
+}

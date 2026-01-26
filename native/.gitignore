@@ -1,0 +1,4 @@
+/build
+
+# Rust build outputs (very large; never commit)
+/sync-core/target/

@@ -34,6 +34,7 @@
     <!-- About Items -->
     <string name="app_version">App Version: %1$s</string>
     <string name="contact_support">Contact Support</string>
+    <string name="sync_debug">Sync Debug</string>
 
     <!-- Edit Profile -->
     <string name="edit_profile_title">Edit Profile</string>

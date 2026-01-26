@@ -49,6 +49,7 @@ fun MainScreen(
     onChangePassword: () -> Unit,
     onChangeLanguage: () -> Unit,
     onDeleteAccount: () -> Unit,
+    onSyncDebug: () -> Unit,
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
     onNavigateToDeletedArchived: (tabId: Int) -> Unit,
@@ -141,7 +142,10 @@ fun MainScreen(
                     onTagsClicked = {
                         Log.d("MainScreen", "PS onTagsClicked")
                         navController.navigate(BottomNavDestination.Tags.route)
-                    }
+                    },
+                    onSyncDebug = {
+                        onSyncDebug()
+                    },
                 )
             }
 
@@ -215,6 +219,7 @@ fun MainScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
+
         }
     }
         

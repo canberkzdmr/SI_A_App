@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import com.cbo.core.navigation.AppDestination
 import com.cbo.login.presentation.navigation.loginNavGraph
 import com.cbo.memcloud.presentation.screen.MainScreen
+import com.cbo.memcloud.presentation.screen.SyncDebugScreen
 import com.cbo.notes.presentation.navigation.navigateToCategories
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
 import com.cbo.notes.presentation.navigation.navigateToDeletedArchived
@@ -96,6 +97,9 @@ fun MainNavHost(
             onDeleteUserClicked = {
                 Log.d("MainNavHost", "(userNavGraph) Delete Account clicked")
             },
+            onSyncDebug = {
+                navController.navigate(AppDestination.SyncDebug.route)
+            },
             onNotesClicked = {
                 Log.d("MainNavHost", "(userNavGraph) Navigated to Main")
                 navController.navigate(AppDestination.Main.route)
@@ -151,6 +155,9 @@ fun MainNavHost(
                 onDeleteAccount = {
                     Log.d("MainNavHost", "(MainScreen) Delete Account clicked")
                 },
+                onSyncDebug = {
+                    navController.navigate(AppDestination.SyncDebug.route)
+                },
                 onNavigateToCreateNote = {
                     navController.navigateToCreateNote()
                 },
@@ -160,6 +167,12 @@ fun MainNavHost(
                 onNavigateToDeletedArchived = { tabId ->
                     navController.navigateToDeletedArchived(tabId)
                 }
+            )
+        }
+
+        composable(AppDestination.SyncDebug.route) {
+            SyncDebugScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
