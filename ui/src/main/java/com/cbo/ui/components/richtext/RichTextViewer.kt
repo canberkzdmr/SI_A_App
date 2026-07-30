@@ -1,35 +1,22 @@
 package com.cbo.ui.components.richtext
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import com.mohamedrejeb.richeditor.model.RichTextState
-import com.mohamedrejeb.richeditor.ui.material3.RichText
+import com.halilibo.richtext.commonmark.Markdown
+import com.halilibo.richtext.ui.material3.RichText
 
+/**
+ * Displays Markdown-formatted text using [RichText] from
+ * halilozercan/compose-richtext (Material3 themed).
+ *
+ * @param markdown Raw Markdown string to render.
+ */
 @Composable
 fun RichTextViewer(
-    html: String,
+    markdown: String,
     modifier: Modifier = Modifier,
-    overflow: TextOverflow = TextOverflow.Ellipsis,
-    maxLines: Int = 5,
 ) {
-    val state = remember { RichTextState() }
-
-    LaunchedEffect(html) {
-        state.setHtml(html)
+    RichText(modifier = modifier) {
+        Markdown(content = markdown)
     }
-
-    RichText(
-        state = state,
-        overflow = overflow,
-        maxLines = maxLines,
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = modifier.fillMaxWidth(),
-    )
 }
-
-

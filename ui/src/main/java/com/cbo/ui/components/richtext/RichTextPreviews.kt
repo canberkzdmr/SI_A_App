@@ -17,11 +17,11 @@ import com.cbo.ui.theme.MemCloudApplicationTheme
 private fun RichTextEditorFieldPreview_Empty() {
     MemCloudApplicationTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            var html by remember { mutableStateOf("") }
+            var markdown by remember { mutableStateOf("") }
             Column {
                 RichTextEditorField(
-                    valueHtml = html,
-                    onValueChange = { html = it },
+                    valueMarkdown = markdown,
+                    onValueChange = { markdown = it },
                 )
             }
         }
@@ -33,42 +33,54 @@ private fun RichTextEditorFieldPreview_Empty() {
 private fun RichTextEditorFieldPreview_WithContent() {
     MemCloudApplicationTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            var html by remember {
+            var markdown by remember {
                 mutableStateOf(
                     """
-                    <h3>Compose Rich Editor</h3>
-                    <p>Write <b>bold</b>, <i>italic</i>, and lists below:</p>
-                    <ul>
-                      <li>First</li>
-                      <li>Second</li>
-                    </ul>
+                    ### Compose Rich Editor
+                    
+                    Write **bold**, *italic*, and lists below:
+                    
+                    - First
+                    - Second
+                    
+                    1. Ordered item one
+                    2. Ordered item two
+                    
+                    > A blockquote example
+                    
+                    Inline `code` and ~~strikethrough~~ also work.
                     """.trimIndent()
                 )
             }
             Column {
                 RichTextEditorField(
-                    valueHtml = html,
-                    onValueChange = { html = it },
+                    valueMarkdown = markdown,
+                    onValueChange = { markdown = it },
                 )
             }
         }
     }
 }
 
-@Preview(name = "RichTextViewer – HTML", showBackground = true)
+@Preview(name = "RichTextViewer – Markdown", showBackground = true)
 @Composable
 private fun RichTextViewerPreview() {
     MemCloudApplicationTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column {
                 RichTextViewer(
-                    html = """
-                        <p>This is <b>bold</b> and <i>italic</i> text with a link to 
-                        <a href=\"https://example.com\">Example</a>.</p>
-                        <ol>
-                          <li>Item one</li>
-                          <li>Item two</li>
-                        </ol>
+                    markdown = """
+                        This is **bold** and *italic* text with a [link](https://example.com).
+                        
+                        1. Item one
+                        2. Item two
+                        
+                        - Bullet A
+                        - Bullet B
+                        
+                        > A wise person once said…
+                        
+                        Inline `code` snippet.
                     """.trimIndent(),
                 )
             }

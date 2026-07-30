@@ -425,7 +425,7 @@ fun EditNoteScreen(
                     val focusRequestContent = remember { FocusRequester() }
 
                     RichTextEditorField(
-                        valueHtml = uiState.content,
+                        valueMarkdown = uiState.content,
                         onValueChange = onContentChange,
                         modifier =
                             Modifier

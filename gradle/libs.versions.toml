@@ -35,7 +35,7 @@ appcompatVersion = "1.7.1"
 roomCommonJvm = "2.8.1"
 workManager = "2.9.0"
 
-richeditor = "1.0.0-rc01"
+composeRichtext = "1.0.0-alpha03"
 
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
@@ -82,7 +82,8 @@ work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version
 hilt-work = { group = "androidx.hilt", name = "hilt-work", version = "1.2.0" }
 hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler", version = "1.2.0" }
 
-richeditorCompose = { group = "com.mohamedrejeb.richeditor", name = "richeditor-compose", version.ref = "richeditor" }
+richtextUiMaterial3 = { group = "com.halilibo.compose-richtext", name = "richtext-ui-material3", version.ref = "composeRichtext" }
+richtextCommonmark = { group = "com.halilibo.compose-richtext", name = "richtext-commonmark", version.ref = "composeRichtext" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

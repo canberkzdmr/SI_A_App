@@ -1,6 +1,7 @@
 package com.cbo.notes.presentation.component
 
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -75,19 +76,17 @@ fun SwipeableNoteCard(
 
     // 2. Configure the AnchoredDraggableState
     val state = remember {
-        AnchoredDraggableState(
+        AnchoredDraggableState<SwipeState>(
             initialValue = SwipeState.CLOSED,
+            anchors = DraggableAnchors {
+                SwipeState.CLOSED at 0f
+                SwipeState.REVEALED at -actionAreaWidthPx // Swipe Left (negative offset)
+            },
             positionalThreshold = { distance: Float -> distance * 0.5f },
             velocityThreshold = { with(density) { 100.dp.toPx() } },
-            animationSpec = tween(durationMillis = 300),
-        ).apply {
-            updateAnchors(
-                DraggableAnchors {
-                    SwipeState.CLOSED at 0f
-                    SwipeState.REVEALED at -actionAreaWidthPx // Swipe Left (negative offset)
-                }
-            )
-        }
+            snapAnimationSpec = tween(durationMillis = 300),
+            decayAnimationSpec = exponentialDecay()
+        )
     }
 
     Box(

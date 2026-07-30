@@ -472,12 +472,7 @@ private fun NotesContent(
                             onArchive = { onArchive(note.id) },
                             onDelete = { onDelete(note.id) },
                             isListView = true,
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            ),
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
@@ -499,12 +494,7 @@ private fun NotesContent(
                         key = { note -> note.id },
                     ) { note ->
                         NoteCard(
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            ),
+                            modifier = Modifier.animateItem(),
                             note = note,
                             onClick = { onNoteClick(note.id) },
                             onTogglePin = { onTogglePin(note.id) },
@@ -541,12 +531,7 @@ private fun NotesContent(
                             onDelete = { onDelete(note.id) },
                             swipeHintEnabled = false,
                             isFirstItem = index == 0,
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = spring(
-                                    stiffness = Spring.StiffnessMediumLow,
-                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                )
-                            ),
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }

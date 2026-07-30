@@ -1,6 +1,7 @@
 package com.cbo.ui.components.richtext
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -12,21 +13,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.FormatAlignLeft
-import androidx.compose.material.icons.automirrored.outlined.FormatAlignRight
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
-import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.FormatAlignCenter
 import androidx.compose.material.icons.outlined.FormatBold
 import androidx.compose.material.icons.outlined.FormatItalic
 import androidx.compose.material.icons.outlined.FormatListNumbered
-import androidx.compose.material.icons.outlined.FormatSize
 import androidx.compose.material.icons.outlined.FormatStrikethrough
-import androidx.compose.material.icons.outlined.FormatUnderlined
 import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -39,291 +35,227 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontStyle.Companion.Italic
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.cbo.ui.components.dialogs.AppFormDialog
 import com.cbo.ui.components.dialogs.FormField
-import com.mohamedrejeb.richeditor.model.RichTextState
-import com.mohamedrejeb.richeditor.model.rememberRichTextState
-import com.mohamedrejeb.richeditor.ui.BasicRichTextEditor
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RichTextEditorField(
-    valueHtml: String,
+    valueMarkdown: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String = "Start writing your note...",
-    minHeight: Int = 200
+    minHeight: Int = 200,
 ) {
-    val richTextState = rememberRichTextState()
+    // TextFieldValue is used to track cursor position for Markdown insertion
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(valueMarkdown)) }
 
     // Sync editor when external value changes (e.g., editing existing note)
-    LaunchedEffect(valueHtml) {
-        // Only update if different to avoid cursor jumps
-        if (valueHtml != richTextState.toHtml()) {
-            richTextState.setHtml(valueHtml)
+    LaunchedEffect(valueMarkdown) {
+        if (valueMarkdown != textFieldValue.text) {
+            textFieldValue = TextFieldValue(
+                text = valueMarkdown,
+                selection = TextRange(valueMarkdown.length)
+            )
         }
     }
 
     Column(modifier = modifier) {
-        EditorToolbar(richTextState)
+        EditorToolbar(
+            textFieldValue = textFieldValue,
+            onValueChange = { newValue ->
+                textFieldValue = newValue
+                onValueChange(newValue.text)
+            }
+        )
         HorizontalDivider()
         Surface(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .heightIn(min = minHeight.dp),
             tonalElevation = 1.dp,
         ) {
-            Column(
-                modifier =
-                    Modifier
-                        .padding(bottom = 12.dp),
-            ) {
-                if (richTextState.toHtml().isBlank()) {
+            Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+                if (textFieldValue.text.isEmpty()) {
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                BasicRichTextEditor(
-                    state = richTextState,
-                    modifier = Modifier.padding(horizontal = 4.dp).fillMaxSize(),
+                BasicTextField(
+                    value = textFieldValue,
+                    onValueChange = { newValue ->
+                        textFieldValue = newValue
+                        onValueChange(newValue.text)
+                    },
+                    modifier = Modifier.fillMaxSize(),
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface
                     ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 )
             }
         }
     }
-
-    // Report changes upstream by observing changes
-    LaunchedEffect(richTextState) {
-        snapshotFlow { richTextState.annotatedString }
-            .map { richTextState.toHtml() }
-            .distinctUntilChanged()
-            .collectLatest { html -> onValueChange(html) }
-    }
 }
 
+// ---------------------------------------------------------------------------
+// Toolbar
+// ---------------------------------------------------------------------------
+
 @Composable
-private fun EditorToolbar(state: RichTextState) {
+private fun EditorToolbar(
+    textFieldValue: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+) {
+    /** Wraps the current selection (or inserts at cursor) with [prefix] and [suffix]. */
+    fun wrap(prefix: String, suffix: String = prefix) {
+        val sel = textFieldValue.selection
+        val text = textFieldValue.text
+        val newText: String
+        val newSelection: TextRange
+
+        if (!sel.collapsed) {
+            val selected = text.substring(sel.start, sel.end)
+            newText = text.substring(0, sel.start) + prefix + selected + suffix +
+                    text.substring(sel.end)
+            newSelection = TextRange(sel.start, sel.end + prefix.length + suffix.length)
+        } else {
+            newText = text.substring(0, sel.start) + prefix + suffix + text.substring(sel.start)
+            newSelection = TextRange(sel.start + prefix.length)
+        }
+
+        onValueChange(TextFieldValue(text = newText, selection = newSelection))
+    }
+
+    /** Prepends [prefix] to every selected line (or the line at cursor). */
+    fun prependLine(prefix: String) {
+        val sel = textFieldValue.selection
+        val text = textFieldValue.text
+
+        // Determine the line range
+        val lineStart = text.lastIndexOf('\n', sel.start - 1).let { if (it < 0) 0 else it + 1 }
+        val lineEnd = text.indexOf('\n', sel.end).let { if (it < 0) text.length else it }
+        val lineText = text.substring(lineStart, lineEnd)
+
+        // Toggle: remove prefix if already present, otherwise add it
+        val newLineText = if (lineText.startsWith(prefix)) {
+            lineText.removePrefix(prefix)
+        } else {
+            prefix + lineText
+        }
+
+        val delta = newLineText.length - lineText.length
+        val newText = text.substring(0, lineStart) + newLineText + text.substring(lineEnd)
+        val newCursor = (sel.start + delta).coerceIn(0, newText.length)
+        onValueChange(TextFieldValue(text = newText, selection = TextRange(newCursor)))
+    }
 
     Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
+        // ---- Row 1: Inline styles ----
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            // Bold
             RichTextStyleButton(
-                onClick = { state.toggleSpanStyle(SpanStyle(fontWeight = FontWeight.Bold)) },
-                isSelected = state.currentSpanStyle.fontWeight == FontWeight.Bold,
-                icon = Icons.Outlined.FormatBold
+                onClick = { wrap("**") },
+                icon = Icons.Outlined.FormatBold,
+                isSelected = false,
+            )
+            RichTextStyleButton(
+                onClick = { wrap("*") },
+                icon = Icons.Outlined.FormatItalic,
+                isSelected = false,
+            )
+            RichTextStyleButton(
+                onClick = { wrap("~~") },
+                icon = Icons.Outlined.FormatStrikethrough,
+                isSelected = false,
+            )
+            RichTextStyleButton(
+                onClick = { wrap("`") },
+                icon = Icons.Outlined.Code,
+                isSelected = false,
             )
 
-            // Italic
-            RichTextStyleButton(
-                onClick = {
-                    state.toggleSpanStyle(
-                        SpanStyle(
-                            fontStyle = Italic
-                        )
-                    )
-                },
-                isSelected = state.currentSpanStyle.fontStyle == Italic,
-                icon = Icons.Outlined.FormatItalic
-            )
+            Spacer(modifier = Modifier.weight(1f))
+            VerticalDivider(modifier = Modifier.fillMaxHeight())
 
-            // Underline
+            // Heading (H3)
             RichTextStyleButton(
-                onClick = {
-                    state.toggleSpanStyle(
-                        SpanStyle(
-                            textDecoration = TextDecoration.Underline
-                        )
-                    )
-                },
-                isSelected = state.currentSpanStyle.textDecoration?.contains(TextDecoration.Underline) == true,
-                icon = Icons.Outlined.FormatUnderlined
-            )
-
-            // Strikethrough
-            RichTextStyleButton(
-                onClick = {
-                    state.toggleSpanStyle(
-                        SpanStyle(
-                            textDecoration = TextDecoration.LineThrough
-                        )
-                    )
-                },
-                isSelected = state.currentSpanStyle.textDecoration?.contains(TextDecoration.LineThrough) == true,
-                icon = Icons.Outlined.FormatStrikethrough
-            )
-
-            // Format Size
-            RichTextStyleButton(
-                onClick = {
-                    state.toggleSpanStyle(
-                        SpanStyle(
-                            fontSize = 28.sp
-                        )
-                    )
-                },
-                isSelected = state.currentSpanStyle.fontSize == 28.sp,
-                icon = Icons.Outlined.FormatSize
-            )
-
-            // Red
-            RichTextStyleButton(
-                onClick = {
-                    state.toggleSpanStyle(
-                        SpanStyle(
-                            color = Color.Red
-                        )
-                    )
-                },
-                isSelected = state.currentSpanStyle.color == MaterialTheme.colorScheme.error,
-                icon = Icons.Filled.Circle,
-                tint = MaterialTheme.colorScheme.error
-            )
-
-            // Yellow
-            RichTextStyleButton(
-                onClick = {
-                    state.toggleSpanStyle(
-                        SpanStyle(
-                            background = Color.Yellow
-                        )
-                    )
-                },
-                isSelected = state.currentSpanStyle.background == Color.Yellow,
-                icon = Icons.Outlined.Circle,
-                tint = Color.Yellow
+                onClick = { prependLine("### ") },
+                icon = Icons.Outlined.Title,
+                isSelected = false,
             )
         }
 
         HorizontalDivider(modifier = Modifier.fillMaxWidth())
 
+        // ---- Row 2: Block styles ----
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            // Unordered list
             RichTextStyleButton(
-                onClick = {
-                    state.addParagraphStyle(
-                        ParagraphStyle(
-                            textAlign = TextAlign.Left,
-                        )
-                    )
-                },
-                isSelected = state.currentParagraphStyle.textAlign == TextAlign.Left,
-                icon = Icons.AutoMirrored.Outlined.FormatAlignLeft
-            )
-
-            RichTextStyleButton(
-                onClick = {
-                    state.addParagraphStyle(
-                        ParagraphStyle(
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                },
-                isSelected = state.currentParagraphStyle.textAlign == TextAlign.Center,
-                icon = Icons.Outlined.FormatAlignCenter
-            )
-
-            RichTextStyleButton(
-                onClick = {
-                    state.addParagraphStyle(
-                        ParagraphStyle(
-                            textAlign = TextAlign.Right
-                        )
-                    )
-                },
-                isSelected = state.currentParagraphStyle.textAlign == TextAlign.Right,
-                icon = Icons.AutoMirrored.Outlined.FormatAlignRight
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            VerticalDivider(modifier = Modifier.fillMaxHeight())
-            // Code block insertion prompt
-            var codeDialogOpen by remember {
-                mutableStateOf(false)
-            }
-
-            // Unordered List (Bullet/Dot)
-            RichTextStyleButton(
-                onClick = {
-                    state.toggleUnorderedList()
-                },
-                isSelected = state.isUnorderedList,
+                onClick = { prependLine("- ") },
                 icon = Icons.AutoMirrored.Outlined.FormatListBulleted,
+                isSelected = false,
             )
 
-            // Ordered List 1. 2. 3.
+            // Ordered list — simple: always prefix with "1. " (user adjusts numbering manually)
             RichTextStyleButton(
-                onClick = {
-                    state.toggleOrderedList()
-                },
-                isSelected = state.isOrderedList,
+                onClick = { prependLine("1. ") },
                 icon = Icons.Outlined.FormatListNumbered,
+                isSelected = false,
+            )
+
+            // Blockquote
+            RichTextStyleButton(
+                onClick = { prependLine("> ") },
+                icon = Icons.Outlined.FormatBold, // placeholder icon
+                isSelected = false,
             )
 
             Spacer(modifier = Modifier.weight(1f))
-
             VerticalDivider(modifier = Modifier.fillMaxHeight())
 
-            RichTextStyleButton(
-                onClick = {
-                    state.toggleCodeSpan()
-                },
-                isSelected = state.isCodeSpan,
-                icon = Icons.Outlined.Code,
-            )
-
-            // Simple link insertion prompt
+            // Link dialog
             var linkDialogOpen by remember { mutableStateOf(false) }
-
             RichTextStyleButton(
-                onClick = {
-                    linkDialogOpen = true
-                },
-                isSelected = state.isLink,
+                onClick = { linkDialogOpen = true },
                 icon = Icons.Outlined.Link,
+                isSelected = false,
             )
-
             if (linkDialogOpen) {
                 SimpleLinkDialog(
                     onConfirm = { text, url ->
-                        state.addLink(text = text, url = url)
+                        val sel = textFieldValue.selection
+                        val fullText = textFieldValue.text
+                        val mdLink = "[$text]($url)"
+                        val newText = fullText.substring(0, sel.start) + mdLink +
+                                fullText.substring(if (sel.collapsed) sel.start else sel.end)
+                        onValueChange(
+                            TextFieldValue(
+                                text = newText,
+                                selection = TextRange(sel.start + mdLink.length)
+                            )
+                        )
                         linkDialogOpen = false
                     },
                     onDismiss = { linkDialogOpen = false },
@@ -333,6 +265,10 @@ private fun EditorToolbar(state: RichTextState) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Link dialog
+// ---------------------------------------------------------------------------
+
 @Composable
 private fun SimpleLinkDialog(
     onConfirm: (String, String) -> Unit,
@@ -341,27 +277,26 @@ private fun SimpleLinkDialog(
     var text by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
 
-    val fields =
-        listOf(
-            FormField(
-                key = "text",
-                label = "Text",
-                placeholder = "Enter link text",
-                value = text,
-                onValueChange = { text = it },
-                isError = text.isBlank(),
-                errorMessage = if (text.isBlank()) "Text cannot be empty" else null,
-            ),
-            FormField(
-                key = "url",
-                label = "URL",
-                placeholder = "Enter link URL",
-                value = url,
-                onValueChange = { url = it },
-                isError = url.isBlank(),
-                errorMessage = if (url.isBlank()) "URL cannot be empty" else null,
-            ),
-        )
+    val fields = listOf(
+        FormField(
+            key = "text",
+            label = "Text",
+            placeholder = "Enter link text",
+            value = text,
+            onValueChange = { text = it },
+            isError = text.isBlank(),
+            errorMessage = if (text.isBlank()) "Text cannot be empty" else null,
+        ),
+        FormField(
+            key = "url",
+            label = "URL",
+            placeholder = "Enter link URL",
+            value = url,
+            onValueChange = { url = it },
+            isError = url.isBlank(),
+            errorMessage = if (url.isBlank()) "URL cannot be empty" else null,
+        ),
+    )
 
     AppFormDialog(
         title = "Insert Link",

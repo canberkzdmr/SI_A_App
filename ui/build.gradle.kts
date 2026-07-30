@@ -72,6 +72,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Rich text editor (explicit to avoid catalog issues)
-    implementation(libs.richeditorCompose)
+    // Rich text — Markdown renderer & editor (halilozercan/compose-richtext)
+    implementation(libs.richtextUiMaterial3)
+    implementation(libs.richtextCommonmark)
 }

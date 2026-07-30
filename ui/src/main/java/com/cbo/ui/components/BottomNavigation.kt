@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ripple
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -366,7 +367,7 @@ fun NavigationTab(
         modifier = Modifier
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false, radius = 28.dp)
+                indication = ripple(bounded = false, radius = 28.dp)
             ) { onClick() }
             .padding(vertical = 4.dp)
             .scale(animatedScale)
@@ -529,7 +530,7 @@ fun CenterLabel(
         modifier = Modifier
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = false, radius = 28.dp)
+                indication = ripple(bounded = false, radius = 28.dp)
             ) { onClick() }
     ) {
         val labelSlotHeight = 28.dp
