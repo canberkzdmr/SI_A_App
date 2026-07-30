@@ -63,7 +63,7 @@ import kotlinx.coroutines.flow.map
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RichTextEditorField(
-    valueHtml: String,
+    valueMarkdown: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String = "Start writing your note...",
@@ -72,10 +72,10 @@ fun RichTextEditorField(
     val richTextState = rememberRichTextState()
 
     // Sync editor when external value changes (e.g., editing existing note)
-    LaunchedEffect(valueHtml) {
+    LaunchedEffect(valueMarkdown) {
         // Only update if different to avoid cursor jumps
-        if (valueHtml != richTextState.toHtml()) {
-            richTextState.setHtml(valueHtml)
+        if (valueMarkdown != richTextState.toMarkdown()) {
+            richTextState.setMarkdown(valueMarkdown)
         }
     }
 
@@ -93,7 +93,7 @@ fun RichTextEditorField(
                     Modifier
                         .padding(bottom = 12.dp),
             ) {
-                if (richTextState.toHtml().isBlank()) {
+                if (richTextState.toMarkdown().isBlank()) {
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyMedium,
@@ -115,9 +115,9 @@ fun RichTextEditorField(
     // Report changes upstream by observing changes
     LaunchedEffect(richTextState) {
         snapshotFlow { richTextState.annotatedString }
-            .map { richTextState.toHtml() }
+            .map { richTextState.toMarkdown() }
             .distinctUntilChanged()
-            .collectLatest { html -> onValueChange(html) }
+            .collectLatest { markdown -> onValueChange(markdown) }
     }
 }
 

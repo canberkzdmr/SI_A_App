@@ -71,4 +71,10 @@ object DatabaseModule {
     
     @Provides
     fun provideSupportedLanguageDao(database: AppDatabase): SupportedLanguageDao = database.supportedLanguageDao()
+
+    @Provides
+    fun provideNoteLinkDao(database: AppDatabase): com.cbo.core.database.dao.NoteLinkDao = database.noteLinkDao()
+
+    @Provides
+    fun provideNoteTemplateDao(database: AppDatabase): com.cbo.core.database.dao.NoteTemplateDao = database.noteTemplateDao()
 }

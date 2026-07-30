@@ -12,15 +12,15 @@ import com.mohamedrejeb.richeditor.ui.material3.RichText
 
 @Composable
 fun RichTextViewer(
-    html: String,
+    markdown: String,
     modifier: Modifier = Modifier,
     overflow: TextOverflow = TextOverflow.Ellipsis,
     maxLines: Int = 5,
 ) {
     val state = remember { RichTextState() }
 
-    LaunchedEffect(html) {
-        state.setHtml(html)
+    LaunchedEffect(markdown) {
+        state.setMarkdown(markdown)
     }
 
     RichText(

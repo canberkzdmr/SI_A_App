@@ -21,6 +21,11 @@ import com.cbo.core.database.entity.UserDetailEntity
 import com.cbo.core.database.entity.UserEntity
 import com.cbo.core.database.entity.UserSettingsEntity
 
+import com.cbo.core.database.dao.NoteLinkDao
+import com.cbo.core.database.dao.NoteTemplateDao
+import com.cbo.core.database.entity.NoteLinkEntity
+import com.cbo.core.database.entity.NoteTemplateEntity
+
 @Database(
     entities = [
         NoteEntity::class, 
@@ -31,8 +36,10 @@ import com.cbo.core.database.entity.UserSettingsEntity
         UserDetailEntity::class,
         UserSettingsEntity::class,
         SupportedLanguageEntity::class,
+        NoteLinkEntity::class,
+        NoteTemplateEntity::class
     ], 
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 @TypeConverters(Converters::class, ViewModeConverter::class)
@@ -44,4 +51,6 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun userDetailDao(): UserDetailDao
     abstract fun userSettingsDao(): UserSettingsDao
     abstract fun supportedLanguageDao(): SupportedLanguageDao
+    abstract fun noteLinkDao(): NoteLinkDao
+    abstract fun noteTemplateDao(): NoteTemplateDao
 }

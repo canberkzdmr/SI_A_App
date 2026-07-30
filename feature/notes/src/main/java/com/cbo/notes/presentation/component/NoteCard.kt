@@ -157,14 +157,14 @@ fun NoteCardContent(
                 )
             }
 
-            // Content preview (render rich text HTML)
+            // Content preview (render rich text Markdown)
             if (note.content.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 RichTextViewer(
-                    html = note.content,
-                    maxLines = if (isListView) 4 else 1,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                    markdown = note.content,
+                        maxLines = if (isListView) 4 else 1,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
             }
 
             HorizontalDivider(

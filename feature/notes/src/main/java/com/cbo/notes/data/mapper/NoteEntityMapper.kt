@@ -23,7 +23,8 @@ class NoteEntityMapper @Inject constructor(
             isFavorite = entity.isFavorite,
             isDeleted = entity.isDeleted,
             deletedAt = entity.deletedAt,
-            reminderTime = entity.reminderTime
+            reminderTime = entity.reminderTime,
+            zettelId = entity.zettelId
         )
     }
     
@@ -42,7 +43,8 @@ class NoteEntityMapper @Inject constructor(
             isFavorite = noteWithDetails.note.isFavorite,
             isDeleted = noteWithDetails.note.isDeleted,
             deletedAt = noteWithDetails.note.deletedAt,
-            reminderTime = noteWithDetails.note.reminderTime
+            reminderTime = noteWithDetails.note.reminderTime,
+            zettelId = noteWithDetails.note.zettelId
         )
     }
     
@@ -60,7 +62,8 @@ class NoteEntityMapper @Inject constructor(
             isFavorite = domain.isFavorite,
             isDeleted = domain.isDeleted,
             deletedAt = domain.deletedAt,
-            reminderTime = domain.reminderTime
+            reminderTime = domain.reminderTime,
+            zettelId = domain.zettelId
         )
     }
 }

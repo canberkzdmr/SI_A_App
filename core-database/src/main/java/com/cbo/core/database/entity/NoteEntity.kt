@@ -44,5 +44,6 @@ data class NoteEntity(
     val isFavorite: Boolean = false,
     val isDeleted: Boolean = false,
     val deletedAt: Long? = null,
-    val reminderTime: Long? = null
+    val reminderTime: Long? = null,
+    val zettelId: String? = null
 )

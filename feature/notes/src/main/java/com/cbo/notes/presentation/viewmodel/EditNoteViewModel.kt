@@ -12,10 +12,17 @@ import com.cbo.notes.domain.usecase.CreateNoteUseCase
 import com.cbo.notes.domain.usecase.CreateTagUseCase
 import com.cbo.notes.domain.usecase.GetCategoriesUseCase
 import com.cbo.notes.domain.usecase.GetNoteByIdUseCase
+import com.cbo.notes.domain.usecase.GetNotesUseCase
 import com.cbo.notes.domain.usecase.GetTagsUseCase
+import com.cbo.notes.domain.usecase.AddNoteLinkUseCase
+import com.cbo.notes.domain.usecase.DeleteAllLinksForNoteUseCase
+import com.cbo.notes.domain.usecase.GetBacklinksForNoteUseCase
 import com.cbo.notes.domain.usecase.RemoveReminderUseCase
 import com.cbo.notes.domain.usecase.SetReminderUseCase
 import com.cbo.notes.domain.usecase.UpdateNoteUseCase
+import com.cbo.notes.domain.usecase.GetNoteTemplatesUseCase
+import com.cbo.notes.domain.usecase.AddNoteTemplateUseCase
+import com.cbo.notes.domain.model.NoteTemplate
 import com.cbo.notes.worker.ReminderScheduler
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
@@ -43,6 +50,12 @@ class EditNoteViewModel @Inject constructor(
     private val setReminderUseCase: SetReminderUseCase,
     private val removeReminderUseCase: RemoveReminderUseCase,
     private val reminderScheduler: ReminderScheduler,
+    private val getNoteTemplatesUseCase: GetNoteTemplatesUseCase,
+    private val addNoteTemplateUseCase: AddNoteTemplateUseCase,
+    private val getNotesUseCase: GetNotesUseCase,
+    private val addNoteLinkUseCase: AddNoteLinkUseCase,
+    private val deleteAllLinksForNoteUseCase: DeleteAllLinksForNoteUseCase,
+    private val getBacklinksForNoteUseCase: GetBacklinksForNoteUseCase,
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
@@ -67,8 +80,25 @@ class EditNoteViewModel @Inject constructor(
                 val categories = getCategoriesUseCase().first()
                 val tags = getTagsUseCase().first()
 
+                // Fetch templates
+                val userId = userSession.currentUser.first()?.id ?: -1
+                var templates = getNoteTemplatesUseCase(userId).first()
+                if (templates.isEmpty() && userId != -1) {
+                    val defaultTemplates = listOf(
+                        NoteTemplate(userId = userId, name = "Zettelkasten", content = "# \n\n**Links:**\n"),
+                        NoteTemplate(userId = userId, name = "Literature Note", content = "# \n\n**Author:** \n**Year:** \n\n**Summary:**\n"),
+                        NoteTemplate(userId = userId, name = "Fleeting Note", content = "...")
+                    )
+                    defaultTemplates.forEach { addNoteTemplateUseCase(it) }
+                    templates = getNoteTemplatesUseCase(userId).first()
+                }
+                
+                // Fetch all notes for linking
+                val allNotes = getNotesUseCase().first()
+
                 if (isEditing) {
                     val note = getNoteByIdUseCase(noteId)
+                    val backlinks = getBacklinksForNoteUseCase(noteId).first()
                     if (note != null) {
                         _uiState.update { currentState ->
                             currentState.copy(
@@ -79,6 +109,9 @@ class EditNoteViewModel @Inject constructor(
                                 selectedTags = note.tags,
                                 availableCategories = categories,
                                 availableTags = tags,
+                                availableTemplates = templates,
+                                allNotes = allNotes,
+                                backlinks = backlinks,
                                 originalNote = note,
                                 reminderTime = note.reminderTime
                             )
@@ -93,7 +126,9 @@ class EditNoteViewModel @Inject constructor(
                         currentState.copy(
                             isLoading = false,
                             availableCategories = categories,
-                            availableTags = tags
+                            availableTags = tags,
+                            availableTemplates = templates,
+                            allNotes = allNotes
                         )
                     }
                 }
@@ -110,8 +145,43 @@ class EditNoteViewModel @Inject constructor(
     }
 
     fun updateContent(content: String) {
-        Log.d("EditNoteViewModel", "updateContent: $content")
-        _uiState.update { it.copy(content = content, hasUnsavedChanges = true) }
+        val linkSearchQuery = extractLinkQuery(content)
+        _uiState.update { 
+            it.copy(
+                content = content, 
+                hasUnsavedChanges = true,
+                linkSearchQuery = linkSearchQuery,
+                showLinkSuggestions = linkSearchQuery != null
+            ) 
+        }
+    }
+
+    private fun extractLinkQuery(content: String): String? {
+        // Find if the cursor is currently typing a link `[[...` without a closing `]]`
+        val lastOpen = content.lastIndexOf("[[")
+        val lastClose = content.lastIndexOf("]]")
+        
+        if (lastOpen != -1 && lastOpen > lastClose) {
+            return content.substring(lastOpen + 2)
+        }
+        return null
+    }
+
+    fun insertLink(note: Note) {
+        _uiState.update { state ->
+            val lastOpen = state.content.lastIndexOf("[[")
+            if (lastOpen != -1) {
+                val newContent = state.content.substring(0, lastOpen) + "[[${note.title}]] "
+                state.copy(
+                    content = newContent,
+                    hasUnsavedChanges = true,
+                    showLinkSuggestions = false,
+                    linkSearchQuery = null
+                )
+            } else {
+                state
+            }
+        }
     }
 
     fun selectCategory(category: Category?) {
@@ -174,6 +244,9 @@ class EditNoteViewModel @Inject constructor(
 
                 result.fold(
                     onSuccess = { savedNote ->
+                        // Extract and save links
+                        handleLinksExtraction(savedNote)
+
                         // Schedule or cancel reminder based on saved note
                         handleReminderScheduling(savedNote)
                         
@@ -344,6 +417,32 @@ class EditNoteViewModel @Inject constructor(
         }
     }
 
+    private suspend fun handleLinksExtraction(note: Note) {
+        // Find all [[Link]] patterns in content
+        val regex = Regex("\\[\\[(.*?)\\]\\]")
+        val matches = regex.findAll(note.content)
+        val linkedTitles = matches.map { it.groupValues[1] }.toList()
+
+        if (linkedTitles.isNotEmpty() || isEditing) {
+            // Delete old links first
+            deleteAllLinksForNoteUseCase(note.id)
+            
+            // Find target notes and add links
+            val allNotesList = _uiState.value.allNotes
+            for (title in linkedTitles) {
+                val targetNote = allNotesList.find { it.title.equals(title, ignoreCase = true) }
+                if (targetNote != null) {
+                    addNoteLinkUseCase(
+                        com.cbo.notes.domain.model.NoteLink(
+                            sourceNoteId = note.id,
+                            targetNoteId = targetNote.id
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private fun handleReminderScheduling(savedNote: Note) {
         if (savedNote.reminderTime != null && savedNote.reminderTime > System.currentTimeMillis()) {
             // Schedule the reminder
@@ -413,6 +512,38 @@ class EditNoteViewModel @Inject constructor(
             }
         }
     }
+
+    fun showTemplateSelector() {
+        _uiState.update { it.copy(showTemplateSelector = true) }
+    }
+
+    fun hideTemplateSelector() {
+        _uiState.update { it.copy(showTemplateSelector = false) }
+    }
+
+    fun createTemplate(name: String, content: String) {
+        viewModelScope.launch {
+            val userId = userSession.currentUser.first()?.id ?: -1
+            if (userId != -1) {
+                val template = NoteTemplate(userId = userId, name = name, content = content)
+                addNoteTemplateUseCase(template)
+                // Refresh templates
+                val templates = getNoteTemplatesUseCase(userId).first()
+                _uiState.update { it.copy(availableTemplates = templates) }
+            }
+        }
+    }
+
+    fun applyTemplate(template: NoteTemplate) {
+        val zettelId = System.currentTimeMillis().toString()
+        _uiState.update { 
+            it.copy(
+                content = if (it.content.isBlank()) template.content else "${it.content}\n\n${template.content}",
+                showTemplateSelector = false,
+                hasUnsavedChanges = true
+            )
+        }
+    }
 }
 
 data class EditNoteUiState(
@@ -436,7 +567,15 @@ data class EditNoteUiState(
     val tagInputText: String = "",
     // Reminder state
     val reminderTime: Long? = null,
-    val showReminderDialog: Boolean = false
+    val showReminderDialog: Boolean = false,
+    // Templates state
+    val availableTemplates: List<NoteTemplate> = emptyList(),
+    val showTemplateSelector: Boolean = false,
+    // Linking state
+    val allNotes: List<Note> = emptyList(),
+    val showLinkSuggestions: Boolean = false,
+    val linkSearchQuery: String? = null,
+    val backlinks: List<Note> = emptyList()
 )
 
 sealed class NavigationEvent {

@@ -116,4 +116,10 @@ interface NoteDao : BaseDao<NoteEntity> {
 
     @Query("SELECT * FROM notes WHERE reminderTime BETWEEN :startTime AND :endTime AND isDeleted = 0")
     suspend fun getNotesWithRemindersBetween(startTime: Long, endTime: Long): List<NoteEntity>
+    @Query("""
+        SELECT n.* FROM notes n 
+        INNER JOIN note_links l ON n.id = l.sourceNoteId 
+        WHERE l.targetNoteId = :noteId AND n.isDeleted = 0
+    """)
+    fun getBacklinksForNote(noteId: Int): Flow<List<NoteEntity>>
 }

@@ -1,6 +1,15 @@
 package com.cbo.notes.presentation.screen
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +33,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.NotificationAdd
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,9 +65,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
+import com.cbo.notes.domain.model.NoteTemplate
 import com.cbo.notes.presentation.component.CreateTagDialog
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.component.ReminderChip
@@ -85,6 +98,38 @@ fun EditNoteScreen(
     viewModel: EditNoteViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.showReminderDialog()
+        } else {
+            Toast.makeText(
+                context,
+                context.getString(R.string.notification_permission_required),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    val onRequestReminder = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val isGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (isGranted) {
+                viewModel.showReminderDialog()
+            } else {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            viewModel.showReminderDialog()
+        }
+    }
 
     // Handle navigation events
     LaunchedEffect(Unit) {
@@ -110,10 +155,15 @@ fun EditNoteScreen(
             viewModel.selectTags(tags)
             viewModel.selectCategory(category)
         },
-        onShowReminderDialog = viewModel::showReminderDialog,
+        onShowReminderDialog = onRequestReminder,
         onHideReminderDialog = viewModel::hideReminderDialog,
         onSetReminder = viewModel::setReminder,
         onRemoveReminder = viewModel::removeReminder,
+        onShowTemplateSelector = viewModel::showTemplateSelector,
+        onApplyTemplate = viewModel::applyTemplate,
+        onCreateTemplate = viewModel::createTemplate,
+        onHideTemplateSelector = viewModel::hideTemplateSelector,
+        onInsertLink = viewModel::insertLink,
         modifier = modifier,
     )
 }
@@ -308,6 +358,11 @@ fun EditNoteScreen(
     onHideReminderDialog: () -> Unit = {},
     onSetReminder: (Long) -> Unit = {},
     onRemoveReminder: () -> Unit = {},
+    onShowTemplateSelector: () -> Unit = {},
+    onApplyTemplate: (NoteTemplate) -> Unit = {},
+    onCreateTemplate: (String, String) -> Unit = { _, _ -> },
+    onHideTemplateSelector: () -> Unit = {},
+    onInsertLink: (Note) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
@@ -370,6 +425,9 @@ fun EditNoteScreen(
                                 MaterialTheme.colorScheme.onSurface
                         )
                     }
+                    IconButton(onClick = onShowTemplateSelector) {
+                        Icon(imageVector = Icons.Default.Description, contentDescription = "Templates")
+                    }
                     IconButton(onClick = { showSelectionSheet = !showSelectionSheet }) {
                         Icon(imageVector = Icons.Default.CollectionsBookmark, contentDescription = "Filter")
                     }
@@ -424,18 +482,69 @@ fun EditNoteScreen(
 
                     val focusRequestContent = remember { FocusRequester() }
 
-                    RichTextEditorField(
-                        valueHtml = uiState.content,
-                        onValueChange = onContentChange,
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .focusRequester(remember { focusRequestContent }),
-                        placeholder = "Start writing your note...",
-                        minHeight = 300,
-                    )
+                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        RichTextEditorField(
+                            valueMarkdown = uiState.content,
+                            onValueChange = onContentChange,
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .focusRequester(remember { focusRequestContent }),
+                            placeholder = "Start writing your note...",
+                            minHeight = 300,
+                        )
 
-                    Spacer(modifier = Modifier.weight(1f))
+                        // Link Suggestions Dropdown
+                        if (uiState.showLinkSuggestions && uiState.linkSearchQuery != null) {
+                            val filteredNotes = uiState.allNotes.filter {
+                                it.title.contains(uiState.linkSearchQuery, ignoreCase = true)
+                            }
+                            if (filteredNotes.isNotEmpty()) {
+                                androidx.compose.material3.DropdownMenu(
+                                    expanded = true,
+                                    onDismissRequest = { /* Controlled by typing */ },
+                                    modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.TopCenter)
+                                ) {
+                                    filteredNotes.take(5).forEach { note ->
+                                        androidx.compose.material3.DropdownMenuItem(
+                                            text = { androidx.compose.material3.Text(note.title) },
+                                            onClick = { onInsertLink(note) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (uiState.backlinks.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        androidx.compose.material3.Text(
+                            text = "Backlinks",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        androidx.compose.foundation.lazy.LazyRow(
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(uiState.backlinks.size) { index ->
+                                val backlink = uiState.backlinks[index]
+                                androidx.compose.material3.AssistChip(
+                                    onClick = { /* Could navigate to note, but out of scope for now */ },
+                                    label = { androidx.compose.material3.Text(backlink.title) },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Link,
+                                            contentDescription = "Link",
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     /*Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
                         if (uiState.availableCategories.isNotEmpty()) {
@@ -498,6 +607,108 @@ fun EditNoteScreen(
             onDismiss = onHideReminderDialog
         )
     }
+
+    if (uiState.showTemplateSelector) {
+        TemplateSelectionDialog(
+            templates = uiState.availableTemplates,
+            onSelect = onApplyTemplate,
+            onCreateTemplate = onCreateTemplate,
+            onDismiss = onHideTemplateSelector
+        )
+    }
+}
+
+@Composable
+fun TemplateSelectionDialog(
+    templates: List<com.cbo.notes.domain.model.NoteTemplate>,
+    onSelect: (com.cbo.notes.domain.model.NoteTemplate) -> Unit,
+    onCreateTemplate: (String, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var showCreateDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
+    if (showCreateDialog) {
+        CreateTemplateDialog(
+            onCreate = { name, content ->
+                onCreateTemplate(name, content)
+                showCreateDialog = false
+            },
+            onDismiss = { showCreateDialog = false }
+        )
+    } else {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("Select Template") },
+            text = {
+                androidx.compose.foundation.lazy.LazyColumn {
+                    items(templates.size) { index ->
+                        val template = templates[index]
+                        androidx.compose.material3.ListItem(
+                            modifier = Modifier.clickable {
+                                onSelect(template)
+                                onDismiss()
+                            },
+                            headlineContent = { androidx.compose.material3.Text(template.name) }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { showCreateDialog = true }) {
+                    androidx.compose.material3.Text("Create New")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun CreateTemplateDialog(
+    onCreate: (String, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var name by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var content by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { androidx.compose.material3.Text("Create Template") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                androidx.compose.material3.OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { androidx.compose.material3.Text("Template Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                androidx.compose.material3.OutlinedTextField(
+                    value = content,
+                    onValueChange = { content = it },
+                    label = { androidx.compose.material3.Text("Content (Markdown)") },
+                    modifier = Modifier.fillMaxWidth().height(150.dp)
+                )
+            }
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(
+                onClick = { onCreate(name, content) },
+                enabled = name.isNotBlank() && content.isNotBlank()
+            ) {
+                androidx.compose.material3.Text("Create")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                androidx.compose.material3.Text("Cancel")
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

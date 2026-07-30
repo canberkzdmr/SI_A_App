@@ -81,8 +81,8 @@ class ReminderWorker @AssistedInject constructor(
             }
         }
         
-        // Convert HTML content to plain text for notification display
-        val plainTextContent = stripHtml(content)
+        // Convert Markdown content to plain text for notification display
+        val plainTextContent = stripMarkdown(content)
         
         // Create intent to open the note when notification is tapped
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
@@ -114,20 +114,19 @@ class ReminderWorker @AssistedInject constructor(
     }
     
     /**
-     * Strips HTML tags from content and returns plain text.
+     * Strips Markdown syntax from content and returns plain text.
      */
-    private fun stripHtml(html: String): String {
-        if (html.isBlank()) return ""
+    private fun stripMarkdown(markdown: String): String {
+        if (markdown.isBlank()) return ""
         
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY).toString()
-        } else {
-            @Suppress("DEPRECATION")
-            Html.fromHtml(html).toString()
-        }.trim()
+        // Simple regex to strip basic markdown characters for notification
+        return markdown
+            .replace(Regex("[#*`_\\[\\]()]"), "") // Remove common markdown symbols
+            .replace(Regex("!.*\\]\\(.*\\)"), "") // Remove images
+            .replace(Regex("<.*?>"), "") // Remove any remaining HTML if present
+            .trim()
             .replace(Regex("\\s+"), " ") // Replace multiple whitespaces with single space
     }
-    
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = context.getString(R.string.reminder_channel_name)
