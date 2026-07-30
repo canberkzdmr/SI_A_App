@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.res.stringResource
@@ -178,7 +179,7 @@ fun RegisterScreenContent(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(Dimens.Padding.extraLarge),
         ) {
             AppCard(
                 variant = CardVariant.DEFAULT,
@@ -189,7 +190,7 @@ fun RegisterScreenContent(
                 Column(
                     modifier =
                         Modifier
-                            .padding(16.dp),
+                            .padding(Dimens.Padding.default),
                 ) {
                     AppRegular(stringResource(id = com.cbo.login.R.string.registration_title))
 
@@ -439,7 +440,7 @@ fun RegisterScreenContent(
                     },
                     modifier =
                         Modifier
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = Dimens.Padding.small),
                 )
                 AppLabel("■cnbrkzdmr")
             }

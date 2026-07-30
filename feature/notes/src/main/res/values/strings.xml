@@ -194,5 +194,9 @@
     <!-- Notification Channel -->
     <string name="reminder_channel_name">Note Reminders</string>
     <string name="reminder_channel_description">Notifications for note reminders</string>
+    <string name="notifications">Notifications</string>
+    <string name="profile">Profile</string>
+    <string name="main_screen_search_placeholder">Search</string>
+    <string name="day_summary">Summary of the Day</string>
 </resources>
 

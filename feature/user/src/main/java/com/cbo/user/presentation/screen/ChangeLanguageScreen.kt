@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cbo.core.domain.model.SupportedLanguage
 import com.cbo.ui.components.AppSwitchGroup
@@ -98,7 +99,7 @@ fun ChangeLanguageScreenContent(
                     Modifier
                         .fillMaxSize()
                         .padding(scaffoldPaddingValues)
-                        .padding(16.dp)
+                        .padding(Dimens.Padding.default)
                         .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.Top,
             ) {
@@ -110,7 +111,7 @@ fun ChangeLanguageScreenContent(
                     content = stringResource(id = R.string.language_help),
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(Dimens.Spacing.xxLarge))
 
                 if (uiState.isLoading && uiState.languageOptions.isEmpty()) {
                     AppLoadingScreen(modifier = Modifier.fillMaxSize())

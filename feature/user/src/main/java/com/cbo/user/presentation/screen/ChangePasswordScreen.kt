@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cbo.ui.components.AppBody
@@ -96,7 +97,7 @@ fun ChangePasswordScreen(
                     Modifier
                         .fillMaxSize()
                         .padding(scaffoldPaddingValues)
-                        .padding(16.dp)
+                        .padding(Dimens.Padding.default)
                         .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
@@ -111,7 +112,7 @@ fun ChangePasswordScreen(
                     content = stringResource(id = com.cbo.user.R.string.password_help)
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(Dimens.Spacing.xxLarge))
 
                 // Current Password Field
                 AppOutlinedTextField(
@@ -151,7 +152,7 @@ fun ChangePasswordScreen(
                         },
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Dimens.Spacing.default))
 
                 // New Password Field
                 AppOutlinedTextField(
@@ -191,7 +192,7 @@ fun ChangePasswordScreen(
                         },
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Dimens.Spacing.default))
 
                 // Confirm Password Field
                 AppOutlinedTextField(
@@ -231,7 +232,7 @@ fun ChangePasswordScreen(
                         },
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Dimens.Spacing.default))
 
                 // Password Requirements
                 AppCard(
@@ -239,14 +240,14 @@ fun ChangePasswordScreen(
                     variant = CardVariant.SURFACE
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(Dimens.Padding.default),
                     ) {
                         AppTitleMedium(
                             text = stringResource(id = com.cbo.user.R.string.password_requirements),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Dimens.Spacing.small))
 
                         val requirements =
                             listOf(
@@ -261,13 +262,13 @@ fun ChangePasswordScreen(
                                 text = "• $requirement",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                                modifier = Modifier.padding(start = Dimens.Padding.small, top = Dimens.Padding.extraTiny),
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(Dimens.Spacing.xxLarge))
 
                 // Change Password Button
                 PrimaryButton(
@@ -275,7 +276,7 @@ fun ChangePasswordScreen(
                     onClick = viewModel::changePassword,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
+                        .height(Dimens.Component.buttonHeight),
                     enabled = !uiState.isLoading &&
                             uiState.currentPassword.isNotEmpty() &&
                             uiState.newPassword.isNotEmpty() &&

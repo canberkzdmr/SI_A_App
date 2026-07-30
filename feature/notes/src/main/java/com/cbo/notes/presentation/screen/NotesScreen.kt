@@ -243,8 +243,8 @@ fun NotesScreen(
                     allTags = uiState.tags,
                     selectedCategories = uiState.selectedCategories,
                     selectedTags = uiState.selectedTags,
-                    onUpdateSelectedCategories = { categories ->
-                        viewModel.filterByCategories(categories)
+                    onUpdateSelectedCategories = { category ->
+                        viewModel.filterByCategories(category)
                     },
                     onUpdateSelectedTags = { tags ->
                         viewModel.filterByTags(tags)

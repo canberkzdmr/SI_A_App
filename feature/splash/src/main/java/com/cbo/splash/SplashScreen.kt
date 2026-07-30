@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.core.data.biometric.BiometricUtils
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.cbo.ui.theme.Dimens
 import androidx.compose.ui.res.stringResource
 
 @Composable
@@ -142,13 +143,13 @@ private fun SplashContent(isLoading: Boolean) {
             // Animated Logo
             AnimatedMemCloudLogo(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(Dimens.Component.avatarExtraLarge)
                     .scale(logoScale.value)
                     .alpha(logoAlpha.value),
                 isAnimating = isLoading
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Dimens.Spacing.xxLarge))
 
             // App Name
             Text(
@@ -162,7 +163,7 @@ private fun SplashContent(isLoading: Boolean) {
                 modifier = Modifier.alpha(textAlpha.value)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dimens.Spacing.small))
 
             // Tagline
             Text(
@@ -176,15 +177,15 @@ private fun SplashContent(isLoading: Boolean) {
             )
 
             if (isLoading) {
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(Dimens.Spacing.huge))
 
                 // Modern loading indicator
                 CircularProgressIndicator(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(Dimens.Icon.extraLarge)
                         .alpha(textAlpha.value),
                     color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 3.dp
+                    strokeWidth = Dimens.Component.borderMedium
                 )
             }
         }

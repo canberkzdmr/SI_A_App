@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.PrimaryButton
@@ -41,18 +42,18 @@ fun AppEmptyState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(Dimens.Padding.xxLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         androidx.compose.material3.Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(Dimens.Icon.avatar),
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.Spacing.default))
         
         AppTitle(
             text = title,
@@ -60,7 +61,7 @@ fun AppEmptyState(
             color = MaterialTheme.colorScheme.onSurface
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimens.Spacing.small))
         
         AppBody(
             text = message,
@@ -69,11 +70,11 @@ fun AppEmptyState(
         )
         
         if (actionText != null && onAction != null) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Dimens.Spacing.extraLarge))
             
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(Dimens.Spacing.small)
             ) {
                 PrimaryButton(
                     text = actionText,
@@ -105,7 +106,7 @@ fun AppErrorState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(Dimens.Padding.xxLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -113,11 +114,11 @@ fun AppErrorState(
             androidx.compose.material3.Icon(
                 imageVector = Icons.Default.Error,
                 contentDescription = null,
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier.size(Dimens.Icon.avatar),
                 tint = MaterialTheme.colorScheme.error
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Dimens.Spacing.default))
         }
         
         AppTitle(
@@ -126,7 +127,7 @@ fun AppErrorState(
             color = MaterialTheme.colorScheme.error
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimens.Spacing.small))
         
         AppBody(
             text = error,
@@ -135,7 +136,7 @@ fun AppErrorState(
         )
         
         if (onRetry != null) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Dimens.Spacing.extraLarge))
             
             PrimaryButton(
                 text = retryText,
@@ -159,18 +160,18 @@ fun AppSuccessState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(Dimens.Padding.xxLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         androidx.compose.material3.Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(Dimens.Icon.avatar),
             tint = MaterialTheme.colorScheme.primary
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.Spacing.default))
         
         AppTitle(
             text = title,
@@ -178,7 +179,7 @@ fun AppSuccessState(
             color = MaterialTheme.colorScheme.primary
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimens.Spacing.small))
         
         AppBody(
             text = message,
@@ -187,7 +188,7 @@ fun AppSuccessState(
         )
         
         if (actionText != null && onAction != null) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Dimens.Spacing.extraLarge))
             
             PrimaryButton(
                 text = actionText,
@@ -208,18 +209,18 @@ fun AppOfflineState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(Dimens.Padding.xxLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         androidx.compose.material3.Icon(
             imageVector = Icons.Default.WifiOff,
             contentDescription = null,
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(Dimens.Icon.avatar),
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
         )
         
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimens.Spacing.default))
         
         AppTitle(
             text = "No Internet Connection",
@@ -227,7 +228,7 @@ fun AppOfflineState(
             color = MaterialTheme.colorScheme.onSurface
         )
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimens.Spacing.small))
         
         AppBody(
             text = "Please check your internet connection and try again.",
@@ -236,7 +237,7 @@ fun AppOfflineState(
         )
         
         if (onRetry != null) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Dimens.Spacing.extraLarge))
             
             PrimaryButton(
                 text = "Retry",

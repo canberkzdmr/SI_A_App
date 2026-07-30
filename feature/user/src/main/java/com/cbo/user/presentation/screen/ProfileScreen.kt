@@ -56,6 +56,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
@@ -185,7 +186,7 @@ fun ProfileScreenContent(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
+                    .padding(Dimens.Padding.default),
         ) {
             // ------------------------
             // Profile Header
@@ -195,14 +196,14 @@ fun ProfileScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(bottom = Dimens.Padding.default),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (uiState.isLoading) {
                         ShimmerBox(
                             modifier =
                                 Modifier
-                                    .size(96.dp)
+                                    .size(Dimens.Icon.avatar)
                                     .clip(CircleShape),
                         )
                     } else if (uiState.avatarUrl.isNotEmpty()) {
@@ -211,7 +212,7 @@ fun ProfileScreenContent(
                             contentDescription = "Profile Picture",
                             modifier =
                                 Modifier
-                                    .size(96.dp)
+                                    .size(Dimens.Icon.avatar)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentScale = ContentScale.Crop,
@@ -219,9 +220,9 @@ fun ProfileScreenContent(
                                 ShimmerBox(
                                     modifier =
                                         Modifier
-                                            .size(96.dp)
+                                            .size(Dimens.Icon.avatar)
                                             .clip(CircleShape),
-                                    cornerRadius = 48.dp, // Half of 96dp for circular shape
+                                    cornerRadius = Dimens.CornerRadius.extraLarge,
                                 )
                             },
                             error = {
@@ -241,7 +242,7 @@ fun ProfileScreenContent(
                             contentDescription = "Default Profile Picture",
                             modifier =
                                 Modifier
-                                    .size(96.dp)
+                                    .size(Dimens.Icon.avatar)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentScale = ContentScale.Crop,
@@ -253,32 +254,32 @@ fun ProfileScreenContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.SpaceEvenly,
                     ) {
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(Dimens.Spacing.small))
                         if (uiState.isLoading) {
                             ShimmerBox(
                                 modifier =
                                     Modifier
-                                        .height(20.dp)
+                                        .height(Dimens.Icon.small)
                                         .fillMaxWidth(0.6f),
                             )
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(Dimens.Spacing.small))
                             ShimmerBox(
                                 modifier =
                                     Modifier
-                                        .height(16.dp)
+                                        .height(Dimens.Icon.extraSmall)
                                         .fillMaxWidth(0.4f),
                             )
                         } else {
                             AppTitle(
                                 text = uiState.username ?: stringResource(id = R.string.guest),
                             )
-                            Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(Dimens.Spacing.small))
                             AppLabel(
                                 text = uiState.email ?: stringResource(id = R.string.not_available),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(Dimens.Spacing.default))
                     }
                 }
 
@@ -286,7 +287,7 @@ fun ProfileScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(1.dp)
+                            .height(Dimens.Component.borderThin)
                             .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
                 )
             }
@@ -296,7 +297,7 @@ fun ProfileScreenContent(
                 item {
                     SectionHeader(
                         stringResource(id = sectionTitleResId),
-                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                        modifier = Modifier.padding(top = Dimens.Padding.default, bottom = Dimens.Padding.small),
                     )
                 }
 
@@ -311,8 +312,8 @@ fun ProfileScreenContent(
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(56.dp)
-                                    .padding(vertical = 4.dp),
+                                    .height(Dimens.Component.inputHeight)
+                                    .padding(vertical = Dimens.Padding.tiny),
                         )
                     } else {
                         ProfileListItem(
@@ -365,16 +366,16 @@ fun ProfileListItem(
             modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(vertical = 4.dp),
+                .padding(vertical = Dimens.Padding.tiny),
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(8.dp),
-        tonalElevation = 1.dp,
+        shape = RoundedCornerShape(Dimens.CornerRadius.medium),
+        tonalElevation = Dimens.Elevation.extraLow,
     ) {
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = Dimens.Padding.default, vertical = Dimens.Padding.medium),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
@@ -382,7 +383,7 @@ fun ProfileListItem(
                 contentDescription = text,
                 tint = if (isDanger) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Dimens.Spacing.default))
             AppBody(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,

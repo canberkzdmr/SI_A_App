@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -130,20 +131,20 @@ fun LoginScreenContent(
                             .fillMaxWidth()
                             .background(
                                 color = MaterialTheme.colorScheme.background,
-                                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                            ).padding(vertical = 24.dp),
+                                shape = RoundedCornerShape(topStart = Dimens.CornerRadius.extraLarge, topEnd = Dimens.CornerRadius.extraLarge),
+                            ).padding(vertical = Dimens.Padding.extraLarge),
                 ) {
                     AppHeadline(
                         stringResource(id = com.cbo.login.R.string.your_style_of_notes),
-                        modifier = Modifier.padding(horizontal = 24.dp),
+                        modifier = Modifier.padding(horizontal = Dimens.Padding.extraLarge),
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Dimens.Spacing.small))
                     AppRegular(
                         stringResource(id = com.cbo.login.R.string.capture_thoughts),
-                        modifier = Modifier.padding(horizontal = 24.dp),
+                        modifier = Modifier.padding(horizontal = Dimens.Padding.extraLarge),
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Dimens.Spacing.default))
 
                     AppOutlinedTextField(
                         value = state.username,
@@ -155,12 +156,12 @@ fun LoginScreenContent(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 24.dp),
+                                .padding(horizontal = Dimens.Padding.extraLarge),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                         keyboardActions = KeyboardActions(onNext = { focusRequesterPassword.requestFocus() }),
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Dimens.Spacing.small))
 
                     val keyboardController = LocalSoftwareKeyboardController.current
                     AppOutlinedTextField(
@@ -174,7 +175,7 @@ fun LoginScreenContent(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 24.dp)
+                                .padding(horizontal = Dimens.Padding.extraLarge)
                                 .focusRequester(remember { focusRequesterPassword }),
                         keyboardOptions =
                             KeyboardOptions.Default.copy(
@@ -189,7 +190,7 @@ fun LoginScreenContent(
                             ),
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Dimens.Spacing.default))
 
                     PrimaryButton(
                         text = stringResource(id = com.cbo.login.R.string.login_cta),
@@ -199,10 +200,10 @@ fun LoginScreenContent(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 24.dp),
+                                .padding(horizontal = Dimens.Padding.extraLarge),
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Dimens.Spacing.small))
 
                     TextButton(
                         onClick = onRegisterClick,

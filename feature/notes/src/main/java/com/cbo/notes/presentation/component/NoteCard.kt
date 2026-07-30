@@ -127,7 +127,7 @@ fun NoteCardContent(
         size = CardSize.SMALL,
         isPinned = note.isPinned,
         indicatorColor = categoryColor,
-        indicatorPosition = IndicatorPosition.TOP,
+        indicatorPosition = IndicatorPosition.BOTTOM,
         indicatorEffect = IndicatorEffect.GRADIENT,
         indicatorSize = IndicatorSize.THICK,
         pinnedBorderColor = categoryColor,

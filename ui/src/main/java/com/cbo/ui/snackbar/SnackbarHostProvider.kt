@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import kotlinx.coroutines.launch
 
 /**
@@ -113,21 +114,21 @@ private fun CustomSnackbar(snackbarData: SnackbarData) {
 
     Snackbar(
         modifier = Modifier
-            .padding(16.dp),
+            .padding(Dimens.Padding.default),
         containerColor = backgroundColor,
         contentColor = contentColor,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(Dimens.CornerRadius.default),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing.medium),
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = contentColor,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(Dimens.Icon.default)
             )
             Text(
                 text = message,
@@ -137,13 +138,13 @@ private fun CustomSnackbar(snackbarData: SnackbarData) {
             )
             IconButton(
                 onClick = { snackbarData.dismiss() },
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(Dimens.Icon.default)
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Dismiss",
                     tint = contentColor,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(Dimens.Icon.small)
                 )
             }
         }
@@ -164,7 +165,7 @@ private fun SnackbarPreviewTemplate(message: String) {
                 text = "Snackbar Preview Content",
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(16.dp)
+                    .padding(Dimens.Padding.default)
             )
 
             SnackbarHost(

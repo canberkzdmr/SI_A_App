@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.Dimens
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
@@ -170,7 +171,7 @@ fun EditProfileScreenContent(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
+                    .padding(Dimens.Padding.default),
         ) {
             item {
                 Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -191,11 +192,11 @@ fun EditProfileScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(top = 36.dp, bottom = 8.dp),
+                            .padding(top = Dimens.Padding.xxxLarge, bottom = Dimens.Padding.small),
                 ) {
                     SectionHeader(
                         title = stringResource(R.string.account_information_section).uppercase(),
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = Dimens.Padding.default),
                     )
 
                     AppOutlinedTextField(
@@ -224,11 +225,11 @@ fun EditProfileScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = Dimens.Padding.small),
                 ) {
                     SectionHeader(
                         title = stringResource(R.string.personal_details_section).uppercase(),
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = Dimens.Padding.default),
                     )
                     val fullNameMaxLength = 50
                     AppOutlinedTextField(
@@ -271,7 +272,7 @@ fun EditProfileScreenContent(
 
                     AppBody(stringResource(R.string.gender))
                     SingleSelectionButton(
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = Modifier.padding(vertical = Dimens.Padding.small),
                         options =
                             listOf(
                                 SelectionOption(value = Gender.MALE, label = stringResource(R.string.male)),
@@ -283,7 +284,7 @@ fun EditProfileScreenContent(
                     )
 
                     DatePickerField(
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = Modifier.padding(vertical = Dimens.Padding.small),
                         selectedDate = uiState.dateOfBirth,
                         onDateSelected = { selectedDate ->
                             updateDateOfBirth(selectedDate)
@@ -311,11 +312,11 @@ fun EditProfileScreenContent(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                            .padding(vertical = Dimens.Padding.small),
                 ) {
                     SectionHeader(
                         title = stringResource(R.string.contact_information_section).uppercase(),
-                        modifier = Modifier.padding(bottom = 16.dp),
+                        modifier = Modifier.padding(bottom = Dimens.Padding.default),
                     )
 
                     PhoneNumber(
@@ -371,18 +372,18 @@ fun EditableProfileImage(
 
     // Container Box for avatar and edit button - no clipping here
     Box(
-        modifier = modifier.size(100.dp), // Larger to accommodate edit button
+        modifier = modifier.size(Dimens.Component.avatarLarge + Dimens.Padding.extraLarge), // Larger to accommodate edit button
         contentAlignment = Alignment.Center,
     ) {
         // Avatar container with clipping
         Box(
             modifier =
                 Modifier
-                    .size(200.dp)
+                    .size(Dimens.Component.emptyStateImageSize)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .border(
-                        width = 2.dp,
+                        width = Dimens.Component.borderMedium,
                         color = MaterialTheme.colorScheme.primary,
                         shape = CircleShape,
                     ),
@@ -393,7 +394,7 @@ fun EditableProfileImage(
                     // Overall loading state
                     ShimmerBox(
                         modifier = Modifier.fillMaxSize(),
-                        cornerRadius = 60.dp, // Circular shape
+                        cornerRadius = Dimens.CornerRadius.round, // Circular shape
                     )
                 }
 
@@ -401,7 +402,7 @@ fun EditableProfileImage(
                     // Image loading state with shimmer
                     ShimmerBox(
                         modifier = Modifier.fillMaxSize(),
-                        cornerRadius = 60.dp, // Circular shape
+                        cornerRadius = Dimens.CornerRadius.round, // Circular shape
                     )
                 }
 
@@ -414,7 +415,7 @@ fun EditableProfileImage(
                         loading = {
                             ShimmerBox(
                                 modifier = Modifier.fillMaxSize(),
-                                cornerRadius = 60.dp, // Circular shape
+                                cornerRadius = Dimens.CornerRadius.round, // Circular shape
                             )
                         },
                     )
@@ -443,7 +444,7 @@ fun EditableProfileImage(
             modifier =
                 Modifier
                     .align(Alignment.BottomEnd)
-                    .size(24.dp)
+                    .size(Dimens.Icon.default)
                     .background(
                         if (isImageLoading) {
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
