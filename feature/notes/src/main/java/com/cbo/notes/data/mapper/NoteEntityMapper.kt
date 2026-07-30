@@ -24,7 +24,8 @@ class NoteEntityMapper @Inject constructor(
             isDeleted = entity.isDeleted,
             deletedAt = entity.deletedAt,
             reminderTime = entity.reminderTime,
-            zettelId = entity.zettelId
+            zettelId = entity.zettelId,
+            attachments = entity.attachments
         )
     }
     
@@ -44,7 +45,8 @@ class NoteEntityMapper @Inject constructor(
             isDeleted = noteWithDetails.note.isDeleted,
             deletedAt = noteWithDetails.note.deletedAt,
             reminderTime = noteWithDetails.note.reminderTime,
-            zettelId = noteWithDetails.note.zettelId
+            zettelId = noteWithDetails.note.zettelId,
+            attachments = noteWithDetails.note.attachments
         )
     }
     
@@ -63,7 +65,8 @@ class NoteEntityMapper @Inject constructor(
             isDeleted = domain.isDeleted,
             deletedAt = domain.deletedAt,
             reminderTime = domain.reminderTime,
-            zettelId = domain.zettelId
+            zettelId = domain.zettelId,
+            attachments = domain.attachments
         )
     }
 }

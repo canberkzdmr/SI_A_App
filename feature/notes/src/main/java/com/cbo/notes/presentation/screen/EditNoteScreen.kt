@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -75,6 +76,8 @@ import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.component.ReminderChip
 import com.cbo.notes.presentation.component.ReminderDialog
 import com.cbo.notes.presentation.component.SelectionBottomSheet
+import com.cbo.notes.presentation.component.NoteAttachmentsRow
+import com.cbo.notes.presentation.component.ImagePreviewDialog
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
@@ -140,6 +143,25 @@ fun EditNoteScreen(
         }
     }
 
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia()
+    ) { uris ->
+        if (uris.isNotEmpty()) {
+            val uriStrings = uris.map { uri ->
+                try {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    )
+                } catch (e: Exception) {
+                    // Ignore
+                }
+                uri.toString()
+            }
+            viewModel.addAttachments(uriStrings)
+        }
+    }
+
     // Delegate to the unified UI composable
     EditNoteScreen(
         uiState = uiState,
@@ -164,6 +186,14 @@ fun EditNoteScreen(
         onCreateTemplate = viewModel::createTemplate,
         onHideTemplateSelector = viewModel::hideTemplateSelector,
         onInsertLink = viewModel::insertLink,
+        onAddAttachments = { 
+            imagePickerLauncher.launch(
+                androidx.activity.result.PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                )
+            ) 
+        },
+        onRemoveAttachment = viewModel::removeAttachment,
         modifier = modifier,
     )
 }
@@ -363,10 +393,13 @@ fun EditNoteScreen(
     onCreateTemplate: (String, String) -> Unit = { _, _ -> },
     onHideTemplateSelector: () -> Unit = {},
     onInsertLink: (Note) -> Unit = {},
+    onAddAttachments: () -> Unit = {},
+    onRemoveAttachment: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showSelectionSheet by remember { mutableStateOf(false) }
+    var previewImageUri by remember { mutableStateOf<String?>(null) }
 
     // Intercept system back to respect unsaved changes
     BackHandler(enabled = true) {
@@ -516,6 +549,13 @@ fun EditNoteScreen(
                         }
                     }
 
+                    NoteAttachmentsRow(
+                        attachments = uiState.attachments,
+                        onAddImageClick = onAddAttachments,
+                        onRemoveAttachment = onRemoveAttachment,
+                        onImageClick = { uri -> previewImageUri = uri }
+                    )
+
                     if (uiState.backlinks.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
                         androidx.compose.material3.Text(
@@ -614,6 +654,14 @@ fun EditNoteScreen(
             onSelect = onApplyTemplate,
             onCreateTemplate = onCreateTemplate,
             onDismiss = onHideTemplateSelector
+        )
+    }
+
+    previewImageUri?.let { uri ->
+        ImagePreviewDialog(
+            imageUri = uri,
+            onDismiss = { previewImageUri = null },
+            onRemove = { onRemoveAttachment(uri) }
         )
     }
 }

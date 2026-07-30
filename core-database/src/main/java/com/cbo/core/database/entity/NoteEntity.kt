@@ -45,5 +45,6 @@ data class NoteEntity(
     val isDeleted: Boolean = false,
     val deletedAt: Long? = null,
     val reminderTime: Long? = null,
-    val zettelId: String? = null
+    val zettelId: String? = null,
+    val attachments: List<String> = emptyList()
 )

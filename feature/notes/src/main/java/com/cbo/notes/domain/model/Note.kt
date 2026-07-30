@@ -15,7 +15,8 @@ data class Note(
     val isDeleted: Boolean = false,
     val deletedAt: Long? = null,
     val reminderTime: Long? = null,
-    val zettelId: String? = null
+    val zettelId: String? = null,
+    val attachments: List<String> = emptyList()
 ) {
     /** Returns true if this note has an active reminder set for the future */
     fun hasActiveReminder(): Boolean = reminderTime != null && reminderTime > System.currentTimeMillis()

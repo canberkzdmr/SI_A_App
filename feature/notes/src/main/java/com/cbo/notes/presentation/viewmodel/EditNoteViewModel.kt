@@ -113,7 +113,8 @@ class EditNoteViewModel @Inject constructor(
                                 allNotes = allNotes,
                                 backlinks = backlinks,
                                 originalNote = note,
-                                reminderTime = note.reminderTime
+                                reminderTime = note.reminderTime,
+                                attachments = note.attachments
                             )
                         }
                     } else {
@@ -223,7 +224,8 @@ class EditNoteViewModel @Inject constructor(
                         content = currentState.content,
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags,
-                        reminderTime = currentState.reminderTime
+                        reminderTime = currentState.reminderTime,
+                        attachments = currentState.attachments
                     )
                 } else {
                     Note(
@@ -232,7 +234,8 @@ class EditNoteViewModel @Inject constructor(
                         content = currentState.content,
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags,
-                        reminderTime = currentState.reminderTime
+                        reminderTime = currentState.reminderTime,
+                        attachments = currentState.attachments
                     )
                 }
 
@@ -283,6 +286,7 @@ class EditNoteViewModel @Inject constructor(
                     content = originalNote.content,
                     selectedCategory = originalNote.category,
                     selectedTags = originalNote.tags,
+                    attachments = originalNote.attachments,
                     hasUnsavedChanges = false
                 )
             }
@@ -293,6 +297,7 @@ class EditNoteViewModel @Inject constructor(
                     content = "",
                     selectedCategory = null,
                     selectedTags = emptyList(),
+                    attachments = emptyList(),
                     hasUnsavedChanges = false
                 )
             }
@@ -544,6 +549,20 @@ class EditNoteViewModel @Inject constructor(
             )
         }
     }
+
+    fun addAttachments(uris: List<String>) {
+        _uiState.update { 
+            val newAttachments = (it.attachments + uris).distinct()
+            it.copy(attachments = newAttachments, hasUnsavedChanges = true) 
+        }
+    }
+
+    fun removeAttachment(uri: String) {
+        _uiState.update { 
+            val newAttachments = it.attachments.filter { attachment -> attachment != uri }
+            it.copy(attachments = newAttachments, hasUnsavedChanges = true) 
+        }
+    }
 }
 
 data class EditNoteUiState(
@@ -575,7 +594,9 @@ data class EditNoteUiState(
     val allNotes: List<Note> = emptyList(),
     val showLinkSuggestions: Boolean = false,
     val linkSearchQuery: String? = null,
-    val backlinks: List<Note> = emptyList()
+    val backlinks: List<Note> = emptyList(),
+    // Attachments state
+    val attachments: List<String> = emptyList()
 )
 
 sealed class NavigationEvent {
