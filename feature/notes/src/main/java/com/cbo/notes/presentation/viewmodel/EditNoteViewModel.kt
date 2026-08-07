@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
+import com.cbo.notes.domain.model.TodoItem
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.usecase.CreateNoteUseCase
 import com.cbo.notes.domain.usecase.CreateTagUseCase
@@ -114,7 +115,9 @@ class EditNoteViewModel @Inject constructor(
                                 backlinks = backlinks,
                                 originalNote = note,
                                 reminderTime = note.reminderTime,
-                                attachments = note.attachments
+                                attachments = note.attachments,
+                                color = note.color,
+                                todos = note.todos
                             )
                         }
                     } else {
@@ -142,18 +145,22 @@ class EditNoteViewModel @Inject constructor(
     }
 
     fun updateTitle(title: String) {
-        _uiState.update { it.copy(title = title, hasUnsavedChanges = true) }
+        if (_uiState.value.title != title) {
+            _uiState.update { it.copy(title = title, hasUnsavedChanges = true) }
+        }
     }
 
     fun updateContent(content: String) {
-        val linkSearchQuery = extractLinkQuery(content)
-        _uiState.update { 
-            it.copy(
-                content = content, 
-                hasUnsavedChanges = true,
-                linkSearchQuery = linkSearchQuery,
-                showLinkSuggestions = linkSearchQuery != null
-            ) 
+        if (_uiState.value.content != content) {
+            val linkSearchQuery = extractLinkQuery(content)
+            _uiState.update { 
+                it.copy(
+                    content = content, 
+                    hasUnsavedChanges = true,
+                    linkSearchQuery = linkSearchQuery,
+                    showLinkSuggestions = linkSearchQuery != null
+                ) 
+            }
         }
     }
 
@@ -186,7 +193,9 @@ class EditNoteViewModel @Inject constructor(
     }
 
     fun selectCategory(category: Category?) {
-        _uiState.update { it.copy(selectedCategory = category, hasUnsavedChanges = true) }
+        if (_uiState.value.selectedCategory != category) {
+            _uiState.update { it.copy(selectedCategory = category, hasUnsavedChanges = true) }
+        }
     }
 
     fun toggleTag(tag: Tag) {
@@ -201,17 +210,34 @@ class EditNoteViewModel @Inject constructor(
     }
 
     fun selectTags(tags: List<Tag>) {
-        _uiState.update { it.copy(selectedTags = tags, hasUnsavedChanges = true) }
+        if (_uiState.value.selectedTags != tags) {
+            _uiState.update { it.copy(selectedTags = tags, hasUnsavedChanges = true) }
+        }
     }
 
     fun saveNote() {
         val currentState = _uiState.value
-        if (currentState.title.isBlank()) {
-            viewModelScope.launch {
-                snackbarManager.showMessage(SnackbarMessage.Warning("Title cannot be empty"))
-            }
+        
+        // If the note is completely empty and it's a new note, just navigate back without saving
+        if (currentState.title.isBlank() && 
+            currentState.content.isBlank() && 
+            currentState.attachments.isEmpty() &&
+            currentState.todos.isEmpty() &&
+            !isEditing) {
+            _navigationEvents.trySend(NavigationEvent.NavigateBack)
             return
         }
+
+        // Determine title
+        val finalTitle = if (currentState.title.isNotBlank()) {
+            currentState.title
+        } else if (currentState.content.isNotBlank()) {
+            val firstLine = currentState.content.lines().firstOrNull { it.isNotBlank() } ?: "İsimsiz Not"
+            if (firstLine.length > 40) firstLine.take(40) + "..." else firstLine
+        } else {
+            "İsimsiz Not"
+        }
+
 
         viewModelScope.launch {
             val currentUser = userSession.currentUser.first()
@@ -220,22 +246,26 @@ class EditNoteViewModel @Inject constructor(
 
                 val noteToSave = if (isEditing) {
                     currentState.originalNote!!.copy(
-                        title = currentState.title,
+                        title = finalTitle,
                         content = currentState.content,
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags,
                         reminderTime = currentState.reminderTime,
-                        attachments = currentState.attachments
+                        attachments = currentState.attachments,
+                        color = currentState.color,
+                        todos = currentState.todos
                     )
                 } else {
                     Note(
                         userId = user.id,
-                        title = currentState.title,
+                        title = finalTitle,
                         content = currentState.content,
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags,
                         reminderTime = currentState.reminderTime,
-                        attachments = currentState.attachments
+                        attachments = currentState.attachments,
+                        color = currentState.color,
+                        todos = currentState.todos
                     )
                 }
 
@@ -287,6 +317,8 @@ class EditNoteViewModel @Inject constructor(
                     selectedCategory = originalNote.category,
                     selectedTags = originalNote.tags,
                     attachments = originalNote.attachments,
+                    color = originalNote.color,
+                    todos = originalNote.todos,
                     hasUnsavedChanges = false
                 )
             }
@@ -298,6 +330,8 @@ class EditNoteViewModel @Inject constructor(
                     selectedCategory = null,
                     selectedTags = emptyList(),
                     attachments = emptyList(),
+                    color = null,
+                    todos = emptyList(),
                     hasUnsavedChanges = false
                 )
             }
@@ -553,14 +587,88 @@ class EditNoteViewModel @Inject constructor(
     fun addAttachments(uris: List<String>) {
         _uiState.update { 
             val newAttachments = (it.attachments + uris).distinct()
-            it.copy(attachments = newAttachments, hasUnsavedChanges = true) 
+            if (it.attachments != newAttachments) {
+                it.copy(attachments = newAttachments, hasUnsavedChanges = true)
+            } else {
+                it
+            }
         }
     }
 
     fun removeAttachment(uri: String) {
         _uiState.update { 
             val newAttachments = it.attachments.filter { attachment -> attachment != uri }
-            it.copy(attachments = newAttachments, hasUnsavedChanges = true) 
+            if (it.attachments != newAttachments) {
+                it.copy(attachments = newAttachments, hasUnsavedChanges = true)
+            } else {
+                it
+            }
+        }
+    }
+
+    // Color methods
+    fun updateColor(color: String?) {
+        if (_uiState.value.color != color) {
+            _uiState.update { it.copy(color = color, hasUnsavedChanges = true) }
+        }
+    }
+
+    fun toggleColorPicker() {
+        _uiState.update { it.copy(showColorPicker = !it.showColorPicker) }
+    }
+
+    // Todo list methods
+    fun addTodo() {
+        _uiState.update { 
+            val newTodos = it.todos + TodoItem(text = "")
+            it.copy(todos = newTodos, hasUnsavedChanges = true) 
+        }
+    }
+
+    fun updateTodo(id: String, text: String, isDone: Boolean) {
+        _uiState.update {
+            val newTodos = it.todos.map { todo -> 
+                if (todo.id == id) todo.copy(text = text, isDone = isDone) else todo 
+            }
+            if (it.todos != newTodos) {
+                it.copy(todos = newTodos, hasUnsavedChanges = true)
+            } else {
+                it
+            }
+        }
+    }
+
+    fun deleteTodo(id: String) {
+        _uiState.update {
+            val newTodos = it.todos.filter { todo -> todo.id != id }
+            if (it.todos != newTodos) {
+                it.copy(todos = newTodos, hasUnsavedChanges = true)
+            } else {
+                it
+            }
+        }
+    }
+
+    // Audio recording methods
+    fun startRecording() {
+        _uiState.update { it.copy(isRecording = true) }
+    }
+
+    fun stopRecording() {
+        _uiState.update { it.copy(isRecording = false) }
+    }
+
+    fun onAudioRecordingComplete(filePath: String) {
+        _uiState.update {
+            val newAttachments = (it.attachments + filePath).distinct()
+            if (it.attachments != newAttachments) {
+                it.copy(
+                    attachments = newAttachments,
+                    hasUnsavedChanges = true
+                )
+            } else {
+                it
+            }
         }
     }
 }
@@ -596,7 +704,14 @@ data class EditNoteUiState(
     val linkSearchQuery: String? = null,
     val backlinks: List<Note> = emptyList(),
     // Attachments state
-    val attachments: List<String> = emptyList()
+    val attachments: List<String> = emptyList(),
+    // Color state
+    val color: String? = null,
+    val showColorPicker: Boolean = false,
+    // Todo state
+    val todos: List<TodoItem> = emptyList(),
+    // Audio recording state
+    val isRecording: Boolean = false
 )
 
 sealed class NavigationEvent {

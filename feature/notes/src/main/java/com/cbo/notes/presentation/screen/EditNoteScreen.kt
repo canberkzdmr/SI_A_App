@@ -1,15 +1,14 @@
 package com.cbo.notes.presentation.screen
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import android.content.Intent
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,19 +23,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CollectionsBookmark
-import androidx.compose.material.icons.filled.NotificationAdd
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.NotificationAdd
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,7 +47,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -61,23 +56,30 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
-import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.model.NoteTemplate
-import com.cbo.notes.presentation.component.CreateTagDialog
+import com.cbo.notes.domain.model.Tag
+import com.cbo.notes.presentation.component.AudioPlayerMini
+import com.cbo.notes.presentation.component.AudioRecorderButton
 import com.cbo.notes.presentation.component.FilterChip
+import com.cbo.notes.presentation.component.ImagePreviewDialog
+import com.cbo.notes.presentation.component.NoteAttachmentsRow
+import com.cbo.notes.presentation.component.NoteBottomToolbar
+import com.cbo.notes.presentation.component.NoteColorBar
 import com.cbo.notes.presentation.component.ReminderChip
 import com.cbo.notes.presentation.component.ReminderDialog
 import com.cbo.notes.presentation.component.SelectionBottomSheet
-import com.cbo.notes.presentation.component.NoteAttachmentsRow
-import com.cbo.notes.presentation.component.ImagePreviewDialog
+import com.cbo.notes.presentation.component.TodoListComponent
+import com.cbo.notes.presentation.component.isAudioAttachment
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
 import com.cbo.notes.presentation.viewmodel.EditNoteViewModel
 import com.cbo.notes.presentation.viewmodel.NavigationEvent
@@ -194,6 +196,14 @@ fun EditNoteScreen(
             ) 
         },
         onRemoveAttachment = viewModel::removeAttachment,
+        onColorChange = viewModel::updateColor,
+        onToggleColorPicker = viewModel::toggleColorPicker,
+        onAddTodo = viewModel::addTodo,
+        onUpdateTodo = viewModel::updateTodo,
+        onDeleteTodo = viewModel::deleteTodo,
+        onStartRecording = viewModel::startRecording,
+        onStopRecording = viewModel::stopRecording,
+        onAudioRecordingComplete = viewModel::onAudioRecordingComplete,
         modifier = modifier,
     )
 }
@@ -374,6 +384,7 @@ private fun TagSelection(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditNoteScreen(
+    modifier: Modifier = Modifier,
     uiState: EditNoteUiState,
     onNavigateBack: () -> Unit,
     onTitleChange: (String) -> Unit,
@@ -395,16 +406,23 @@ fun EditNoteScreen(
     onInsertLink: (Note) -> Unit = {},
     onAddAttachments: () -> Unit = {},
     onRemoveAttachment: (String) -> Unit = {},
-    modifier: Modifier = Modifier,
+    onColorChange: (String?) -> Unit = {},
+    onToggleColorPicker: () -> Unit = {},
+    onAddTodo: () -> Unit = {},
+    onUpdateTodo: (String, String, Boolean) -> Unit = { _, _, _ -> },
+    onDeleteTodo: (String) -> Unit = {},
+    onStartRecording: () -> Unit = {},
+    onStopRecording: () -> Unit = {},
+    onAudioRecordingComplete: (String) -> Unit = {},
 ) {
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showSelectionSheet by remember { mutableStateOf(false) }
     var previewImageUri by remember { mutableStateOf<String?>(null) }
 
-    // Intercept system back to respect unsaved changes
+    // Intercept system back to respect unsaved changes and auto-save
     BackHandler(enabled = true) {
         if (uiState.hasUnsavedChanges) {
-            showDiscardDialog = true
+            onSave()
         } else {
             onNavigateBack()
         }
@@ -431,7 +449,7 @@ fun EditNoteScreen(
                     IconButton(
                         onClick = {
                             if (uiState.hasUnsavedChanges) {
-                                showDiscardDialog = true
+                                onSave()
                             } else {
                                 onNavigateBack()
                             }
@@ -502,8 +520,24 @@ fun EditNoteScreen(
                         Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
+                    // Color picker bar (animated show/hide)
+                    NoteColorBar(
+                        visible = uiState.showColorPicker,
+                        selectedColor = uiState.color,
+                        onColorSelected = onColorChange
+                    )
+
+                    // Audio recording indicator bar
+                    // We render it always so its DisposableEffect and LaunchedEffects don't get 
+                    // cancelled when isRecording turns false, allowing it to finalize the recording.
+                    AudioRecorderButton(
+                        isRecording = uiState.isRecording,
+                        onStartRecording = onStartRecording,
+                        onStopRecording = onStopRecording,
+                        onRecordingComplete = onAudioRecordingComplete
+                    )
+
                     // Show reminder chip if a reminder is set
                     if (uiState.reminderTime != null) {
                         ReminderChip(
@@ -515,17 +549,30 @@ fun EditNoteScreen(
 
                     val focusRequestContent = remember { FocusRequester() }
 
+                    // Content area: RichTextEditor + TodoListComponent
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                        RichTextEditorField(
-                            valueMarkdown = uiState.content,
-                            onValueChange = onContentChange,
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .focusRequester(remember { focusRequestContent }),
-                            placeholder = "Start writing your note...",
-                            minHeight = 300,
-                        )
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            // Detached Todo List (only shows if there are todos)
+                            TodoListComponent(
+                                todos = uiState.todos,
+                                onAddTodo = onAddTodo,
+                                onUpdateTodo = onUpdateTodo,
+                                onDeleteTodo = onDeleteTodo
+                            )
+
+                            // Main Rich Text Editor
+                            RichTextEditorField(
+                                valueMarkdown = uiState.content,
+                                onValueChange = onContentChange,
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .fillMaxWidth()
+                                        .focusRequester(remember { focusRequestContent }),
+                                placeholder = "Start writing your note...",
+                                minHeight = 300,
+                            )
+                        }
 
                         // Link Suggestions Dropdown
                         if (uiState.showLinkSuggestions && uiState.linkSearchQuery != null) {
@@ -540,7 +587,7 @@ fun EditNoteScreen(
                                 ) {
                                     filteredNotes.take(5).forEach { note ->
                                         androidx.compose.material3.DropdownMenuItem(
-                                            text = { androidx.compose.material3.Text(note.title) },
+                                            text = { Text(note.title) },
                                             onClick = { onInsertLink(note) }
                                         )
                                     }
@@ -549,29 +596,40 @@ fun EditNoteScreen(
                         }
                     }
 
+                    // Audio attachments - show mini players
+                    val audioAttachments = uiState.attachments.filter { isAudioAttachment(it) }
+                    audioAttachments.forEach { audioUri ->
+                        AudioPlayerMini(
+                            audioUri = audioUri,
+                            onRemove = { onRemoveAttachment(audioUri) }
+                        )
+                    }
+
+                    // Image attachments row
+                    val imageAttachments = uiState.attachments.filter { !isAudioAttachment(it) }
                     NoteAttachmentsRow(
-                        attachments = uiState.attachments,
+                        attachments = imageAttachments,
                         onAddImageClick = onAddAttachments,
                         onRemoveAttachment = onRemoveAttachment,
                         onImageClick = { uri -> previewImageUri = uri }
                     )
 
                     if (uiState.backlinks.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        androidx.compose.material3.Text(
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
                             text = "Backlinks",
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
-                        androidx.compose.foundation.lazy.LazyRow(
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp),
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(uiState.backlinks.size) { index ->
                                 val backlink = uiState.backlinks[index]
                                 androidx.compose.material3.AssistChip(
                                     onClick = { /* Could navigate to note, but out of scope for now */ },
-                                    label = { androidx.compose.material3.Text(backlink.title) },
+                                    label = { Text(backlink.title) },
                                     leadingIcon = {
                                         Icon(
                                             imageVector = Icons.Default.Link,
@@ -584,27 +642,15 @@ fun EditNoteScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    /*Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
-                        if (uiState.availableCategories.isNotEmpty()) {
-                            CategorySelection(
-                                categories = uiState.availableCategories,
-                                selectedCategory = uiState.selectedCategory,
-                                onCategorySelected = onCategorySelected,
-                            )
-                        }
-
-                        TagSelection(
-                            tags = uiState.availableTags,
-                            selectedTags = uiState.selectedTags,
-                            tagInputText = uiState.tagInputText,
-                            onTagToggle = onTagToggle,
-                            onTagInputChange = { },
-                            onCreateTagFromInput = { },
-                            onCreateTag = { },
-                        )
-                    }*/
+                    // Bottom toolbar with color, checklist, and audio buttons
+                    NoteBottomToolbar(
+                        showColorPicker = uiState.showColorPicker,
+                        isRecording = uiState.isRecording,
+                        onToggleColorPicker = onToggleColorPicker,
+                        onAddTodo = onAddTodo,
+                        onStartRecording = onStartRecording,
+                        onStopRecording = onStopRecording
+                    )
                 }
             }
         }
@@ -668,12 +714,12 @@ fun EditNoteScreen(
 
 @Composable
 fun TemplateSelectionDialog(
-    templates: List<com.cbo.notes.domain.model.NoteTemplate>,
-    onSelect: (com.cbo.notes.domain.model.NoteTemplate) -> Unit,
+    templates: List<NoteTemplate>,
+    onSelect: (NoteTemplate) -> Unit,
     onCreateTemplate: (String, String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var showCreateDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showCreateDialog by androidx.compose.runtime.remember { mutableStateOf(false) }
 
     if (showCreateDialog) {
         CreateTemplateDialog(
@@ -686,7 +732,7 @@ fun TemplateSelectionDialog(
     } else {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onDismiss,
-            title = { androidx.compose.material3.Text("Select Template") },
+            title = { Text("Select Template") },
             text = {
                 androidx.compose.foundation.lazy.LazyColumn {
                     items(templates.size) { index ->
@@ -696,19 +742,19 @@ fun TemplateSelectionDialog(
                                 onSelect(template)
                                 onDismiss()
                             },
-                            headlineContent = { androidx.compose.material3.Text(template.name) }
+                            headlineContent = { Text(template.name) }
                         )
                     }
                 }
             },
             confirmButton = {
-                androidx.compose.material3.TextButton(onClick = { showCreateDialog = true }) {
-                    androidx.compose.material3.Text("Create New")
+                TextButton(onClick = { showCreateDialog = true }) {
+                    Text("Create New")
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = onDismiss) {
-                    androidx.compose.material3.Text("Cancel")
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
                 }
             }
         )
@@ -720,40 +766,40 @@ fun CreateTemplateDialog(
     onCreate: (String, String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var name by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
-    var content by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var name by androidx.compose.runtime.remember { mutableStateOf("") }
+    var content by androidx.compose.runtime.remember { mutableStateOf("") }
 
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { androidx.compose.material3.Text("Create Template") },
+        title = { Text("Create Template") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 androidx.compose.material3.OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { androidx.compose.material3.Text("Template Name") },
+                    label = { Text("Template Name") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 androidx.compose.material3.OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
-                    label = { androidx.compose.material3.Text("Content (Markdown)") },
+                    label = { Text("Content (Markdown)") },
                     modifier = Modifier.fillMaxWidth().height(150.dp)
                 )
             }
         },
         confirmButton = {
-            androidx.compose.material3.TextButton(
+            TextButton(
                 onClick = { onCreate(name, content) },
                 enabled = name.isNotBlank() && content.isNotBlank()
             ) {
-                androidx.compose.material3.Text("Create")
+                Text("Create")
             }
         },
         dismissButton = {
-            androidx.compose.material3.TextButton(onClick = onDismiss) {
-                androidx.compose.material3.Text("Cancel")
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
             }
         }
     )

@@ -2,7 +2,9 @@ package com.cbo.notes.data.mapper
 
 import com.cbo.core.database.entity.NoteEntity
 import com.cbo.core.database.entity.NoteWithDetails
+import com.cbo.core.database.entity.TodoItemEntity
 import com.cbo.notes.domain.model.Note
+import com.cbo.notes.domain.model.TodoItem
 import javax.inject.Inject
 
 class NoteEntityMapper @Inject constructor(
@@ -25,7 +27,9 @@ class NoteEntityMapper @Inject constructor(
             deletedAt = entity.deletedAt,
             reminderTime = entity.reminderTime,
             zettelId = entity.zettelId,
-            attachments = entity.attachments
+            attachments = entity.attachments,
+            color = entity.color,
+            todos = entity.todos.map { TodoItem(it.id, it.text, it.isDone) }
         )
     }
     
@@ -46,7 +50,9 @@ class NoteEntityMapper @Inject constructor(
             deletedAt = noteWithDetails.note.deletedAt,
             reminderTime = noteWithDetails.note.reminderTime,
             zettelId = noteWithDetails.note.zettelId,
-            attachments = noteWithDetails.note.attachments
+            attachments = noteWithDetails.note.attachments,
+            color = noteWithDetails.note.color,
+            todos = noteWithDetails.note.todos.map { TodoItem(it.id, it.text, it.isDone) }
         )
     }
     
@@ -66,7 +72,9 @@ class NoteEntityMapper @Inject constructor(
             deletedAt = domain.deletedAt,
             reminderTime = domain.reminderTime,
             zettelId = domain.zettelId,
-            attachments = domain.attachments
+            attachments = domain.attachments,
+            color = domain.color,
+            todos = domain.todos.map { TodoItemEntity(it.id, it.text, it.isDone) }
         )
     }
 }

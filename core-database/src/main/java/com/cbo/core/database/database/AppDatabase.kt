@@ -39,7 +39,7 @@ import com.cbo.core.database.entity.NoteTemplateEntity
         NoteLinkEntity::class,
         NoteTemplateEntity::class
     ], 
-    version = 2,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class, ViewModeConverter::class)

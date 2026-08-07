@@ -1,5 +1,7 @@
 package com.cbo.notes.domain.model
 
+import com.cbo.notes.domain.model.TodoItem
+
 data class Note(
     val id: Int = 0,
     val userId: Int,
@@ -16,7 +18,9 @@ data class Note(
     val deletedAt: Long? = null,
     val reminderTime: Long? = null,
     val zettelId: String? = null,
-    val attachments: List<String> = emptyList()
+    val attachments: List<String> = emptyList(),
+    val color: String? = null,
+    val todos: List<TodoItem> = emptyList()
 ) {
     /** Returns true if this note has an active reminder set for the future */
     fun hasActiveReminder(): Boolean = reminderTime != null && reminderTime > System.currentTimeMillis()
