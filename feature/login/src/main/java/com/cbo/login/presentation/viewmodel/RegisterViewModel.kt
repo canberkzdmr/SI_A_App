@@ -6,8 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.cbo.core.common.base.UiState
 import com.cbo.core.common.util.DateUtil
 import com.cbo.core.common.validation.FieldValidation
+import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.exception.RegistrationException
+import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.login.domain.model.RegisterUserModel
+import com.cbo.login.domain.usecase.GetUserUseCase
+import com.cbo.login.domain.usecase.LoginUseCase
 import com.cbo.login.domain.usecase.RegisterUserUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
@@ -24,6 +28,9 @@ class RegisterViewModel
     @Inject
     constructor(
         private val registerUserUseCase: RegisterUserUseCase,
+        private val loginUseCase: LoginUseCase,
+        private val getUserUseCase: GetUserUseCase,
+        private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
     ) : ViewModel() {
         private val TAG = "RegisterViewModel"
 
@@ -53,34 +60,64 @@ class RegisterViewModel
                     }
 
                 val result = registerUserUseCase(user)
-                _uiState.value = handleRegisterResult(result, onSuccess)
-            }
-
-        private fun handleRegisterResult(
-            result: Result<Unit>,
-            onSuccess: () -> Unit,
-        ): UiState<Unit> =
-            when {
-                result.isSuccess -> {
-                    onSuccess()
-                    UiState.Success(Unit)
-                }
-                result.isFailure -> {
+                if (result.isSuccess) {
+                    val loginResult = loginUseCase(user.username, user.password)
+                    if (loginResult.exceptionOrNull() is LoginException.FirstLoginIsNotCompleted) {
+                        setShowBiometricDialog(true)
+                    } else if (loginResult.isSuccess) {
+                        SnackbarManager.showMessage(SnackbarMessage.Success("Welcome ${user.username}!"))
+                        onSuccess()
+                        _uiState.value = UiState.Success(Unit)
+                    } else {
+                        val exception = loginResult.exceptionOrNull()
+                        Log.e(TAG, "Auto login failed: ${exception?.message}")
+                        SnackbarManager.showMessage(SnackbarMessage.Warning(exception?.message ?: "Login failed"))
+                        _uiState.value = UiState.Error(exception?.message ?: "Auto login failed")
+                    }
+                } else {
                     val exception = result.exceptionOrNull()
                     Log.e(TAG, exception?.message ?: "Unknown error")
                     handleRegistrationException(exception)
-                    viewModelScope.launch {
-                        SnackbarManager.showMessage(
-                            SnackbarMessage.Warning(exception?.message ?: "Unknown error"),
-                        )
-                    }
-                    UiState.Error(exception?.message ?: "Unknown error")
-                }
-                else -> {
-                    viewModelScope.launch { SnackbarManager.showMessage(SnackbarMessage.Error("Unknown error")) }
-                    UiState.Error("Unknown error")
+                    SnackbarManager.showMessage(
+                        SnackbarMessage.Warning(exception?.message ?: "Unknown error"),
+                    )
+                    _uiState.value = UiState.Error(exception?.message ?: "Unknown error")
                 }
             }
+
+        fun enableBiometricLogin(enabled: Boolean, onSuccess: () -> Unit) {
+            viewModelScope.launch {
+                val username = _registerState.value.username
+                val password = _registerState.value.password
+                val userResult = getUserUseCase(username)
+                userResult.getOrNull()?.let { user ->
+                    setBiometricEnabledUseCase(user.id, enabled)
+                } ?: run {
+                    Log.e(TAG, "Enable BiometricLogin: User is null")
+                }
+                setShowBiometricDialog(false)
+                completeLogin(username, password, onSuccess)
+            }
+        }
+
+        fun setShowBiometricDialog(enabled: Boolean) {
+            _registerState.update { it.copy(showBiometricDialog = enabled) }
+        }
+
+        private suspend fun completeLogin(username: String, password: String, onSuccess: () -> Unit) {
+            val loginResult = loginUseCase(username, password)
+            if (loginResult.isSuccess) {
+                SnackbarManager.showMessage(SnackbarMessage.Success("Welcome $username!"))
+                onSuccess()
+                _uiState.value = UiState.Success(Unit)
+            } else {
+                val exception = loginResult.exceptionOrNull()
+                Log.e(TAG, "Auto login failed: ${exception?.message}")
+                SnackbarManager.showMessage(SnackbarMessage.Warning(exception?.message ?: "Login failed"))
+                _uiState.value = UiState.Error(exception?.message ?: "Auto login failed")
+            }
+        }
+
 
         private fun handleRegistrationException(exception: Throwable?) {
             when (exception) {
@@ -186,4 +223,5 @@ data class RegisterState(
     val email: String = "",
     val termsAndConditionsChecked: Boolean = false,
     val isValid: Boolean = false,
+    val showBiometricDialog: Boolean = false,
 )

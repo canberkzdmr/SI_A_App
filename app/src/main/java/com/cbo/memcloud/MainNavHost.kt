@@ -42,11 +42,9 @@ fun MainNavHost(
                 }
             },
 
-            onRegisterSuccess = { username ->
-                navController.navigate(AppDestination.Login.createRoute(username)) {
-                    popUpTo(AppDestination.Login.route) {
-                        inclusive = true
-                    }
+            onRegisterSuccess = { _ ->
+                navController.navigate(AppDestination.Main.route) {
+                    popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
             }

@@ -60,6 +60,9 @@ import com.cbo.ui.components.cards.AppCard
 import com.cbo.ui.components.cards.CardVariant
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
+import com.cbo.ui.components.dialogs.AppConfirmationDialog
+import com.cbo.ui.components.dialogs.DialogType
+
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel(),
@@ -90,7 +93,13 @@ fun RegisterScreen(
                     viewModel.register {
                         onRegisterSuccess(registerState.username)
                     }
-                }
+                },
+                onBiometricLoginEnabled = { enabled ->
+                    viewModel.enableBiometricLogin(enabled) {
+                        onRegisterSuccess(registerState.username)
+                    }
+                },
+                onShowBiometricDialog = viewModel::setShowBiometricDialog,
             )
         }
     }
@@ -110,6 +119,8 @@ fun RegisterScreenContent(
     validatePassword: () -> FieldValidation,
     validateRetypePassword: () -> FieldValidation,
     onRegister: () -> Unit,
+    onBiometricLoginEnabled: (Boolean) -> Unit = {},
+    onShowBiometricDialog: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val focusRequesterEmail = remember { FocusRequester() }
@@ -175,12 +186,13 @@ fun RegisterScreenContent(
             )
         }
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(Dimens.Padding.extraLarge),
-        ) {
+        if (!registerState.showBiometricDialog) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(Dimens.Padding.extraLarge),
+            ) {
             AppCard(
                 variant = CardVariant.DEFAULT,
                 modifier =
@@ -444,6 +456,27 @@ fun RegisterScreenContent(
                 )
                 AppLabel("■cnbrkzdmr")
             }
+        }
+    }
+
+        if (registerState.showBiometricDialog) {
+            AppConfirmationDialog(
+                type = DialogType.INFO,
+                title = stringResource(id = com.cbo.login.R.string.enable_biometric_title),
+                message = stringResource(id = com.cbo.login.R.string.enable_biometric_message),
+                onConfirm = {
+                    onBiometricLoginEnabled(true)
+                    Log.d("RegisterScreen", "Biometric Login Enabled")
+                    onShowBiometricDialog(false)
+                },
+                onDismiss = {
+                    onBiometricLoginEnabled(false)
+                    Log.d("RegisterScreen", "Biometric Login is Not Enabled")
+                    onShowBiometricDialog(false)
+                },
+                confirmText = stringResource(id = com.cbo.login.R.string.enable),
+                dismissText = stringResource(id = com.cbo.login.R.string.not_now)
+            )
         }
     }
 }
