@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -388,3 +389,71 @@ fun CardIndicatorPreviews() {
         }
     }
 }
+
+@Preview(showBackground = true, name = "GroupView Preview")
+@Preview(showBackground = true, name = "GroupView Dark Preview", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun GroupViewPreview() {
+    MemCloudApplicationTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Settings Group Example
+            GroupView(
+                title = "Account Settings",
+                subtitle = "Manage your profile and privacy preferences",
+                leadingIcon = Icons.Default.Settings,
+                showDividerAfterHeader = true,
+                variant = CardVariant.DEFAULT
+            ) {
+                GroupItem(
+                    title = "Profile Information",
+                    subtitle = "Change name, email, avatar",
+                    leadingIcon = Icons.Default.Person,
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    showDivider = true,
+                    onClick = {}
+                )
+                GroupItem(
+                    title = "Notifications",
+                    subtitle = "Manage push and email alerts",
+                    leadingIcon = Icons.Default.Notifications,
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    onClick = {}
+                )
+            }
+
+            // Simple Info Group Example
+            GroupView(
+                title = "System Info",
+                variant = CardVariant.TONAL
+            ) {
+                GroupItem(
+                    title = "App Version",
+                    subtitle = "v1.0.0 (Build 42)",
+                    showDivider = true
+                )
+                GroupItem(
+                    title = "Storage Used",
+                    subtitle = "1.2 GB of 15 GB"
+                )
+            }
+        }
+    }
+}
+

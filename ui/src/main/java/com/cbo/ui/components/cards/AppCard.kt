@@ -74,13 +74,7 @@ fun AppCard(
             }
         )
 
-    Card(
-        modifier = finalModifier,
-        shape = shape,
-        colors = cardColors,
-        elevation = cardElevation,
-        onClick = onClick ?: {}
-    ) {
+    val cardContent: @Composable ColumnScope.() -> Unit = {
         // 1. Standard layout (No Indicator)
         if (indicatorColor == null) {
             Column(
@@ -177,6 +171,25 @@ fun AppCard(
             }
         }
     }
+
+    if (onClick != null) {
+        Card(
+            onClick = onClick,
+            modifier = finalModifier,
+            shape = shape,
+            colors = cardColors,
+            elevation = cardElevation,
+            content = cardContent
+        )
+    } else {
+        Card(
+            modifier = finalModifier,
+            shape = shape,
+            colors = cardColors,
+            elevation = cardElevation,
+            content = cardContent
+        )
+    }
 }
 
 /**
@@ -224,13 +237,7 @@ fun AppCardHorizontal(
             }
         )
 
-    Card(
-        modifier = finalModifier,
-        shape = shape,
-        colors = cardColors,
-        elevation = cardElevation,
-        onClick = onClick ?: {}
-    ) {
+    val cardContent: @Composable ColumnScope.() -> Unit = {
         // 1. Standard layout (No Indicator)
         if (indicatorColor == null) {
             Row(
@@ -326,6 +333,25 @@ fun AppCardHorizontal(
                 }
             }
         }
+    }
+
+    if (onClick != null) {
+        Card(
+            onClick = onClick,
+            modifier = finalModifier,
+            shape = shape,
+            colors = cardColors,
+            elevation = cardElevation,
+            content = cardContent
+        )
+    } else {
+        Card(
+            modifier = finalModifier,
+            shape = shape,
+            colors = cardColors,
+            elevation = cardElevation,
+            content = cardContent
+        )
     }
 }
 

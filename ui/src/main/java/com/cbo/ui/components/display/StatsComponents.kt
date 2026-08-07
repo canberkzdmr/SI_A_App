@@ -2,6 +2,7 @@ package com.cbo.ui.components.display
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,14 +34,7 @@ fun AppStatCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        onClick = onClick ?: {}
-    ) {
+    val cardContent: @Composable ColumnScope.() -> Unit = {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -63,8 +57,7 @@ fun AppStatCard(
                 )
                 
                 if (subtitle != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    
+                    Spacer(modifier = Modifier.height(2.dp))
                     AppBody(
                         text = subtitle,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -76,11 +69,32 @@ fun AppStatCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
+    }
+
+    if (onClick != null) {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            onClick = onClick,
+            content = cardContent
+        )
+    } else {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            content = cardContent
+        )
     }
 }
 

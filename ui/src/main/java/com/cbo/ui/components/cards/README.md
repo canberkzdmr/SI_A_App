@@ -78,6 +78,28 @@ ContentCard(
 )
 ```
 
+#### GroupView & GroupItem
+Component for grouping related UI items (such as settings, form sections, or metadata blocks) inside an `AppCard` container.
+
+```kotlin
+GroupView(
+    title = "Account Settings",
+    subtitle = "Manage your preferences",
+    leadingIcon = Icons.Default.Settings,
+    showDividerAfterHeader = true,
+    variant = CardVariant.DEFAULT
+) {
+    GroupItem(
+        title = "Profile Information",
+        subtitle = "Change name, email",
+        leadingIcon = Icons.Default.Person,
+        showDivider = true,
+        onClick = { /* navigate */ }
+    )
+}
+```
+
+
 #### ActionCard
 Card with primary and secondary actions.
 
