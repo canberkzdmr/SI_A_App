@@ -1,6 +1,7 @@
 package com.cbo.notes.presentation.component
 
 import android.Manifest
+import android.content.res.Configuration
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -10,11 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.NotificationAdd
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,9 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import com.cbo.notes.domain.model.Note
 
 /**
  * A bottom toolbar for the note editor that provides quick access to:
@@ -46,6 +47,8 @@ fun NoteBottomToolbar(
     showColorPicker: Boolean,
     isRecording: Boolean,
     onToggleColorPicker: () -> Unit,
+    onAddImage: () -> Unit,
+    onAddReminder: () -> Unit,
     onAddTodo: () -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
@@ -85,7 +88,7 @@ fun NoteBottomToolbar(
                 )
             }
 
-            // Add Todo button
+            // Add To-do button
             IconButton(onClick = onAddTodo) {
                 Icon(
                     imageVector = Icons.Default.CheckBox,
@@ -124,6 +127,101 @@ fun NoteBottomToolbar(
                     modifier = Modifier.size(22.dp)
                 )
             }
+
+            // Add image toggle
+            IconButton(onClick = onAddImage) {
+                Icon(
+                    imageVector = Icons.Default.AddPhotoAlternate,
+                    contentDescription = "Note color",
+                    tint = if (showColorPicker)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            // Add Reminder toggle
+            IconButton(onClick = onAddReminder) {
+                Icon(
+                    imageVector = Icons.Default.NotificationAdd,
+                    contentDescription = "Note color",
+                    tint = if (showColorPicker)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
         }
     }
 }
+
+@Preview(showBackground = true, name = "Note Bottom Toolbar - Default")
+@Composable
+private fun NoteBottomToolbarPreview() {
+    MaterialTheme {
+        NoteBottomToolbar(
+            showColorPicker = false,
+            isRecording = false,
+            onToggleColorPicker = {},
+            onAddTodo = {},
+            onStartRecording = {},
+            onAddImage = {},
+            onAddReminder = {},
+            onStopRecording = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Note Bottom Toolbar - Color Picker Active")
+@Composable
+private fun NoteBottomToolbarColorPickerActivePreview() {
+    MaterialTheme {
+        NoteBottomToolbar(
+            showColorPicker = true,
+            isRecording = false,
+            onToggleColorPicker = {},
+            onAddTodo = {},
+            onStartRecording = {},
+            onAddImage = {},
+            onAddReminder = {},
+            onStopRecording = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Note Bottom Toolbar - Recording Active")
+@Composable
+private fun NoteBottomToolbarRecordingPreview() {
+    MaterialTheme {
+        NoteBottomToolbar(
+            showColorPicker = false,
+            isRecording = true,
+            onToggleColorPicker = {},
+            onAddTodo = {},
+            onAddImage = {},
+            onStartRecording = {},
+            onAddReminder = {},
+            onStopRecording = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Note Bottom Toolbar - Dark Mode")
+@Composable
+private fun NoteBottomToolbarDarkModePreview() {
+    MaterialTheme {
+        NoteBottomToolbar(
+            showColorPicker = false,
+            isRecording = false,
+            onToggleColorPicker = {},
+            onAddTodo = {},
+            onStartRecording = {},
+            onAddImage = {},
+            onAddReminder = {},
+            onStopRecording = {}
+        )
+    }
+}
+

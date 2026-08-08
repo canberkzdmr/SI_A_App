@@ -8,6 +8,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -33,11 +35,17 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.NotificationAdd
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -190,12 +198,13 @@ fun EditNoteScreen(
         onInsertLink = viewModel::insertLink,
         onAddAttachments = { 
             imagePickerLauncher.launch(
-                androidx.activity.result.PickVisualMediaRequest(
+                PickVisualMediaRequest(
                     ActivityResultContracts.PickVisualMedia.ImageOnly
                 )
             ) 
         },
         onRemoveAttachment = viewModel::removeAttachment,
+        onRenameAttachment = viewModel::onRenameAttachment,
         onColorChange = viewModel::updateColor,
         onToggleColorPicker = viewModel::toggleColorPicker,
         onAddTodo = viewModel::addTodo,
@@ -406,6 +415,7 @@ fun EditNoteScreen(
     onInsertLink: (Note) -> Unit = {},
     onAddAttachments: () -> Unit = {},
     onRemoveAttachment: (String) -> Unit = {},
+    onRenameAttachment: (String, String) -> Unit = { _, _ -> },
     onColorChange: (String?) -> Unit = {},
     onToggleColorPicker: () -> Unit = {},
     onAddTodo: () -> Unit = {},
@@ -580,13 +590,13 @@ fun EditNoteScreen(
                                 it.title.contains(uiState.linkSearchQuery, ignoreCase = true)
                             }
                             if (filteredNotes.isNotEmpty()) {
-                                androidx.compose.material3.DropdownMenu(
+                                DropdownMenu(
                                     expanded = true,
                                     onDismissRequest = { /* Controlled by typing */ },
                                     modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.TopCenter)
                                 ) {
                                     filteredNotes.take(5).forEach { note ->
-                                        androidx.compose.material3.DropdownMenuItem(
+                                        DropdownMenuItem(
                                             text = { Text(note.title) },
                                             onClick = { onInsertLink(note) }
                                         )
@@ -601,7 +611,8 @@ fun EditNoteScreen(
                     audioAttachments.forEach { audioUri ->
                         AudioPlayerMini(
                             audioUri = audioUri,
-                            onRemove = { onRemoveAttachment(audioUri) }
+                            onRemove = { onRemoveAttachment(audioUri) },
+                            onRename = { newName -> onRenameAttachment(audioUri, newName) }
                         )
                     }
 
@@ -627,7 +638,7 @@ fun EditNoteScreen(
                         ) {
                             items(uiState.backlinks.size) { index ->
                                 val backlink = uiState.backlinks[index]
-                                androidx.compose.material3.AssistChip(
+                                AssistChip(
                                     onClick = { /* Could navigate to note, but out of scope for now */ },
                                     label = { Text(backlink.title) },
                                     leadingIcon = {
@@ -649,7 +660,9 @@ fun EditNoteScreen(
                         onToggleColorPicker = onToggleColorPicker,
                         onAddTodo = onAddTodo,
                         onStartRecording = onStartRecording,
-                        onStopRecording = onStopRecording
+                        onStopRecording = onStopRecording,
+                        onAddImage = {},
+                        onAddReminder = {},
                     )
                 }
             }
@@ -719,7 +732,7 @@ fun TemplateSelectionDialog(
     onCreateTemplate: (String, String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var showCreateDialog by androidx.compose.runtime.remember { mutableStateOf(false) }
+    var showCreateDialog by remember { mutableStateOf(false) }
 
     if (showCreateDialog) {
         CreateTemplateDialog(
@@ -730,14 +743,14 @@ fun TemplateSelectionDialog(
             onDismiss = { showCreateDialog = false }
         )
     } else {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text("Select Template") },
             text = {
-                androidx.compose.foundation.lazy.LazyColumn {
+                LazyColumn {
                     items(templates.size) { index ->
                         val template = templates[index]
-                        androidx.compose.material3.ListItem(
+                        ListItem(
                             modifier = Modifier.clickable {
                                 onSelect(template)
                                 onDismiss()
@@ -766,22 +779,22 @@ fun CreateTemplateDialog(
     onCreate: (String, String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var name by androidx.compose.runtime.remember { mutableStateOf("") }
-    var content by androidx.compose.runtime.remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf("") }
 
-    androidx.compose.material3.AlertDialog(
+    AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Create Template") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Template Name") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                androidx.compose.material3.OutlinedTextField(
+                OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
                     label = { Text("Content (Markdown)") },

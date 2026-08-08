@@ -25,6 +25,8 @@ import com.cbo.notes.domain.usecase.GetNoteTemplatesUseCase
 import com.cbo.notes.domain.usecase.AddNoteTemplateUseCase
 import com.cbo.notes.domain.model.NoteTemplate
 import com.cbo.notes.worker.ReminderScheduler
+import com.cbo.notes.presentation.component.getAudioPath
+import com.cbo.notes.presentation.component.isAudioAttachment
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -659,15 +661,36 @@ class EditNoteViewModel @Inject constructor(
     }
 
     fun onAudioRecordingComplete(filePath: String) {
-        _uiState.update {
-            val newAttachments = (it.attachments + filePath).distinct()
-            if (it.attachments != newAttachments) {
-                it.copy(
+        _uiState.update { currentState ->
+            val existingAudioCount = currentState.attachments.count { isAudioAttachment(it) }
+            val defaultName = "Ses Kaydı ${existingAudioCount + 1}"
+            val formattedAttachment = "$filePath|$defaultName"
+            val newAttachments = (currentState.attachments + formattedAttachment).distinct()
+            if (currentState.attachments != newAttachments) {
+                currentState.copy(
                     attachments = newAttachments,
                     hasUnsavedChanges = true
                 )
             } else {
-                it
+                currentState
+            }
+        }
+    }
+
+    fun onRenameAttachment(oldAttachment: String, newName: String) {
+        val path = getAudioPath(oldAttachment)
+        val updatedAttachment = if (newName.isBlank()) path else "$path|$newName"
+        _uiState.update { currentState ->
+            val updatedAttachments = currentState.attachments.map { attachment ->
+                if (attachment == oldAttachment) updatedAttachment else attachment
+            }
+            if (currentState.attachments != updatedAttachments) {
+                currentState.copy(
+                    attachments = updatedAttachments,
+                    hasUnsavedChanges = true
+                )
+            } else {
+                currentState
             }
         }
     }
