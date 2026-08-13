@@ -65,6 +65,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +82,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
@@ -459,6 +461,8 @@ fun EditNoteScreen(
         )
     )
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var activeAccordionId by remember { mutableStateOf<Int?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -502,7 +506,11 @@ fun EditNoteScreen(
                     }
 
                     // Add To-do button
-                    IconButton(onClick = onAddTodo) {
+                    IconButton(onClick = {
+                        activeAccordionId = 1
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                        onAddTodo()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.CheckBox,
                             contentDescription = "Add Todo",
@@ -514,6 +522,9 @@ fun EditNoteScreen(
                     // Audio recording
                     IconButton(
                         onClick = {
+                            activeAccordionId = 2
+                            scope.launch { scaffoldState.bottomSheetState.expand() }
+                            
                             if (uiState.isRecording) {
                                 onStopRecording()
                             } else {
@@ -542,7 +553,11 @@ fun EditNoteScreen(
                     }
 
                     // Add image toggle
-                    IconButton(onClick = onAddAttachments) {
+                    IconButton(onClick = {
+                        activeAccordionId = 3
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                        onAddAttachments()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.AddPhotoAlternate,
                             contentDescription = "Add image",
@@ -567,29 +582,6 @@ fun EditNoteScreen(
                         )
                     }
                 }
-
-                /*Column(modifier = Modifier.fillMaxSize()) {
-                    // Detached To-do List (only shows if there are todos)
-                    TodoListComponent(
-                        todos = uiState.todos,
-                        onAddTodo = onAddTodo,
-                        onUpdateTodo = onUpdateTodo,
-                        onDeleteTodo = onDeleteTodo
-                    )
-
-                    // Main Rich Text Editor
-                    RichTextEditorField(
-                        valueMarkdown = uiState.content,
-                        onValueChange = onContentChange,
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .focusRequester(remember { focusRequestContent }),
-                        placeholder = "Start writing your note...",
-                        minHeight = 300,
-                    )
-                }*/
 
                 val audioAttachments = remember(uiState.attachments) {
                     uiState.attachments.filter { isAudioAttachment(it) }
@@ -650,6 +642,7 @@ fun EditNoteScreen(
                     items = attachmentAccordionItems,
                     mode = AccordionMode.SINGLE,
                     style = AccordionStyle.BORDERLESS,
+                    initialExpandedId = activeAccordionId
                 )
             }
         }
@@ -815,7 +808,6 @@ fun EditNoteScreen(
                     }
 
                     // Box closed above. Backlinks below.
-
                     if (uiState.backlinks.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(

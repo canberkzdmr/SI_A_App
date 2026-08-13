@@ -71,8 +71,8 @@ fun <T> AppAccordion(
     initialExpandedIds: Set<T> = emptySet(),
     itemSpacing: Dp = if (style == AccordionStyle.CARD) 8.dp else 0.dp
 ) {
-    var expandedSingleId by remember { mutableStateOf(initialExpandedId ?: items.firstOrNull()?.id) }
-    var expandedMultipleIds by remember { mutableStateOf(initialExpandedIds) }
+    var expandedSingleId by remember(initialExpandedId) { mutableStateOf(initialExpandedId) }
+    var expandedMultipleIds by remember(initialExpandedIds) { mutableStateOf(initialExpandedIds) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
