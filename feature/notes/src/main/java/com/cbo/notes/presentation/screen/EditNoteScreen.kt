@@ -10,6 +10,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,8 @@ import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
@@ -68,6 +71,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -464,6 +471,13 @@ fun EditNoteScreen(
     val scope = rememberCoroutineScope()
     var activeAccordionId by remember { mutableStateOf<Int?>(null) }
 
+    val audioAttachments = remember(uiState.attachments) {
+        uiState.attachments.filter { isAudioAttachment(it) }
+    }
+    val imageAttachments = remember(uiState.attachments) {
+        uiState.attachments.filter { !isAudioAttachment(it) }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -474,121 +488,41 @@ fun EditNoteScreen(
         }
     }
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
+    Box(modifier = Modifier.fillMaxSize()) {
+        BottomSheetScaffold(
+            scaffoldState = scaffoldState,
         sheetPeekHeight = 110.dp,
-        sheetDragHandle = {
-            BottomSheetDefaults.DragHandle()
-        },
+        sheetDragHandle = null,
         sheetContent = {
+            val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.8f)
-            ) {
-                // Toolbar 5 button
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Color picker toggle
-                    IconButton(onClick = onToggleColorPicker) {
-                        Icon(
-                            imageVector = Icons.Default.Palette,
-                            contentDescription = "Note color",
-                            tint = if (uiState.showColorPicker)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-
-                    // Add To-do button
-                    IconButton(onClick = {
-                        activeAccordionId = 1
-                        scope.launch { scaffoldState.bottomSheetState.expand() }
-                        onAddTodo()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.CheckBox,
-                            contentDescription = "Add Todo",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-
-                    // Audio recording
-                    IconButton(
-                        onClick = {
-                            activeAccordionId = 2
-                            scope.launch { scaffoldState.bottomSheetState.expand() }
-                            
-                            if (uiState.isRecording) {
-                                onStopRecording()
-                            } else {
-                                val hasPermission = ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.RECORD_AUDIO
-                                ) == PackageManager.PERMISSION_GRANTED
-
-                                if (hasPermission) {
-                                    onStartRecording()
-                                } else {
-                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                }
-                            }
+                    .drawWithContent {
+                        drawContent()
+                        val strokeWidth = 1.dp.toPx()
+                        val cornerRadius = 28.dp.toPx()
+                        
+                        clipRect(
+                            left = 0f,
+                            top = 0f,
+                            right = size.width,
+                            bottom = 110.dp.toPx()
+                        ) {
+                            drawRoundRect(
+                                color = borderColor,
+                                size = size,
+                                cornerRadius = CornerRadius(cornerRadius, cornerRadius),
+                                style = Stroke(width = strokeWidth)
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Mic,
-                            contentDescription = if (uiState.isRecording) "Stop recording" else "Record audio",
-                            tint = if (uiState.isRecording)
-                                MaterialTheme.colorScheme.error
-                            else
-                                MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(22.dp)
-                        )
                     }
-
-                    // Add image toggle
-                    IconButton(onClick = {
-                        activeAccordionId = 3
-                        scope.launch { scaffoldState.bottomSheetState.expand() }
-                        onAddAttachments()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.AddPhotoAlternate,
-                            contentDescription = "Add image",
-                            tint = if (uiState.showColorPicker)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-
-                    // Add Reminder toggle
-                    IconButton(onClick = onShowReminderDialog) {
-                        Icon(
-                            imageVector = Icons.Default.NotificationAdd,
-                            contentDescription = "Add reminder",
-                            tint = if (uiState.showColorPicker)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-
-                val audioAttachments = remember(uiState.attachments) {
-                    uiState.attachments.filter { isAudioAttachment(it) }
-                }
-                val imageAttachments = remember(uiState.attachments) {
-                    uiState.attachments.filter { !isAudioAttachment(it) }
-                }
+            ) {
+                BottomSheetDefaults.DragHandle(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                // Toolbar extracted to bottom fixed Box
 
                 val attachmentAccordionItems = listOf(
                     AccordionItem(
@@ -644,6 +578,8 @@ fun EditNoteScreen(
                     style = AccordionStyle.BORDERLESS,
                     initialExpandedId = activeAccordionId
                 )
+                
+                Spacer(modifier = Modifier.height(72.dp))
             }
         }
     ) { bottomSheetPadding ->
@@ -836,6 +772,137 @@ fun EditNoteScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+    }
+
+    // Fixed Toolbar at the bottom of the screen
+    Surface(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth(),
+        tonalElevation = BottomSheetDefaults.Elevation
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Color picker toggle
+            IconButton(onClick = onToggleColorPicker) {
+                Icon(
+                    imageVector = Icons.Default.Palette,
+                    contentDescription = "Note color",
+                    tint = if (uiState.showColorPicker)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            // Add To-do button
+            BadgedBox(
+                badge = {
+                    if (uiState.todos.isNotEmpty()) {
+                        Badge { Text(uiState.todos.size.toString()) }
+                    }
+                }
+            ) {
+                IconButton(onClick = {
+                    activeAccordionId = 1
+                    scope.launch { scaffoldState.bottomSheetState.expand() }
+                    onAddTodo()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.CheckBox,
+                        contentDescription = "Add Todo",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+
+            // Audio recording
+            BadgedBox(
+                badge = {
+                    if (audioAttachments.isNotEmpty()) {
+                        Badge { Text(audioAttachments.size.toString()) }
+                    }
+                }
+            ) {
+                IconButton(
+                    onClick = {
+                        activeAccordionId = 2
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                        
+                        if (uiState.isRecording) {
+                            onStopRecording()
+                        } else {
+                            val hasPermission = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.RECORD_AUDIO
+                            ) == PackageManager.PERMISSION_GRANTED
+
+                            if (hasPermission) {
+                                onStartRecording()
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mic,
+                        contentDescription = if (uiState.isRecording) "Stop recording" else "Record audio",
+                        tint = if (uiState.isRecording)
+                            MaterialTheme.colorScheme.error
+                        else
+                            MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+
+            // Add image toggle
+            BadgedBox(
+                badge = {
+                    if (imageAttachments.isNotEmpty()) {
+                        Badge { Text(imageAttachments.size.toString()) }
+                    }
+                }
+            ) {
+                IconButton(onClick = {
+                    activeAccordionId = 3
+                    scope.launch { scaffoldState.bottomSheetState.expand() }
+                    onAddAttachments()
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.AddPhotoAlternate,
+                        contentDescription = "Add image",
+                        tint = if (uiState.showColorPicker)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+
+            // Add Reminder toggle
+            IconButton(onClick = onShowReminderDialog) {
+                Icon(
+                    imageVector = Icons.Default.NotificationAdd,
+                    contentDescription = "Add reminder",
+                    tint = if (uiState.showColorPicker)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(22.dp)
+                )
             }
         }
     }
