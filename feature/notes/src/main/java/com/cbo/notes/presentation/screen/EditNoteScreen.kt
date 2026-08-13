@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,13 +31,19 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.NotificationAdd
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -46,9 +53,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -81,7 +92,6 @@ import com.cbo.notes.presentation.component.AudioRecorderButton
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.component.ImagePreviewDialog
 import com.cbo.notes.presentation.component.NoteAttachmentsRow
-import com.cbo.notes.presentation.component.NoteBottomToolbar
 import com.cbo.notes.presentation.component.NoteColorBar
 import com.cbo.notes.presentation.component.ReminderChip
 import com.cbo.notes.presentation.component.ReminderDialog
@@ -98,9 +108,14 @@ import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import com.cbo.ui.components.dialogs.AppConfirmationDialog
 import com.cbo.ui.components.dialogs.DialogType
+import com.cbo.ui.components.expandable.AccordionItem
+import com.cbo.ui.components.expandable.AccordionMode
+import com.cbo.ui.components.expandable.AccordionStyle
+import com.cbo.ui.components.expandable.AppAccordion
 import com.cbo.ui.components.richtext.RichTextEditorField
 import com.cbo.ui.components.states.AppErrorState
 import com.cbo.ui.components.states.AppLoadingScreen
+import com.cbo.ui.theme.Dimens
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -438,9 +453,210 @@ fun EditNoteScreen(
         }
     }
 
-    ScreenWithTopBarAndInsets(
-        modifier = modifier,
-        topBar = {
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.PartiallyExpanded
+        )
+    )
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            onStartRecording()
+        } else {
+            Toast.makeText(context, "Microphone permission required", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetPeekHeight = 110.dp,
+        sheetDragHandle = {
+            BottomSheetDefaults.DragHandle()
+        },
+        sheetContent = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.8f)
+            ) {
+                // Toolbar 5 button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Color picker toggle
+                    IconButton(onClick = onToggleColorPicker) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = "Note color",
+                            tint = if (uiState.showColorPicker)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    // Add To-do button
+                    IconButton(onClick = onAddTodo) {
+                        Icon(
+                            imageVector = Icons.Default.CheckBox,
+                            contentDescription = "Add Todo",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    // Audio recording
+                    IconButton(
+                        onClick = {
+                            if (uiState.isRecording) {
+                                onStopRecording()
+                            } else {
+                                val hasPermission = ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.RECORD_AUDIO
+                                ) == PackageManager.PERMISSION_GRANTED
+
+                                if (hasPermission) {
+                                    onStartRecording()
+                                } else {
+                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = if (uiState.isRecording) "Stop recording" else "Record audio",
+                            tint = if (uiState.isRecording)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    // Add image toggle
+                    IconButton(onClick = onAddAttachments) {
+                        Icon(
+                            imageVector = Icons.Default.AddPhotoAlternate,
+                            contentDescription = "Add image",
+                            tint = if (uiState.showColorPicker)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    // Add Reminder toggle
+                    IconButton(onClick = onShowReminderDialog) {
+                        Icon(
+                            imageVector = Icons.Default.NotificationAdd,
+                            contentDescription = "Add reminder",
+                            tint = if (uiState.showColorPicker)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                /*Column(modifier = Modifier.fillMaxSize()) {
+                    // Detached To-do List (only shows if there are todos)
+                    TodoListComponent(
+                        todos = uiState.todos,
+                        onAddTodo = onAddTodo,
+                        onUpdateTodo = onUpdateTodo,
+                        onDeleteTodo = onDeleteTodo
+                    )
+
+                    // Main Rich Text Editor
+                    RichTextEditorField(
+                        valueMarkdown = uiState.content,
+                        onValueChange = onContentChange,
+                        modifier =
+                            Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                                .focusRequester(remember { focusRequestContent }),
+                        placeholder = "Start writing your note...",
+                        minHeight = 300,
+                    )
+                }*/
+
+                val audioAttachments = remember(uiState.attachments) {
+                    uiState.attachments.filter { isAudioAttachment(it) }
+                }
+                val imageAttachments = remember(uiState.attachments) {
+                    uiState.attachments.filter { !isAudioAttachment(it) }
+                }
+
+                val attachmentAccordionItems = listOf(
+                    AccordionItem(
+                        id = 1,
+                        title = "To-do",
+                        leadingIcon = Icons.Default.CheckBox,
+                        badgeText = uiState.todos.count().toString(),
+                        content = {
+                            TodoListComponent(
+                                todos = uiState.todos,
+                                onAddTodo = onAddTodo,
+                                onUpdateTodo = onUpdateTodo,
+                                onDeleteTodo = onDeleteTodo
+                            )
+                        }
+                    ),
+
+                    AccordionItem(
+                        id = 2,
+                        title = "Record Audio",
+                        leadingIcon = Icons.Default.Mic,
+                        badgeText = audioAttachments.count().toString(),
+                        content = {
+                            audioAttachments.forEach { audioUri ->
+                                AudioPlayerMini(
+                                    audioUri = audioUri,
+                                    onRemove = { onRemoveAttachment(audioUri) },
+                                    onRename = { newName -> onRenameAttachment(audioUri, newName) }
+                                )
+                            }
+                        }
+                    ),
+
+                    AccordionItem(
+                        id = 3,
+                        title = "Add Image",
+                        leadingIcon = Icons.Default.AddPhotoAlternate,
+                        badgeText = imageAttachments.count().toString(),
+                        content = {
+                            NoteAttachmentsRow(
+                                attachments = imageAttachments,
+                                onAddImageClick = onAddAttachments,
+                                onRemoveAttachment = onRemoveAttachment,
+                                onImageClick = { uri -> previewImageUri = uri }
+                            )
+                        }
+                    )
+                )
+
+                AppAccordion(
+                    items = attachmentAccordionItems,
+                    mode = AccordionMode.SINGLE,
+                    style = AccordionStyle.BORDERLESS,
+                )
+            }
+        }
+    ) { bottomSheetPadding ->
+        ScreenWithTopBarAndInsets(
+            modifier = modifier.padding(bottomSheetPadding),
+            topBar = {
             TopAppBar(
                 title = {
                     AppBasicTextField(
@@ -562,14 +778,6 @@ fun EditNoteScreen(
                     // Content area: RichTextEditor + TodoListComponent
                     Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                         Column(modifier = Modifier.fillMaxSize()) {
-                            // Detached Todo List (only shows if there are todos)
-                            TodoListComponent(
-                                todos = uiState.todos,
-                                onAddTodo = onAddTodo,
-                                onUpdateTodo = onUpdateTodo,
-                                onDeleteTodo = onDeleteTodo
-                            )
-
                             // Main Rich Text Editor
                             RichTextEditorField(
                                 valueMarkdown = uiState.content,
@@ -606,24 +814,7 @@ fun EditNoteScreen(
                         }
                     }
 
-                    // Audio attachments - show mini players
-                    val audioAttachments = uiState.attachments.filter { isAudioAttachment(it) }
-                    audioAttachments.forEach { audioUri ->
-                        AudioPlayerMini(
-                            audioUri = audioUri,
-                            onRemove = { onRemoveAttachment(audioUri) },
-                            onRename = { newName -> onRenameAttachment(audioUri, newName) }
-                        )
-                    }
-
-                    // Image attachments row
-                    val imageAttachments = uiState.attachments.filter { !isAudioAttachment(it) }
-                    NoteAttachmentsRow(
-                        attachments = imageAttachments,
-                        onAddImageClick = onAddAttachments,
-                        onRemoveAttachment = onRemoveAttachment,
-                        onImageClick = { uri -> previewImageUri = uri }
-                    )
+                    // Box closed above. Backlinks below.
 
                     if (uiState.backlinks.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
@@ -652,21 +843,10 @@ fun EditNoteScreen(
                             }
                         }
                     }
-
-                    // Bottom toolbar with color, checklist, and audio buttons
-                    NoteBottomToolbar(
-                        showColorPicker = uiState.showColorPicker,
-                        isRecording = uiState.isRecording,
-                        onToggleColorPicker = onToggleColorPicker,
-                        onAddTodo = onAddTodo,
-                        onStartRecording = onStartRecording,
-                        onStopRecording = onStopRecording,
-                        onAddImage = {},
-                        onAddReminder = {},
-                    )
                 }
             }
         }
+    }
     }
 
     if (showDiscardDialog) {
