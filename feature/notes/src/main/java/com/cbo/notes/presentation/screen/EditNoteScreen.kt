@@ -100,7 +100,7 @@ import com.cbo.notes.presentation.component.AudioPlayerMini
 import com.cbo.notes.presentation.component.AudioRecorderButton
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.component.ImagePreviewDialog
-import com.cbo.notes.presentation.component.NoteAttachmentsRow
+import com.cbo.notes.presentation.component.NoteImageAttachmentsRow
 import com.cbo.notes.presentation.component.NoteColorBar
 import com.cbo.notes.presentation.component.ReminderChip
 import com.cbo.notes.presentation.component.ReminderDialog
@@ -562,10 +562,10 @@ fun EditNoteScreen(
                         leadingIcon = Icons.Default.AddPhotoAlternate,
                         badgeText = imageAttachments.count().toString(),
                         content = {
-                            NoteAttachmentsRow(
-                                attachments = imageAttachments,
+                            NoteImageAttachmentsRow(
+                                imageUris = imageAttachments,
                                 onAddImageClick = onAddAttachments,
-                                onRemoveAttachment = onRemoveAttachment,
+                                onRemoveImage = onRemoveAttachment,
                                 onImageClick = { uri -> previewImageUri = uri }
                             )
                         }

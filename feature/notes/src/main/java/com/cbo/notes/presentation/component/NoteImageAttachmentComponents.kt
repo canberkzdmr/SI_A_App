@@ -21,10 +21,10 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 
 @Composable
-fun NoteAttachmentsRow(
-    attachments: List<String>,
+fun NoteImageAttachmentsRow(
+    imageUris: List<String>,
     onAddImageClick: () -> Unit,
-    onRemoveAttachment: (String) -> Unit,
+    onRemoveImage: (String) -> Unit,
     onImageClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -55,7 +55,7 @@ fun NoteAttachmentsRow(
             }
         }
 
-        items(attachments) { uri ->
+        items(imageUris) { uri ->
             Box(
                 modifier = Modifier
                     .size(84.dp)
@@ -64,13 +64,13 @@ fun NoteAttachmentsRow(
             ) {
                 AsyncImage(
                     model = uri,
-                    contentDescription = "Attachment",
+                    contentDescription = "Image Attachment",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
                 
                 IconButton(
-                    onClick = { onRemoveAttachment(uri) },
+                    onClick = { onRemoveImage(uri) },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .size(24.dp)
@@ -121,7 +121,7 @@ fun ImagePreviewDialog(
                         onRemove()
                         onDismiss()
                     }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Remove Attachment")
+                        Icon(Icons.Default.Delete, contentDescription = "Remove Image")
                     }
                 }
 
