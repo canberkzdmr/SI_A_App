@@ -11,6 +11,7 @@ import com.cbo.notes.domain.model.TodoItem
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.usecase.CreateNoteUseCase
 import com.cbo.notes.domain.usecase.CreateTagUseCase
+import com.cbo.notes.domain.usecase.CreateCategoryUseCase
 import com.cbo.notes.domain.usecase.GetCategoriesUseCase
 import com.cbo.notes.domain.usecase.GetNoteByIdUseCase
 import com.cbo.notes.domain.usecase.GetNotesUseCase
@@ -48,6 +49,7 @@ class EditNoteViewModel @Inject constructor(
     private val updateNoteUseCase: UpdateNoteUseCase,
     private val getNoteByIdUseCase: GetNoteByIdUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
+    private val createCategoryUseCase: CreateCategoryUseCase,
     private val getTagsUseCase: GetTagsUseCase,
     private val createTagUseCase: CreateTagUseCase,
     private val setReminderUseCase: SetReminderUseCase,
@@ -196,7 +198,9 @@ class EditNoteViewModel @Inject constructor(
 
     fun selectCategory(category: Category?) {
         if (_uiState.value.selectedCategory != category) {
-            _uiState.update { it.copy(selectedCategory = category, hasUnsavedChanges = true) }
+            _uiState.update { it.copy(selectedCategory = category, hasUnsavedChanges = true, categoryInputText = "") }
+        } else {
+            _uiState.update { it.copy(categoryInputText = "") }
         }
     }
 
@@ -208,7 +212,7 @@ class EditNoteViewModel @Inject constructor(
             currentTags.add(tag)
         }
         Log.d("EditNoteViewModel", "toggleTag current tags: $currentTags")
-        _uiState.update { it.copy(selectedTags = currentTags, hasUnsavedChanges = true) }
+        _uiState.update { it.copy(selectedTags = currentTags, hasUnsavedChanges = true, tagInputText = "") }
     }
 
     fun selectTags(tags: List<Tag>) {
@@ -554,6 +558,61 @@ class EditNoteViewModel @Inject constructor(
         }
     }
 
+    // Category input field methods
+    fun updateCategoryInputText(text: String) {
+        _uiState.update { it.copy(categoryInputText = text) }
+    }
+
+    fun createCategoryFromInput() {
+        val currentState = _uiState.value
+        val categoryName = currentState.categoryInputText.trim()
+        
+        if (categoryName.isBlank()) {
+            return
+        }
+
+        // Check if category already exists
+        val existingCategory = currentState.availableCategories.find { 
+            it.name.equals(categoryName, ignoreCase = true) 
+        }
+        if (existingCategory != null) {
+            if (currentState.selectedCategory != existingCategory) {
+                selectCategory(existingCategory)
+            }
+            _uiState.update { it.copy(categoryInputText = "") }
+            return
+        }
+
+        viewModelScope.launch {
+            val currentUser = userSession.currentUser.first()
+            currentUser?.let { user ->
+                val newCategory = Category(
+                    userId = user.id,
+                    name = categoryName,
+                    color = "#FF6B6B", // Provide a default color
+                    description = ""
+                )
+
+                createCategoryUseCase(newCategory).fold(
+                    onSuccess = { createdCategory ->
+                        _uiState.update { state ->
+                            state.copy(
+                                availableCategories = state.availableCategories + createdCategory,
+                                selectedCategory = createdCategory,
+                                categoryInputText = "",
+                                hasUnsavedChanges = true
+                            )
+                        }
+                        snackbarManager.showMessage(SnackbarMessage.Success("Category '${createdCategory.name}' created"))
+                    },
+                    onFailure = { throwable ->
+                        snackbarManager.showMessage(SnackbarMessage.Error("Failed to create category: ${throwable.message}"))
+                    }
+                )
+            }
+        }
+    }
+
     fun showTemplateSelector() {
         _uiState.update { it.copy(showTemplateSelector = true) }
     }
@@ -715,6 +774,8 @@ data class EditNoteUiState(
     val newTagColor: String? = null,
     // Tag input field state
     val tagInputText: String = "",
+    // Category input field state
+    val categoryInputText: String = "",
     // Reminder state
     val reminderTime: Long? = null,
     val showReminderDialog: Boolean = false,

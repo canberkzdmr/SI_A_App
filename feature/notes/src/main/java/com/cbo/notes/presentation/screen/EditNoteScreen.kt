@@ -10,7 +10,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.border
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -34,7 +34,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Mic
@@ -71,13 +70,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -89,7 +89,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
@@ -100,11 +99,10 @@ import com.cbo.notes.presentation.component.AudioPlayerMini
 import com.cbo.notes.presentation.component.AudioRecorderButton
 import com.cbo.notes.presentation.component.FilterChip
 import com.cbo.notes.presentation.component.ImagePreviewDialog
-import com.cbo.notes.presentation.component.NoteImageAttachmentsRow
 import com.cbo.notes.presentation.component.NoteColorBar
+import com.cbo.notes.presentation.component.NoteImageAttachmentsRow
 import com.cbo.notes.presentation.component.ReminderChip
 import com.cbo.notes.presentation.component.ReminderDialog
-import com.cbo.notes.presentation.component.SelectionBottomSheet
 import com.cbo.notes.presentation.component.TodoListComponent
 import com.cbo.notes.presentation.component.isAudioAttachment
 import com.cbo.notes.presentation.viewmodel.EditNoteUiState
@@ -124,8 +122,8 @@ import com.cbo.ui.components.expandable.AppAccordion
 import com.cbo.ui.components.richtext.RichTextEditorField
 import com.cbo.ui.components.states.AppErrorState
 import com.cbo.ui.components.states.AppLoadingScreen
-import com.cbo.ui.theme.Dimens
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -205,6 +203,11 @@ fun EditNoteScreen(
         onSave = viewModel::saveNote,
         onCategorySelected = viewModel::selectCategory,
         onTagToggle = viewModel::toggleTag,
+        onCategoryInputChange = viewModel::updateCategoryInputText,
+        onCreateCategoryFromInput = viewModel::createCategoryFromInput,
+        onTagInputChange = viewModel::updateTagInputText,
+        onCreateTagFromInput = viewModel::createTagFromInput,
+        onCreateTag = viewModel::showCreateTagDialog,
         onClearError = viewModel::clearError,
         onDiscardChanges = viewModel::discardChanges,
         onApplySelection = { category, tags ->
@@ -220,12 +223,12 @@ fun EditNoteScreen(
         onCreateTemplate = viewModel::createTemplate,
         onHideTemplateSelector = viewModel::hideTemplateSelector,
         onInsertLink = viewModel::insertLink,
-        onAddAttachments = { 
+        onAddAttachments = {
             imagePickerLauncher.launch(
                 PickVisualMediaRequest(
                     ActivityResultContracts.PickVisualMedia.ImageOnly
                 )
-            ) 
+            )
         },
         onRemoveAttachment = viewModel::removeAttachment,
         onRenameAttachment = viewModel::onRenameAttachment,
@@ -245,29 +248,89 @@ fun EditNoteScreen(
 private fun CategorySelection(
     categories: List<Category>,
     selectedCategory: Category?,
+    categoryInputText: String,
     onCategorySelected: (Category?) -> Unit,
+    onCategoryInputChange: (String) -> Unit,
+    onCreateCategoryFromInput: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        AppTitle(
-            text = "Category",
-            modifier = Modifier.padding(bottom = 8.dp),
+        AppTitle(text = "Category")
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Category input field
+        AppOutlinedTextField(
+            value = categoryInputText,
+            onValueChange = onCategoryInputChange,
+            placeholder = "Type category name & press Enter",
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+                    .onKeyEvent { keyEvent ->
+                        if (keyEvent.type == KeyEventType.KeyDown &&
+                            (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) &&
+                            categoryInputText.isNotBlank()
+                        ) {
+                            onCreateCategoryFromInput()
+                            true
+                        } else {
+                            false
+                        }
+                    },
+            singleLine = true,
+            trailingIcon = {
+                if (categoryInputText.isNotBlank()) {
+                    IconButton(onClick = onCreateCategoryFromInput) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add category",
+                        )
+                    }
+                }
+            },
+            maxLines = 1,
+            keyboardActions =
+                KeyboardActions(
+                    onDone = {
+                        if (categoryInputText.isNotBlank()) {
+                            onCreateCategoryFromInput()
+                        }
+                    },
+                ),
+            keyboardOptions =
+                KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                ),
         )
+
+        val displayedCategories = if (categoryInputText.isNotBlank()) {
+            categories.filter { it.name.contains(categoryInputText, ignoreCase = true) }
+        } else {
+            categories
+        }
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 4.dp),
         ) {
             // "None" option
-            item {
-                FilterChip(
-                    selected = selectedCategory == null,
-                    onClick = { onCategorySelected(null) },
-                    label = "None",
+            if (categoryInputText.isBlank() || "none".contains(
+                    categoryInputText,
+                    ignoreCase = true
                 )
+            ) {
+                item {
+                    FilterChip(
+                        selected = selectedCategory == null,
+                        onClick = { onCategorySelected(null) },
+                        label = "None",
+                    )
+                }
             }
 
-            items(categories) { category ->
+            items(displayedCategories) { category ->
                 FilterChip(
                     selected = selectedCategory?.id == category.id,
                     onClick = { onCategorySelected(category) },
@@ -385,11 +448,18 @@ private fun TagSelection(
                 ),
         )
 
+        val displayedTags = if (tagInputText.isNotBlank()) {
+            tags.filter { it.name.contains(tagInputText, ignoreCase = true) }
+                .sortedByDescending { it in selectedTags }
+        } else {
+            tags.sortedByDescending { it in selectedTags }
+        }
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(horizontal = 4.dp),
         ) {
-            items(tags.sortedByDescending { it in selectedTags }) { tag ->
+            items(displayedTags) { tag ->
                 FilterChip(
                     selected = selectedTags.any { it.id == tag.id },
                     onClick = { onTagToggle(tag) },
@@ -399,12 +469,21 @@ private fun TagSelection(
             }
 
             // If no tags, show helpful message
-            if (tags.isEmpty()) {
+            if (displayedTags.isEmpty() && tagInputText.isBlank()) {
                 item {
                     Text(
                         text = "No tags yet. Type in the field above to create your first tag!",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+            } else if (displayedTags.isEmpty() && tagInputText.isNotBlank()) {
+                item {
+                    Text(
+                        text = "Press Enter to create '#${tagInputText.trim()}'",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
@@ -425,6 +504,11 @@ fun EditNoteScreen(
     onSave: () -> Unit,
     onCategorySelected: (Category?) -> Unit,
     onTagToggle: (Tag) -> Unit,
+    onCategoryInputChange: (String) -> Unit = {},
+    onCreateCategoryFromInput: () -> Unit = {},
+    onTagInputChange: (String) -> Unit = {},
+    onCreateTagFromInput: () -> Unit = {},
+    onCreateTag: () -> Unit = {},
     onClearError: () -> Unit = {},
     onDiscardChanges: () -> Unit = {},
     onApplySelection: (Category?, List<Tag>) -> Unit = { _, _ -> },
@@ -449,24 +533,38 @@ fun EditNoteScreen(
     onStopRecording: () -> Unit = {},
     onAudioRecordingComplete: (String) -> Unit = {},
 ) {
+    val coroutineScope = rememberCoroutineScope()
     var showDiscardDialog by remember { mutableStateOf(false) }
-    var showSelectionSheet by remember { mutableStateOf(false) }
     var previewImageUri by remember { mutableStateOf<String?>(null) }
-
-    // Intercept system back to respect unsaved changes and auto-save
-    BackHandler(enabled = true) {
-        if (uiState.hasUnsavedChanges) {
-            onSave()
-        } else {
-            onNavigateBack()
-        }
-    }
+    var isTitleExpanded by remember { mutableStateOf(false) }
 
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.PartiallyExpanded
         )
     )
+    val isSheetExpanded = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
+
+    // Intercept system back to collapse expanded UI (title/bottom sheet) first; otherwise auto-save or navigate back
+    BackHandler(enabled = true) {
+        if (isTitleExpanded || isSheetExpanded) {
+            if (isTitleExpanded) {
+                isTitleExpanded = false
+            }
+            if (isSheetExpanded) {
+                coroutineScope.launch {
+                    scaffoldState.bottomSheetState.partialExpand()
+                }
+            }
+        } else {
+            if (uiState.hasUnsavedChanges) {
+                onSave()
+            } else {
+                onNavigateBack()
+            }
+        }
+    }
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var activeAccordionId by remember { mutableStateOf<Int?>(null) }
@@ -491,398 +589,471 @@ fun EditNoteScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
-        sheetPeekHeight = 110.dp,
-        sheetDragHandle = null,
-        sheetContent = {
-            val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.8f)
-                    .drawWithContent {
-                        drawContent()
-                        val strokeWidth = 1.dp.toPx()
-                        val cornerRadius = 28.dp.toPx()
-                        
-                        clipRect(
-                            left = 0f,
-                            top = 0f,
-                            right = size.width,
-                            bottom = 110.dp.toPx()
-                        ) {
-                            drawRoundRect(
-                                color = borderColor,
-                                size = size,
-                                cornerRadius = CornerRadius(cornerRadius, cornerRadius),
-                                style = Stroke(width = strokeWidth)
-                            )
-                        }
-                    }
-            ) {
-                BottomSheetDefaults.DragHandle(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                // Toolbar extracted to bottom fixed Box
+            sheetPeekHeight = 110.dp,
+            sheetDragHandle = null,
+            sheetContent = {
+                val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.8f)
+                        .drawWithContent {
+                            drawContent()
+                            val strokeWidth = 1.dp.toPx()
+                            val cornerRadius = 28.dp.toPx()
 
-                val attachmentAccordionItems = listOf(
-                    AccordionItem(
-                        id = 1,
-                        title = "To-do",
-                        leadingIcon = Icons.Default.CheckBox,
-                        badgeText = uiState.todos.count().toString(),
-                        content = {
-                            TodoListComponent(
-                                todos = uiState.todos,
-                                onAddTodo = onAddTodo,
-                                onUpdateTodo = onUpdateTodo,
-                                onDeleteTodo = onDeleteTodo
-                            )
-                        }
-                    ),
-
-                    AccordionItem(
-                        id = 2,
-                        title = "Record Audio",
-                        leadingIcon = Icons.Default.Mic,
-                        badgeText = audioAttachments.count().toString(),
-                        content = {
-                            audioAttachments.forEach { audioUri ->
-                                AudioPlayerMini(
-                                    audioUri = audioUri,
-                                    onRemove = { onRemoveAttachment(audioUri) },
-                                    onRename = { newName -> onRenameAttachment(audioUri, newName) }
+                            clipRect(
+                                left = 0f,
+                                top = 0f,
+                                right = size.width,
+                                bottom = 110.dp.toPx()
+                            ) {
+                                drawRoundRect(
+                                    color = borderColor,
+                                    size = size,
+                                    cornerRadius = CornerRadius(cornerRadius, cornerRadius),
+                                    style = Stroke(width = strokeWidth)
                                 )
                             }
                         }
-                    ),
-
-                    AccordionItem(
-                        id = 3,
-                        title = "Add Image",
-                        leadingIcon = Icons.Default.AddPhotoAlternate,
-                        badgeText = imageAttachments.count().toString(),
-                        content = {
-                            NoteImageAttachmentsRow(
-                                imageUris = imageAttachments,
-                                onAddImageClick = onAddAttachments,
-                                onRemoveImage = onRemoveAttachment,
-                                onImageClick = { uri -> previewImageUri = uri }
-                            )
-                        }
-                    )
-                )
-
-                AppAccordion(
-                    items = attachmentAccordionItems,
-                    mode = AccordionMode.SINGLE,
-                    style = AccordionStyle.BORDERLESS,
-                    initialExpandedId = activeAccordionId
-                )
-                
-                Spacer(modifier = Modifier.height(72.dp))
-            }
-        }
-    ) { bottomSheetPadding ->
-        ScreenWithTopBarAndInsets(
-            modifier = modifier.padding(bottomSheetPadding),
-            topBar = {
-            TopAppBar(
-                title = {
-                    AppBasicTextField(
-                        value = uiState.title,
-                        onValueChange = onTitleChange,
-                        placeholder = "Note title...",
-                        textStyle =
-                            MaterialTheme.typography.titleLarge.copy(
-                                color = MaterialTheme.colorScheme.onSurface,
-                            ),
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            if (uiState.hasUnsavedChanges) {
-                                onSave()
-                            } else {
-                                onNavigateBack()
-                            }
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
-                actions = {
-                    // Reminder button
-                    IconButton(onClick = onShowReminderDialog) {
-                        Icon(
-                            imageVector = if (uiState.reminderTime != null) 
-                                Icons.Default.NotificationsActive 
-                            else 
-                                Icons.Default.NotificationAdd, 
-                            contentDescription = "Set Reminder",
-                            tint = if (uiState.reminderTime != null) 
-                                MaterialTheme.colorScheme.primary 
-                            else 
-                                MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    IconButton(onClick = onShowTemplateSelector) {
-                        Icon(imageVector = Icons.Default.Description, contentDescription = "Templates")
-                    }
-                    IconButton(onClick = { showSelectionSheet = !showSelectionSheet }) {
-                        Icon(imageVector = Icons.Default.CollectionsBookmark, contentDescription = "Filter")
-                    }
-                    TextButton(
-                        onClick = onSave,
-                        enabled = uiState.title.isNotBlank() && !uiState.isSaving,
-                    ) {
-                        if (uiState.isSaving) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                            )
-                        } else {
-                            Text("Save")
-                        }
-                    }
-                },
-            )
-        },
-    ) { paddingValues ->
-        when {
-            uiState.isLoading -> {
-                AppLoadingScreen(
-                    message = "Loading note...",
-                    showProgress = true,
-                )
-            }
-
-            uiState.errorMessage != null -> {
-                AppErrorState(
-                    error = uiState.errorMessage ?: "Failed to load note",
-                    onRetry = { onClearError() },
-                )
-            }
-
-            else -> {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
                 ) {
-                    // Color picker bar (animated show/hide)
-                    NoteColorBar(
-                        visible = uiState.showColorPicker,
-                        selectedColor = uiState.color,
-                        onColorSelected = onColorChange
+                    BottomSheetDefaults.DragHandle(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    // Toolbar extracted to bottom fixed Box
+
+                    val attachmentAccordionItems = listOf(
+                        AccordionItem(
+                            id = 1,
+                            title = "To-do",
+                            leadingIcon = Icons.Default.CheckBox,
+                            badgeText = uiState.todos.count().toString(),
+                            content = {
+                                TodoListComponent(
+                                    todos = uiState.todos,
+                                    onAddTodo = onAddTodo,
+                                    onUpdateTodo = onUpdateTodo,
+                                    onDeleteTodo = onDeleteTodo
+                                )
+                            }
+                        ),
+
+                        AccordionItem(
+                            id = 2,
+                            title = "Record Audio",
+                            leadingIcon = Icons.Default.Mic,
+                            badgeText = audioAttachments.count().toString(),
+                            content = {
+                                audioAttachments.forEach { audioUri ->
+                                    AudioPlayerMini(
+                                        audioUri = audioUri,
+                                        onRemove = { onRemoveAttachment(audioUri) },
+                                        onRename = { newName ->
+                                            onRenameAttachment(
+                                                audioUri,
+                                                newName
+                                            )
+                                        }
+                                    )
+                                }
+                            }
+                        ),
+
+                        AccordionItem(
+                            id = 3,
+                            title = "Add Image",
+                            leadingIcon = Icons.Default.AddPhotoAlternate,
+                            badgeText = imageAttachments.count().toString(),
+                            content = {
+                                NoteImageAttachmentsRow(
+                                    imageUris = imageAttachments,
+                                    onAddImageClick = onAddAttachments,
+                                    onRemoveImage = onRemoveAttachment,
+                                    onImageClick = { uri -> previewImageUri = uri }
+                                )
+                            }
+                        )
                     )
 
-                    // Audio recording indicator bar
-                    // We render it always so its DisposableEffect and LaunchedEffects don't get 
-                    // cancelled when isRecording turns false, allowing it to finalize the recording.
-                    AudioRecorderButton(
-                        isRecording = uiState.isRecording,
-                        onStartRecording = onStartRecording,
-                        onStopRecording = onStopRecording,
-                        onRecordingComplete = onAudioRecordingComplete
+                    AppAccordion(
+                        items = attachmentAccordionItems,
+                        mode = AccordionMode.SINGLE,
+                        style = AccordionStyle.BORDERLESS,
+                        initialExpandedId = activeAccordionId
                     )
 
-                    // Show reminder chip if a reminder is set
-                    if (uiState.reminderTime != null) {
-                        ReminderChip(
-                            reminderTime = uiState.reminderTime,
-                            onClick = onShowReminderDialog,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                    Spacer(modifier = Modifier.height(72.dp))
+                }
+            }
+        ) { bottomSheetPadding ->
+            ScreenWithTopBarAndInsets(
+                modifier = modifier.padding(bottomSheetPadding),
+                topBar = {
+                    Surface(
+                        tonalElevation = if (isTitleExpanded) 2.dp else 0.dp,
+                        shadowElevation = if (isTitleExpanded) 4.dp else 0.dp,
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.animateContentSize()
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            TopAppBar(
+                                title = {
+                                    AppBasicTextField(
+                                        value = uiState.title,
+                                        onValueChange = onTitleChange,
+                                        placeholder = "Note title...",
+                                        textStyle =
+                                            MaterialTheme.typography.titleLarge.copy(
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                            ),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .onFocusChanged { focusState ->
+                                                if (focusState.isFocused) {
+                                                    isTitleExpanded = true
+                                                }
+                                            },
+                                        singleLine = true,
+                                    )
+                                },
+                                navigationIcon = {
+                                    IconButton(
+                                        onClick = {
+                                            if (uiState.hasUnsavedChanges) {
+                                                onSave()
+                                            } else {
+                                                onNavigateBack()
+                                            }
+                                        },
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = "Back",
+                                        )
+                                    }
+                                },
+                                actions = {
+                                    // Reminder button
+                                    IconButton(onClick = onShowReminderDialog) {
+                                        Icon(
+                                            imageVector = if (uiState.reminderTime != null)
+                                                Icons.Default.NotificationsActive
+                                            else
+                                                Icons.Default.NotificationAdd,
+                                            contentDescription = "Set Reminder",
+                                            tint = if (uiState.reminderTime != null)
+                                                MaterialTheme.colorScheme.primary
+                                            else
+                                                MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                    IconButton(onClick = onShowTemplateSelector) {
+                                        Icon(
+                                            imageVector = Icons.Default.Description,
+                                            contentDescription = "Templates"
+                                        )
+                                    }
+                                    TextButton(
+                                        onClick = onSave,
+                                        enabled = uiState.title.isNotBlank() && !uiState.isSaving,
+                                    ) {
+                                        if (uiState.isSaving) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(16.dp),
+                                                strokeWidth = 2.dp,
+                                            )
+                                        } else {
+                                            Text("Save")
+                                        }
+                                    }
+                                },
+                            )
+
+                            if (isTitleExpanded) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                                ) {
+                                    CategorySelection(
+                                        categories = uiState.availableCategories,
+                                        selectedCategory = uiState.selectedCategory,
+                                        categoryInputText = uiState.categoryInputText,
+                                        onCategorySelected = onCategorySelected,
+                                        onCategoryInputChange = onCategoryInputChange,
+                                        onCreateCategoryFromInput = onCreateCategoryFromInput
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    TagSelection(
+                                        tags = uiState.availableTags,
+                                        selectedTags = uiState.selectedTags,
+                                        tagInputText = uiState.tagInputText,
+                                        onTagToggle = onTagToggle,
+                                        onTagInputChange = onTagInputChange,
+                                        onCreateTagFromInput = onCreateTagFromInput,
+                                        onCreateTag = onCreateTag,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+            ) { paddingValues ->
+                when {
+                    uiState.isLoading -> {
+                        AppLoadingScreen(
+                            message = "Loading note...",
+                            showProgress = true,
                         )
                     }
 
-                    val focusRequestContent = remember { FocusRequester() }
+                    uiState.errorMessage != null -> {
+                        AppErrorState(
+                            error = uiState.errorMessage ?: "Failed to load note",
+                            onRetry = { onClearError() },
+                        )
+                    }
 
-                    // Content area: RichTextEditor + TodoListComponent
-                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            // Main Rich Text Editor
-                            RichTextEditorField(
-                                valueMarkdown = uiState.content,
-                                onValueChange = onContentChange,
-                                modifier =
-                                    Modifier
-                                        .weight(1f)
-                                        .fillMaxWidth()
-                                        .focusRequester(remember { focusRequestContent }),
-                                placeholder = "Start writing your note...",
-                                minHeight = 300,
+                    else -> {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(paddingValues),
+                        ) {
+                            // Color picker bar (animated show/hide)
+                            NoteColorBar(
+                                visible = uiState.showColorPicker,
+                                selectedColor = uiState.color,
+                                onColorSelected = onColorChange
                             )
-                        }
 
-                        // Link Suggestions Dropdown
-                        if (uiState.showLinkSuggestions && uiState.linkSearchQuery != null) {
-                            val filteredNotes = uiState.allNotes.filter {
-                                it.title.contains(uiState.linkSearchQuery, ignoreCase = true)
+                            // Audio recording indicator bar
+                            // We render it always so its DisposableEffect and LaunchedEffects don't get
+                            // cancelled when isRecording turns false, allowing it to finalize the recording.
+                            AudioRecorderButton(
+                                isRecording = uiState.isRecording,
+                                onStartRecording = onStartRecording,
+                                onStopRecording = onStopRecording,
+                                onRecordingComplete = onAudioRecordingComplete
+                            )
+
+                            // Show reminder chip if a reminder is set
+                            if (uiState.reminderTime != null) {
+                                ReminderChip(
+                                    reminderTime = uiState.reminderTime,
+                                    onClick = onShowReminderDialog,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
                             }
-                            if (filteredNotes.isNotEmpty()) {
-                                DropdownMenu(
-                                    expanded = true,
-                                    onDismissRequest = { /* Controlled by typing */ },
-                                    modifier = Modifier.fillMaxWidth(0.8f).align(Alignment.TopCenter)
+
+                            val focusRequestContent = remember { FocusRequester() }
+
+                            // Content area: RichTextEditor + TodoListComponent
+                            Box(modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()) {
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    // Main Rich Text Editor
+                                    RichTextEditorField(
+                                        valueMarkdown = uiState.content,
+                                        onValueChange = onContentChange,
+                                        modifier =
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxWidth()
+                                                .focusRequester(remember { focusRequestContent })
+                                                .onFocusChanged { focusState ->
+                                                    if (focusState.isFocused) {
+                                                        isTitleExpanded = false
+                                                    }
+                                                },
+                                        placeholder = "Start writing your note...",
+                                        minHeight = 300,
+                                    )
+                                }
+
+                                // Link Suggestions Dropdown
+                                if (uiState.showLinkSuggestions && uiState.linkSearchQuery != null) {
+                                    val filteredNotes = uiState.allNotes.filter {
+                                        it.title.contains(
+                                            uiState.linkSearchQuery,
+                                            ignoreCase = true
+                                        )
+                                    }
+                                    if (filteredNotes.isNotEmpty()) {
+                                        DropdownMenu(
+                                            expanded = true,
+                                            onDismissRequest = { /* Controlled by typing */ },
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.8f)
+                                                .align(Alignment.TopCenter)
+                                        ) {
+                                            filteredNotes.take(5).forEach { note ->
+                                                DropdownMenuItem(
+                                                    text = { Text(note.title) },
+                                                    onClick = { onInsertLink(note) }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Box closed above. Backlinks below.
+                            if (uiState.backlinks.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Backlinks",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    filteredNotes.take(5).forEach { note ->
-                                        DropdownMenuItem(
-                                            text = { Text(note.title) },
-                                            onClick = { onInsertLink(note) }
+                                    items(uiState.backlinks.size) { index ->
+                                        val backlink = uiState.backlinks[index]
+                                        AssistChip(
+                                            onClick = { /* Could navigate to note, but out of scope for now */ },
+                                            label = { Text(backlink.title) },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.Link,
+                                                    contentDescription = "Link",
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
                                         )
                                     }
                                 }
                             }
                         }
                     }
-
-                    // Box closed above. Backlinks below.
-                    if (uiState.backlinks.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Backlinks",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(uiState.backlinks.size) { index ->
-                                val backlink = uiState.backlinks[index]
-                                AssistChip(
-                                    onClick = { /* Could navigate to note, but out of scope for now */ },
-                                    label = { Text(backlink.title) },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Link,
-                                            contentDescription = "Link",
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }
-    }
-    }
 
-    // Fixed Toolbar at the bottom of the screen
-    Surface(
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .fillMaxWidth(),
-        tonalElevation = BottomSheetDefaults.Elevation
-    ) {
-        Row(
+        // Fixed Toolbar at the bottom of the screen
+        Surface(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(),
+            tonalElevation = BottomSheetDefaults.Elevation
         ) {
-            // Color picker toggle
-            IconButton(onClick = onToggleColorPicker) {
-                Icon(
-                    imageVector = Icons.Default.Palette,
-                    contentDescription = "Note color",
-                    tint = if (uiState.showColorPicker)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-
-            // Add To-do button
-            BadgedBox(
-                badge = {
-                    if (uiState.todos.isNotEmpty()) {
-                        Badge { Text(uiState.todos.size.toString()) }
-                    }
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {
-                    activeAccordionId = 1
-                    scope.launch { scaffoldState.bottomSheetState.expand() }
-                    onAddTodo()
-                }) {
+                // Color picker toggle
+                IconButton(onClick = onToggleColorPicker) {
                     Icon(
-                        imageVector = Icons.Default.CheckBox,
-                        contentDescription = "Add Todo",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
-
-            // Audio recording
-            BadgedBox(
-                badge = {
-                    if (audioAttachments.isNotEmpty()) {
-                        Badge { Text(audioAttachments.size.toString()) }
-                    }
-                }
-            ) {
-                IconButton(
-                    onClick = {
-                        activeAccordionId = 2
-                        scope.launch { scaffoldState.bottomSheetState.expand() }
-                        
-                        if (uiState.isRecording) {
-                            onStopRecording()
-                        } else {
-                            val hasPermission = ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.RECORD_AUDIO
-                            ) == PackageManager.PERMISSION_GRANTED
-
-                            if (hasPermission) {
-                                onStartRecording()
-                            } else {
-                                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                            }
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Mic,
-                        contentDescription = if (uiState.isRecording) "Stop recording" else "Record audio",
-                        tint = if (uiState.isRecording)
-                            MaterialTheme.colorScheme.error
+                        imageVector = Icons.Default.Palette,
+                        contentDescription = "Note color",
+                        tint = if (uiState.showColorPicker)
+                            MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(22.dp)
                     )
                 }
-            }
 
-            // Add image toggle
-            BadgedBox(
-                badge = {
-                    if (imageAttachments.isNotEmpty()) {
-                        Badge { Text(imageAttachments.size.toString()) }
+                // Add To-do button
+                BadgedBox(
+                    badge = {
+                        if (uiState.todos.isNotEmpty()) {
+                            Badge { Text(uiState.todos.size.toString()) }
+                        }
+                    }
+                ) {
+                    IconButton(onClick = {
+                        activeAccordionId = 1
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                        onAddTodo()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.CheckBox,
+                            contentDescription = "Add Todo",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
                     }
                 }
-            ) {
-                IconButton(onClick = {
-                    activeAccordionId = 3
-                    scope.launch { scaffoldState.bottomSheetState.expand() }
-                    onAddAttachments()
-                }) {
+
+                // Audio recording
+                BadgedBox(
+                    badge = {
+                        if (audioAttachments.isNotEmpty()) {
+                            Badge { Text(audioAttachments.size.toString()) }
+                        }
+                    }
+                ) {
+                    IconButton(
+                        onClick = {
+                            activeAccordionId = 2
+                            scope.launch { scaffoldState.bottomSheetState.expand() }
+
+                            if (uiState.isRecording) {
+                                onStopRecording()
+                            } else {
+                                val hasPermission = ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.RECORD_AUDIO
+                                ) == PackageManager.PERMISSION_GRANTED
+
+                                if (hasPermission) {
+                                    onStartRecording()
+                                } else {
+                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Mic,
+                            contentDescription = if (uiState.isRecording) "Stop recording" else "Record audio",
+                            tint = if (uiState.isRecording)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                // Add image toggle
+                BadgedBox(
+                    badge = {
+                        if (imageAttachments.isNotEmpty()) {
+                            Badge { Text(imageAttachments.size.toString()) }
+                        }
+                    }
+                ) {
+                    IconButton(onClick = {
+                        activeAccordionId = 3
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                        onAddAttachments()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.AddPhotoAlternate,
+                            contentDescription = "Add image",
+                            tint = if (uiState.showColorPicker)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                // Add Reminder toggle
+                IconButton(onClick = onShowReminderDialog) {
                     Icon(
-                        imageVector = Icons.Default.AddPhotoAlternate,
-                        contentDescription = "Add image",
+                        imageVector = Icons.Default.NotificationAdd,
+                        contentDescription = "Add reminder",
                         tint = if (uiState.showColorPicker)
                             MaterialTheme.colorScheme.primary
                         else
@@ -891,21 +1062,7 @@ fun EditNoteScreen(
                     )
                 }
             }
-
-            // Add Reminder toggle
-            IconButton(onClick = onShowReminderDialog) {
-                Icon(
-                    imageVector = Icons.Default.NotificationAdd,
-                    contentDescription = "Add reminder",
-                    tint = if (uiState.showColorPicker)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
         }
-    }
     }
 
     if (showDiscardDialog) {
@@ -921,18 +1078,6 @@ fun EditNoteScreen(
             onDismiss = { showDiscardDialog = false },
             confirmText = "Discard",
             dismissText = "Cancel",
-        )
-    }
-
-    if (showSelectionSheet) {
-        SelectionBottomSheet(
-            allCategories = uiState.availableCategories,
-            allTags = uiState.availableTags,
-            selectedCategory = uiState.selectedCategory,
-            selectedTags = uiState.selectedTags,
-            onApply = { category, tags, -> onApplySelection(category, tags) },
-            onClearAll = {},
-            onDismiss = { showSelectionSheet = !showSelectionSheet }
         )
     }
 
@@ -1037,7 +1182,9 @@ fun CreateTemplateDialog(
                     value = content,
                     onValueChange = { content = it },
                     label = { Text("Content (Markdown)") },
-                    modifier = Modifier.fillMaxWidth().height(150.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
                 )
             }
         },
@@ -1095,7 +1242,10 @@ private fun EditNoteScreenEditPreview() {
                     title = "Project Meeting Notes",
                     content = "Discussed the new features for Q4. Need to finalize the design by Friday. John will handle the backend integration while Sarah focuses on the UI components.\n\nAction items:\n• Complete wireframes\n• Review technical specs\n• Schedule follow-up meeting",
                     selectedCategory = sampleEditCategories()[0], // Work category
-                    selectedTags = listOf(sampleEditTags()[1], sampleEditTags()[2]), // meeting, project
+                    selectedTags = listOf(
+                        sampleEditTags()[1],
+                        sampleEditTags()[2]
+                    ), // meeting, project
                     availableCategories = sampleEditCategories(),
                     availableTags = sampleEditTags(),
                     hasUnsavedChanges = true,
