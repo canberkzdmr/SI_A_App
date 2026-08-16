@@ -8,5 +8,13 @@
                 <action android:name="com.cbo.notes.action.SNOOZE" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".worker.GeofenceBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.location.GeofenceBroadcastReceiver" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

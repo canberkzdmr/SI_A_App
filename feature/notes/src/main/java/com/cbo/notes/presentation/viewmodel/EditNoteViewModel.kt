@@ -57,6 +57,7 @@ class EditNoteViewModel @Inject constructor(
     private val setReminderUseCase: SetReminderUseCase,
     private val removeReminderUseCase: RemoveReminderUseCase,
     private val reminderScheduler: ReminderScheduler,
+    private val locationReminderManager: com.cbo.notes.worker.LocationReminderManager,
     private val getNoteTemplatesUseCase: GetNoteTemplatesUseCase,
     private val addNoteTemplateUseCase: AddNoteTemplateUseCase,
     private val getNotesUseCase: GetNotesUseCase,
@@ -123,6 +124,11 @@ class EditNoteViewModel @Inject constructor(
                                 reminderTime = note.reminderTime,
                                 reminderRepeat = note.reminderRepeat ?: ReminderRepeat.NONE,
                                 reminderPriority = note.reminderPriority ?: ReminderPriority.DEFAULT,
+                                reminderLatitude = note.reminderLatitude,
+                                reminderLongitude = note.reminderLongitude,
+                                reminderLocationName = note.reminderLocationName,
+                                reminderRadius = note.reminderRadius,
+                                isLocationReminderEnabled = note.isLocationReminderEnabled,
                                 attachments = note.attachments,
                                 color = note.color,
                                 todos = note.todos
@@ -263,6 +269,11 @@ class EditNoteViewModel @Inject constructor(
                         reminderTime = currentState.reminderTime,
                         reminderRepeat = currentState.reminderRepeat,
                         reminderPriority = currentState.reminderPriority,
+                        reminderLatitude = currentState.reminderLatitude,
+                        reminderLongitude = currentState.reminderLongitude,
+                        reminderLocationName = currentState.reminderLocationName,
+                        reminderRadius = currentState.reminderRadius,
+                        isLocationReminderEnabled = currentState.isLocationReminderEnabled,
                         attachments = currentState.attachments,
                         color = currentState.color,
                         todos = currentState.todos
@@ -277,6 +288,11 @@ class EditNoteViewModel @Inject constructor(
                         reminderTime = currentState.reminderTime,
                         reminderRepeat = currentState.reminderRepeat,
                         reminderPriority = currentState.reminderPriority,
+                        reminderLatitude = currentState.reminderLatitude,
+                        reminderLongitude = currentState.reminderLongitude,
+                        reminderLocationName = currentState.reminderLocationName,
+                        reminderRadius = currentState.reminderRadius,
+                        isLocationReminderEnabled = currentState.isLocationReminderEnabled,
                         attachments = currentState.attachments,
                         color = currentState.color,
                         todos = currentState.todos
@@ -333,6 +349,14 @@ class EditNoteViewModel @Inject constructor(
                     attachments = originalNote.attachments,
                     color = originalNote.color,
                     todos = originalNote.todos,
+                    reminderTime = originalNote.reminderTime,
+                    reminderRepeat = originalNote.reminderRepeat ?: ReminderRepeat.NONE,
+                    reminderPriority = originalNote.reminderPriority ?: ReminderPriority.DEFAULT,
+                    reminderLatitude = originalNote.reminderLatitude,
+                    reminderLongitude = originalNote.reminderLongitude,
+                    reminderLocationName = originalNote.reminderLocationName,
+                    reminderRadius = originalNote.reminderRadius,
+                    isLocationReminderEnabled = originalNote.isLocationReminderEnabled,
                     hasUnsavedChanges = false
                 )
             }
@@ -346,6 +370,14 @@ class EditNoteViewModel @Inject constructor(
                     attachments = emptyList(),
                     color = null,
                     todos = emptyList(),
+                    reminderTime = null,
+                    reminderRepeat = ReminderRepeat.NONE,
+                    reminderPriority = ReminderPriority.DEFAULT,
+                    reminderLatitude = null,
+                    reminderLongitude = null,
+                    reminderLocationName = null,
+                    reminderRadius = null,
+                    isLocationReminderEnabled = false,
                     hasUnsavedChanges = false
                 )
             }
@@ -462,12 +494,30 @@ class EditNoteViewModel @Inject constructor(
         }
     }
 
+    fun setLocationReminder(latitude: Double, longitude: Double, locationName: String, isReminder: Boolean, radius: Float = 100f) {
+        _uiState.update {
+            it.copy(
+                reminderLatitude = latitude,
+                reminderLongitude = longitude,
+                reminderLocationName = locationName,
+                reminderRadius = radius,
+                isLocationReminderEnabled = isReminder,
+                hasUnsavedChanges = true
+            )
+        }
+    }
+
     fun removeReminder() {
         _uiState.update { 
             it.copy(
                 reminderTime = null, 
                 reminderRepeat = ReminderRepeat.NONE,
                 reminderPriority = ReminderPriority.DEFAULT,
+                reminderLatitude = null,
+                reminderLongitude = null,
+                reminderLocationName = null,
+                reminderRadius = null,
+                isLocationReminderEnabled = false,
                 showReminderDialog = false,
                 hasUnsavedChanges = true
             ) 
@@ -501,16 +551,27 @@ class EditNoteViewModel @Inject constructor(
     }
 
     private fun handleReminderScheduling(savedNote: Note) {
+        // Time based reminder
         if (savedNote.reminderTime != null && savedNote.reminderTime > System.currentTimeMillis()) {
-            // Schedule the reminder
             reminderScheduler.scheduleReminder(
                 noteId = savedNote.id,
                 noteTitle = savedNote.title,
                 reminderTime = savedNote.reminderTime
             )
         } else {
-            // Cancel any existing reminder
             reminderScheduler.cancelReminder(savedNote.id)
+        }
+
+        // Location based reminder
+        if (savedNote.reminderLatitude != null && savedNote.reminderLongitude != null && savedNote.isLocationReminderEnabled) {
+            locationReminderManager.addLocationReminder(
+                noteId = savedNote.id,
+                latitude = savedNote.reminderLatitude,
+                longitude = savedNote.reminderLongitude,
+                radiusInMeters = savedNote.reminderRadius ?: 100f
+            )
+        } else {
+            locationReminderManager.removeLocationReminder(savedNote.id)
         }
     }
 
@@ -792,6 +853,11 @@ data class EditNoteUiState(
     val reminderTime: Long? = null,
     val reminderRepeat: ReminderRepeat = ReminderRepeat.NONE,
     val reminderPriority: ReminderPriority = ReminderPriority.DEFAULT,
+    val reminderLatitude: Double? = null,
+    val reminderLongitude: Double? = null,
+    val reminderLocationName: String? = null,
+    val reminderRadius: Float? = null,
+    val isLocationReminderEnabled: Boolean = false,
     val showReminderDialog: Boolean = false,
     // Templates state
     val availableTemplates: List<NoteTemplate> = emptyList(),

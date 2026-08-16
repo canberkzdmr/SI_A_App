@@ -29,7 +29,7 @@ class ReminderScheduler @Inject constructor(
      * @param noteTitle The title of the note (shown in notification)
      * @param reminderTime The timestamp (in milliseconds) when the reminder should trigger
      */
-    fun scheduleReminder(noteId: Int, noteTitle: String, reminderTime: Long) {
+    fun scheduleReminder(noteId: Int, noteTitle: String, reminderTime: Long, triggerType: String = "TIME") {
         val currentTime = System.currentTimeMillis()
         val delay = reminderTime - currentTime
         
@@ -43,6 +43,7 @@ class ReminderScheduler @Inject constructor(
         val inputData = Data.Builder()
             .putInt(ReminderWorker.KEY_NOTE_ID, noteId)
             .putString(ReminderWorker.KEY_NOTE_TITLE, noteTitle)
+            .putString("trigger_type", triggerType)
             .build()
         
         val reminderRequest = OneTimeWorkRequestBuilder<ReminderWorker>()

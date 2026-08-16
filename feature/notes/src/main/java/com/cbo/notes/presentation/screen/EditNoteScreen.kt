@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -32,6 +33,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Description
@@ -217,6 +219,7 @@ fun EditNoteScreen(
         onShowReminderDialog = onRequestReminder,
         onHideReminderDialog = viewModel::hideReminderDialog,
         onSetReminder = viewModel::setReminder,
+        onSetLocationReminder = viewModel::setLocationReminder,
         onRemoveReminder = viewModel::removeReminder,
         onShowTemplateSelector = viewModel::showTemplateSelector,
         onApplyTemplate = viewModel::applyTemplate,
@@ -515,6 +518,7 @@ fun EditNoteScreen(
     onShowReminderDialog: () -> Unit = {},
     onHideReminderDialog: () -> Unit = {},
     onSetReminder: (Long, com.cbo.notes.domain.model.ReminderRepeat, com.cbo.notes.domain.model.ReminderPriority) -> Unit = { _, _, _ -> },
+    onSetLocationReminder: (Double, Double, String, Boolean) -> Unit = { _, _, _, _ -> },
     onRemoveReminder: () -> Unit = {},
     onShowTemplateSelector: () -> Unit = {},
     onApplyTemplate: (NoteTemplate) -> Unit = {},
@@ -537,6 +541,7 @@ fun EditNoteScreen(
     var showDiscardDialog by remember { mutableStateOf(false) }
     var previewImageUri by remember { mutableStateOf<String?>(null) }
     var isTitleExpanded by remember { mutableStateOf(false) }
+    var showLocationPicker by remember { mutableStateOf(false) }
 
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
@@ -583,6 +588,18 @@ fun EditNoteScreen(
             onStartRecording()
         } else {
             Toast.makeText(context, "Microphone permission required", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            showLocationPicker = true
+        } else {
+            Toast.makeText(context, "Location permission required", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -838,13 +855,43 @@ fun EditNoteScreen(
                                 onRecordingComplete = onAudioRecordingComplete
                             )
 
-                            // Show reminder chip if a reminder is set
-                            if (uiState.reminderTime != null) {
-                                ReminderChip(
-                                    reminderTime = uiState.reminderTime,
-                                    onClick = onShowReminderDialog,
-                                    modifier = Modifier.padding(horizontal = 16.dp)
-                                )
+                            // Show reminder chips
+                            Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                if (uiState.reminderTime != null) {
+                                    ReminderChip(
+                                        reminderTime = uiState.reminderTime,
+                                        onClick = onShowReminderDialog
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                if (uiState.reminderLocationName != null) {
+                                    AssistChip(
+                                        onClick = {
+                                            val hasPermission = ContextCompat.checkSelfPermission(
+                                                context,
+                                                Manifest.permission.ACCESS_FINE_LOCATION
+                                            ) == PackageManager.PERMISSION_GRANTED
+                                            if (hasPermission) {
+                                                showLocationPicker = true
+                                            } else {
+                                                locationPermissionLauncher.launch(
+                                                    arrayOf(
+                                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                                    )
+                                                )
+                                            }
+                                        },
+                                        label = { Text(uiState.reminderLocationName) },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.AddLocationAlt,
+                                                contentDescription = "Location Reminder",
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    )
+                                }
                             }
 
                             val focusRequestContent = remember { FocusRequester() }
@@ -1055,6 +1102,31 @@ fun EditNoteScreen(
                         modifier = Modifier.size(22.dp)
                     )
                 }
+
+                // Add Location toggle
+                IconButton(onClick = {
+                    val hasPermission = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                    if (hasPermission) {
+                        showLocationPicker = true
+                    } else {
+                        locationPermissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.AddLocationAlt,
+                        contentDescription = "Add location reminder",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
         }
     }
@@ -1086,6 +1158,16 @@ fun EditNoteScreen(
             },
             onRemove = if (uiState.reminderTime != null) onRemoveReminder else null,
             onDismiss = onHideReminderDialog,
+        )
+    }
+
+    if (showLocationPicker) {
+        com.cbo.notes.presentation.component.LocationPickerDialog(
+            onDismissRequest = { showLocationPicker = false },
+            onLocationSelected = { lat, lng, name, isReminder ->
+                onSetLocationReminder(lat, lng, name, isReminder)
+                showLocationPicker = false
+            }
         )
     }
 

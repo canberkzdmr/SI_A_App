@@ -46,21 +46,28 @@ class ReminderWorker @AssistedInject constructor(
         }
         
         return try {
-            // Verify the note still exists and has the reminder set
-            val note = noteDao.getNoteWithReminder(noteId)
+            // Verify the note still exists
+            val note = noteDao.getNoteById(noteId)
             if (note == null || note.isDeleted) {
                 Log.d(TAG, "Note was deleted or reminder was removed, skipping notification")
                 return Result.success()
             }
             
-            // Show the notification
-            showNotification(note, noteTitle)
+            // Use the title from the database to ensure it's up to date
+            val currentTitle = note.title
             
-            // Handle repeat or clear
-            if (note.reminderRepeat != null && note.reminderRepeat != "NONE") {
-                scheduleNextReminder(note, noteTitle)
-            } else {
-                noteDao.updateReminder(noteId, null)
+            // Show the notification
+            showNotification(note, currentTitle)
+            
+            val triggerType = inputData.getString("trigger_type") ?: "TIME"
+            
+            // Handle repeat or clear only for time-based triggers
+            if (triggerType == "TIME") {
+                if (note.reminderRepeat != null && note.reminderRepeat != "NONE") {
+                    scheduleNextReminder(note, currentTitle)
+                } else {
+                    noteDao.updateReminder(noteId, null)
+                }
             }
             
             Result.success()

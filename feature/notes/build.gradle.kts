@@ -95,4 +95,8 @@ dependencies {
 
     // Link Preview (OpenGraph parsing)
     implementation(libs.jsoup)
+
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
 }
