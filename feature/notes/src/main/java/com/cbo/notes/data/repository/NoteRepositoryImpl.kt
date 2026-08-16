@@ -324,9 +324,14 @@ class NoteRepositoryImpl @Inject constructor(
     }
 
     // Reminder operations
-    override suspend fun setReminder(noteId: Int, reminderTime: Long): Result<Unit> {
+    override suspend fun setReminder(
+        noteId: Int, 
+        reminderTime: Long, 
+        repeat: com.cbo.notes.domain.model.ReminderRepeat, 
+        priority: com.cbo.notes.domain.model.ReminderPriority
+    ): Result<Unit> {
         return try {
-            noteDao.updateReminder(noteId, reminderTime)
+            noteDao.updateReminder(noteId, reminderTime, repeat.name, priority.name)
             Log.d("NoteRepositoryImpl", "Reminder set for note $noteId at $reminderTime")
             Result.success(Unit)
         } catch (e: Exception) {

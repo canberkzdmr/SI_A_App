@@ -5,6 +5,8 @@ import com.cbo.core.database.entity.NoteWithDetails
 import com.cbo.core.database.entity.TodoItemEntity
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.TodoItem
+import com.cbo.notes.domain.model.ReminderRepeat
+import com.cbo.notes.domain.model.ReminderPriority
 import javax.inject.Inject
 
 class NoteEntityMapper @Inject constructor(
@@ -26,6 +28,8 @@ class NoteEntityMapper @Inject constructor(
             isDeleted = entity.isDeleted,
             deletedAt = entity.deletedAt,
             reminderTime = entity.reminderTime,
+            reminderRepeat = entity.reminderRepeat?.let { runCatching { ReminderRepeat.valueOf(it) }.getOrDefault(ReminderRepeat.NONE) } ?: ReminderRepeat.NONE,
+            reminderPriority = entity.reminderPriority?.let { runCatching { ReminderPriority.valueOf(it) }.getOrDefault(ReminderPriority.DEFAULT) } ?: ReminderPriority.DEFAULT,
             zettelId = entity.zettelId,
             attachments = entity.attachments,
             color = entity.color,
@@ -49,6 +53,8 @@ class NoteEntityMapper @Inject constructor(
             isDeleted = noteWithDetails.note.isDeleted,
             deletedAt = noteWithDetails.note.deletedAt,
             reminderTime = noteWithDetails.note.reminderTime,
+            reminderRepeat = noteWithDetails.note.reminderRepeat?.let { runCatching { ReminderRepeat.valueOf(it) }.getOrDefault(ReminderRepeat.NONE) } ?: ReminderRepeat.NONE,
+            reminderPriority = noteWithDetails.note.reminderPriority?.let { runCatching { ReminderPriority.valueOf(it) }.getOrDefault(ReminderPriority.DEFAULT) } ?: ReminderPriority.DEFAULT,
             zettelId = noteWithDetails.note.zettelId,
             attachments = noteWithDetails.note.attachments,
             color = noteWithDetails.note.color,
@@ -71,6 +77,8 @@ class NoteEntityMapper @Inject constructor(
             isDeleted = domain.isDeleted,
             deletedAt = domain.deletedAt,
             reminderTime = domain.reminderTime,
+            reminderRepeat = domain.reminderRepeat.name,
+            reminderPriority = domain.reminderPriority.name,
             zettelId = domain.zettelId,
             attachments = domain.attachments,
             color = domain.color,

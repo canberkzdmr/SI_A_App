@@ -45,7 +45,12 @@ interface NoteRepository {
     
     // Reminder operations
     /** Sets or updates the reminder time for a note */
-    suspend fun setReminder(noteId: Int, reminderTime: Long): Result<Unit>
+    suspend fun setReminder(
+        noteId: Int, 
+        reminderTime: Long, 
+        repeat: com.cbo.notes.domain.model.ReminderRepeat = com.cbo.notes.domain.model.ReminderRepeat.NONE, 
+        priority: com.cbo.notes.domain.model.ReminderPriority = com.cbo.notes.domain.model.ReminderPriority.DEFAULT
+    ): Result<Unit>
     
     /** Removes the reminder from a note */
     suspend fun removeReminder(noteId: Int): Result<Unit>

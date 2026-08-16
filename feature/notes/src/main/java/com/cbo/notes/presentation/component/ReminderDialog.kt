@@ -34,7 +34,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +45,20 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+import com.cbo.notes.domain.model.ReminderPriority
+import com.cbo.notes.domain.model.ReminderRepeat
+import androidx.compose.material3.FilterChip
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.lazy.items
+
 /**
  * Dialog for setting or editing a note reminder.
  * Allows the user to pick a date and time for the reminder.
@@ -54,7 +67,9 @@ import java.util.Locale
 @Composable
 fun ReminderDialog(
     existingReminderTime: Long? = null,
-    onConfirm: (Long) -> Unit,
+    existingRepeat: ReminderRepeat = ReminderRepeat.NONE,
+    existingPriority: ReminderPriority = ReminderPriority.DEFAULT,
+    onConfirm: (Long, ReminderRepeat, ReminderPriority) -> Unit,
     onRemove: (() -> Unit)? = null,
     onDismiss: () -> Unit
 ) {
@@ -78,6 +93,9 @@ fun ReminderDialog(
     var selectedHour by remember { mutableStateOf(calendar.get(Calendar.HOUR_OF_DAY)) }
     var selectedMinute by remember { mutableStateOf(calendar.get(Calendar.MINUTE)) }
     
+    var selectedRepeat by remember { mutableStateOf(existingRepeat) }
+    var selectedPriority by remember { mutableStateOf(existingPriority) }
+    
     val dateFormatter = remember { SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault()) }
     val timeFormatter = remember { SimpleDateFormat("h:mm a", Locale.getDefault()) }
     
@@ -91,9 +109,45 @@ fun ReminderDialog(
         }.timeInMillis
     }
     
+    fun updateDateTime(timeMs: Long) {
+        val cal = Calendar.getInstance().apply { timeInMillis = timeMs }
+        selectedDate = cal.timeInMillis
+        selectedHour = cal.get(Calendar.HOUR_OF_DAY)
+        selectedMinute = cal.get(Calendar.MINUTE)
+    }
+    
+    fun setSmartChipTime(type: String) {
+        val cal = Calendar.getInstance()
+        when (type) {
+            "Evening" -> {
+                cal.set(Calendar.HOUR_OF_DAY, 18)
+                cal.set(Calendar.MINUTE, 0)
+                if (cal.timeInMillis < System.currentTimeMillis()) {
+                    cal.add(Calendar.DAY_OF_YEAR, 1) // Next evening
+                }
+            }
+            "Morning" -> {
+                cal.add(Calendar.DAY_OF_YEAR, 1)
+                cal.set(Calendar.HOUR_OF_DAY, 9)
+                cal.set(Calendar.MINUTE, 0)
+            }
+            "Weekend" -> {
+                val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
+                val daysToSaturday = if (dayOfWeek == Calendar.SATURDAY) 7 else (Calendar.SATURDAY - dayOfWeek + 7) % 7
+                cal.add(Calendar.DAY_OF_YEAR, daysToSaturday)
+                cal.set(Calendar.HOUR_OF_DAY, 10)
+                cal.set(Calendar.MINUTE, 0)
+            }
+        }
+        updateDateTime(cal.timeInMillis)
+    }
+    
     fun isValidReminderTime(): Boolean {
         return getSelectedDateTime() > System.currentTimeMillis()
     }
+
+    var repeatExpanded by remember { mutableStateOf(false) }
+    var priorityExpanded by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -118,43 +172,132 @@ fun ReminderDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Date selector
-                OutlinedButton(
-                    onClick = { showDatePicker = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CalendarMonth,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = dateFormatter.format(Date(selectedDate)),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                // Smart Chips
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    item {
+                        FilterChip(
+                            selected = false,
+                            onClick = { setSmartChipTime("Evening") },
+                            label = { Text("Bu Akşam") }
+                        )
+                    }
+                    item {
+                        FilterChip(
+                            selected = false,
+                            onClick = { setSmartChipTime("Morning") },
+                            label = { Text("Yarın Sabah") }
+                        )
+                    }
+                    item {
+                        FilterChip(
+                            selected = false,
+                            onClick = { setSmartChipTime("Weekend") },
+                            label = { Text("Hafta Sonu") }
+                        )
+                    }
                 }
-                
-                // Time selector
-                OutlinedButton(
-                    onClick = { showTimePicker = true },
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Date selector
+                    OutlinedButton(
+                        onClick = { showDatePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = dateFormatter.format(Date(selectedDate)),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    
+                    // Time selector
+                    OutlinedButton(
+                        onClick = { showTimePicker = true },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccessTime,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = timeFormatter.format(
+                                Calendar.getInstance().apply {
+                                    set(Calendar.HOUR_OF_DAY, selectedHour)
+                                    set(Calendar.MINUTE, selectedMinute)
+                                }.time
+                            ),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+
+                // Repeat Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = repeatExpanded,
+                    onExpandedChange = { repeatExpanded = !repeatExpanded },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AccessTime,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
+                    OutlinedTextField(
+                        value = selectedRepeat.name,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Tekrar") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = repeatExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier.menuAnchor()
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = timeFormatter.format(
-                            Calendar.getInstance().apply {
-                                set(Calendar.HOUR_OF_DAY, selectedHour)
-                                set(Calendar.MINUTE, selectedMinute)
-                            }.time
-                        ),
-                        style = MaterialTheme.typography.bodyLarge
+                    ExposedDropdownMenu(
+                        expanded = repeatExpanded,
+                        onDismissRequest = { repeatExpanded = false }
+                    ) {
+                        ReminderRepeat.entries.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.name) },
+                                onClick = {
+                                    selectedRepeat = option
+                                    repeatExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Priority Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = priorityExpanded,
+                    onExpandedChange = { priorityExpanded = !priorityExpanded },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = selectedPriority.name,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Öncelik") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = priorityExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier.menuAnchor()
                     )
+                    ExposedDropdownMenu(
+                        expanded = priorityExpanded,
+                        onDismissRequest = { priorityExpanded = false }
+                    ) {
+                        ReminderPriority.entries.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.name) },
+                                onClick = {
+                                    selectedPriority = option
+                                    priorityExpanded = false
+                                }
+                            )
+                        }
+                    }
                 }
                 
                 // Warning if time is in the past
@@ -169,7 +312,7 @@ fun ReminderDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(getSelectedDateTime()) },
+                onClick = { onConfirm(getSelectedDateTime(), selectedRepeat, selectedPriority) },
                 enabled = isValidReminderTime()
             ) {
                 Text(stringResource(R.string.save))
@@ -305,7 +448,7 @@ private fun ReminderDialogPreview() {
     MemCloudApplicationTheme {
         ReminderDialog(
             existingReminderTime = null,
-            onConfirm = {},
+            onConfirm = { _, _, _ -> },
             onDismiss = {}
         )
     }
@@ -317,7 +460,7 @@ private fun ReminderDialogWithExistingPreview() {
     MemCloudApplicationTheme {
         ReminderDialog(
             existingReminderTime = System.currentTimeMillis() + 86400000, // Tomorrow
-            onConfirm = {},
+            onConfirm = { _, _, _ -> },
             onRemove = {},
             onDismiss = {}
         )

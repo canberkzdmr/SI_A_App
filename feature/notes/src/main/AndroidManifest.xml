@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <application>
+        <receiver
+            android:name=".worker.SnoozeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.cbo.notes.action.SNOOZE" />
+            </intent-filter>
+        </receiver>
+    </application>
 </manifest>

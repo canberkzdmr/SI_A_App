@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Note
+import com.cbo.notes.domain.model.ReminderPriority
+import com.cbo.notes.domain.model.ReminderRepeat
 import com.cbo.notes.domain.model.TodoItem
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.usecase.CreateNoteUseCase
@@ -119,6 +121,8 @@ class EditNoteViewModel @Inject constructor(
                                 backlinks = backlinks,
                                 originalNote = note,
                                 reminderTime = note.reminderTime,
+                                reminderRepeat = note.reminderRepeat ?: ReminderRepeat.NONE,
+                                reminderPriority = note.reminderPriority ?: ReminderPriority.DEFAULT,
                                 attachments = note.attachments,
                                 color = note.color,
                                 todos = note.todos
@@ -257,6 +261,8 @@ class EditNoteViewModel @Inject constructor(
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags,
                         reminderTime = currentState.reminderTime,
+                        reminderRepeat = currentState.reminderRepeat,
+                        reminderPriority = currentState.reminderPriority,
                         attachments = currentState.attachments,
                         color = currentState.color,
                         todos = currentState.todos
@@ -269,6 +275,8 @@ class EditNoteViewModel @Inject constructor(
                         category = currentState.selectedCategory,
                         tags = currentState.selectedTags,
                         reminderTime = currentState.reminderTime,
+                        reminderRepeat = currentState.reminderRepeat,
+                        reminderPriority = currentState.reminderPriority,
                         attachments = currentState.attachments,
                         color = currentState.color,
                         todos = currentState.todos
@@ -442,10 +450,12 @@ class EditNoteViewModel @Inject constructor(
         _uiState.update { it.copy(showReminderDialog = false) }
     }
 
-    fun setReminder(reminderTime: Long) {
+    fun setReminder(reminderTime: Long, repeat: ReminderRepeat, priority: ReminderPriority) {
         _uiState.update { 
             it.copy(
                 reminderTime = reminderTime, 
+                reminderRepeat = repeat,
+                reminderPriority = priority,
                 showReminderDialog = false,
                 hasUnsavedChanges = true
             ) 
@@ -456,6 +466,8 @@ class EditNoteViewModel @Inject constructor(
         _uiState.update { 
             it.copy(
                 reminderTime = null, 
+                reminderRepeat = ReminderRepeat.NONE,
+                reminderPriority = ReminderPriority.DEFAULT,
                 showReminderDialog = false,
                 hasUnsavedChanges = true
             ) 
@@ -778,6 +790,8 @@ data class EditNoteUiState(
     val categoryInputText: String = "",
     // Reminder state
     val reminderTime: Long? = null,
+    val reminderRepeat: ReminderRepeat = ReminderRepeat.NONE,
+    val reminderPriority: ReminderPriority = ReminderPriority.DEFAULT,
     val showReminderDialog: Boolean = false,
     // Templates state
     val availableTemplates: List<NoteTemplate> = emptyList(),

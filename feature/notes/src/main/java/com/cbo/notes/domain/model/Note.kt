@@ -17,6 +17,8 @@ data class Note(
     val isDeleted: Boolean = false,
     val deletedAt: Long? = null,
     val reminderTime: Long? = null,
+    val reminderRepeat: ReminderRepeat = ReminderRepeat.NONE,
+    val reminderPriority: ReminderPriority = ReminderPriority.DEFAULT,
     val zettelId: String? = null,
     val attachments: List<String> = emptyList(),
     val color: String? = null,

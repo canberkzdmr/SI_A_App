@@ -514,7 +514,7 @@ fun EditNoteScreen(
     onApplySelection: (Category?, List<Tag>) -> Unit = { _, _ -> },
     onShowReminderDialog: () -> Unit = {},
     onHideReminderDialog: () -> Unit = {},
-    onSetReminder: (Long) -> Unit = {},
+    onSetReminder: (Long, com.cbo.notes.domain.model.ReminderRepeat, com.cbo.notes.domain.model.ReminderPriority) -> Unit = { _, _, _ -> },
     onRemoveReminder: () -> Unit = {},
     onShowTemplateSelector: () -> Unit = {},
     onApplyTemplate: (NoteTemplate) -> Unit = {},
@@ -1040,10 +1040,7 @@ fun EditNoteScreen(
                         Icon(
                             imageVector = Icons.Default.AddPhotoAlternate,
                             contentDescription = "Add image",
-                            tint = if (uiState.showColorPicker)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -1054,10 +1051,7 @@ fun EditNoteScreen(
                     Icon(
                         imageVector = Icons.Default.NotificationAdd,
                         contentDescription = "Add reminder",
-                        tint = if (uiState.showColorPicker)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            MaterialTheme.colorScheme.onSurface,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -1085,9 +1079,13 @@ fun EditNoteScreen(
     if (uiState.showReminderDialog) {
         ReminderDialog(
             existingReminderTime = uiState.reminderTime,
-            onConfirm = onSetReminder,
+            existingRepeat = uiState.reminderRepeat,
+            existingPriority = uiState.reminderPriority,
+            onConfirm = { time, repeat, priority ->
+                onSetReminder(time, repeat, priority)
+            },
             onRemove = if (uiState.reminderTime != null) onRemoveReminder else null,
-            onDismiss = onHideReminderDialog
+            onDismiss = onHideReminderDialog,
         )
     }
 

@@ -54,10 +54,14 @@ class ReminderWorker @AssistedInject constructor(
             }
             
             // Show the notification
-            showNotification(noteId, noteTitle, note.content)
+            showNotification(note, noteTitle)
             
-            // Clear the reminder after it's been triggered
-            noteDao.updateReminder(noteId, null)
+            // Handle repeat or clear
+            if (note.reminderRepeat != null && note.reminderRepeat != "NONE") {
+                scheduleNextReminder(note, noteTitle)
+            } else {
+                noteDao.updateReminder(noteId, null)
+            }
             
             Result.success()
         } catch (e: Exception) {
@@ -66,8 +70,10 @@ class ReminderWorker @AssistedInject constructor(
         }
     }
     
-    private fun showNotification(noteId: Int, title: String, content: String) {
-        createNotificationChannel()
+    private fun showNotification(note: com.cbo.core.database.entity.NoteEntity, title: String) {
+        val priorityLevel = note.reminderPriority ?: "DEFAULT"
+        val channelId = if (priorityLevel == "HIGH") CHANNEL_ID_HIGH else CHANNEL_ID_DEFAULT
+        createNotificationChannels()
         
         // Check notification permission on Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -82,35 +88,61 @@ class ReminderWorker @AssistedInject constructor(
         }
         
         // Convert Markdown content to plain text for notification display
-        val plainTextContent = stripMarkdown(content)
+        val plainTextContent = stripMarkdown(note.content)
         
         // Create intent to open the note when notification is tapped
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra(EXTRA_NOTE_ID, noteId)
+            putExtra(EXTRA_NOTE_ID, note.id)
         }
         
         val pendingIntent = PendingIntent.getActivity(
             context,
-            noteId,
+            note.id,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
+        // Snooze actions
+        val snooze15Intent = Intent(context, SnoozeReceiver::class.java).apply {
+            action = SnoozeReceiver.ACTION_SNOOZE
+            putExtra(EXTRA_NOTE_ID, note.id)
+            putExtra(SnoozeReceiver.EXTRA_SNOOZE_MINUTES, 15)
+            putExtra(KEY_NOTE_TITLE, title)
+        }
+        val snooze15Pending = PendingIntent.getBroadcast(
+            context, note.id * 10 + 1, snooze15Intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        
+        val snooze60Intent = Intent(context, SnoozeReceiver::class.java).apply {
+            action = SnoozeReceiver.ACTION_SNOOZE
+            putExtra(EXTRA_NOTE_ID, note.id)
+            putExtra(SnoozeReceiver.EXTRA_SNOOZE_MINUTES, 60)
+            putExtra(KEY_NOTE_TITLE, title)
+        }
+        val snooze60Pending = PendingIntent.getBroadcast(
+            context, note.id * 10 + 2, snooze60Intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        
         // Build and show the notification
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification_reminder)
             .setContentTitle(title)
             .setContentText(plainTextContent.take(100).let { if (plainTextContent.length > 100) "$it..." else it })
             .setStyle(NotificationCompat.BigTextStyle().bigText(plainTextContent.take(300)))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(if (priorityLevel == "HIGH") NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .build()
+            .addAction(0, "15 Dk Ertele", snooze15Pending)
+            .addAction(0, "1 Saat Ertele", snooze60Pending)
+            
+        if (priorityLevel == "LOW") {
+            builder.setSilent(true)
+        }
         
-        NotificationManagerCompat.from(context).notify(noteId, notification)
-        Log.d(TAG, "Notification shown for note: $noteId")
+        NotificationManagerCompat.from(context).notify(note.id, builder.build())
+        Log.d(TAG, "Notification shown for note: ${note.id} with priority $priorityLevel")
     }
     
     /**
@@ -127,25 +159,71 @@ class ReminderWorker @AssistedInject constructor(
             .trim()
             .replace(Regex("\\s+"), " ") // Replace multiple whitespaces with single space
     }
-    private fun createNotificationChannel() {
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = context.getString(R.string.reminder_channel_name)
-            val description = context.getString(R.string.reminder_channel_description)
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                this.description = description
+            val notificationManager = context.getSystemService(NotificationManager::class.java)
+            
+            // High priority channel
+            val highChannel = NotificationChannel(CHANNEL_ID_HIGH, "Yüksek Öncelikli Hatırlatıcılar", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Yüksek öncelikli not hatırlatıcıları"
                 enableVibration(true)
                 enableLights(true)
             }
             
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+            // Default priority channel
+            val defaultChannel = NotificationChannel(CHANNEL_ID_DEFAULT, "Normal Hatırlatıcılar", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "Normal öncelikli not hatırlatıcıları"
+                enableVibration(false)
+                enableLights(false)
+            }
+            
+            notificationManager.createNotificationChannel(highChannel)
+            notificationManager.createNotificationChannel(defaultChannel)
         }
+    }
+    
+    private suspend fun scheduleNextReminder(note: com.cbo.core.database.entity.NoteEntity, title: String) {
+        val nextTime = calculateNextReminderTime(note.reminderTime ?: System.currentTimeMillis(), note.reminderRepeat)
+        noteDao.updateReminder(note.id, nextTime, note.reminderRepeat, note.reminderPriority)
+        
+        val delay = nextTime - System.currentTimeMillis()
+        if (delay > 0) {
+            val inputData = androidx.work.Data.Builder()
+                .putInt(KEY_NOTE_ID, note.id)
+                .putString(KEY_NOTE_TITLE, title)
+                .build()
+            
+            val reminderRequest = androidx.work.OneTimeWorkRequestBuilder<ReminderWorker>()
+                .setInitialDelay(delay, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .setInputData(inputData)
+                .addTag("note_reminder")
+                .addTag("note_reminder_${note.id}")
+                .build()
+                
+            androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
+                getWorkName(note.id),
+                androidx.work.ExistingWorkPolicy.REPLACE,
+                reminderRequest
+            )
+        }
+    }
+
+    private fun calculateNextReminderTime(currentTime: Long, repeat: String?): Long {
+        val calendar = java.util.Calendar.getInstance()
+        calendar.timeInMillis = currentTime
+        when (repeat) {
+            "DAILY" -> calendar.add(java.util.Calendar.DAY_OF_YEAR, 1)
+            "WEEKLY" -> calendar.add(java.util.Calendar.WEEK_OF_YEAR, 1)
+            "MONTHLY" -> calendar.add(java.util.Calendar.MONTH, 1)
+            "YEARLY" -> calendar.add(java.util.Calendar.YEAR, 1)
+        }
+        return calendar.timeInMillis
     }
 
     companion object {
         private const val TAG = "ReminderWorker"
-        const val CHANNEL_ID = "note_reminders"
+        const val CHANNEL_ID_HIGH = "note_reminders_high"
+        const val CHANNEL_ID_DEFAULT = "note_reminders_default"
         const val KEY_NOTE_ID = "note_id"
         const val KEY_NOTE_TITLE = "note_title"
         const val EXTRA_NOTE_ID = "extra_note_id"
