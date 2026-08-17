@@ -472,8 +472,8 @@ private fun NotesContent(
                             onArchive = { onArchive(note.id) },
                             onDelete = { onDelete(note.id) },
                             isListView = true,
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = spring(
+                            modifier = Modifier.animateItem(
+                                placementSpec = spring(
                                     stiffness = Spring.StiffnessMediumLow,
                                     dampingRatio = Spring.DampingRatioMediumBouncy
                                 )
@@ -499,8 +499,8 @@ private fun NotesContent(
                         key = { note -> note.id },
                     ) { note ->
                         NoteCard(
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = spring(
+                            modifier = Modifier.animateItem(
+                                placementSpec = spring(
                                     stiffness = Spring.StiffnessMediumLow,
                                     dampingRatio = Spring.DampingRatioMediumBouncy
                                 )
@@ -541,8 +541,8 @@ private fun NotesContent(
                             onDelete = { onDelete(note.id) },
                             swipeHintEnabled = false,
                             isFirstItem = index == 0,
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = spring(
+                            modifier = Modifier.animateItem(
+                                placementSpec = spring(
                                     stiffness = Spring.StiffnessMediumLow,
                                     dampingRatio = Spring.DampingRatioMediumBouncy
                                 )

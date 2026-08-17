@@ -58,7 +58,7 @@ dependencies {
     
     // Room testing
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation("androidx.room:room-testing:2.6.1")
+    androidTestImplementation("androidx.room:room-testing:${libs.versions.room.get()}")
     androidTestImplementation(libs.kotlinx.coroutines.test)
 
     // Serialization
