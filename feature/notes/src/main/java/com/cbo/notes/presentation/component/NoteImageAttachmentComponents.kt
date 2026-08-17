@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.cbo.ui.theme.Dimens
 
 @Composable
 fun NoteImageAttachmentsRow(
@@ -59,7 +60,7 @@ fun NoteImageAttachmentsRow(
             Box(
                 modifier = Modifier
                     .size(84.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(Dimens.CornerRadius.default))
                     .clickable { onImageClick(uri) }
             ) {
                 AsyncImage(

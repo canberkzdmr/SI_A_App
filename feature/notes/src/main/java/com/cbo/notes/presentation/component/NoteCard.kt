@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,12 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import coil.compose.AsyncImage
 import com.cbo.core.common.util.DateUtil
 import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
@@ -45,6 +48,7 @@ import com.cbo.ui.components.cards.IndicatorPosition
 import com.cbo.ui.components.cards.IndicatorSize
 import com.cbo.ui.components.dialogs.AppDeleteDialog
 import com.cbo.ui.components.richtext.RichTextViewer
+import com.cbo.ui.theme.Dimens
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.ui.toHexString
 
@@ -121,6 +125,10 @@ fun NoteCardContent(
     onMenuExpandedChange: (Boolean) -> Unit,
     onDeleteClick: () -> Unit,
 ) {
+    val imageAttachments = remember(note.attachments) {
+        note.attachments.filter { !isAudioAttachment(it) }
+    }
+
     AppCard(
         modifier = Modifier.fillMaxWidth(),
         variant = CardVariant.OUTLINED,
@@ -134,6 +142,17 @@ fun NoteCardContent(
         onClick = onClick,
     ) {
         Column {
+            if (imageAttachments.isNotEmpty()) {
+                AsyncImage(
+                    model = imageAttachments.first(),
+                    contentDescription = "Image Attachment",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(124.dp)
+                        .clip(RoundedCornerShape(Dimens.CornerRadius.default)),
+                    contentScale = ContentScale.Crop
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -162,9 +181,9 @@ fun NoteCardContent(
                 Spacer(modifier = Modifier.height(8.dp))
                 RichTextViewer(
                     markdown = note.content,
-                        maxLines = if (isListView) 4 else 1,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    maxLines = if (isListView) 4 else 1,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             HorizontalDivider(
@@ -246,7 +265,8 @@ private fun TagDot(
     )
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
     device = "id:pixel_5"
 )
 @Composable
@@ -257,7 +277,7 @@ private fun CompactNoteCardPreview() {
             Note(
                 id = 3,
                 title = "Meeting Summary QR FA fsfa Ggdgdfgds gsd dfgdsgds dsfg",
-                content = "Discussed project roadmap and upcoming milestones. Next meeting scheduled for Friday.",
+                content = "**Discussed project roadmap and upcoming milestones. Next meeting scheduled for Friday.**",
                 category =
                     Category(
                         id = 3,
