@@ -608,6 +608,7 @@ fun EditNoteScreen(
             scaffoldState = scaffoldState,
             sheetPeekHeight = 110.dp,
             sheetDragHandle = null,
+            sheetContainerColor = MaterialTheme.colorScheme.surface,
             sheetContent = {
                 val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                 Column(
@@ -986,7 +987,8 @@ fun EditNoteScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
-            tonalElevation = BottomSheetDefaults.Elevation
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 0.dp
         ) {
             Row(
                 modifier = Modifier

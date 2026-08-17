@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.ParagraphStyle
@@ -79,6 +80,8 @@ fun RichTextEditorField(
         }
     }
 
+    var isFocused by remember { mutableStateOf(false) }
+
     Column(modifier = modifier) {
         EditorToolbar(richTextState)
         HorizontalDivider()
@@ -102,7 +105,10 @@ fun RichTextEditorField(
                 }
                 BasicRichTextEditor(
                     state = richTextState,
-                    modifier = Modifier.padding(horizontal = 4.dp).fillMaxSize(),
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .fillMaxSize()
+                        .onFocusChanged { isFocused = it.isFocused },
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface
                     ),
@@ -117,7 +123,11 @@ fun RichTextEditorField(
         snapshotFlow { richTextState.annotatedString }
             .map { richTextState.toMarkdown() }
             .distinctUntilChanged()
-            .collectLatest { markdown -> onValueChange(markdown) }
+            .collectLatest { markdown -> 
+                if (isFocused) {
+                    onValueChange(markdown) 
+                }
+            }
     }
 }
 
