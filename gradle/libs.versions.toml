@@ -46,6 +46,7 @@ googleServices = "4.4.2"
 firebaseBom = "33.1.2"
 firebaseCrashlyticsPlugin = "3.0.2"
 places = "3.5.0"
+kizitonwoseCalendar = "2.6.0"
 
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
@@ -104,6 +105,7 @@ firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx" }
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
+kizitonwose-calendar-compose = { module = "com.kizitonwose.calendar:compose", version.ref = "kizitonwoseCalendar" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

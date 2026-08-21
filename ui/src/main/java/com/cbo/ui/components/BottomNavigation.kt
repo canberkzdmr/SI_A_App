@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
@@ -85,6 +86,12 @@ sealed class BottomNavDestination(
         route = "main_categories", 
         title = "Categories",
         icon = Icons.Default.Category
+    )
+    
+    object Calendar : BottomNavDestination(
+        route = "main_calendar", 
+        title = "Calendar",
+        icon = Icons.Default.CalendarMonth
     )
     
     object Profile : BottomNavDestination(
@@ -212,7 +219,7 @@ fun BottomNavigationBar(
 ) {
     val mainTabs = listOf(
         TabItem("main_notes", Icons.AutoMirrored.Filled.Note, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_notes)),
-        TabItem("main_categories", Icons.Default.Category, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_categories)),
+        TabItem("main_calendar", Icons.Default.CalendarMonth, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_calendar)),
         TabItem("center", Icons.Default.Add, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_create)),
         TabItem("main_map", Icons.Default.Map, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_map)),
         TabItem("main_profile", Icons.Default.Person, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_profile)),

@@ -610,7 +610,7 @@ fun EditNoteScreen(
             sheetDragHandle = null,
             sheetContainerColor = MaterialTheme.colorScheme.surface,
             sheetContent = {
-                val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                val borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

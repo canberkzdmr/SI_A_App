@@ -2,6 +2,7 @@ package com.cbo.notes.presentation.screen
 
 import android.annotation.SuppressLint
 import android.location.Location
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,12 +16,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.presentation.viewmodel.MapViewModel
+import com.cbo.notes.presentation.viewmodel.MapUiState
+import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -37,8 +42,37 @@ fun MapScreen(
     viewModel: MapViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    
+    MapScreenContent(
+        uiState = uiState,
+        onNavigateToEditNote = onNavigateToEditNote,
+        onSelectNote = { viewModel.selectNote(it) },
+        onUpdateCurrentLocation = { viewModel.updateCurrentLocation(it) },
+        onToggleCategory = { viewModel.toggleCategory(it) },
+        onToggleTag = { viewModel.toggleTag(it) },
+        onToggleNearbyFilter = { viewModel.toggleNearbyFilter() },
+        onClearFilters = { viewModel.clearFilters() }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@SuppressLint("MissingPermission")
+@Composable
+fun MapScreenContent(
+    uiState: MapUiState,
+    onNavigateToEditNote: (noteId: Int) -> Unit,
+    onSelectNote: (com.cbo.notes.domain.model.Note?) -> Unit,
+    onUpdateCurrentLocation: (Location) -> Unit,
+    onToggleCategory: (com.cbo.notes.domain.model.Category) -> Unit,
+    onToggleTag: (com.cbo.notes.domain.model.Tag) -> Unit,
+    onToggleNearbyFilter: () -> Unit,
+    onClearFilters: () -> Unit
+) {
     val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val isPreview = LocalInspectionMode.current
+    val fusedLocationClient = remember { 
+        if (isPreview) null else LocationServices.getFusedLocationProviderClient(context) 
+    }
     val coroutineScope = rememberCoroutineScope()
     
     val cameraPositionState = rememberCameraPositionState {
@@ -51,12 +85,14 @@ fun MapScreen(
     val activeFilterCount = uiState.selectedCategories.size + uiState.selectedTags.size
 
     LaunchedEffect(Unit) {
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                viewModel.updateCurrentLocation(location)
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(
-                    LatLng(location.latitude, location.longitude), 12f
-                )
+        if (!isPreview) {
+            fusedLocationClient?.lastLocation?.addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    onUpdateCurrentLocation(location)
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(
+                        LatLng(location.latitude, location.longitude), 12f
+                    )
+                }
             }
         }
     }
@@ -65,15 +101,17 @@ fun MapScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                        if (location != null) {
-                            viewModel.updateCurrentLocation(location)
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngZoom(
-                                        LatLng(location.latitude, location.longitude), 15f
+                    if (!isPreview) {
+                        fusedLocationClient?.lastLocation?.addOnSuccessListener { location: Location? ->
+                            if (location != null) {
+                                onUpdateCurrentLocation(location)
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(
+                                        CameraUpdateFactory.newLatLngZoom(
+                                            LatLng(location.latitude, location.longitude), 15f
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }
@@ -86,35 +124,44 @@ fun MapScreen(
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             // Harita
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                properties = MapProperties(isMyLocationEnabled = true),
-                uiSettings = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false),
-                onMapClick = {
-                    viewModel.selectNote(null)
+            if (isPreview) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color(0xFFE0E0E0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Google Map (Preview'da yüklenmez)", color = Color.Gray)
                 }
-            ) {
-                uiState.filteredNotes.forEach { note ->
-                    val lat = note.reminderLatitude ?: return@forEach
-                    val lng = note.reminderLongitude ?: return@forEach
-                    val hue = getHueFromHexColor(note.category?.color)
-                    
-                    Marker(
-                        state = MarkerState(position = LatLng(lat, lng)),
-                        title = note.title,
-                        snippet = note.category?.name ?: "Kategorisiz",
-                        icon = BitmapDescriptorFactory.defaultMarker(hue),
-                        onClick = {
-                            viewModel.selectNote(note)
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLng(LatLng(lat, lng))
-                                )
+            } else {
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    properties = MapProperties(isMyLocationEnabled = true),
+                    uiSettings = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false),
+                    onMapClick = {
+                        onSelectNote(null)
+                    }
+                ) {
+                    uiState.filteredNotes.forEach { note ->
+                        val lat = note.reminderLatitude ?: return@forEach
+                        val lng = note.reminderLongitude ?: return@forEach
+                        val hue = getHueFromHexColor(note.category?.color)
+                        
+                        Marker(
+                            state = MarkerState(position = LatLng(lat, lng)),
+                            title = note.title,
+                            snippet = note.category?.name ?: "Kategorisiz",
+                            icon = BitmapDescriptorFactory.defaultMarker(hue),
+                            onClick = {
+                                onSelectNote(note)
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(
+                                        CameraUpdateFactory.newLatLng(LatLng(lat, lng))
+                                    )
+                                }
+                                true
                             }
-                            true
-                        }
-                    )
+                        )
+                    }
                 }
             }
             
@@ -159,13 +206,13 @@ fun MapScreen(
                     FilterChip(
                         selected = uiState.isNearbyFilterEnabled,
                         onClick = {
-                            if (!uiState.isNearbyFilterEnabled) {
-                                fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
-                                    if (loc != null) viewModel.updateCurrentLocation(loc)
-                                    viewModel.toggleNearbyFilter()
+                            if (!uiState.isNearbyFilterEnabled && !isPreview) {
+                                fusedLocationClient?.lastLocation?.addOnSuccessListener { loc ->
+                                    if (loc != null) onUpdateCurrentLocation(loc)
+                                    onToggleNearbyFilter()
                                 }
                             } else {
-                                viewModel.toggleNearbyFilter()
+                                onToggleNearbyFilter()
                             }
                         },
                         label = { Text("Yakınımdakiler (5km)") },
@@ -182,9 +229,9 @@ fun MapScreen(
     
     // Not Önizleme BottomSheet'i (Seçili not varsa açılır)
     if (uiState.selectedNote != null) {
-        val note = uiState.selectedNote!!
+        val note = uiState.selectedNote
         ModalBottomSheet(
-            onDismissRequest = { viewModel.selectNote(null) },
+            onDismissRequest = { onSelectNote(null) },
             containerColor = MaterialTheme.colorScheme.surface,
             dragHandle = { BottomSheetDefaults.DragHandle() }
         ) {
@@ -206,7 +253,7 @@ fun MapScreen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    IconButton(onClick = { viewModel.selectNote(null) }) {
+                    IconButton(onClick = { onSelectNote(null) }) {
                         Icon(Icons.Default.Close, contentDescription = "Kapat")
                     }
                 }
@@ -233,7 +280,7 @@ fun MapScreen(
                 
                 Button(
                     onClick = { 
-                        viewModel.selectNote(null)
+                        onSelectNote(null)
                         onNavigateToEditNote(note.id) 
                     },
                     modifier = Modifier.fillMaxWidth()
@@ -267,7 +314,7 @@ fun MapScreen(
                         style = MaterialTheme.typography.titleLarge
                     )
                     if (activeFilterCount > 0) {
-                        TextButton(onClick = { viewModel.clearFilters() }) {
+                        TextButton(onClick = { onClearFilters() }) {
                             Text("Temizle ($activeFilterCount)")
                         }
                     }
@@ -320,7 +367,7 @@ fun MapScreen(
                                 val isSelected = uiState.selectedCategories.contains(category.id)
                                 FilterChip(
                                     selected = isSelected,
-                                    onClick = { viewModel.toggleCategory(category) },
+                                    onClick = { onToggleCategory(category) },
                                     label = { Text(category.name) },
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
@@ -346,7 +393,7 @@ fun MapScreen(
                                 val isSelected = uiState.selectedTags.contains(tag.id)
                                 FilterChip(
                                     selected = isSelected,
-                                    onClick = { viewModel.toggleTag(tag) },
+                                    onClick = { onToggleTag(tag) },
                                     label = { Text("#${tag.name}") },
                                     colors = FilterChipDefaults.filterChipColors(
                                         selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -382,5 +429,29 @@ private fun getHueFromHexColor(hexColor: String?): Float {
         hsv[0]
     } catch (e: Exception) {
         BitmapDescriptorFactory.HUE_RED
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Composable
+private fun MapScreenPreview() {
+    MemCloudApplicationTheme {
+        MapScreenContent(
+            uiState = MapUiState(
+                categories = listOf(
+                    com.cbo.notes.domain.model.Category(id = 1, userId = 1, name = "Kişisel", color = "#FF0000")
+                ),
+                tags = listOf(
+                    com.cbo.notes.domain.model.Tag(id = 1, userId = 1, name = "Acil")
+                )
+            ),
+            onNavigateToEditNote = {},
+            onSelectNote = {},
+            onUpdateCurrentLocation = {},
+            onToggleCategory = {},
+            onToggleTag = {},
+            onToggleNearbyFilter = {},
+            onClearFilters = {}
+        )
     }
 }

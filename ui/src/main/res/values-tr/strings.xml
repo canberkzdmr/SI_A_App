@@ -3,6 +3,7 @@
     <string name="nav_categories">Kategoriler</string>
     <string name="nav_tags">Etiketler</string>
     <string name="nav_map">Konumlar</string>
+    <string name="nav_calendar">Takvim</string>
     <string name="nav_profile">Profil</string>
     <string name="nav_create">Oluştur</string>
     <string name="phone_number">Telefon Numaranızı Girin</string>

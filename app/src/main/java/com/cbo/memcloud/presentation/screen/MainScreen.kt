@@ -24,6 +24,7 @@ import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
 import com.cbo.notes.presentation.screen.MapScreen
+import com.cbo.notes.presentation.screen.CalendarScreen
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -148,6 +149,12 @@ fun MainScreen(
 
             composable(BottomNavDestination.Map.route) {
                 MapScreen(
+                    onNavigateToEditNote = onNavigateToEditNote
+                )
+            }
+
+            composable(BottomNavDestination.Calendar.route) {
+                CalendarScreen(
                     onNavigateToEditNote = onNavigateToEditNote
                 )
             }
