@@ -87,7 +87,6 @@ fun CalendarScreenContent(
                     }
                     onSelectDate(LocalDate.now())
                 },
-                modifier = Modifier.padding(bottom = 70.dp) // Bottom Navigation payı
             ) {
                 Icon(Icons.Default.Today, contentDescription = "Bugün")
             }
