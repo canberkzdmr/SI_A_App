@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tag
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.ripple
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -96,6 +97,12 @@ sealed class BottomNavDestination(
         route = "main_tags",
         title = "Tags",
         icon = Icons.Default.Tag
+    )
+    
+    object Map : BottomNavDestination(
+        route = "main_map",
+        title = "Map",
+        icon = Icons.Default.Map
     )
 }
 
@@ -207,7 +214,7 @@ fun BottomNavigationBar(
         TabItem("main_notes", Icons.AutoMirrored.Filled.Note, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_notes)),
         TabItem("main_categories", Icons.Default.Category, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_categories)),
         TabItem("center", Icons.Default.Add, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_create)),
-        TabItem("main_tags", Icons.Default.Tag, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_tags)),
+        TabItem("main_map", Icons.Default.Map, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_map)),
         TabItem("main_profile", Icons.Default.Person, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_profile)),
     )
     

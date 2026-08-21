@@ -23,6 +23,7 @@ import com.cbo.notes.presentation.component.FilterType
 import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
+import com.cbo.notes.presentation.screen.MapScreen
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -142,6 +143,12 @@ fun MainScreen(
                         Log.d("MainScreen", "PS onTagsClicked")
                         navController.navigate(BottomNavDestination.Tags.route)
                     }
+                )
+            }
+
+            composable(BottomNavDestination.Map.route) {
+                MapScreen(
+                    onNavigateToEditNote = onNavigateToEditNote
                 )
             }
 
