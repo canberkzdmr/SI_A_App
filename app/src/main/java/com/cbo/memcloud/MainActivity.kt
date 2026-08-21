@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.theme.MemCloudApplicationTheme
+import com.cbo.memcloud.presentation.screen.ForceUpdateScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -39,12 +40,18 @@ class MainActivity : AppCompatActivity() {
             val effectiveDarkTheme = darkThemeOverride ?: systemDarkTheme
 
             MemCloudApplicationTheme(darkTheme = effectiveDarkTheme) {
-                val navController = rememberNavController()
-                SnackbarHostProvider { padding ->
-                    MainNavHost(
-                        navController = navController,
-                        modifier = Modifier,
-                    )
+                val isForceUpdateRequired = viewModel.isForceUpdateRequired.collectAsStateWithLifecycle().value
+                
+                if (isForceUpdateRequired) {
+                    ForceUpdateScreen()
+                } else {
+                    val navController = rememberNavController()
+                    SnackbarHostProvider { padding ->
+                        MainNavHost(
+                            navController = navController,
+                            modifier = Modifier,
+                        )
+                    }
                 }
             }
         }

@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics.plugin)
 }
 
 android {
@@ -46,6 +48,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -97,4 +100,10 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.config.ktx)
+    implementation(libs.firebase.analytics.ktx)
+    implementation(libs.firebase.crashlytics.ktx)
 }
