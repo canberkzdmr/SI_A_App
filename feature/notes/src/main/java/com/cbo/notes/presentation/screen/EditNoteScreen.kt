@@ -773,7 +773,7 @@ fun EditNoteScreen(
                                     }
                                     TextButton(
                                         onClick = onSave,
-                                        enabled = uiState.title.isNotBlank() && !uiState.isSaving,
+                                        enabled = uiState.canSave,
                                     ) {
                                         if (uiState.isSaving) {
                                             CircularProgressIndicator(
@@ -897,7 +897,7 @@ fun EditNoteScreen(
 
                             val focusRequestContent = remember { FocusRequester() }
 
-                            // Content area: RichTextEditor + TodoListComponent
+                            // Content area: RichTextEditor
                             Box(modifier = Modifier
                                 .weight(1f)
                                 .fillMaxWidth()) {

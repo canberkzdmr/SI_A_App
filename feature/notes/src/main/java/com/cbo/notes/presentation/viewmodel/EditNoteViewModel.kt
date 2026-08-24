@@ -876,7 +876,17 @@ data class EditNoteUiState(
     val todos: List<TodoItem> = emptyList(),
     // Audio recording state
     val isRecording: Boolean = false
-)
+) {
+    val canSave: Boolean
+        get() = !isSaving && (
+            title.isNotBlank() ||
+            content.isNotBlank() ||
+            attachments.isNotEmpty() ||
+            todos.isNotEmpty() ||
+            hasUnsavedChanges ||
+            originalNote != null
+        )
+}
 
 sealed class NavigationEvent {
     object NavigateBack : NavigationEvent()
