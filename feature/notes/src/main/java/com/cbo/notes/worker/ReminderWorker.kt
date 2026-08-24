@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.text.Html
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -17,6 +18,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.cbo.core.database.dao.NoteDao
+import com.cbo.core.database.entity.NoteEntity
 import com.cbo.notes.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -34,6 +36,7 @@ class ReminderWorker @AssistedInject constructor(
     private val noteDao: NoteDao
 ) : CoroutineWorker(context, workerParams) {
 
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun doWork(): Result {
         val noteId = inputData.getInt(KEY_NOTE_ID, -1)
         val noteTitle = inputData.getString(KEY_NOTE_TITLE) ?: "Note Reminder"
@@ -77,7 +80,8 @@ class ReminderWorker @AssistedInject constructor(
         }
     }
     
-    private fun showNotification(note: com.cbo.core.database.entity.NoteEntity, title: String) {
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun showNotification(note: NoteEntity, title: String) {
         val priorityLevel = note.reminderPriority ?: "DEFAULT"
         val channelId = if (priorityLevel == "HIGH") CHANNEL_ID_HIGH else CHANNEL_ID_DEFAULT
         createNotificationChannels()
