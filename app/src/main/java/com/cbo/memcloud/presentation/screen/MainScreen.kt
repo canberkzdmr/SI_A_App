@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.cbo.notes.presentation.component.FilterDetailScreen
 import com.cbo.notes.presentation.component.FilterListScreen
 import com.cbo.notes.presentation.component.FilterType
+import com.cbo.notes.presentation.screen.DashboardScreen
 import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
@@ -75,11 +76,23 @@ fun MainScreen(
         Log.d("MainScreen", "current destination (${navController.currentDestination?.route})")
         NavHost(
             navController = navController,
-            startDestination = BottomNavDestination.Notes.route,
+            startDestination = BottomNavDestination.Dashboard.route,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            composable(BottomNavDestination.Dashboard.route) {
+                DashboardScreen(
+                    onNavigateToCreateNote = onNavigateToCreateNote,
+                    onNavigateToEditNote = onNavigateToEditNote,
+                    onNavigateToSearch = { query ->
+                        // In the future, we can navigate directly to NotesScreen with this query
+                        // For now, navigate to Notes Screen
+                        navController.navigate(BottomNavDestination.Notes.route)
+                    }
+                )
+            }
+            
             composable(BottomNavDestination.Notes.route) {
                 NotesScreen(
                     onNavigateToCreateNote = onNavigateToCreateNote,
