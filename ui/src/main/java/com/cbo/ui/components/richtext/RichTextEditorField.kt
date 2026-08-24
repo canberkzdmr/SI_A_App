@@ -123,7 +123,7 @@ fun RichTextEditorField(
         snapshotFlow { richTextState.annotatedString }
             .map { richTextState.toMarkdown() }
             .distinctUntilChanged()
-            .collectLatest { markdown -> 
+            .collect { markdown ->
                 if (isFocused) {
                     onValueChange(markdown) 
                 }

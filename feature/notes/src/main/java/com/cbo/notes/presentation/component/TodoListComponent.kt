@@ -23,8 +23,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
@@ -49,6 +56,20 @@ fun TodoListComponent(
     onDeleteTodo: (id: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var previousTodos by remember { mutableStateOf(todos.map { it.id }) }
+    var itemToFocus by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(todos) {
+        val currentIds = todos.map { it.id }
+        if (currentIds.size > previousTodos.size) {
+            val newId = currentIds.lastOrNull { it !in previousTodos }
+            if (newId != null) {
+                itemToFocus = newId
+            }
+        }
+        previousTodos = currentIds
+    }
+
     AnimatedVisibility(
         visible = todos.isNotEmpty(),
         enter = expandVertically(animationSpec = tween(300)),
@@ -71,6 +92,12 @@ fun TodoListComponent(
             todos.forEach { item ->
                 TodoItemRow(
                     item = item,
+                    requestFocus = itemToFocus == item.id,
+                    onFocusRequested = {
+                        if (itemToFocus == item.id) {
+                            itemToFocus = null
+                        }
+                    },
                     onCheckedChange = { checked ->
                         onUpdateTodo(item.id, item.text, checked)
                     },
@@ -92,12 +119,23 @@ fun TodoListComponent(
 @Composable
 private fun TodoItemRow(
     item: TodoItem,
+    requestFocus: Boolean,
+    onFocusRequested: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
     onTextChange: (String) -> Unit,
     onDelete: () -> Unit,
     onEnterPressed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(requestFocus) {
+        if (requestFocus) {
+            focusRequester.requestFocus()
+            onFocusRequested()
+        }
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -115,7 +153,9 @@ private fun TodoItemRow(
         BasicTextField(
             value = item.text,
             onValueChange = onTextChange,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(focusRequester),
             textStyle = MaterialTheme.typography.bodyLarge.copy(
                 color = if (item.isDone) 
                     MaterialTheme.colorScheme.onSurfaceVariant 

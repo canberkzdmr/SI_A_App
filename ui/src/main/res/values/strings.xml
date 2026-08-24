@@ -2,10 +2,10 @@
     <string name="nav_notes">Notes</string>
     <string name="nav_categories">Categories</string>
     <string name="nav_tags">Tags</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_calendar">Calendar</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_create">Create</string>
     <string name="phone_number">Enter Phone Number</string>
     <string name="phone_number_error">Phone number must be 10 digits</string>
 </resources>
-
-
