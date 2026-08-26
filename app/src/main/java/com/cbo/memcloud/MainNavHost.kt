@@ -105,6 +105,10 @@ fun MainNavHost(
             onTagsClicked = {
                 Log.d("MainNavHost", "(userNavGraph) Navigated to Tags")
                 navController.navigateToTags()
+            },
+            onNavigateToStatistics = {
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Statistics")
+                navController.navigate(AppDestination.Statistics.route)
             }
         )
 
@@ -157,6 +161,10 @@ fun MainNavHost(
                 },
                 onNavigateToDeletedArchived = { tabId ->
                     navController.navigateToDeletedArchived(tabId)
+                },
+                onNavigateToStatistics = {
+                    Log.d("MainNavHost", "(MainScreen) Navigated to Statistics")
+                    navController.navigate(AppDestination.Statistics.route)
                 }
             )
         }

@@ -54,6 +54,7 @@ fun MainScreen(
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
     onNavigateToDeletedArchived: (tabId: Int) -> Unit,
+    onNavigateToStatistics: () -> Unit,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
@@ -143,6 +144,10 @@ fun MainScreen(
                     onTagsClicked = {
                         Log.d("MainScreen", "PS onTagsClicked")
                         navController.navigate(BottomNavDestination.Tags.route)
+                    },
+                    onStatisticsClicked = {
+                        Log.d("MainScreen", "PS onStatisticsClicked")
+                        onNavigateToStatistics()
                     }
                 )
             }

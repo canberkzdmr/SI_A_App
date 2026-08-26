@@ -65,6 +65,7 @@ dependencies {
     implementation(project(":feature:user"))
     implementation(project(":feature:splash"))
     implementation(project(":feature:notes"))
+    implementation(project(":feature:statistics"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)

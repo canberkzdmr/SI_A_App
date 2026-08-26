@@ -50,4 +50,20 @@ interface TagDao : BaseDao<TagEntity> {
 
     @Query("DELETE FROM tags WHERE id = :id")
     suspend fun deleteById(id: Int)
+
+    /**
+     * Belirli bir tarih aralığında en çok kullanılan etiketi getirir.
+     * Haftalık özet (Weekly Digest) bölümü için kullanılır.
+     */
+    @Query("""
+        SELECT t.* FROM tags t
+        INNER JOIN note_tag_cross_ref ntc ON t.id = ntc.tagId
+        INNER JOIN notes n ON ntc.noteId = n.id
+        WHERE n.userId = :userId AND n.isDeleted = 0
+        AND n.updatedAt >= :sinceTimestamp
+        GROUP BY t.id
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    """)
+    suspend fun getMostUsedTagSince(userId: Int, sinceTimestamp: Long): TagEntity?
 }

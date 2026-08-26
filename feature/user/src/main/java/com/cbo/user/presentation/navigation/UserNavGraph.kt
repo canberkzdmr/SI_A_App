@@ -6,6 +6,7 @@ import com.cbo.user.presentation.screen.EditProfileScreen
 import com.cbo.user.presentation.screen.ProfileScreen
 import com.cbo.user.presentation.screen.ChangePasswordScreen
 import com.cbo.core.navigation.AppDestination
+import com.cbo.statistics.presentation.screen.StatisticsScreen
 import com.cbo.user.presentation.screen.ChangeLanguageScreen
 
 fun NavGraphBuilder.userNavGraph(
@@ -22,6 +23,7 @@ fun NavGraphBuilder.userNavGraph(
     onNotesClicked: () -> Unit = {},
     onCategoriesClicked: () -> Unit = {},
     onTagsClicked: () -> Unit = {},
+    onNavigateToStatistics: () -> Unit = {},
 ) {
     composable(AppDestination.Profile.route) {
         ProfileScreen(
@@ -33,7 +35,12 @@ fun NavGraphBuilder.userNavGraph(
             onNotesClicked = { onNotesClicked() },
             onCategoriesClicked = { onCategoriesClicked() },
             onTagsClicked = { onTagsClicked() },
+            onStatisticsClicked = { onNavigateToStatistics() },
         )
+    }
+
+    composable(AppDestination.Statistics.route) {
+        StatisticsScreen(onNavigateBack = { onNavigateBack() })
     }
 
     composable(AppDestination.EditProfile.route) {

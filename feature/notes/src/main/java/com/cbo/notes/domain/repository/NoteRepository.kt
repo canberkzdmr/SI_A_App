@@ -1,6 +1,7 @@
 package com.cbo.notes.domain.repository
 
 import com.cbo.notes.domain.model.Note
+import com.cbo.notes.domain.model.NoteStatistics
 import kotlinx.coroutines.flow.Flow
 
 interface NoteRepository {
@@ -66,4 +67,14 @@ interface NoteRepository {
     
     /** Gets all notes with active location reminders */
     suspend fun getNotesWithActiveLocationReminders(): List<Note>
+
+    // -------------------------------------------------------------------------
+    // Statistics
+    // -------------------------------------------------------------------------
+
+    /**
+     * Kullanıcıya ait tüm istatistikleri tek seferde hesaplayıp döndürür.
+     * Paralel coroutine'lerle tüm DAO sorgularını çalıştırır.
+     */
+    suspend fun getNoteStatistics(userId: Int): NoteStatistics
 }

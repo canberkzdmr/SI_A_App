@@ -18,4 +18,5 @@ sealed class AppDestination(val route: String) {
     object ChangeLanguage : AppDestination("change_language")
     object Splash: AppDestination("splash")
     object Main: AppDestination("main")
+    object Statistics: AppDestination("statistics")
 }

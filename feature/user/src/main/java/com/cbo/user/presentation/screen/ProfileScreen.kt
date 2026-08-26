@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Note
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -83,6 +84,7 @@ fun ProfileScreen(
     onNotesClicked: () -> Unit = {},
     onCategoriesClicked: () -> Unit = {},
     onTagsClicked: () -> Unit = {},
+    onStatisticsClicked: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val user by viewModel.currentUser.collectAsState("")
@@ -120,6 +122,7 @@ fun ProfileScreen(
         onManageCategories = { onCategoriesClicked() },
         onManageTags = { onTagsClicked() },
         onExportNotes = {},
+        onStatisticsClicked = { onStatisticsClicked() },
         onEnableBiometrics = viewModel::toggleBiometrics,
         onContactSupport = {},
     )
@@ -139,6 +142,7 @@ fun ProfileScreenContent(
     onManageCategories: () -> Unit,
     onManageTags: () -> Unit,
     onExportNotes: () -> Unit,
+    onStatisticsClicked: () -> Unit,
     onEnableBiometrics: () -> Unit,
     onContactSupport: () -> Unit,
 ) {
@@ -170,6 +174,7 @@ fun ProfileScreenContent(
                 Icons.AutoMirrored.Filled.Note to R.string.my_notes,
                 Icons.Default.Category to R.string.manage_categories,
                 Icons.Default.Tag to R.string.manage_tags,
+                Icons.Default.BarChart to R.string.statistics,
                 Icons.Default.UploadFile to R.string.export_notes,
             ),
             R.string.section_security to listOf(
@@ -330,6 +335,7 @@ fun ProfileScreenContent(
                                     R.string.language -> onLanguageChange()
                                     R.string.manage_categories -> onManageCategories()
                                     R.string.manage_tags -> onManageTags()
+                                    R.string.statistics -> onStatisticsClicked()
                                     R.string.export_notes -> onExportNotes()
                                     R.string.enable_biometrics -> onEnableBiometrics()
                                     R.string.contact_support -> onContactSupport()
@@ -423,6 +429,7 @@ fun ProfileScreenPreview() {
             onManageCategories = {},
             onManageTags = {},
             onExportNotes = {},
+            onStatisticsClicked = {},
             onEnableBiometrics = {},
             onContactSupport = {},
         )
