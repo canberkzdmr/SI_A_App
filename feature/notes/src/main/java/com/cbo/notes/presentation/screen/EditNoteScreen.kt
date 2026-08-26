@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Mic
@@ -221,6 +222,7 @@ fun EditNoteScreen(
         onSetReminder = viewModel::setReminder,
         onSetLocationReminder = viewModel::setLocationReminder,
         onRemoveReminder = viewModel::removeReminder,
+        onRemoveLocationReminder = viewModel::removeLocationReminder,
         onShowTemplateSelector = viewModel::showTemplateSelector,
         onApplyTemplate = viewModel::applyTemplate,
         onCreateTemplate = viewModel::createTemplate,
@@ -520,6 +522,7 @@ fun EditNoteScreen(
     onSetReminder: (Long, com.cbo.notes.domain.model.ReminderRepeat, com.cbo.notes.domain.model.ReminderPriority) -> Unit = { _, _, _ -> },
     onSetLocationReminder: (Double, Double, String, Boolean) -> Unit = { _, _, _, _ -> },
     onRemoveReminder: () -> Unit = {},
+    onRemoveLocationReminder: () -> Unit = {},
     onShowTemplateSelector: () -> Unit = {},
     onApplyTemplate: (NoteTemplate) -> Unit = {},
     onCreateTemplate: (String, String) -> Unit = { _, _ -> },
@@ -890,6 +893,15 @@ fun EditNoteScreen(
                                                 contentDescription = "Location Reminder",
                                                 modifier = Modifier.size(16.dp)
                                             )
+                                        },
+                                        trailingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Clear,
+                                                contentDescription = "Remove Location",
+                                                modifier = Modifier
+                                                    .size(16.dp)
+                                                    .clickable { onRemoveLocationReminder() }
+                                            )
                                         }
                                     )
                                 }
@@ -1165,6 +1177,9 @@ fun EditNoteScreen(
 
     if (showLocationPicker) {
         com.cbo.notes.presentation.component.LocationPickerDialog(
+            initialLatitude = uiState.reminderLatitude,
+            initialLongitude = uiState.reminderLongitude,
+            initialIsReminder = uiState.isLocationReminderEnabled,
             onDismissRequest = { showLocationPicker = false },
             onLocationSelected = { lat, lng, name, isReminder ->
                 onSetLocationReminder(lat, lng, name, isReminder)

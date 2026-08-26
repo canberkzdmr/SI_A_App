@@ -44,11 +44,32 @@ class CalendarViewModel @Inject constructor(
                     !it.isDeleted && it.reminderTime != null 
                 }
                 
-                // Notları LocalDate'e göre grupla
-                val groupedNotes = reminders.groupBy { note ->
-                    Instant.ofEpochMilli(note.reminderTime!!)
+                val groupedNotes = mutableMapOf<LocalDate, MutableList<Note>>()
+                val today = LocalDate.now()
+                val minDate = today.minusYears(8)
+                val maxDate = today.plusYears(8)
+
+                reminders.forEach { note ->
+                    val startDate = Instant.ofEpochMilli(note.reminderTime!!)
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate()
+
+                    var currentDate = startDate
+                    val limitDate = if (startDate.isAfter(maxDate)) startDate else maxDate
+
+                    while (!currentDate.isAfter(limitDate)) {
+                        if (!currentDate.isBefore(minDate)) {
+                            groupedNotes.getOrPut(currentDate) { mutableListOf() }.add(note)
+                        }
+
+                        currentDate = when (note.reminderRepeat) {
+                            com.cbo.notes.domain.model.ReminderRepeat.NONE -> limitDate.plusDays(1)
+                            com.cbo.notes.domain.model.ReminderRepeat.DAILY -> currentDate.plusDays(1)
+                            com.cbo.notes.domain.model.ReminderRepeat.WEEKLY -> currentDate.plusWeeks(1)
+                            com.cbo.notes.domain.model.ReminderRepeat.MONTHLY -> currentDate.plusMonths(1)
+                            com.cbo.notes.domain.model.ReminderRepeat.YEARLY -> currentDate.plusYears(1)
+                        }
+                    }
                 }
 
                 _uiState.update { state ->

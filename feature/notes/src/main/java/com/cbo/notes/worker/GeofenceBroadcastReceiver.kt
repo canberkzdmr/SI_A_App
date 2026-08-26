@@ -25,11 +25,18 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             triggeringGeofences?.forEach { geofence ->
                 val noteId = geofence.requestId.toIntOrNull()
                 if (noteId != null) {
-                    Log.d(TAG, "Entered geofence for note: $noteId")
-                    // Note: Ideally, we should fetch the note title from DB here.
-                    // For now, we will trigger a notification with a generic message or enqueue a Worker
-                    // to fetch the details and show notification. Let's trigger a one-time worker immediately.
-                    triggerNotificationWorker(context, noteId)
+                    val prefs = context.getSharedPreferences("geofence_prefs", Context.MODE_PRIVATE)
+                    val lastTrigger = prefs.getLong("last_trigger_$noteId", 0L)
+                    val now = System.currentTimeMillis()
+                    
+                    // 10 dakika (600,000 ms) debounce süresi ile jitter önleniyor.
+                    if (now - lastTrigger > 10 * 60 * 1000) {
+                        prefs.edit().putLong("last_trigger_$noteId", now).apply()
+                        Log.d(TAG, "Entered geofence for note: $noteId")
+                        triggerNotificationWorker(context, noteId)
+                    } else {
+                        Log.d(TAG, "Geofence debounce active for note: $noteId, ignoring trigger.")
+                    }
                 }
             }
         }

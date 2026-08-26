@@ -59,10 +59,10 @@ class ReminderWorker @AssistedInject constructor(
             // Use the title from the database to ensure it's up to date
             val currentTitle = note.title
             
-            // Show the notification
-            showNotification(note, currentTitle)
-            
             val triggerType = inputData.getString("trigger_type") ?: "TIME"
+            
+            // Show the notification
+            showNotification(note, currentTitle, triggerType)
             
             // Handle repeat or clear only for time-based triggers
             if (triggerType == "TIME") {
@@ -81,7 +81,7 @@ class ReminderWorker @AssistedInject constructor(
     }
     
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    private fun showNotification(note: NoteEntity, title: String) {
+    private fun showNotification(note: NoteEntity, title: String, triggerType: String) {
         val priorityLevel = note.reminderPriority ?: "DEFAULT"
         val channelId = if (priorityLevel == "HIGH") CHANNEL_ID_HIGH else CHANNEL_ID_DEFAULT
         createNotificationChannels()
@@ -138,15 +138,27 @@ class ReminderWorker @AssistedInject constructor(
         // Build and show the notification
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_notification_reminder)
-            .setContentTitle(title)
+            .setContentTitle(if (triggerType == "LOCATION") "📍 $title" else title)
             .setContentText(plainTextContent.take(100).let { if (plainTextContent.length > 100) "$it..." else it })
             .setStyle(NotificationCompat.BigTextStyle().bigText(plainTextContent.take(300)))
             .setPriority(if (priorityLevel == "HIGH") NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .addAction(0, "15 Dk Ertele", snooze15Pending)
-            .addAction(0, "1 Saat Ertele", snooze60Pending)
+            
+        if (triggerType == "LOCATION") {
+            val turnOffIntent = Intent(context, SnoozeReceiver::class.java).apply {
+                action = SnoozeReceiver.ACTION_TURN_OFF_LOCATION_REMINDER
+                putExtra(EXTRA_NOTE_ID, note.id)
+            }
+            val turnOffPending = PendingIntent.getBroadcast(
+                context, note.id * 10 + 3, turnOffIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.addAction(0, "Bildirimini iptal et", turnOffPending)
+        } else {
+            builder.addAction(0, "15 Dk Ertele", snooze15Pending)
+            builder.addAction(0, "1 Saat Ertele", snooze60Pending)
+        }
             
         if (priorityLevel == "LOW") {
             builder.setSilent(true)

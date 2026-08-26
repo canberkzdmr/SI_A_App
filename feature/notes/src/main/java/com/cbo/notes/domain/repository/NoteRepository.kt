@@ -60,4 +60,10 @@ interface NoteRepository {
     
     /** Gets notes with reminders scheduled between the specified times */
     suspend fun getNotesWithRemindersBetween(startTime: Long, endTime: Long): List<Note>
+    
+    /** Enables or disables the location reminder for a note */
+    suspend fun setLocationReminderEnabled(noteId: Int, isEnabled: Boolean): Result<Unit>
+    
+    /** Gets all notes with active location reminders */
+    suspend fun getNotesWithActiveLocationReminders(): List<Note>
 }

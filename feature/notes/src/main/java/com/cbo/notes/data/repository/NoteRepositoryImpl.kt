@@ -367,4 +367,26 @@ class NoteRepositoryImpl @Inject constructor(
             emptyList()
         }
     }
+
+    override suspend fun setLocationReminderEnabled(noteId: Int, isEnabled: Boolean): Result<Unit> {
+        return try {
+            noteDao.updateLocationReminderEnabled(noteId, isEnabled)
+            Log.d("NoteRepositoryImpl", "Location reminder for note $noteId set to $isEnabled")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error setting location reminder: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getNotesWithActiveLocationReminders(): List<Note> {
+        return try {
+            noteDao.getNotesWithActiveLocationReminders().map { 
+                noteEntityMapper.toDomain(it) 
+            }
+        } catch (e: Exception) {
+            Log.e("NoteRepositoryImpl", "Error getting notes with active location reminders: ${e.message}")
+            emptyList()
+        }
+    }
 }

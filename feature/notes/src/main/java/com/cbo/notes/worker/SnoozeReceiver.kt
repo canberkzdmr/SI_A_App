@@ -24,7 +24,27 @@ class SnoozeReceiver : BroadcastReceiver() {
     @Inject
     lateinit var noteDao: NoteDao
 
+    @Inject
+    lateinit var locationReminderManager: LocationReminderManager
+
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == ACTION_TURN_OFF_LOCATION_REMINDER) {
+            val noteId = intent.getIntExtra(ReminderWorker.EXTRA_NOTE_ID, -1)
+            if (noteId != -1) {
+                NotificationManagerCompat.from(context).cancel(noteId)
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        noteDao.updateLocationReminderEnabled(noteId, false)
+                        locationReminderManager.removeLocationReminder(noteId)
+                        Log.d("SnoozeReceiver", "Turned off location reminder for note \$noteId")
+                    } catch (e: Exception) {
+                        Log.e("SnoozeReceiver", "Error turning off location reminder", e)
+                    }
+                }
+            }
+            return
+        }
+
         if (intent.action != ACTION_SNOOZE) return
 
         val noteId = intent.getIntExtra(ReminderWorker.EXTRA_NOTE_ID, -1)
@@ -75,6 +95,7 @@ class SnoozeReceiver : BroadcastReceiver() {
 
     companion object {
         const val ACTION_SNOOZE = "com.cbo.notes.action.SNOOZE"
+        const val ACTION_TURN_OFF_LOCATION_REMINDER = "com.cbo.notes.action.TURN_OFF_LOCATION_REMINDER"
         const val EXTRA_SNOOZE_MINUTES = "extra_snooze_minutes"
     }
 }

@@ -513,12 +513,20 @@ class EditNoteViewModel @Inject constructor(
                 reminderTime = null, 
                 reminderRepeat = ReminderRepeat.NONE,
                 reminderPriority = ReminderPriority.DEFAULT,
+                hasUnsavedChanges = true,
+                showReminderDialog = false
+            ) 
+        }
+    }
+
+    fun removeLocationReminder() {
+        _uiState.update { 
+            it.copy(
                 reminderLatitude = null,
                 reminderLongitude = null,
                 reminderLocationName = null,
                 reminderRadius = null,
                 isLocationReminderEnabled = false,
-                showReminderDialog = false,
                 hasUnsavedChanges = true
             ) 
         }

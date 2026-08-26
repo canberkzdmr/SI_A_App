@@ -114,8 +114,14 @@ interface NoteDao : BaseDao<NoteEntity> {
         updatedAt: Long = System.currentTimeMillis()
     )
 
-    @Query("SELECT * FROM notes WHERE reminderTime IS NOT NULL AND reminderTime > :currentTime AND isDeleted = 0 ORDER BY reminderTime ASC")
+    @Query("SELECT * FROM notes WHERE ((reminderTime IS NOT NULL AND reminderTime > :currentTime) OR isLocationReminderEnabled = 1) AND isDeleted = 0 ORDER BY reminderTime ASC")
     fun getNotesWithActiveReminders(currentTime: Long = System.currentTimeMillis()): Flow<List<NoteEntity>>
+
+    @Query("UPDATE notes SET isLocationReminderEnabled = :isEnabled, updatedAt = :updatedAt WHERE id = :noteId")
+    suspend fun updateLocationReminderEnabled(noteId: Int, isEnabled: Boolean, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("SELECT * FROM notes WHERE isLocationReminderEnabled = 1 AND isDeleted = 0")
+    suspend fun getNotesWithActiveLocationReminders(): List<NoteEntity>
 
     @Query("SELECT * FROM notes WHERE id = :noteId AND reminderTime IS NOT NULL")
     suspend fun getNoteWithReminder(noteId: Int): NoteEntity?

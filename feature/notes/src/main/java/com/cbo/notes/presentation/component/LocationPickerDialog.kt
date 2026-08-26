@@ -32,6 +32,9 @@ import kotlinx.coroutines.launch
 @SuppressLint("MissingPermission")
 @Composable
 fun LocationPickerDialog(
+    initialLatitude: Double? = null,
+    initialLongitude: Double? = null,
+    initialIsReminder: Boolean = false,
     onDismissRequest: () -> Unit,
     onLocationSelected: (latitude: Double, longitude: Double, locationName: String, isReminder: Boolean) -> Unit,
     viewModel: LocationSearchViewModel = hiltViewModel()
@@ -44,20 +47,32 @@ fun LocationPickerDialog(
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     val isSearching by viewModel.isLoading.collectAsStateWithLifecycle()
 
-    var selectedLocation by remember { mutableStateOf<LatLng?>(null) }
+    var selectedLocation by remember { 
+        mutableStateOf(
+            if (initialLatitude != null && initialLongitude != null) 
+                LatLng(initialLatitude, initialLongitude) 
+            else null
+        ) 
+    }
     var locationName by remember { mutableStateOf("Seçilen Konum") }
-    var isReminder by remember { mutableStateOf(false) }
+    var isReminder by remember { mutableStateOf(initialIsReminder) }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(39.92077, 32.85411), 6f) // Default to Turkey
+        position = if (initialLatitude != null && initialLongitude != null) {
+            CameraPosition.fromLatLngZoom(LatLng(initialLatitude, initialLongitude), 15f)
+        } else {
+            CameraPosition.fromLatLngZoom(LatLng(39.92077, 32.85411), 6f) // Default to Turkey
+        }
     }
 
     LaunchedEffect(Unit) {
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                val latLng = LatLng(location.latitude, location.longitude)
-                selectedLocation = latLng
-                cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
+        if (selectedLocation == null) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    selectedLocation = latLng
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
+                }
             }
         }
     }

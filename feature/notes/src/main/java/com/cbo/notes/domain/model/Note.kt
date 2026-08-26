@@ -29,8 +29,11 @@ data class Note(
     val color: String? = null,
     val todos: List<TodoItem> = emptyList()
 ) {
-    /** Returns true if this note has an active reminder set for the future */
-    fun hasActiveReminder(): Boolean = reminderTime != null && reminderTime > System.currentTimeMillis()
+    /** Returns true if this note has an active reminder set for the future or an active location reminder */
+    fun hasActiveReminder(): Boolean = (reminderTime != null && reminderTime > System.currentTimeMillis()) || isLocationReminderEnabled
+
+    /** Returns true if this note has an active location reminder */
+    fun hasActiveLocationReminder(): Boolean = isLocationReminderEnabled
 
     /** Returns true if the reminder time has passed */
     fun isReminderExpired(): Boolean = reminderTime != null && reminderTime <= System.currentTimeMillis()

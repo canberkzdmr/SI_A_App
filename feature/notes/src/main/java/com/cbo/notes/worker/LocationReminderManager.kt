@@ -79,6 +79,11 @@ class LocationReminderManager @Inject constructor(
                 Log.e(TAG, "Failed to remove geofence for note $noteId", it)
             }
         }
+        try {
+            androidx.core.app.NotificationManagerCompat.from(context).cancel(noteId)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to cancel notification for note $noteId", e)
+        }
     }
 
     companion object {
