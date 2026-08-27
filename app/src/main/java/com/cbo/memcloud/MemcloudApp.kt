@@ -89,7 +89,6 @@ fun MemcloudApp(
                                         launchSingleTop = true
                                     }
                                 }
-                                // Search functionality not yet fully implemented
                             }
                             isBottomNavExpanded = false
                         }

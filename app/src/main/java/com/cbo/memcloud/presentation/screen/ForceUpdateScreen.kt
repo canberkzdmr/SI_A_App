@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,7 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.cbo.memcloud.R
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -46,7 +49,7 @@ fun ForceUpdateScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(32.dp))
             
             Text(
-                text = "Güncelleme Gerekli",
+                text = stringResource(id = R.string.update_required_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -54,7 +57,7 @@ fun ForceUpdateScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "Uygulamanın yeni bir sürümü mevcut. Kullanmaya devam edebilmek için lütfen uygulamayı güncelleyin.",
+                text = stringResource(id = R.string.update_required_desc),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -70,9 +73,10 @@ fun ForceUpdateScreen(modifier: Modifier = Modifier) {
                     } catch (e: ActivityNotFoundException) {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Şimdi Güncelle")
+                Text(text = stringResource(id = R.string.update_required_button))
             }
         }
     }

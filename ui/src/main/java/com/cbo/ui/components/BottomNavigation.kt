@@ -573,7 +573,7 @@ fun CenterActionOptions(
     val centerOptions = listOf(
         CenterOption("categories", Icons.Default.Category, "Categories", Color(0xFFFF6B6B)),
         CenterOption("tags", Icons.Default.Tag, "Tags", Color(0xFF4ECDC4)),
-        CenterOption("search", Icons.Default.Search, "Search", Color(0xFF45B7D1)),
+
         CenterOption("create_note", Icons.Default.Edit, "New Note", Color(0xFF7E57C2)),
     )
 
