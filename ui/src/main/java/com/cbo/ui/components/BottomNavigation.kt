@@ -77,37 +77,37 @@ sealed class BottomNavDestination(
     val icon: ImageVector
 ) {
     object Notes : BottomNavDestination(
-        route = "main_notes",
+        route = "notes",
         title = "Notes",
         icon = Icons.AutoMirrored.Filled.Note
     )
     
     object Categories : BottomNavDestination(
-        route = "main_categories", 
+        route = "categories", 
         title = "Categories",
         icon = Icons.Default.Category
     )
     
     object Calendar : BottomNavDestination(
-        route = "main_calendar", 
+        route = "calendar", 
         title = "Calendar",
         icon = Icons.Default.CalendarMonth
     )
     
     object Profile : BottomNavDestination(
-        route = "main_profile",
+        route = "profile",
         title = "Profile", 
         icon = Icons.Default.Person
     )
 
     object Tags : BottomNavDestination(
-        route = "main_tags",
+        route = "tags",
         title = "Tags",
         icon = Icons.Default.Tag
     )
     
     object Map : BottomNavDestination(
-        route = "main_map",
+        route = "map",
         title = "Map",
         icon = Icons.Default.Map
     )
@@ -146,7 +146,7 @@ fun AppBottomNavigation(
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry.value?.destination
 
-    val currentRoute = currentDestination?.route ?: "main_notes"
+    val currentRoute = currentDestination?.route?.substringBefore("?")?.substringBefore("/") ?: "notes"
 
     BottomNavigationBar(
         activeRoute = currentRoute,
@@ -156,7 +156,7 @@ fun AppBottomNavigation(
                 onExpandedChange(!isExpanded)
             } else {
                 navController.navigate(route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
+                        popUpTo("notes") {
                             saveState = true
                         }
                         launchSingleTop = true
@@ -218,11 +218,11 @@ fun BottomNavigationBar(
     showCenterButton: Boolean = true
 ) {
     val mainTabs = listOf(
-        TabItem("main_notes", Icons.AutoMirrored.Filled.Note, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_notes)),
-        TabItem("main_calendar", Icons.Default.CalendarMonth, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_calendar)),
+        TabItem("notes", Icons.AutoMirrored.Filled.Note, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_notes)),
+        TabItem("calendar", Icons.Default.CalendarMonth, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_calendar)),
         TabItem("center", Icons.Default.Add, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_create)),
-        TabItem("main_map", Icons.Default.Map, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_map)),
-        TabItem("main_profile", Icons.Default.Person, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_profile)),
+        TabItem("map", Icons.Default.Map, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_map)),
+        TabItem("profile", Icons.Default.Person, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_profile)),
     )
     
     // Find the index of the active tab (excluding center button)
@@ -237,17 +237,18 @@ fun BottomNavigationBar(
         else -> activeTabIndex
     }
     
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 8.dp
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(bottom = 8.dp)
-                .fillMaxWidth(),
-            contentAlignment = Alignment.TopEnd
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 8.dp
         ) {
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopEnd
+            ) {
             HorizontalDivider(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -289,19 +290,7 @@ fun BottomNavigationBar(
                 }
             }
 
-            // Overlay the center FAB so it doesn't affect the bar height
-            if (showCenterButton) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .zIndex(1f)
-                ) {
-                    CenterButton(
-                        isExpanded = isExpanded,
-                        onClick = { onTabClick("center") }
-                    )
-                }
-            }
+            // CenterButton moved outside Surface
             
             // Sliding indicator - show for all non-center tabs
             if (activeTabIndex >= 0) {
@@ -311,6 +300,21 @@ fun BottomNavigationBar(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 4.dp)
+                )
+            }
+            }
+        }
+        
+        // Overlay the center FAB outside the Surface so it can overflow without being clipped
+        if (showCenterButton) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .zIndex(1f)
+            ) {
+                CenterButton(
+                    isExpanded = isExpanded,
+                    onClick = { onTabClick("center") }
                 )
             }
         }
@@ -630,7 +634,7 @@ fun CenterActionOptions(
 private fun BottomNavigationBarPreview() {
     MaterialTheme {
         BottomNavigationBar(
-            activeRoute = "main_notes",
+            activeRoute = "notes",
             isExpanded = false,
             onTabClick = {}
         )
@@ -642,7 +646,7 @@ private fun BottomNavigationBarPreview() {
 private fun BottomNavigationBarExpandedPreview() {
     MaterialTheme {
         BottomNavigationBar(
-            activeRoute = "main_notes",
+            activeRoute = "notes",
             isExpanded = true,
             onTabClick = {}
         )
@@ -655,7 +659,7 @@ private fun NavigationTabActivePreview() {
     MaterialTheme {
         Surface {
             NavigationTab(
-                tab = TabItem("main_notes", Icons.AutoMirrored.Filled.Note, "Notes"),
+                tab = TabItem("notes", Icons.AutoMirrored.Filled.Note, "Notes"),
                 isActive = true,
                 onClick = {}
             )
@@ -669,7 +673,7 @@ private fun NavigationTabInactivePreview() {
     MaterialTheme {
         Surface {
             NavigationTab(
-                tab = TabItem("main_profile", Icons.Default.Person, "Profile"),
+                tab = TabItem("profile", Icons.Default.Person, "Profile"),
                 isActive = false,
                 onClick = {}
             )
@@ -764,7 +768,7 @@ private fun BottomNavigationOverlayPreview() {
 private fun BottomNavigationBarDarkPreview() {
     MaterialTheme {
         BottomNavigationBar(
-            activeRoute = "main_categories",
+            activeRoute = "categories",
             isExpanded = false,
             onTabClick = {}
         )

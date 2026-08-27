@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.cbo.notes.presentation.component.FilterDetailScreen
 import com.cbo.notes.presentation.component.FilterListScreen
@@ -16,6 +17,11 @@ import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
 import com.cbo.notes.presentation.screen.toTabIndex
 import com.cbo.notes.presentation.viewmodel.DeleteArchiveMode
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import com.cbo.notes.presentation.viewmodel.NotesViewModel
 
 const val NOTES_ROUTE = "notes"
 const val CREATE_NOTE_ROUTE = "create_note"
@@ -25,6 +31,8 @@ const val TAGS_ROUTE = "tags"
 const val DELETED_ARCHIVED_ROUTE = "deleted_archived"
 const val FILTER_LIST_ROUTE = "filter_list"
 const val FILTER_DETAIL_ROUTE = "filter_detail"
+const val CALENDAR_ROUTE = "calendar"
+const val MAP_ROUTE = "map"
 
 fun NavController.navigateToNotes(navOptions: NavOptions? = null) {
     this.navigate(NOTES_ROUTE, navOptions)
@@ -63,6 +71,7 @@ fun NavController.navigateToFilterDetail(filterType: String, navOptions: NavOpti
 }
 
 fun NavGraphBuilder.notesGraph(
+    navController: NavController,
     onNavigateBack: () -> Unit,
     onNavigateToCreateNote: () -> Unit,
     onNavigateToEditNote: (noteId: Int) -> Unit,
@@ -72,25 +81,93 @@ fun NavGraphBuilder.notesGraph(
     onNavigateToDeletedArchived: (tabId: Int) -> Unit,
     onOpenNotesForCategory: (Int) -> Unit,
 ) {
-    composable(
-        route = "$NOTES_ROUTE?categoryId={categoryId}",
-        arguments = listOf(
-            navArgument("categoryId") {
-                type = NavType.IntType
-                defaultValue = -1
+    navigation(
+        route = "notes_flow",
+        startDestination = "$NOTES_ROUTE?categoryId={categoryId}"
+    ) {
+        composable(
+            route = "$NOTES_ROUTE?categoryId={categoryId}",
+            arguments = listOf(
+                navArgument("categoryId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val categoryArg = backStackEntry.arguments?.getInt("categoryId") ?: -1
+            val initialCategoryId = if (categoryArg != -1) categoryArg else null
+            NotesScreen(
+                onNavigateToCreateNote = onNavigateToCreateNote,
+                onNavigateToEditNote = onNavigateToEditNote,
+                onNavigateToCategories = onNavigateToCategories,
+                onNavigateToDeletedArchived = onNavigateToDeletedArchived,
+                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToFilters = {
+                    navController.navigateToFilterList()
+                },
+                initialCategoryId = initialCategoryId,
+            )
+        }
+
+        composable(FILTER_LIST_ROUTE) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("notes_flow")
             }
-        )
-    ) { backStackEntry ->
-        val categoryArg = backStackEntry.arguments?.getInt("categoryId") ?: -1
-        val initialCategoryId = if (categoryArg != -1) categoryArg else null
-        NotesScreen(
-            onNavigateToCreateNote = onNavigateToCreateNote,
-            onNavigateToEditNote = onNavigateToEditNote,
-            onNavigateToCategories = onNavigateToCategories,
-            onNavigateToDeletedArchived = onNavigateToDeletedArchived,
-            onNavigateToSettings = onNavigateToSettings,
-            initialCategoryId = initialCategoryId,
-        )
+            val notesViewModel: NotesViewModel = hiltViewModel(parentEntry)
+            val uiState by notesViewModel.uiState.collectAsStateWithLifecycle()
+
+            FilterListScreen(
+                selectedCategories = uiState.selectedCategories,
+                selectedTags = uiState.selectedTags,
+                filterPinned = uiState.filterPinned,
+                filterFavorites = uiState.filterFavorites,
+                onNavigateBack = { navController.popBackStack() },
+                onFilterTypeClick = { filterType ->
+                    navController.navigateToFilterDetail(filterType.name)
+                },
+                onPinnedToggle = { notesViewModel.toggleFilterPinned() },
+                onFavoritesToggle = { notesViewModel.toggleFilterFavorites() },
+                onClearAllFilters = {
+                    notesViewModel.clearFilters()
+                }
+            )
+        }
+
+        composable(
+            route = "$FILTER_DETAIL_ROUTE/{filterType}",
+            arguments = listOf(
+                navArgument("filterType") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val filterTypeArg = backStackEntry.arguments?.getString("filterType") ?: FilterType.CATEGORY.name
+            val filterType = FilterType.valueOf(filterTypeArg)
+
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("notes_flow")
+            }
+            val notesViewModel: NotesViewModel = hiltViewModel(parentEntry)
+            val uiState by notesViewModel.uiState.collectAsStateWithLifecycle()
+
+            FilterDetailScreen(
+                filterType = filterType,
+                categories = uiState.categories,
+                tags = uiState.tags,
+                selectedCategories = uiState.selectedCategories,
+                selectedTags = uiState.selectedTags,
+                onCategoryToggled = { category ->
+                    notesViewModel.toggleCategory(category)
+                },
+                onTagToggled = { tag ->
+                    notesViewModel.toggleTag(tag)
+                },
+                onApply = {
+                    navController.popBackStack()
+                },
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 
     composable(route = CREATE_NOTE_ROUTE) {

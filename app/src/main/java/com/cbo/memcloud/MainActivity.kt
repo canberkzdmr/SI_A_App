@@ -10,9 +10,9 @@ import androidx.core.view.WindowCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cbo.ui.snackbar.SnackbarHostProvider
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.cbo.memcloud.presentation.screen.ForceUpdateScreen
+import com.cbo.memcloud.MemcloudApp
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -45,13 +45,7 @@ class MainActivity : AppCompatActivity() {
                 if (isForceUpdateRequired) {
                     ForceUpdateScreen()
                 } else {
-                    val navController = rememberNavController()
-                    SnackbarHostProvider { padding ->
-                        MainNavHost(
-                            navController = navController,
-                            modifier = Modifier,
-                        )
-                    }
+                    MemcloudApp()
                 }
             }
         }

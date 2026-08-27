@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.cbo.core.navigation.AppDestination
 import com.cbo.login.presentation.navigation.loginNavGraph
-import com.cbo.memcloud.presentation.screen.MainScreen
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.cbo.notes.presentation.navigation.navigateToCategories
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
 import com.cbo.notes.presentation.navigation.navigateToDeletedArchived
@@ -18,6 +18,11 @@ import com.cbo.notes.presentation.navigation.navigateToTags
 import com.cbo.notes.presentation.navigation.notesGraph
 import com.cbo.splash.splashNavGraph
 import com.cbo.user.presentation.navigation.userNavGraph
+import com.cbo.notes.presentation.screen.CalendarScreen
+import com.cbo.notes.presentation.screen.MapScreen
+import com.cbo.notes.presentation.navigation.NOTES_ROUTE
+import com.cbo.notes.presentation.navigation.CATEGORIES_ROUTE
+import com.cbo.notes.presentation.navigation.TAGS_ROUTE
 
 @Composable
 fun MainNavHost(
@@ -31,8 +36,8 @@ fun MainNavHost(
     ) {
         loginNavGraph(
             onLoginSuccess = {
-                navController.navigate(AppDestination.Main.route) {
-                    popUpTo(0) { inclusive = true }
+                navController.navigate(NOTES_ROUTE) {
+                    popUpTo(navController.graph.id) { inclusive = true }
                     launchSingleTop = true
                 }
             },
@@ -43,8 +48,8 @@ fun MainNavHost(
             },
 
             onRegisterSuccess = { _ ->
-                navController.navigate(AppDestination.Main.route) {
-                    popUpTo(0) { inclusive = true }
+                navController.navigate(NOTES_ROUTE) {
+                    popUpTo(navController.graph.id) { inclusive = true }
                     launchSingleTop = true
                 }
             }
@@ -95,16 +100,26 @@ fun MainNavHost(
                 Log.d("MainNavHost", "(userNavGraph) Delete Account clicked")
             },
             onNotesClicked = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Main")
-                navController.navigate(AppDestination.Main.route)
+                Log.d("MainNavHost", "(userNavGraph) Navigated to Notes")
+                navController.navigate(NOTES_ROUTE) {
+                    popUpTo(NOTES_ROUTE) {
+                        this.saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
             },
             onCategoriesClicked = {
                 Log.d("MainNavHost", "(userNavGraph) Navigated to Categories")
-                navController.navigateToCategories()
+                navController.navigate(CATEGORIES_ROUTE) {
+                    launchSingleTop = true
+                }
             },
             onTagsClicked = {
                 Log.d("MainNavHost", "(userNavGraph) Navigated to Tags")
-                navController.navigateToTags()
+                navController.navigate(TAGS_ROUTE) {
+                    launchSingleTop = true
+                }
             },
             onNavigateToStatistics = {
                 Log.d("MainNavHost", "(userNavGraph) Navigated to Statistics")
@@ -115,61 +130,36 @@ fun MainNavHost(
         splashNavGraph(
             onNavigateToLogin = {
                 navController.navigate(AppDestination.Login.createRoute()) {
-                    popUpTo(0) { inclusive = true }
+                    popUpTo(navController.graph.id) { inclusive = true }
                     launchSingleTop = true
                 }
             },
             onNavigateToMain = {
-                navController.navigate(AppDestination.Main.route) {
+                navController.navigate(NOTES_ROUTE) {
                     popUpTo(AppDestination.Login.route) { inclusive = true }
                     launchSingleTop = true
                 }
             }
         )
 
-        // Main screen with bottom navigation
-        composable(AppDestination.Main.route) {
-            Log.d("MainNavHost", "Main Screen navigation called")
-            MainScreen(
-                onLogOut = {
-                    navController.navigate(AppDestination.Login.createRoute()) {
-                        // clear main graph and go back to login
-                        popUpTo(0) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-                onEditProfile = {
-                    Log.d("MainNavHost", "(MainScreen) Navigated to Edit Profile")
-                    navController.navigate(AppDestination.EditProfile.route)
-                },
-                onChangePassword = {
-                    Log.d("MainNavHost", "(MainScreen) Navigated to Change Password")
-                    navController.navigate(AppDestination.ChangePassword.route)
-                },
-                onChangeLanguage = {
-                    Log.d("MainNavHost", "(MainScreen) Navigated to Change Language")
-                    navController.navigate(AppDestination.ChangeLanguage.route)
-                },
-                onDeleteAccount = {
-                    Log.d("MainNavHost", "(MainScreen) Delete Account clicked")
-                },
-                onNavigateToCreateNote = {
-                    navController.navigateToCreateNote()
-                },
+        composable("calendar") {
+            CalendarScreen(
                 onNavigateToEditNote = { noteId ->
-                    navController.navigateToEditNote(noteId)
-                },
-                onNavigateToDeletedArchived = { tabId ->
-                    navController.navigateToDeletedArchived(tabId)
-                },
-                onNavigateToStatistics = {
-                    Log.d("MainNavHost", "(MainScreen) Navigated to Statistics")
-                    navController.navigate(AppDestination.Statistics.route)
+                    navController.navigate("edit_note/$noteId")
+                }
+            )
+        }
+
+        composable("map") {
+            MapScreen(
+                onNavigateToEditNote = { noteId ->
+                    navController.navigate("edit_note/$noteId")
                 }
             )
         }
 
         notesGraph(
+            navController = navController,
             onNavigateBack = {
                 navController.popBackStack()
             },
