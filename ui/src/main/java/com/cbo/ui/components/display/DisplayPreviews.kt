@@ -2,6 +2,8 @@ package com.cbo.ui.components.display
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Note
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -215,6 +218,56 @@ fun MetricCardsPreview() {
         }
     }
 }
+
+@Preview(showBackground = true, name = "KPI and Section Cards")
+@Composable
+fun KpiAndSectionCardsPreview() {
+    MemCloudApplicationTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            AppSectionCard(
+                title = "Overview Section",
+                icon = Icons.AutoMirrored.Filled.Note
+            ) {
+                androidx.compose.foundation.layout.Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    AppKpiCard(
+                        label = "Total Notes",
+                        value = "128",
+                        icon = Icons.AutoMirrored.Filled.Note,
+                        modifier = Modifier.weight(1f)
+                    )
+                    AppStreakCard(
+                        value = 7,
+                        label = "Current Streak",
+                        emoji = "🔥",
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            AppInsightBanner(
+                title = "Not Sağlığı",
+                text = "Tüm görevleri tamamlanmış notlar arşive taşınabilir.",
+                icon = Icons.Default.Edit,
+                color = androidx.compose.ui.graphics.Color(0xFF10B981)
+            )
+
+            androidx.compose.foundation.layout.Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                AppCompactStatItem(value = "12", label = "Yeni Not", icon = Icons.AutoMirrored.Filled.Note)
+                AppCompactStatItem(value = "8", label = "Tamamlanan", icon = Icons.Default.Edit)
+            }
+        }
+    }
+}
+
 
 
 

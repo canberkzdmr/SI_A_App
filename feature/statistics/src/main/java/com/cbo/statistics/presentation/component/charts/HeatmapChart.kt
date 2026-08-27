@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,9 +24,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cbo.ui.theme.MemCloudApplicationTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -144,3 +147,26 @@ fun HeatmapChart(
         }
     }
 }
+
+@Preview(name = "HeatmapChart • Default", showBackground = true)
+@Composable
+private fun HeatmapChartPreview() {
+    MemCloudApplicationTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            HeatmapChart(
+                notesPerDay = mapOf(
+                    "2026-08-20" to 3,
+                    "2026-08-21" to 5,
+                    "2026-08-22" to 2,
+                    "2026-08-24" to 6,
+                    "2026-08-25" to 8,
+                    "2026-08-26" to 4,
+                    "2026-08-27" to 7,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                weekCount = 16
+            )
+        }
+    }
+}
+

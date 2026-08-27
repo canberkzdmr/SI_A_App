@@ -146,6 +146,7 @@ fun AppLabel(
     modifier: Modifier = Modifier,
     textAlign: TextAlign? = null,
     style: TextStyle = MaterialTheme.typography.labelMedium,
+    fontWeight: FontWeight? = null,
     overflow: TextOverflow = TextOverflow.Visible,
     maxLines: Int = Int.MAX_VALUE,
     color: Color = Color.Unspecified,
@@ -153,6 +154,7 @@ fun AppLabel(
     Text(
         text = text,
         style = style,
+        fontWeight = fontWeight,
         modifier = modifier,
         textAlign = textAlign,
         color = color,
@@ -166,11 +168,13 @@ fun AppLabelLarge(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
 ) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
+        fontWeight = fontWeight,
         color = color,
         modifier = modifier,
         textAlign = textAlign

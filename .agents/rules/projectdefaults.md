@@ -262,12 +262,28 @@ sealed class AppDestination(val route: String) {
 
 ### UI Components
 
-**Shared components in `:ui` module:**
-- `components/` - Buttons, cards, dialogs, forms, etc.
+**Shared components in `:ui` module (`com.cbo.ui.components.*`):**
+- `components/` - `AppButton` (`PrimaryButton`, `SecondaryButton`, `TertiaryButton`, `DestructiveButton`, `AppIconButton`), `AppText` (`AppHeadline`, `AppTitle`, `AppTitleMedium`, `AppBody`, `AppCaption`, `AppLabel`, `SectionHeader`), `AppScaffold`, `Chips` (`StatChip`, `ColorDot`), `Dialog`, etc.
+- `components/cards/` - `AppCard`, `HeaderCard`, `ContentCard`, `ActionCard`, `GroupView`
+- `components/display/` - `AppStatCard`, `AppStatGrid`, `AppMetricCard`, `AppKpiCard`, `AppProgressCard`, `AppCircularProgressCard`, `AppStepProgress`, `AppTimeline`, `AppActivityFeed`
+- `components/states/` - `AppLoadingScreen`, `AppLoadingOverlay`, `AppLoadingButton`, `AppErrorState`, `AppEmptyState`, `AppSuccessState`, `AppOfflineState`, `SkeletonComponents`
 - `components/richtext/` - Rich text editor and viewer
-- `components/states/` - Loading, skeleton, empty states
 - `snackbar/` - Global snackbar management
-- `theme/` - Colors, typography, theme
+- `theme/` - Colors, typography, theme (`MemCloudApplicationTheme`, `Dimens`)
+
+**UIKit Priority Rule (Mandatory):**
+- **Always check `:ui` first**: Before using default Jetpack Compose / Material 3 primitives (e.g., `Text`, `Button`, `Card`, `Scaffold`, `CircularProgressIndicator`), developers and AI agents MUST check if an existing UIKit component in `:ui` satisfies the use case.
+- **Component Mapping Standard**:
+  - Raw `Text` ➔ Use `AppHeadline`, `AppTitle`, `AppTitleMedium`, `AppBody`, `AppCaption`, `AppLabel`, `SectionHeader`
+  - Raw `Button` / `IconButton` ➔ Use `PrimaryButton`, `SecondaryButton`, `TertiaryButton`, `DestructiveButton`, `AppIconButton`
+  - Raw `Scaffold` ➔ Use `AppScaffold` or `ScreenWithTopBar`
+  - Raw `CircularProgressIndicator` (full-screen loading) ➔ Use `AppLoadingScreen` or `AppLoadingOverlay`
+  - Custom Error / Empty layouts ➔ Use `AppErrorState`, `AppEmptyState`, `AppOfflineState`
+  - Custom stat / metric / info cards ➔ Use `AppStatCard`, `AppMetricCard`, `AppKpiCard`, `AppCard`
+
+**Extending UIKit for Reusability:**
+- When building features, if a UI element represents a generic, reusable pattern across the application (e.g. KPI badges, insight/alert banners, chart containers, metric cards), it **must be added to `:ui`** (`ui/src/main/java/com/cbo/ui/components/`) rather than duplicated or kept private inside a single feature module.
+- Any newly added UIKit component in `:ui` MUST include `@Preview` composable functions with light/dark theme support.
 
 **Snackbar Pattern:**
 ```kotlin
@@ -336,6 +352,7 @@ snackbarManager.showMessage(
 - Include all necessary imports
 - Add Hilt annotations and injections
 - Follow existing patterns in the codebase
+- **Prioritize UIKit Components**: Always check the `:ui` module first for existing components (`AppButton`, `AppText`, `AppScaffold`, `AppLoadingScreen`, `AppErrorState`, `AppEmptyState`, `AppCard`, `AppStatCard`, etc.) before using default Jetpack Compose primitives or creating ad-hoc layouts. If a reusable UI pattern is missing, add it to `:ui` with full previews.
 - **Always include Jetpack Compose `@Preview` composable functions for newly created or modified screens and custom UI components**
 
 ### Modifications

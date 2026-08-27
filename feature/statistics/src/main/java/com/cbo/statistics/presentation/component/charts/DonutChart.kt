@@ -28,8 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.theme.MemCloudApplicationTheme
 
 /**
  * Animasyonlu donut (halka) grafiği.
@@ -155,3 +157,24 @@ val donutPalette = listOf(
     Color(0xFF06B6D4), // sky
     Color(0xFFEC4899), // pink
 )
+
+@Preview(name = "DonutChart • Default", showBackground = true)
+@Composable
+private fun DonutChartPreview() {
+    MemCloudApplicationTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            DonutChart(
+                slices = listOf(
+                    Triple("İş", 18f, donutPalette[0]),
+                    Triple("Kişisel", 14f, donutPalette[1]),
+                    Triple("Yazılım", 10f, donutPalette[2]),
+                    Triple("Fikirler", 6f, donutPalette[3]),
+                ),
+                centerLabel = "İş",
+                centerSubLabel = "En fazla",
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
