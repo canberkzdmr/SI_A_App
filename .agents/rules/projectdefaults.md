@@ -1,9 +1,3 @@
----
-description: Project development guidelines and conventions for MemCloud Android application
-globs:
-alwaysApply: true
----
-
 # MemCloud Project Development Guidelines
 
 ## 1. General Principles
@@ -21,7 +15,6 @@ alwaysApply: true
 - UI State is represented as data classes (e.g., `NotesUiState`)
 - Avoid direct UI updates from repositories or use cases
 - **Mandatory Previews**: Every newly added screen and UI component MUST include Jetpack Compose `@Preview` composable functions
-
 
 ### Kotlin-First Development
 - Write all new code in **Kotlin 2.0.0**
@@ -295,7 +288,6 @@ snackbarManager.showMessage(
   - Light & Dark theme variants (`@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)`)
 - **Realistic Sample Data**: Supply preview helper functions or sample models (e.g., `previewUiState()`, `sampleNotes()`) to make previews realistic and standalone.
 
-
 ---
 
 ## 5. Testing Guidelines
@@ -345,7 +337,6 @@ snackbarManager.showMessage(
 - Add Hilt annotations and injections
 - Follow existing patterns in the codebase
 - **Always include Jetpack Compose `@Preview` composable functions for newly created or modified screens and custom UI components**
-
 
 ### Modifications
 - Reference specific modules and file paths
@@ -473,4 +464,3 @@ private fun FeatureScreenPreview() {
     }
 }
 ```
-
