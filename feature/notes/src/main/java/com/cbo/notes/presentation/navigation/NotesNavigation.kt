@@ -1,5 +1,6 @@
 package com.cbo.notes.presentation.navigation
 
+import android.net.Uri
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -13,6 +14,7 @@ import com.cbo.notes.presentation.component.FilterType
 import com.cbo.notes.presentation.screen.CategoriesScreen
 import com.cbo.notes.presentation.screen.DeletedArchivedNotesScreen
 import com.cbo.notes.presentation.screen.EditNoteScreen
+import com.cbo.notes.presentation.screen.FilteredNotesScreen
 import com.cbo.notes.presentation.screen.NotesScreen
 import com.cbo.notes.presentation.screen.TagsScreen
 import com.cbo.notes.presentation.screen.toTabIndex
@@ -31,6 +33,8 @@ const val TAGS_ROUTE = "tags"
 const val DELETED_ARCHIVED_ROUTE = "deleted_archived"
 const val FILTER_LIST_ROUTE = "filter_list"
 const val FILTER_DETAIL_ROUTE = "filter_detail"
+const val CATEGORY_NOTES_ROUTE = "category_notes"
+const val TAG_NOTES_ROUTE = "tag_notes"
 const val CALENDAR_ROUTE = "calendar"
 const val MAP_ROUTE = "map"
 
@@ -62,12 +66,22 @@ fun NavController.navigateToDeletedArchived(tabId: Int, navOptions: NavOptions? 
     this.navigate("$DELETED_ARCHIVED_ROUTE/$tabId", navOptions)
 }
 
-fun NavController.navigateToFilterList(navOptions: NavOptions? = null) {
-    this.navigate(FILTER_LIST_ROUTE, navOptions)
+fun NavController.navigateToFilterList(parentRoute: String? = null, navOptions: NavOptions? = null) {
+    val route = if (parentRoute != null) "$FILTER_LIST_ROUTE?parentRoute=${Uri.encode(parentRoute)}" else FILTER_LIST_ROUTE
+    this.navigate(route, navOptions)
 }
 
-fun NavController.navigateToFilterDetail(filterType: String, navOptions: NavOptions? = null) {
-    this.navigate("$FILTER_DETAIL_ROUTE/$filterType", navOptions)
+fun NavController.navigateToFilterDetail(filterType: String, parentRoute: String? = null, navOptions: NavOptions? = null) {
+    val route = if (parentRoute != null) "$FILTER_DETAIL_ROUTE/$filterType?parentRoute=${Uri.encode(parentRoute)}" else "$FILTER_DETAIL_ROUTE/$filterType"
+    this.navigate(route, navOptions)
+}
+
+fun NavController.navigateToCategoryNotes(categoryId: Int, navOptions: NavOptions? = null) {
+    this.navigate("$CATEGORY_NOTES_ROUTE?categoryId=$categoryId", navOptions)
+}
+
+fun NavController.navigateToTagNotes(tagId: Int, navOptions: NavOptions? = null) {
+    this.navigate("$TAG_NOTES_ROUTE?tagId=$tagId", navOptions)
 }
 
 fun NavGraphBuilder.notesGraph(
@@ -80,6 +94,7 @@ fun NavGraphBuilder.notesGraph(
     onNavigateToTags: () -> Unit,
     onNavigateToDeletedArchived: (tabId: Int) -> Unit,
     onOpenNotesForCategory: (Int) -> Unit,
+    onOpenNotesForTag: (Int) -> Unit = {},
 ) {
     navigation(
         route = "notes_flow",
@@ -109,9 +124,18 @@ fun NavGraphBuilder.notesGraph(
             )
         }
 
-        composable(FILTER_LIST_ROUTE) { backStackEntry ->
+        composable(
+            route = "$FILTER_LIST_ROUTE?parentRoute={parentRoute}",
+            arguments = listOf(
+                navArgument("parentRoute") {
+                    type = NavType.StringType
+                    defaultValue = "notes_flow"
+                }
+            )
+        ) { backStackEntry ->
+            val parentRoute = backStackEntry.arguments?.getString("parentRoute") ?: "notes_flow"
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry("notes_flow")
+                navController.getBackStackEntry(parentRoute)
             }
             val notesViewModel: NotesViewModel = hiltViewModel(parentEntry)
             val uiState by notesViewModel.uiState.collectAsStateWithLifecycle()
@@ -123,7 +147,7 @@ fun NavGraphBuilder.notesGraph(
                 filterFavorites = uiState.filterFavorites,
                 onNavigateBack = { navController.popBackStack() },
                 onFilterTypeClick = { filterType ->
-                    navController.navigateToFilterDetail(filterType.name)
+                    navController.navigateToFilterDetail(filterType.name, parentRoute)
                 },
                 onPinnedToggle = { notesViewModel.toggleFilterPinned() },
                 onFavoritesToggle = { notesViewModel.toggleFilterFavorites() },
@@ -134,18 +158,23 @@ fun NavGraphBuilder.notesGraph(
         }
 
         composable(
-            route = "$FILTER_DETAIL_ROUTE/{filterType}",
+            route = "$FILTER_DETAIL_ROUTE/{filterType}?parentRoute={parentRoute}",
             arguments = listOf(
                 navArgument("filterType") {
                     type = NavType.StringType
+                },
+                navArgument("parentRoute") {
+                    type = NavType.StringType
+                    defaultValue = "notes_flow"
                 }
             )
         ) { backStackEntry ->
             val filterTypeArg = backStackEntry.arguments?.getString("filterType") ?: FilterType.CATEGORY.name
             val filterType = FilterType.valueOf(filterTypeArg)
+            val parentRoute = backStackEntry.arguments?.getString("parentRoute") ?: "notes_flow"
 
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry("notes_flow")
+                navController.getBackStackEntry(parentRoute)
             }
             val notesViewModel: NotesViewModel = hiltViewModel(parentEntry)
             val uiState by notesViewModel.uiState.collectAsStateWithLifecycle()
@@ -216,6 +245,46 @@ fun NavGraphBuilder.notesGraph(
             onNavigateBack = onNavigateBack
         )
     }
+    
+        composable(
+            route = "$CATEGORY_NOTES_ROUTE?categoryId={categoryId}",
+            arguments = listOf(
+                navArgument("categoryId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val viewModel: NotesViewModel = hiltViewModel()
+            FilteredNotesScreen(
+                onNavigateBack = onNavigateBack,
+                onNavigateToCreateNote = onNavigateToCreateNote,
+                onNavigateToEditNote = onNavigateToEditNote,
+                onNavigateToFilters = {
+                    navController.navigateToFilterList(parentRoute = "$CATEGORY_NOTES_ROUTE?categoryId={categoryId}")
+                }
+            )
+        }
+
+        composable(
+            route = "$TAG_NOTES_ROUTE?tagId={tagId}",
+            arguments = listOf(
+                navArgument("tagId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val viewModel: NotesViewModel = hiltViewModel()
+            FilteredNotesScreen(
+                onNavigateBack = onNavigateBack,
+                onNavigateToCreateNote = onNavigateToCreateNote,
+                onNavigateToEditNote = onNavigateToEditNote,
+                onNavigateToFilters = {
+                    navController.navigateToFilterList(parentRoute = "$TAG_NOTES_ROUTE?tagId={tagId}")
+                }
+            )
+        }
 }
 
 // Sealed class for type-safe navigation

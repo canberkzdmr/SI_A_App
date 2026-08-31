@@ -10,10 +10,12 @@ import com.cbo.core.navigation.AppDestination
 import com.cbo.login.presentation.navigation.loginNavGraph
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.cbo.notes.presentation.navigation.navigateToCategories
+import com.cbo.notes.presentation.navigation.navigateToCategoryNotes
 import com.cbo.notes.presentation.navigation.navigateToCreateNote
 import com.cbo.notes.presentation.navigation.navigateToDeletedArchived
 import com.cbo.notes.presentation.navigation.navigateToNotes
 import com.cbo.notes.presentation.navigation.navigateToEditNote
+import com.cbo.notes.presentation.navigation.navigateToTagNotes
 import com.cbo.notes.presentation.navigation.navigateToTags
 import com.cbo.notes.presentation.navigation.notesGraph
 import com.cbo.splash.splashNavGraph
@@ -179,7 +181,10 @@ fun MainNavHost(
                 navController.navigateToTags()
             },
             onOpenNotesForCategory = { categoryId ->
-                navController.navigateToNotes(categoryId)
+                navController.navigateToCategoryNotes(categoryId)
+            },
+            onOpenNotesForTag = { tagId ->
+                navController.navigateToTagNotes(tagId)
             },
             onNavigateToDeletedArchived = { tabId ->
                 navController.navigateToDeletedArchived(tabId)

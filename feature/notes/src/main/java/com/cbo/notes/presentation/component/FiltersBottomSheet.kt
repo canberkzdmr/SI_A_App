@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -49,6 +50,8 @@ fun FiltersBottomSheet(
     allTags: List<Tag>,
     selectedCategories: List<Category>,
     selectedTags: List<Tag>,
+    lockedCategoryId: Int? = null,
+    lockedTagId: Int? = null,
     onUpdateSelectedCategories: (List<Category>) -> Unit,
     onUpdateSelectedTags: (List<Tag>) -> Unit,
     onApply: (List<Category>, List<Tag>) -> Unit,
@@ -68,6 +71,8 @@ fun FiltersBottomSheet(
             allTags = allTags,
             selectedCategories = selectedCategories,
             selectedTags = selectedTags,
+            lockedCategoryId = lockedCategoryId,
+            lockedTagId = lockedTagId,
             onUpdateSelectedCategories = onUpdateSelectedCategories,
             onUpdateSelectedTags = onUpdateSelectedTags,
             onApply = onApply,
@@ -83,9 +88,11 @@ private fun FiltersSheetBody(
     allTags: List<Tag>,
     selectedCategories: List<Category>,
     selectedTags: List<Tag>,
-    onApply: (List<Category>, List<Tag>) -> Unit,
+    lockedCategoryId: Int? = null,
+    lockedTagId: Int? = null,
     onUpdateSelectedCategories: (List<Category>) -> Unit,
     onUpdateSelectedTags: (List<Tag>) -> Unit,
+    onApply: (List<Category>, List<Tag>) -> Unit,
     onClearAll: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -109,9 +116,9 @@ private fun FiltersSheetBody(
             Text(stringResource(id = com.cbo.notes.R.string.manage_filters_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.weight(1f))
             TextButton(onClick = {
-                // Reset local temp states so UI updates immediately
-                tempSelectedCategories = mutableListOf()
-                tempSelectedTags = mutableListOf()
+                // Sadece kilitli olmayanları temizle
+                tempSelectedCategories = allCategories.filter { it.id == lockedCategoryId }.toMutableList()
+                tempSelectedTags = allTags.filter { it.id == lockedTagId }.toMutableList()
                 onClearAll()
             }) { Text(stringResource(id = com.cbo.notes.R.string.clear_all)) }
         }
@@ -135,12 +142,14 @@ private fun FiltersSheetBody(
         ) {
             items(filteredCategories, key = { it.id }) { category ->
                 val isSelected = tempSelectedCategories.any { it.id == category.id }
+                val isLocked = category.id == lockedCategoryId
                 ListItem(
                     headlineContent = { Text(category.name) },
                     trailingContent = {
-                        if (isSelected) Icon(Icons.Default.Check, contentDescription = null)
+                        if (isLocked) Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        else if (isSelected) Icon(Icons.Default.Check, contentDescription = null)
                     },
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(enabled = !isLocked) {
                         tempSelectedCategories = if (isSelected) {
                             tempSelectedCategories.filterNot { it.id == category.id }.toMutableList()
                         } else {
@@ -171,13 +180,15 @@ private fun FiltersSheetBody(
         ) {
             items(items = filteredTags, key = { it.id }) { tag ->
                 val isSelected = tempSelectedTags.any { it.id == tag.id }
+                val isLocked = tag.id == lockedTagId
                 Log.d("FiltersBottomSheet","isSelected (${tag.name}(${tag.id})) $isSelected")
                 ListItem(
                     headlineContent = { Text("#${tag.name}") },
                     trailingContent = {
-                        if (isSelected) Icon(Icons.Default.Check, contentDescription = null)
+                        if (isLocked) Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        else if (isSelected) Icon(Icons.Default.Check, contentDescription = null)
                     },
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.clickable(enabled = !isLocked) {
                         tempSelectedTags = if (isSelected) {
                             tempSelectedTags.filterNot { it.id == tag.id }.toMutableList()
                         } else {

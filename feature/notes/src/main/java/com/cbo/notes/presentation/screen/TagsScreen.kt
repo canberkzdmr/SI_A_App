@@ -74,6 +74,7 @@ import androidx.compose.ui.res.stringResource
 @Composable
 fun TagsScreen(
     onNavigateBack: () -> Unit,
+    onOpenNotesForTag: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: TagsViewModel = hiltViewModel(),
 ) {
@@ -95,6 +96,7 @@ fun TagsScreen(
             }
             viewModel.updateSelectedTags(currentTags)
         },
+        onOpenNotesForTag = onOpenNotesForTag,
         onSaveTag = viewModel::saveTag,
         onUpdateTag = viewModel::updateTag,
         onHideCreateTagDialog = viewModel::hideCreateTagDialog,
@@ -116,6 +118,7 @@ fun TagsContent(
     onShowCreateTagDialog: () -> Unit,
     onShowEditTagDialog: (Tag) -> Unit,
     onUpdateSelectedTags: (Tag) -> Unit,
+    onOpenNotesForTag: (Int) -> Unit = {},
     onSaveTag: () -> Unit,
     onUpdateTag: () -> Unit,
     onHideCreateTagDialog: () -> Unit,
@@ -258,7 +261,7 @@ fun TagsContent(
                             JiggleTag(
                                 tag = tag,
                                 viewMode = uiState.viewMode,
-                                onClick = { if (uiState.viewMode == ViewMode.EDIT) onShowEditTagDialog(tag) },
+                                onClick = { if (uiState.viewMode == ViewMode.EDIT) onShowEditTagDialog(tag) else onOpenNotesForTag(tag.id) },
                                 selectedTags = uiState.selectedTags,
                                 onTagSelected = {
                                     onUpdateSelectedTags(tag)

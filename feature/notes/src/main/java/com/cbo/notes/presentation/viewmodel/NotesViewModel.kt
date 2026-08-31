@@ -1,6 +1,7 @@
 package com.cbo.notes.presentation.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.ViewMode
@@ -47,14 +48,25 @@ class NotesViewModel @Inject constructor(
     private val deleteNoteUseCase: DeleteNoteUseCase,
     private val getNotesViewModeUseCase: GetNotesViewModeUseCase,
     private val setNotesViewModeUseCase: SetNotesViewModeUseCase,
-    private val snackbarManager: SnackbarManager
+    private val snackbarManager: SnackbarManager,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotesUiState())
     val uiState: StateFlow<NotesUiState> = _uiState.asStateFlow()
 
     init {
-        Log.d("NotesViewModel", "init")
+        val lockedCategoryId = savedStateHandle.get<Int>("categoryId")?.takeIf { it != -1 }
+        val lockedTagId = savedStateHandle.get<Int>("tagId")?.takeIf { it != -1 }
+        
+        _uiState.update { 
+            it.copy(
+                lockedCategoryId = lockedCategoryId,
+                lockedTagId = lockedTagId
+            )
+        }
+        
+        Log.d("NotesViewModel", "init - lockedCategoryId: $lockedCategoryId, lockedTagId: $lockedTagId")
         loadData()
     }
 
@@ -78,17 +90,53 @@ class NotesViewModel @Inject constructor(
             }.collect { (notes, categories, tags) ->
                 val viewMode = getNotesViewModeUseCase()
                 Log.d("NotesViewModel", "Notes View Mode retrieved -> $viewMode")
+                
                 _uiState.update { currentState ->
+                    val filteredCategories = if (currentState.lockedCategoryId != null) {
+                        categories.filter { it.id == currentState.lockedCategoryId }
+                    } else if (currentState.lockedTagId != null) {
+                        val tagNotes = notes.filter { note -> note.tags.any { it.id == currentState.lockedTagId } }
+                        val tagCategoryIds = tagNotes.mapNotNull { it.category?.id }.toSet()
+                        categories.filter { it.id in tagCategoryIds }
+                    } else {
+                        categories
+                    }
+
+                    val filteredTags = if (currentState.lockedTagId != null) {
+                        tags.filter { it.id == currentState.lockedTagId }
+                    } else if (currentState.lockedCategoryId != null) {
+                        val categoryNotes = notes.filter { it.category?.id == currentState.lockedCategoryId }
+                        val categoryTagIds = categoryNotes.flatMap { note -> note.tags.map { it.id } }.toSet()
+                        tags.filter { it.id in categoryTagIds }
+                    } else {
+                        tags
+                    }
+
+                    // Initialize selected categories and tags based on locks if they are empty
+                    val selectedCategories = if (currentState.lockedCategoryId != null && currentState.selectedCategories.isEmpty()) {
+                        filteredCategories.filter { it.id == currentState.lockedCategoryId }
+                    } else {
+                        currentState.selectedCategories
+                    }
+                    
+                    val selectedTags = if (currentState.lockedTagId != null && currentState.selectedTags.isEmpty()) {
+                        filteredTags.filter { it.id == currentState.lockedTagId }
+                    } else {
+                        currentState.selectedTags
+                    }
+
                     currentState.copy(
                         isLoading = false,
                         notes = notes,
-                        categories = categories,
-                        tags = tags,
+                        categories = filteredCategories,
+                        tags = filteredTags,
+                        selectedCategories = selectedCategories,
+                        selectedTags = selectedTags,
                         filteredNotes = filterNotes(
                             notes,
                             currentState.searchQuery,
-                            currentState.selectedCategories,
-                            currentState.selectedTags,
+                            selectedCategories,
+                            selectedTags,
                             currentState.filterPinned,
                             currentState.filterFavorites
                         ),
@@ -109,7 +157,10 @@ class NotesViewModel @Inject constructor(
      * If not selected, it will be added to the selection.
      */
     fun toggleCategory(category: Category) {
-        val currentCategories = _uiState.value.selectedCategories.toMutableList()
+        val currentState = _uiState.value
+        if (category.id == currentState.lockedCategoryId) return // Prevent toggling locked category
+        
+        val currentCategories = currentState.selectedCategories.toMutableList()
         if (currentCategories.any { it.id == category.id }) {
             currentCategories.removeAll { it.id == category.id }
         } else {
@@ -132,7 +183,10 @@ class NotesViewModel @Inject constructor(
      * If not selected, it will be added to the selection.
      */
     fun toggleTag(tag: Tag) {
-        val currentTags = _uiState.value.selectedTags.toMutableList()
+        val currentState = _uiState.value
+        if (tag.id == currentState.lockedTagId) return // Prevent toggling locked tag
+        
+        val currentTags = currentState.selectedTags.toMutableList()
         if (currentTags.any { it.id == tag.id }) {
             currentTags.removeAll { it.id == tag.id }
         } else {
@@ -183,15 +237,17 @@ class NotesViewModel @Inject constructor(
 
     fun clearFilters() {
         _uiState.update { 
+            val preservedCategories = it.categories.filter { cat -> cat.id == it.lockedCategoryId }
+            val preservedTags = it.tags.filter { tag -> tag.id == it.lockedTagId }
             it.copy(
                 searchQuery = "", 
-                selectedCategories = emptyList(), 
-                selectedTags = emptyList(),
+                selectedCategories = preservedCategories, 
+                selectedTags = preservedTags,
                 filterPinned = false,
-                filterFavorites = false,
-                filteredNotes = it.notes
+                filterFavorites = false
             ) 
         }
+        applyFilters()
     }
 
     fun toggleNotePin(noteId: Int) {
@@ -420,6 +476,8 @@ data class NotesUiState(
     val selectedTags: List<Tag> = emptyList(),
     val filterPinned: Boolean = false,
     val filterFavorites: Boolean = false,
+    val lockedCategoryId: Int? = null,
+    val lockedTagId: Int? = null,
     val viewMode: ViewMode = ViewMode.LIST,
     val sortOrder: SortOrder = SortOrder.UPDATED_DESC,
     val errorMessage: String? = null

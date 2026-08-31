@@ -284,10 +284,10 @@ fun NotesScreen(
 }
 
 @Composable
-private fun FilterSection(
+fun FilterSection(
     categories: List<Category>,
     tags: List<Tag>,
-    selectedCategory: Category?,
+    selectedCategories: List<Category>,
     selectedTags: List<Tag>,
     onCategorySelected: (Category?) -> Unit,
     onTagSelected: (Tag) -> Unit,
@@ -299,7 +299,7 @@ private fun FilterSection(
     ImprovedFilterSection(
         categories = categories,
         tags = tags,
-        selectedCategory = selectedCategory,
+        selectedCategories = selectedCategories,
         selectedTags = selectedTags,
         onCategorySelected = onCategorySelected,
         onTagSelected = onTagSelected,
@@ -315,7 +315,7 @@ private fun FilterSection(
  * a 3D cube with each view mode on a different face.
  */
 @Composable
-private fun Cube3DRotationTransition(
+fun Cube3DRotationTransition(
     targetState: ViewMode,
     modifier: Modifier = Modifier,
     content: @Composable (ViewMode) -> Unit,
@@ -432,7 +432,7 @@ private fun Cube3DRotationTransition(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NotesContent(
+fun NotesContent(
     notes: List<Note>,
     viewMode: ViewMode,
     header: (@Composable () -> Unit)? = null,

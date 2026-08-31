@@ -21,8 +21,10 @@ import com.cbo.ui.theme.MemCloudApplicationTheme
 fun ImprovedFilterSection(
     categories: List<Category>,
     tags: List<Tag>,
-    selectedCategory: Category?,
+    selectedCategories: List<Category>,
     selectedTags: List<Tag>,
+    lockedCategoryId: Int? = null,
+    lockedTagId: Int? = null,
     onCategorySelected: (Category?) -> Unit,
     onTagSelected: (Tag) -> Unit,
     onClearFilters: () -> Unit,
@@ -51,7 +53,7 @@ fun ImprovedFilterSection(
                     AppLabel(text = "Filters", modifier = Modifier.padding(vertical = 8.dp))
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (selectedCategory != null || selectedTags.isNotEmpty()) {
+                        if (selectedCategories.isNotEmpty() || selectedTags.isNotEmpty()) {
                             TertiaryButton(
                                 "Clear All",
                                 onClick = onClearFilters,
@@ -66,7 +68,7 @@ fun ImprovedFilterSection(
                 }
 
                 // Selected filters summary chips
-                val hasSelection = selectedCategory != null || selectedTags.isNotEmpty()
+                val hasSelection = selectedCategories.isNotEmpty() || selectedTags.isNotEmpty()
                 if (hasSelection) {
                     Spacer(modifier = Modifier.height(12.dp))
                     FlowRow(
@@ -74,26 +76,36 @@ fun ImprovedFilterSection(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        selectedCategory?.let { category ->
+                        selectedCategories.forEach { category ->
+                            val isLocked = category.id == lockedCategoryId
                             FilterChip(
                                 selected = true,
-                                onClick = { onCategorySelected(null) },
+                                onClick = { if (!isLocked) onCategorySelected(category) },
                                 label = category.name,
                                 color = category.color,
                                 trailingIcon = {
-                                    Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                                    if (!isLocked) {
+                                        Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                                    } else {
+                                        Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+                                    }
                                 }
                             )
                         }
 
                         selectedTags.forEach { tag ->
+                            val isLocked = tag.id == lockedTagId
                             FilterChip(
                                 selected = true,
-                                onClick = { onTagSelected(tag) },
+                                onClick = { if (!isLocked) onTagSelected(tag) },
                                 label = "#${tag.name}",
                                 color = tag.color,
                                 trailingIcon = {
-                                    Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                                    if (!isLocked) {
+                                        Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                                    } else {
+                                        Icon(imageVector = Icons.Default.Lock, contentDescription = null)
+                                    }
                                 }
                             )
                         }
@@ -120,8 +132,10 @@ private fun ImprovedFilterSection_Default_Preview() {
         ImprovedFilterSection(
             categories = samplePreviewCategories(),
             tags = samplePreviewTags(),
-            selectedCategory = null,
+            selectedCategories = emptyList(),
             selectedTags = emptyList(),
+            lockedCategoryId = null,
+            lockedTagId = null,
             onCategorySelected = {},
             onTagSelected = {},
             onClearFilters = {},
@@ -140,8 +154,10 @@ private fun ImprovedFilterSection_Selected_Preview() {
         ImprovedFilterSection(
             categories = categories,
             tags = tags,
-            selectedCategory = categories.first(),
+            selectedCategories = listOf(categories.first()),
             selectedTags = tags.take(3),
+            lockedCategoryId = null,
+            lockedTagId = null,
             onCategorySelected = {},
             onTagSelected = {},
             onClearFilters = {},
@@ -158,7 +174,7 @@ private fun ImprovedFilterSection_Empty_Preview() {
         ImprovedFilterSection(
             categories = emptyList(),
             tags = emptyList(),
-            selectedCategory = null,
+            selectedCategories = emptyList(),
             selectedTags = emptyList(),
             onCategorySelected = {},
             onTagSelected = {},
