@@ -348,40 +348,36 @@ fun LogItemCard(log: LogEntity, onClick: () -> Unit) {
         Column(modifier = Modifier.padding(10.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Level Badge
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(levelColor)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = log.level.take(1),
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(levelColor)
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
                     Text(
-                        text = log.tag,
-                        fontWeight = FontWeight.SemiBold,
+                        text = log.level.take(1),
+                        color = Color.White,
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
                 Text(
+                    text = log.tag,
+                    modifier = Modifier.weight(1f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Text(
                     text = formattedTime,
+                    maxLines = 1,
                     fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
