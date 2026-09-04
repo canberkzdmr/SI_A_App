@@ -40,6 +40,7 @@ dependencies {
     // Core modules
     implementation(project(":core-domain"))
     implementation(project(":core-database"))
+    implementation(project(":core-logger"))
     
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.coroutines.core)

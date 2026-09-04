@@ -1,6 +1,6 @@
 package com.cbo.ui.components
 
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -34,15 +34,15 @@ fun PhoneNumber(
         modifier = modifier,
         value = phoneNumber,
         onValueChange = {
-            Log.d("PhoneNumber", "onValueChange: $it")
+            AppLogger.d("onValueChange: $it")
             // Remove non-numeric characters.
             val stripped = numericRegex.replace(it, "")
             onPhoneNumberChange(
                 if (stripped.length >= 10) {
-                    Log.d("PhoneNumber", "onValueChange if: $stripped")
+                    AppLogger.d("onValueChange if: $stripped")
                     stripped.substring(0..9)
                 } else {
-                    Log.d("PhoneNumber", "onValueChange else: $stripped")
+                    AppLogger.d("onValueChange else: $stripped")
                     stripped
                 }
             )

@@ -2,7 +2,7 @@ package com.cbo.user.presentation.util
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -22,7 +22,7 @@ object ImageUtils {
             val inputStream: InputStream? = contentResolver.openInputStream(sourceUri)
             
             if (inputStream == null) {
-                Log.e("ImageUtils", "Failed to open input stream for URI: $sourceUri")
+                AppLogger.e("Failed to open input stream for URI: $sourceUri")
                 return null
             }
             
@@ -46,11 +46,11 @@ object ImageUtils {
             }
             
             val savedPath = outputFile.absolutePath
-            Log.d("ImageUtils", "Image copied successfully to: $savedPath")
+            AppLogger.d("Image copied successfully to: $savedPath")
             
             savedPath
         } catch (e: Exception) {
-            Log.e("ImageUtils", "Error copying image to internal storage", e)
+            AppLogger.e("Error copying image to internal storage", e)
             null
         }
     }
@@ -65,10 +65,10 @@ object ImageUtils {
         try {
             val file = File(filePath)
             if (file.exists() && file.delete()) {
-                Log.d("ImageUtils", "Old avatar deleted: $filePath")
+                AppLogger.d("Old avatar deleted: $filePath")
             }
         } catch (e: Exception) {
-            Log.e("ImageUtils", "Error deleting old avatar: $filePath", e)
+            AppLogger.e("Error deleting old avatar: $filePath", e)
         }
     }
 }

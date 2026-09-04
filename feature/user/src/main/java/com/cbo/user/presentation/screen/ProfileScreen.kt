@@ -1,7 +1,7 @@
 package com.cbo.user.presentation.screen
 
 import android.content.res.Configuration
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -105,14 +105,14 @@ fun ProfileScreen(
 
     // Collect one-shot events
     LaunchedEffect(user) {
-        Log.d("ProfileScreen", "is user null -> (${user == null})")
+        AppLogger.d("is user null -> (${user == null})")
         if (user == null) {
             onLogOut()
         }
         viewModel.events.collect { event ->
             when (event) {
                 is ProfileEvent.LoggedOut -> {
-                    Log.d("ProfileScreen", "User Log Out")
+                    AppLogger.d("User Log Out")
                     onLogOut()
                 }
             }
@@ -120,7 +120,7 @@ fun ProfileScreen(
     }
 
     /*BackHandler {
-        Log.i("ProfileScreen", "Back button is disabled for Profile Screen")
+        AppLogger.i("Back button is disabled for Profile Screen")
     }*/
 
     val context = LocalContext.current

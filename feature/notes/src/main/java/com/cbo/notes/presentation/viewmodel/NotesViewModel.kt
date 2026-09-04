@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.ViewMode
@@ -66,7 +66,7 @@ class NotesViewModel @Inject constructor(
             )
         }
         
-        Log.d("NotesViewModel", "init - lockedCategoryId: $lockedCategoryId, lockedTagId: $lockedTagId")
+        AppLogger.d("init - lockedCategoryId: $lockedCategoryId, lockedTagId: $lockedTagId")
         loadData()
     }
 
@@ -89,7 +89,7 @@ class NotesViewModel @Inject constructor(
                 }
             }.collect { (notes, categories, tags) ->
                 val viewMode = getNotesViewModeUseCase()
-                Log.d("NotesViewModel", "Notes View Mode retrieved -> $viewMode")
+                AppLogger.d("Notes View Mode retrieved -> $viewMode")
                 
                 _uiState.update { currentState ->
                     val filteredCategories = if (currentState.lockedCategoryId != null) {
@@ -326,7 +326,7 @@ class NotesViewModel @Inject constructor(
 
     fun changeViewMode(viewMode: ViewMode) {
         viewModelScope.launch {
-            Log.d("NotesViewModel", "ViewMode Changed to -> $viewMode")
+            AppLogger.d("ViewMode Changed to -> $viewMode")
             setNotesViewModeUseCase.invoke(viewMode)
             _uiState.update { it.copy(viewMode = viewMode) }
         }

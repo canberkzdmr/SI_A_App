@@ -1,15 +1,14 @@
 package com.cbo.login.domain.usecase
 
-import android.util.Log
 import com.cbo.core.domain.exception.RegistrationException
-
+import com.cbo.core.logger.AppLogger
 import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.repository.UserRepository
 
 class RegisterUserUseCase(private val userRepository: UserRepository) {
 
     suspend operator fun invoke(user: RegisterUserModel): Result<Unit> {
-        Log.d("RegisterUserUseCase", "Register user in progress")
+        AppLogger.d("Register user in progress")
 
         return when {
             user.username.isBlank() ->

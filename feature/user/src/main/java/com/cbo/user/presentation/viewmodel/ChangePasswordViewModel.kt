@@ -1,7 +1,7 @@
 package com.cbo.user.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.User
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
@@ -35,7 +35,7 @@ class ChangePasswordViewModel @Inject constructor(
         viewModelScope.launch {
             getActiveUserUseCase()
                 .catch { 
-                    Log.e("ChangePasswordViewModel", "Error loading active user", it)
+                    AppLogger.e("Error loading active user", it)
                     SnackbarManager.showMessage(SnackbarMessage.Error("Failed to load user data"))
                 }
                 .collect { user ->
@@ -154,7 +154,7 @@ class ChangePasswordViewModel @Inject constructor(
                 newPassword = _uiState.value.newPassword
             ).fold(
                 onSuccess = {
-                    Log.i("ChangePasswordViewModel", "Password changed successfully")
+                    AppLogger.i("Password changed successfully")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isPasswordChanged = true
@@ -162,7 +162,7 @@ class ChangePasswordViewModel @Inject constructor(
                     SnackbarManager.showMessage(SnackbarMessage.Success("Password changed successfully!"))
                 },
                 onFailure = { error ->
-                    Log.e("ChangePasswordViewModel", "Failed to change password", error)
+                    AppLogger.e("Failed to change password", error)
                     _uiState.value = _uiState.value.copy(isLoading = false)
                     SnackbarManager.showMessage(SnackbarMessage.Error(error.message ?: "Failed to change password"))
                 }

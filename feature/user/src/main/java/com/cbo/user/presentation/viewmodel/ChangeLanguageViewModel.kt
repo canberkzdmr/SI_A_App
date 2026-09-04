@@ -1,7 +1,7 @@
 package com.cbo.user.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.data.locale.LocaleManager
 import com.cbo.core.data.prefs.LanguagePreferencesManager
@@ -57,14 +57,14 @@ class ChangeLanguageViewModel @Inject constructor(
             user?.let {
                 getAllSupportedLanguages()
                     .catch { error ->
-                        Log.e("ChangeLanguageViewModel", "Error loading languages", error)
+                        AppLogger.e("Error loading languages", error)
                         _uiState.update { it.copy(
                             isLoading = false,
                             errorMessage = "Failed to load languages"
                         ) }
                     }
                     .map { languages ->
-                        Log.d("ChangeLanguageViewModel", "languages retrieved: $languages")
+                        AppLogger.d("languages retrieved: $languages")
                         val currentLanguageResult = getAppLanguage(user.id)
                         val currentLanguageCode = currentLanguageResult.getOrElse { "en" }
 
@@ -112,7 +112,7 @@ class ChangeLanguageViewModel @Inject constructor(
                             .firstOrNull { it.code == languageCode }
                             ?.displayName ?: "System default"
                         
-                        Log.d("ChangeLanguageViewModel", "Language changed to: $languageCode, emitting recreate event...")
+                        AppLogger.d("Language changed to: $languageCode, emitting recreate event...")
                         
                         // Emit event to recreate the activity to apply the new locale immediately
                         _recreateActivityEvent.emit(Unit)
@@ -120,12 +120,12 @@ class ChangeLanguageViewModel @Inject constructor(
                     onFailure = { error ->
                         _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to change language") }
                         SnackbarManager.showMessage(SnackbarMessage.Error("Failed to change language"))
-                        Log.e("ChangeLanguageViewModel", "Error changing language", error)
+                        AppLogger.e("Error changing language", error)
                     }
                 )
             } ?: run {
                 _uiState.update { it.copy(isLoading = false, errorMessage = "No active user session") }
-                Log.e("ChangeLanguageViewModel", "No active user session")
+                AppLogger.e("No active user session")
             }
         }
     }

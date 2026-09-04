@@ -1,12 +1,12 @@
 package com.cbo.notes.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.cbo.core.logger.AppLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -30,7 +30,7 @@ class DeletedNotesCleanupScheduler @Inject constructor(
      * is already scheduled, avoiding duplicate work instances.
      */
     fun schedulePeriodicCleanup() {
-        Log.d(TAG, "Scheduling periodic deleted notes cleanup")
+        AppLogger.d("Scheduling periodic deleted notes cleanup")
         
         val constraints = Constraints.Builder()
             .setRequiresBatteryNotLow(true) // Only run when battery is not low
@@ -57,19 +57,18 @@ class DeletedNotesCleanupScheduler @Inject constructor(
             cleanupRequest
         )
         
-        Log.d(TAG, "Periodic cleanup work scheduled successfully")
+        AppLogger.d("Periodic cleanup work scheduled successfully")
     }
 
     /**
      * Cancels the scheduled periodic cleanup work.
      */
     fun cancelPeriodicCleanup() {
-        Log.d(TAG, "Cancelling periodic deleted notes cleanup")
+        AppLogger.d("Cancelling periodic deleted notes cleanup")
         WorkManager.getInstance(context).cancelUniqueWork(DeletedNotesCleanupWorker.WORK_NAME)
     }
 
     companion object {
-        private const val TAG = "DeletedNotesCleanupScheduler"
         private const val WORK_TAG = "deleted_notes_cleanup"
         
         /** Run cleanup every 24 hours */

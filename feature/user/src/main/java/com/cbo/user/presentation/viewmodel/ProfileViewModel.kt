@@ -1,7 +1,7 @@
 package com.cbo.user.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.model.UserWithDetail
@@ -59,15 +59,15 @@ class ProfileViewModel @Inject constructor(
             delay(500)
             getActiveUserUseCase()
                 .catch { 
-                    Log.e("ProfileViewModel", "Error loading active user", it)
+                    AppLogger.e("Error loading active user", it)
                     _uiState.update { state -> state.copy(isLoading = false, errorMessage = "Failed to load user data") }
                 }
                 .collect { user: User? ->
                     user?.let { user ->
-                        Log.d("ProfileViewModel", "Retrieved User: ${user.username}(${user.id})")
+                        AppLogger.d("Retrieved User: ${user.username}(${user.id})")
                         getUserWithDetailUseCase(user.id)
                             .catch { error ->
-                                Log.e("ProfileViewModel", "Failed to load user details", error)
+                                AppLogger.e("Failed to load user details", error)
                                 _uiState.value = _uiState.value.copy(
                                     username = user.username,
                                     email = user.email,
@@ -86,7 +86,7 @@ class ProfileViewModel @Inject constructor(
                                         isBiometricEnabled = userWithDetail.userSettings.isBiometricsEnabled
                                     )
                                 } ?: run {
-                                    Log.e("ProfielViewModel", "Error while retrieving user details. User detail is null!")
+                                    AppLogger.e("Error while retrieving user details. User detail is null!")
                                     ProfileUiState(
                                         username = user.username,
                                         email = user.email,
@@ -165,7 +165,7 @@ class ProfileViewModel @Inject constructor(
                 val json = exportBackupUseCase(userId)
                 onReady(json)
             } catch (e: Exception) {
-                Log.e("ProfileViewModel", "Failed to export backup", e)
+                AppLogger.e("Failed to export backup", e)
                 SnackbarManager.showMessage(SnackbarMessage.Error("Yedek alınamadı: ${e.message}"))
             }
         }
@@ -186,7 +186,7 @@ class ProfileViewModel @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                Log.e("ProfileViewModel", "Failed to restore backup", e)
+                AppLogger.e("Failed to restore backup", e)
                 SnackbarManager.showMessage(SnackbarMessage.Error("Yedek geri yüklenemedi: ${e.message}"))
             }
         }

@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.session.UserSession
@@ -221,7 +221,7 @@ class EditNoteViewModel @Inject constructor(
         } else {
             currentTags.add(tag)
         }
-        Log.d("EditNoteViewModel", "toggleTag current tags: $currentTags")
+        AppLogger.d("toggleTag current tags: $currentTags")
         _uiState.update { it.copy(selectedTags = currentTags, hasUnsavedChanges = true, tagInputText = "") }
     }
 

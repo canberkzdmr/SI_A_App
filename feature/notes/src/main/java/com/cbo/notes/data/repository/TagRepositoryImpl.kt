@@ -1,6 +1,6 @@
 package com.cbo.notes.data.repository
 
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import com.cbo.notes.data.mapper.TagEntityMapper
 import com.cbo.core.common.util.TagColorPalette
 import com.cbo.core.database.dao.TagDao
@@ -27,7 +27,7 @@ class TagRepositoryImpl @Inject constructor(
                 tagEntityMapper.toDomain(entity)
             }
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error getting tag by id: ${e.message}")
+            AppLogger.e("Error getting tag by id: ${e.message}", e)
             null
         }
     }
@@ -38,7 +38,7 @@ class TagRepositoryImpl @Inject constructor(
                 tagEntityMapper.toDomain(entity)
             }
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error getting tag by name: ${e.message}")
+            AppLogger.e("Error getting tag by name: ${e.message}", e)
             null
         }
     }
@@ -59,7 +59,7 @@ class TagRepositoryImpl @Inject constructor(
             val insertedTag = tagWithColor.copy(id = insertedId.toInt())
             Result.success(insertedTag)
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error inserting tag: ${e.message}")
+            AppLogger.e("Error inserting tag: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -70,7 +70,7 @@ class TagRepositoryImpl @Inject constructor(
             tagDao.update(entity)
             Result.success(tag)
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error updating tag: ${e.message}")
+            AppLogger.e("Error updating tag: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -80,7 +80,7 @@ class TagRepositoryImpl @Inject constructor(
             tagDao.deleteById(tagId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error deleting tag: ${e.message}")
+            AppLogger.e("Error deleting tag: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -101,7 +101,7 @@ class TagRepositoryImpl @Inject constructor(
             tagDao.updateTagColor(tagId, color)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error updating tag color: ${e.message}")
+            AppLogger.e("Error updating tag color: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -111,7 +111,7 @@ class TagRepositoryImpl @Inject constructor(
             tagDao.updateTagUsageCount(tagId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error updating tag usage count: ${e.message}")
+            AppLogger.e("Error updating tag usage count: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -120,7 +120,7 @@ class TagRepositoryImpl @Inject constructor(
         return try {
             tagDao.getTagsCount(userId)
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error getting tags count: ${e.message}")
+            AppLogger.e("Error getting tags count: ${e.message}", e)
             0
         }
     }
@@ -129,7 +129,7 @@ class TagRepositoryImpl @Inject constructor(
         return try {
             tagDao.getTagsByNote(noteId).map { tagEntityMapper.toDomain(it) }
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error getting tags by note: ${e.message}")
+            AppLogger.e("Error getting tags by note: ${e.message}", e)
             emptyList()
         }
     }
@@ -138,7 +138,7 @@ class TagRepositoryImpl @Inject constructor(
         return try {
             tagDao.getMostUsedTags(userId, limit).map { tagEntityMapper.toDomain(it) }
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error getting most used tags: ${e.message}")
+            AppLogger.e("Error getting most used tags: ${e.message}", e)
             emptyList()
         }
     }
@@ -148,7 +148,7 @@ class TagRepositoryImpl @Inject constructor(
             tagDao.deleteUnusedTags(userId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("TagRepositoryImpl", "Error deleting unused tags: ${e.message}")
+            AppLogger.e("Error deleting unused tags: ${e.message}", e)
             Result.failure(e)
         }
     }

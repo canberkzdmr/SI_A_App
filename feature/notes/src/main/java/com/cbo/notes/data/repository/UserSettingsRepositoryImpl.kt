@@ -1,8 +1,8 @@
 package com.cbo.notes.data.repository
 
-import android.util.Log
 import com.cbo.core.database.dao.UserSettingsDao
 import com.cbo.core.domain.model.ViewMode
+import com.cbo.core.logger.AppLogger
 import com.cbo.notes.domain.repository.UserSettingsRepository
 import javax.inject.Inject
 
@@ -14,7 +14,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
             val viewMode = userSettingsDao.getNotesViewMode(userId)
             Result.success(viewMode)
         } catch (e: Exception) {
-            Log.e("UserSettingsRepositoryImpl", "Could not get View Mode preference of the user\n\terror: ${e.message}")
+            AppLogger.e("Could not get View Mode preference of the user\n\terror: ${e.message}", e)
             Result.failure(Throwable("Could not get View Mode preference of the user"))
         }
     }
@@ -27,7 +27,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
             userSettingsDao.setNotesViewMode(userId = userId, viewMode = viewMode)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("UserSettingsRepositoryImpl", "An error occurred while updating viewMode: ${e.message}")
+            AppLogger.e("An error occurred while updating viewMode: ${e.message}", e)
             Result.failure(e)
         }
     }

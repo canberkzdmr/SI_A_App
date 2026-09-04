@@ -1,7 +1,7 @@
 package com.cbo.login.presentation.screen
 
 import android.content.res.Configuration
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -393,8 +393,7 @@ fun RegisterScreenContent(
                             checked = registerState.termsAndConditionsChecked,
                             onCheckedChange = {
                                 onTermsAndConditionsChecked(it)
-                                Log.d(
-                                    "RegisterScreen",
+                                AppLogger.d(
                                     "Terms of service check box changed to ${registerState.termsAndConditionsChecked}",
                                 )
                             },
@@ -411,8 +410,7 @@ fun RegisterScreenContent(
                                         end = offset,
                                     ).firstOrNull()
                                     ?.let {
-                                        Log.d(
-                                            "RegisterScreen",
+                                        AppLogger.d(
                                             "Terms and conditions clicked"
                                         )
                                     }
@@ -447,7 +445,7 @@ fun RegisterScreenContent(
                             .getStringAnnotations("ACCOUNT", start = offset, end = offset)
                             .firstOrNull()
                             ?.let {
-                                Log.d("Register Screen", "Login clicked.")
+                                AppLogger.d("Login clicked.")
                             }
                     },
                     modifier =
@@ -466,12 +464,12 @@ fun RegisterScreenContent(
                 message = stringResource(id = com.cbo.login.R.string.enable_biometric_message),
                 onConfirm = {
                     onBiometricLoginEnabled(true)
-                    Log.d("RegisterScreen", "Biometric Login Enabled")
+                    AppLogger.d("Biometric Login Enabled")
                     onShowBiometricDialog(false)
                 },
                 onDismiss = {
                     onBiometricLoginEnabled(false)
-                    Log.d("RegisterScreen", "Biometric Login is Not Enabled")
+                    AppLogger.d("Biometric Login is Not Enabled")
                     onShowBiometricDialog(false)
                 },
                 confirmText = stringResource(id = com.cbo.login.R.string.enable),

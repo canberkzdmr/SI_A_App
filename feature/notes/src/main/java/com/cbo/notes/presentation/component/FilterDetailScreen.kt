@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.component
 
-import android.util.Log
 import androidx.compose.foundation.clickable
+import com.cbo.core.logger.AppLogger
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -118,7 +118,7 @@ fun FilterDetailScreen(
                             }
                         }
                         else -> {
-                            Log.d("FilterDetailScreen", "Favorite or pinned log")
+                            AppLogger.d("Favorite or pinned log")
                         }
                     }
                 }

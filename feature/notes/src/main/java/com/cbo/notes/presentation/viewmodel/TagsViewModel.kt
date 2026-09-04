@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.model.Tag
@@ -171,7 +171,7 @@ class TagsViewModel
         }
 
         fun showCreateTagDialog() {
-            Log.d("TagsViewModel", "ui state updated")
+            AppLogger.d("ui state updated")
             _uiState.update {
                 it.copy(
                     showCreateDialog = true,
@@ -183,7 +183,7 @@ class TagsViewModel
         }
 
         fun hideCreateTagDialog() {
-            Log.d("TagsViewModel", "ui state updated")
+            AppLogger.d("ui state updated")
             _uiState.update {
                 it.copy(
                     showCreateDialog = false,

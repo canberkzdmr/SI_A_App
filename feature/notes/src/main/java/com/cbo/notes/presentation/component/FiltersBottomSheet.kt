@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.component
 
-import android.util.Log
 import androidx.compose.foundation.clickable
+import com.cbo.core.logger.AppLogger
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -181,7 +181,7 @@ private fun FiltersSheetBody(
             items(items = filteredTags, key = { it.id }) { tag ->
                 val isSelected = tempSelectedTags.any { it.id == tag.id }
                 val isLocked = tag.id == lockedTagId
-                Log.d("FiltersBottomSheet","isSelected (${tag.name}(${tag.id})) $isSelected")
+                AppLogger.d("isSelected (${tag.name}(${tag.id})) $isSelected")
                 ListItem(
                     headlineContent = { Text("#${tag.name}") },
                     trailingContent = {

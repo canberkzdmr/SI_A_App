@@ -1,13 +1,13 @@
 package com.cbo.notes.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.cbo.core.common.util.safePutAttribute
 import com.cbo.core.common.util.safePutMetric
 import com.cbo.core.common.util.traceMetricSuspend
+import com.cbo.core.logger.AppLogger
 import com.cbo.notes.domain.usecase.CleanupExpiredDeletedNotesUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -27,19 +27,19 @@ class DeletedNotesCleanupWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result = traceMetricSuspend("trace_worker_cleanup_deleted_notes") { trace ->
         trace.safePutMetric("run_attempt_count", runAttemptCount.toLong())
-        Log.d(TAG, "Starting deleted notes cleanup work")
+        AppLogger.d("Starting deleted notes cleanup work")
         
         try {
             cleanupExpiredDeletedNotesUseCase.invoke().fold(
                 onSuccess = { deletedCount ->
                     trace.safePutMetric("deleted_notes_count", deletedCount.toLong())
                     trace.safePutAttribute("status", "success")
-                    Log.d(TAG, "Successfully cleaned up $deletedCount expired deleted notes")
+                    AppLogger.d("Successfully cleaned up $deletedCount expired deleted notes")
                     Result.success()
                 },
                 onFailure = { error ->
                     trace.safePutAttribute("status", "failure")
-                    Log.e(TAG, "Failed to cleanup expired notes: ${error.message}")
+                    AppLogger.e("Failed to cleanup expired notes: ${error.message}")
                     // Retry if there's an error
                     if (runAttemptCount < MAX_RETRY_ATTEMPTS) {
                         Result.retry()
@@ -50,7 +50,7 @@ class DeletedNotesCleanupWorker @AssistedInject constructor(
             )
         } catch (e: Exception) {
             trace.safePutAttribute("status", "exception")
-            Log.e(TAG, "Exception during cleanup work", e)
+            AppLogger.e("Exception during cleanup work", e)
             if (runAttemptCount < MAX_RETRY_ATTEMPTS) {
                 Result.retry()
             } else {
@@ -60,7 +60,6 @@ class DeletedNotesCleanupWorker @AssistedInject constructor(
     }
 
     companion object {
-        private const val TAG = "DeletedNotesCleanupWorker"
         private const val MAX_RETRY_ATTEMPTS = 3
         
         /** Unique name for this worker to prevent duplicate scheduling */

@@ -1,11 +1,11 @@
 package com.cbo.notes.worker
 
 import android.content.Context
-import android.util.Log
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.cbo.core.logger.AppLogger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -34,11 +34,11 @@ class ReminderScheduler @Inject constructor(
         val delay = reminderTime - currentTime
         
         if (delay <= 0) {
-            Log.w(TAG, "Reminder time is in the past, not scheduling for note: $noteId")
+            AppLogger.w("Reminder time is in the past, not scheduling for note: $noteId")
             return
         }
         
-        Log.d(TAG, "Scheduling reminder for note $noteId in ${delay / 1000} seconds")
+        AppLogger.d("Scheduling reminder for note $noteId in ${delay / 1000} seconds")
         
         val inputData = Data.Builder()
             .putInt(ReminderWorker.KEY_NOTE_ID, noteId)
@@ -60,7 +60,7 @@ class ReminderScheduler @Inject constructor(
             reminderRequest
         )
         
-        Log.d(TAG, "Reminder scheduled successfully for note: $noteId at $reminderTime")
+        AppLogger.d("Reminder scheduled successfully for note: $noteId at $reminderTime")
     }
     
     /**
@@ -69,7 +69,7 @@ class ReminderScheduler @Inject constructor(
      * @param noteId The ID of the note whose reminder should be cancelled
      */
     fun cancelReminder(noteId: Int) {
-        Log.d(TAG, "Cancelling reminder for note: $noteId")
+        AppLogger.d("Cancelling reminder for note: $noteId")
         WorkManager.getInstance(context).cancelUniqueWork(ReminderWorker.getWorkName(noteId))
     }
     
@@ -77,7 +77,7 @@ class ReminderScheduler @Inject constructor(
      * Cancels all scheduled reminders.
      */
     fun cancelAllReminders() {
-        Log.d(TAG, "Cancelling all reminders")
+        AppLogger.d("Cancelling all reminders")
         WorkManager.getInstance(context).cancelAllWorkByTag(WORK_TAG)
     }
     
@@ -94,7 +94,6 @@ class ReminderScheduler @Inject constructor(
     }
 
     companion object {
-        private const val TAG = "ReminderScheduler"
         private const val WORK_TAG = "note_reminder"
         private const val WORK_TAG_NOTE_PREFIX = "note_reminder_"
     }

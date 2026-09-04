@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.screen
 
 import android.content.res.Configuration
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
@@ -87,7 +87,7 @@ fun TagsScreen(
         onShowCreateTagDialog = viewModel::showCreateTagDialog,
         onShowEditTagDialog = viewModel::showEditTagDialog,
         onUpdateSelectedTags = { tag ->
-            Log.d("TagsScreen", "Selected tag -> $tag")
+            AppLogger.d("Selected tag -> $tag")
             val currentTags = uiState.selectedTags.toMutableList()
             if (currentTags.contains(tag)) {
                 currentTags.remove(tag)
@@ -363,7 +363,7 @@ fun JiggleTag(
                 } else {
                     onTagSelected()
                 }
-                Log.d("TagsScreen", "Clicked tag: ${tag.name}(id:${tag.id})")
+                AppLogger.d("Clicked tag: ${tag.name}(id:${tag.id})")
             },
             isDeleteMode = viewMode == ViewMode.DELETE,
             label = "#${tag.name} (${tag.usageCount})",

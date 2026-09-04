@@ -1,7 +1,7 @@
 package com.cbo.user.presentation.viewmodel
 
 import android.net.Uri
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.Gender
@@ -48,15 +48,15 @@ constructor(
                 .catch { _uiState.update { it.copy(isLoading = false, error = "User informations could not retrieved") } }
                 .collect { user: User? ->
                     user?.let { user ->
-                        Log.d("EditProfileViewModel", "Retrieved User: ${user.username}(${user.id})")
+                        AppLogger.d("Retrieved User: ${user.username}(${user.id})")
                         getUserWithDetailUseCase.invoke(user.id)
                             .catch { error ->
                                 _uiState.value = _uiState.value.copy(isLoading = false, error = error.message)
                             }
                             .map { userWithDetail ->
                                 userWithDetail?.let {
-                                    Log.d("EditProfileViewModel", "dateOfBirth: ${userWithDetail.userDetail?.dateOfBirth}")
-                                    Log.d("EditProfileViewModel", "gender: ${userWithDetail.userDetail?.gender}")
+                                    AppLogger.d("dateOfBirth: ${userWithDetail.userDetail?.dateOfBirth}")
+                                    AppLogger.d("gender: ${userWithDetail.userDetail?.gender}")
                                     EditUserProfileUiState(
                                         id = userWithDetail.userDetail?.id,
                                         userId = userWithDetail.user.id,
@@ -72,7 +72,7 @@ constructor(
                                         isLoading = false
                                     )
                                 } ?: run {
-                                    Log.e("EditProfileViewModel", "Error while retrieving user details. User detail is null")
+                                    AppLogger.e("Error while retrieving user details. User detail is null")
                                     EditUserProfileUiState(isLoading = false, error = "Could not get user details")
                                 }
                             }
@@ -103,7 +103,7 @@ constructor(
     fun onImageSelected(contentUri: Uri) {
         viewModelScope.launch {
             try {
-                Log.d("EditProfileViewModel", "Image selected: $contentUri")
+                AppLogger.d("Image selected: $contentUri")
                 
                 // Set image loading state
                 _uiState.update { it.copy(isImageLoading = true, error = null) }
@@ -114,15 +114,15 @@ constructor(
                 val savedImagePath = saveImageUseCase(contentUri, currentAvatarUrl)
                 
                 if (savedImagePath != null) {
-                    Log.d("EditProfileViewModel", "Image saved to: $savedImagePath")
+                    AppLogger.d("Image saved to: $savedImagePath")
                     updateAvatarUrl(savedImagePath)
                     _uiState.update { it.copy(isImageLoading = false) }
                 } else {
-                    Log.e("EditProfileViewModel", "Failed to save image")
+                    AppLogger.e("Failed to save image")
                     _uiState.update { it.copy(isImageLoading = false, error = "Failed to save image") }
                 }
             } catch (e: Exception) {
-                Log.e("EditProfileViewModel", "Error processing image", e)
+                AppLogger.e("Error processing image", e)
                 _uiState.update { it.copy(isImageLoading = false, error = "Error processing image: ${e.message}") }
             }
         }
@@ -135,7 +135,7 @@ constructor(
     }
 
     fun updatePhoneNumber(phoneNumber: String) {
-        Log.d("EditProfileViewModel", "updatePhoneNumber: $phoneNumber")
+        AppLogger.d("updatePhoneNumber: $phoneNumber")
         _uiState.value = _uiState.value.copy(
             phoneNumber = phoneNumber
         )
@@ -148,12 +148,12 @@ constructor(
     }
 
     fun updateGender(gender: Gender?) {
-        Log.d("EditProfileViewModel", "updateGender: $gender")
+        AppLogger.d("updateGender: $gender")
         _uiState.value = _uiState.value.copy(gender = gender)
     }
 
     fun updateDateOfBirth(dob: Long?) {
-        Log.d("EditProfileViewModel", "update dob: $dob")
+        AppLogger.d("update dob: $dob")
         _uiState.value = _uiState.value.copy(dateOfBirth = dob)
     }
 
@@ -178,7 +178,7 @@ constructor(
                     _navigationEvents.trySend(NavigationEvent.SaveSuccess)
                 },
                 onFailure = { error ->
-                    Log.e("EditProfileViewModel", "Failed to update user(id: ${_uiState.value.userId}) -> ${error.message}")
+                    AppLogger.e("Failed to update user(id: ${_uiState.value.userId}) -> ${error.message}")
                     _uiState.update { it.copy(isLoading = false, error = error.message) }
                     SnackbarManager.showMessage(SnackbarMessage.Error("User information could not be updated"))
                 }

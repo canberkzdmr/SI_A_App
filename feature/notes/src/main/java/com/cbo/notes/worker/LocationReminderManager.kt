@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.cbo.core.common.constants.FeatureFlagManager
+import com.cbo.core.logger.AppLogger
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
@@ -19,9 +19,7 @@ class LocationReminderManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    private val geofencingClient: GeofencingClient by lazy {
-        LocationServices.getGeofencingClient(context)
-    }
+    private val geofencingClient: GeofencingClient = LocationServices.getGeofencingClient(context)
 
     private val geofencePendingIntent: PendingIntent by lazy {
         val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
@@ -44,7 +42,7 @@ class LocationReminderManager @Inject constructor(
         radiusInMeters: Float = 100f
     ) {
         if (!FeatureFlagManager.ENABLE_BACKGROUND_LOCATION) {
-            Log.w(TAG, "Background location feature is disabled via FeatureFlagManager.")
+            AppLogger.w("Background location feature is disabled via FeatureFlagManager.")
             return
         }
 
@@ -62,10 +60,10 @@ class LocationReminderManager @Inject constructor(
 
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
-                Log.d(TAG, "Geofence added for note $noteId")
+                AppLogger.d("Geofence added for note $noteId")
             }
             addOnFailureListener {
-                Log.e(TAG, "Failed to add geofence for note $noteId", it)
+                AppLogger.e("Failed to add geofence for note $noteId", it)
             }
         }
     }
@@ -73,20 +71,16 @@ class LocationReminderManager @Inject constructor(
     fun removeLocationReminder(noteId: Int) {
         geofencingClient.removeGeofences(listOf(noteId.toString())).run {
             addOnSuccessListener {
-                Log.d(TAG, "Geofence removed for note $noteId")
+                AppLogger.d("Geofence removed for note $noteId")
             }
             addOnFailureListener {
-                Log.e(TAG, "Failed to remove geofence for note $noteId", it)
+                AppLogger.e("Failed to remove geofence for note $noteId", it)
             }
         }
         try {
             androidx.core.app.NotificationManagerCompat.from(context).cancel(noteId)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to cancel notification for note $noteId", e)
+            AppLogger.e("Failed to cancel notification for note $noteId", e)
         }
-    }
-
-    companion object {
-        private const val TAG = "LocationReminderManager"
     }
 }

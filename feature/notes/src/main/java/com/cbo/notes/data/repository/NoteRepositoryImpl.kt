@@ -1,6 +1,6 @@
 package com.cbo.notes.data.repository
 
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import com.cbo.notes.data.mapper.NoteEntityMapper
 import com.cbo.core.database.dao.NoteDao
 import com.cbo.core.database.dao.NoteLinkDao
@@ -72,7 +72,7 @@ class NoteRepositoryImpl @Inject constructor(
                 noteEntityMapper.toDomain(it)
             }
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error getting note by id: ${e.message}")
+            AppLogger.e("Error getting note by id: ${e.message}", e)
             null
         }
     }
@@ -103,7 +103,7 @@ class NoteRepositoryImpl @Inject constructor(
             
             Result.success(insertedNote)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error inserting note: ${e.message}")
+            AppLogger.e("Error inserting note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -136,7 +136,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.update(entity)
             Result.success(note)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error updating note: ${e.message}")
+            AppLogger.e("Error updating note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -156,7 +156,7 @@ class NoteRepositoryImpl @Inject constructor(
             
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error deleting note: ${e.message}")
+            AppLogger.e("Error deleting note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -166,7 +166,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.softDeleteNote(noteId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error soft deleting note: ${e.message}")
+            AppLogger.e("Error soft deleting note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -176,7 +176,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.restoreDeletedNote(noteId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error restoring deleted note: ${e.message}")
+            AppLogger.e("Error restoring deleted note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -195,7 +195,7 @@ class NoteRepositoryImpl @Inject constructor(
             
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error permanently deleting note: ${e.message}")
+            AppLogger.e("Error permanently deleting note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -217,11 +217,11 @@ class NoteRepositoryImpl @Inject constructor(
             
             // Permanently delete expired notes
             val deletedCount = noteDao.permanentlyDeleteExpiredNotes(expirationTimestamp)
-            Log.d("NoteRepositoryImpl", "Cleaned up $deletedCount expired deleted notes")
+            AppLogger.d("Cleaned up $deletedCount expired deleted notes")
             
             Result.success(deletedCount)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error cleaning up expired deleted notes: ${e.message}")
+            AppLogger.e("Error cleaning up expired deleted notes: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -231,7 +231,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.updatePinnedStatus(noteId, isPinned)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error updating pinned status: ${e.message}")
+            AppLogger.e("Error updating pinned status: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -241,7 +241,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.updateFavoriteStatus(noteId, isFavorite)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error updating favorite status: ${e.message}")
+            AppLogger.e("Error updating favorite status: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -251,7 +251,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.updateArchivedStatus(noteId, isArchived)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error updating archived status: ${e.message}")
+            AppLogger.e("Error updating archived status: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -261,7 +261,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.updateNoteCategory(noteId, categoryId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error updating note category: ${e.message}")
+            AppLogger.e("Error updating note category: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -274,7 +274,7 @@ class NoteRepositoryImpl @Inject constructor(
             }
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error adding tags to note: ${e.message}")
+            AppLogger.e("Error adding tags to note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -287,7 +287,7 @@ class NoteRepositoryImpl @Inject constructor(
             }
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error removing tags from note: ${e.message}")
+            AppLogger.e("Error removing tags from note: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -315,7 +315,7 @@ class NoteRepositoryImpl @Inject constructor(
             
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error updating note tags: ${e.message}")
+            AppLogger.e("Error updating note tags: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -324,7 +324,7 @@ class NoteRepositoryImpl @Inject constructor(
         return try {
             noteDao.getNotesCount(userId)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error getting notes count: ${e.message}")
+            AppLogger.e("Error getting notes count: ${e.message}", e)
             0
         }
     }
@@ -333,7 +333,7 @@ class NoteRepositoryImpl @Inject constructor(
         return try {
             noteDao.getNotesCountByCategory(userId, categoryId)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error getting notes count by category: ${e.message}")
+            AppLogger.e("Error getting notes count by category: ${e.message}", e)
             0
         }
     }
@@ -343,7 +343,7 @@ class NoteRepositoryImpl @Inject constructor(
             noteDao.deleteAllArchivedNotes(userId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error deleting archived notes: ${e.message}")
+            AppLogger.e("Error deleting archived notes: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -357,10 +357,10 @@ class NoteRepositoryImpl @Inject constructor(
     ): Result<Unit> {
         return try {
             noteDao.updateReminder(noteId, reminderTime, repeat.name, priority.name)
-            Log.d("NoteRepositoryImpl", "Reminder set for note $noteId at $reminderTime")
+            AppLogger.d("Reminder set for note $noteId at $reminderTime")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error setting reminder: ${e.message}")
+            AppLogger.e("Error setting reminder: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -368,10 +368,10 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun removeReminder(noteId: Int): Result<Unit> {
         return try {
             noteDao.updateReminder(noteId, null)
-            Log.d("NoteRepositoryImpl", "Reminder removed for note $noteId")
+            AppLogger.d("Reminder removed for note $noteId")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error removing reminder: ${e.message}")
+            AppLogger.e("Error removing reminder: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -388,7 +388,7 @@ class NoteRepositoryImpl @Inject constructor(
                 noteEntityMapper.toDomain(it) 
             }
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error getting notes with reminders: ${e.message}")
+            AppLogger.e("Error getting notes with reminders: ${e.message}", e)
             emptyList()
         }
     }
@@ -396,10 +396,10 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun setLocationReminderEnabled(noteId: Int, isEnabled: Boolean): Result<Unit> {
         return try {
             noteDao.updateLocationReminderEnabled(noteId, isEnabled)
-            Log.d("NoteRepositoryImpl", "Location reminder for note $noteId set to $isEnabled")
+            AppLogger.d("Location reminder for note $noteId set to $isEnabled")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error setting location reminder: ${e.message}")
+            AppLogger.e("Error setting location reminder: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -410,7 +410,7 @@ class NoteRepositoryImpl @Inject constructor(
                 noteEntityMapper.toDomain(it) 
             }
         } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error getting notes with active location reminders: ${e.message}")
+            AppLogger.e("Error getting notes with active location reminders: ${e.message}", e)
             emptyList()
         }
     }
@@ -545,7 +545,7 @@ class NoteRepositoryImpl @Inject constructor(
                     fullyCompletedTodoNoteCount = 0, // Hesaplama aktif notlardan yapılıyor
                 )
             } catch (e: Exception) {
-                Log.e("NoteRepositoryImpl", "Error computing statistics: ${e.message}", e)
+                AppLogger.e("Error computing statistics: ${e.message}", e)
                 NoteStatistics()
             }
         }

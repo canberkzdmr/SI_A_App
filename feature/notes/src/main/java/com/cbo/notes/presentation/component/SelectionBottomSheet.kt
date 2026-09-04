@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.component
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import com.cbo.core.logger.AppLogger
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -141,7 +141,7 @@ private fun SelectionSheetBody(
             TertiaryButton(text = "Cancel", onClick = onDismiss)
 
             TertiaryButton(text = "Apply", onClick = {
-                Log.d("SelectionBottomSheet", "Selected Category: $tempCategory\nSelected Tags: $tempTags")
+                AppLogger.d("Selected Category: $tempCategory\nSelected Tags: $tempTags")
                 onApply(tempCategory, tempTags)
                 onDismiss()
             })

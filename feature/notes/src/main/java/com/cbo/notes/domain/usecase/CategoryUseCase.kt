@@ -1,7 +1,7 @@
 package com.cbo.notes.domain.usecase
 
 import android.database.sqlite.SQLiteConstraintException
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import com.cbo.core.session.UserSession
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.repository.CategoryRepository
@@ -34,10 +34,10 @@ class CreateCategoryUseCase @Inject constructor(
             },
             onFailure = { exception ->
                 if (exception is SQLiteConstraintException) {
-                    Log.d("CategoryUseCase", "Category ${category.name} already exists")
+                    AppLogger.d("Category ${category.name} already exists")
                     return Result.failure(Throwable("Category ${category.name} already exists"))
                 } else {
-                    Log.d("CategoryUseCase", "(CreateCategoryUseCase)An error occurred: ${exception.message?:"Error unknown!"}")
+                    AppLogger.d("(CreateCategoryUseCase)An error occurred: ${exception.message?:"Error unknown!"}")
                     return Result.failure(exception)
                 }
             }

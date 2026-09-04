@@ -1,7 +1,7 @@
 package com.cbo.ui.components.filter
 
 import android.content.res.Configuration
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -62,7 +62,7 @@ fun <T> ExpandableFilterSection(
     onExpandedChange: (Boolean) -> Unit,
     fillAvailableWhenExpanded: Boolean = false
 ) {
-    Log.d("ExpandableFilterSelection", "selectedItems: ${selectedItems}")
+    AppLogger.d("selectedItems: $selectedItems")
     var searchQuery by remember { mutableStateOf("") }
 
     val filteredItems = remember(items, searchQuery) {

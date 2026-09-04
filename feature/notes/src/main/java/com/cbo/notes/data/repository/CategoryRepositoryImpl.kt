@@ -1,6 +1,6 @@
 package com.cbo.notes.data.repository
 
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import com.cbo.notes.data.mapper.CategoryEntityMapper
 import com.cbo.core.database.dao.CategoryDao
 import com.cbo.core.database.dao.NoteDao
@@ -31,7 +31,7 @@ class CategoryRepositoryImpl @Inject constructor(
                 categoryEntityMapper.toDomain(entity)
             }
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error getting category by id: ${e.message}")
+            AppLogger.e("Error getting category by id: ${e.message}", e)
             null
         }
     }
@@ -42,7 +42,7 @@ class CategoryRepositoryImpl @Inject constructor(
                 categoryEntityMapper.toDomain(entity)
             }
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error getting category by name: ${e.message}")
+            AppLogger.e("Error getting category by name: ${e.message}", e)
             null
         }
     }
@@ -54,7 +54,7 @@ class CategoryRepositoryImpl @Inject constructor(
             val insertedCategory = category.copy(id = insertedId.toInt())
             Result.success(insertedCategory)
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error inserting category: ${e.message}")
+            AppLogger.e("Error inserting category: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -65,7 +65,7 @@ class CategoryRepositoryImpl @Inject constructor(
             categoryDao.update(entity)
             Result.success(category)
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error updating category: ${e.message}")
+            AppLogger.e("Error updating category: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -75,7 +75,7 @@ class CategoryRepositoryImpl @Inject constructor(
             categoryDao.deleteById(categoryId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error deleting category: ${e.message}")
+            AppLogger.e("Error deleting category: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -85,7 +85,7 @@ class CategoryRepositoryImpl @Inject constructor(
             categoryDao.updateCategorySortOrder(categoryId, sortOrder)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error updating category sort order: ${e.message}")
+            AppLogger.e("Error updating category sort order: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -95,7 +95,7 @@ class CategoryRepositoryImpl @Inject constructor(
             categoryDao.updateCategoryColor(categoryId, color)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error updating category color: ${e.message}")
+            AppLogger.e("Error updating category color: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -104,7 +104,7 @@ class CategoryRepositoryImpl @Inject constructor(
         return try {
             categoryDao.getCategoriesCount(userId)
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error getting categories count: ${e.message}")
+            AppLogger.e("Error getting categories count: ${e.message}", e)
             0
         }
     }
@@ -114,7 +114,7 @@ class CategoryRepositoryImpl @Inject constructor(
             categoryDao.deleteUnusedCategories(userId)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("CategoryRepositoryImpl", "Error deleting unused categories: ${e.message}")
+            AppLogger.e("Error deleting unused categories: ${e.message}", e)
             Result.failure(e)
         }
     }

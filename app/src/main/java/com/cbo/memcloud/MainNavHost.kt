@@ -1,11 +1,11 @@
 package com.cbo.memcloud
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.cbo.core.logger.AppLogger
 import com.cbo.core.navigation.AppDestination
 import com.cbo.login.presentation.navigation.loginNavGraph
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -60,7 +60,7 @@ fun MainNavHost(
 
         userNavGraph(
             onLogOut = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to login")
+                AppLogger.d("(userNavGraph) Navigated to login")
                 navController.navigate(AppDestination.Login.createRoute()) {
                     popUpTo(AppDestination.Login.route) {
                         inclusive = true
@@ -72,38 +72,38 @@ fun MainNavHost(
                 navController.navigate(AppDestination.EditProfile.route)
             },
             onProfileUpdated = {
-                Log.d("MainNavHost", "(userNavGraph) Profile updated, navigating to Main")
+                AppLogger.d("(userNavGraph) Profile updated, navigating to Main")
                 navController.popBackStack()
             },
             onEditProfileCancelled = {
-                Log.d("MainNavHost", "(userNavGraph) Edit profile cancelled, navigating to Main")
+                AppLogger.d("(userNavGraph) Edit profile cancelled, navigating to Main")
                 navController.popBackStack()
             },
             onChangePassword = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Change Password")
+                AppLogger.d("(userNavGraph) Navigated to Change Password")
                 navController.navigate(AppDestination.ChangePassword.route)
             },
             onPasswordChanged = {
-                Log.d("MainNavHost", "(userNavGraph) Password changed successfully")
+                AppLogger.d("(userNavGraph) Password changed successfully")
                 navController.popBackStack()
             },
             onChangePasswordCancelled = {
-                Log.d("MainNavHost", "(userNavGraph) Change password cancelled")
+                AppLogger.d("(userNavGraph) Change password cancelled")
                 navController.popBackStack()
             },
             onChangeLanguage = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Change Language")
+                AppLogger.d("(userNavGraph) Navigated to Change Language")
                 navController.navigate(AppDestination.ChangeLanguage.route)
             },
             onNavigateBack = {
-                Log.d("MainNavHost", "(userNavGraph) Change Language back")
+                AppLogger.d("(userNavGraph) Change Language back")
                 navController.popBackStack()
             },
             onDeleteUserClicked = {
-                Log.d("MainNavHost", "(userNavGraph) Delete Account clicked")
+                AppLogger.d("(userNavGraph) Delete Account clicked")
             },
             onNotesClicked = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Notes")
+                AppLogger.d("(userNavGraph) Navigated to Notes")
                 navController.navigate(NOTES_ROUTE) {
                     popUpTo(NOTES_ROUTE) {
                         this.saveState = true
@@ -113,19 +113,19 @@ fun MainNavHost(
                 }
             },
             onCategoriesClicked = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Categories")
+                AppLogger.d("(userNavGraph) Navigated to Categories")
                 navController.navigate(CATEGORIES_ROUTE) {
                     launchSingleTop = true
                 }
             },
             onTagsClicked = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Tags")
+                AppLogger.d("(userNavGraph) Navigated to Tags")
                 navController.navigate(TAGS_ROUTE) {
                     launchSingleTop = true
                 }
             },
             onNavigateToStatistics = {
-                Log.d("MainNavHost", "(userNavGraph) Navigated to Statistics")
+                AppLogger.d("(userNavGraph) Navigated to Statistics")
                 navController.navigate(AppDestination.Statistics.route)
             }
         )

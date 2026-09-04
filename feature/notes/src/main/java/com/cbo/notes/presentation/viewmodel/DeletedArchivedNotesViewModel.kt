@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
+import com.cbo.core.logger.AppLogger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.ViewMode
@@ -56,7 +56,7 @@ class DeletedArchivedNotesViewModel
         }
 
         fun loadData() {
-            Log.d("DeletedArchivedNotesViewModel", "loadData()")
+            AppLogger.d("loadData()")
             viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true) }
 
@@ -64,13 +64,13 @@ class DeletedArchivedNotesViewModel
                     getDeletedNotesUseCase(),
                     getArchivedNotesUseCase(),
                 ) { deletedNotes, archivedNotes ->
-                    Log.d("DeletedArchivedNotesViewModel", "deletedNotes: $deletedNotes\narchivedNotes: $archivedNotes")
+                    AppLogger.d("deletedNotes: $deletedNotes\narchivedNotes: $archivedNotes")
                     Pair(deletedNotes, archivedNotes)
                 }.catch { throwable ->
-                    Log.e("DeletedArchivedNotesViewModel", "Could not get deleted/archived notes:\n\t${throwable.message}")
+                    AppLogger.e("Could not get deleted/archived notes:\n\t${throwable.message}")
                     _uiState.update { it.copy(isLoading = false) }
                 }.collect { (deletedNotes, archivedNotes) ->
-                    Log.d("DeletedArchivedNotesViewModel", "deletedNotes: $deletedNotes\narchivedNotes: $archivedNotes")
+                    AppLogger.d("deletedNotes: $deletedNotes\narchivedNotes: $archivedNotes")
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -85,7 +85,7 @@ class DeletedArchivedNotesViewModel
         }
 
         fun switchTab(selectedTab: Int) {
-            Log.d("DeletedArchivedNotesViewModel", "ViewMode changed to -> ${selectedTab.toDeleteArchiveMode()}")
+            AppLogger.d("ViewMode changed to -> ${selectedTab.toDeleteArchiveMode()}")
             _uiState.update {
                 it.copy(
                     viewMode = selectedTab.toDeleteArchiveMode()
@@ -94,7 +94,7 @@ class DeletedArchivedNotesViewModel
         }
 
         fun restoreNote(noteId: Int) {
-            Log.d("DeletedArchivedNotesViewModel", "restoreNote Id: $noteId, viewMode: ${_uiState.value.viewMode}")
+            AppLogger.d("restoreNote Id: $noteId, viewMode: ${_uiState.value.viewMode}")
             viewModelScope.launch {
                 val result = when (_uiState.value.viewMode) {
                     DeleteArchiveMode.DELETE -> restoreDeletedNoteUseCase.invoke(noteId)
@@ -106,7 +106,7 @@ class DeletedArchivedNotesViewModel
                         snackbarManager.showMessage(SnackbarMessage.Success(messageRes = R.string.note_restored))
                     },
                     onFailure = { error ->
-                        Log.e("DeletedArchivedNotesViewModel", "Failed to restore note: ${error.message}")
+                        AppLogger.e("Failed to restore note: ${error.message}")
                         snackbarManager.showMessage(
                             SnackbarMessage.Error(messageRes = R.string.failed_to_restore_note)
                         )
@@ -116,7 +116,7 @@ class DeletedArchivedNotesViewModel
         }
 
         fun permanentlyDeleteNote(noteId: Int) {
-            Log.d("DeletedArchivedNotesViewModel", "permanentlyDeleteNote Id: $noteId")
+            AppLogger.d("permanentlyDeleteNote Id: $noteId")
             viewModelScope.launch {
                 permanentlyDeleteNoteUseCase.invoke(noteId).fold(
                     onSuccess = {
@@ -125,7 +125,7 @@ class DeletedArchivedNotesViewModel
                         )
                     },
                     onFailure = { error ->
-                        Log.e("DeletedArchivedNotesViewModel", "Failed to permanently delete note: ${error.message}")
+                        AppLogger.e("Failed to permanently delete note: ${error.message}")
                         snackbarManager.showMessage(
                             SnackbarMessage.Error(messageRes = R.string.failed_to_permanently_delete_note)
                         )

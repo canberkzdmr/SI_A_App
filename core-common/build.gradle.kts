@@ -36,6 +36,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    api(project(":core-logger"))
     api(platform(libs.firebase.bom))
     api(libs.firebase.perf)
     

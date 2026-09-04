@@ -4,13 +4,13 @@ import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.cbo.core.database.dao.NoteDao
+import com.cbo.core.logger.AppLogger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,9 +36,9 @@ class SnoozeReceiver : BroadcastReceiver() {
                     try {
                         noteDao.updateLocationReminderEnabled(noteId, false)
                         locationReminderManager.removeLocationReminder(noteId)
-                        Log.d("SnoozeReceiver", "Turned off location reminder for note \$noteId")
+                        AppLogger.d("Turned off location reminder for note $noteId")
                     } catch (e: Exception) {
-                        Log.e("SnoozeReceiver", "Error turning off location reminder", e)
+                        AppLogger.e("Error turning off location reminder", e)
                     }
                 }
             }
@@ -86,9 +86,9 @@ class SnoozeReceiver : BroadcastReceiver() {
                     reminderRequest
                 )
 
-                Log.d("SnoozeReceiver", "Snoozed note $noteId for $snoozeMinutes minutes")
+                AppLogger.d("Snoozed note $noteId for $snoozeMinutes minutes")
             } catch (e: Exception) {
-                Log.e("SnoozeReceiver", "Error snoozing note", e)
+                AppLogger.e("Error snoozing note", e)
             }
         }
     }

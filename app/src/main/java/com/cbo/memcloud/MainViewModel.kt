@@ -33,6 +33,10 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val isSuccess = remoteConfigManager.fetchAndActivate()
             if (isSuccess) {
+                // Update logger with latest remote config parameters
+                com.cbo.core.logger.AppLogger.updateConfig(remoteConfigManager.getLoggerConfig())
+                com.cbo.core.logger.AppLogger.d("Remote config fetched and AppLogger config updated")
+
                 val minRequired = remoteConfigManager.getMinAppVersion()
                 val currentVersion = BuildConfig.VERSION_CODE.toLong()
                 if (currentVersion < minRequired) {

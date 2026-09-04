@@ -1,10 +1,10 @@
 package com.cbo.splash
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.usecase.GetUserSettingsUseCase
+import com.cbo.core.logger.AppLogger
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
@@ -55,7 +55,7 @@ class SplashViewModel
                                     }
                                 }
                                 userSettingsResult.isFailure -> {
-                                    Log.d("SplashViewModel", "Could not get user settings: ${userSettingsResult.exceptionOrNull()}")
+                                    AppLogger.d("Could not get user settings: ${userSettingsResult.exceptionOrNull()}")
                                     _uiState.update { it.copy(isLoading = false, isLoggedIn = true, isBiometricEnabled = false) }
                                 }
                             }

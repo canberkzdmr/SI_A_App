@@ -1,7 +1,6 @@
 package com.cbo.login.data.repository
 
 import android.database.sqlite.SQLiteConstraintException
-import android.util.Log
 import androidx.room.Transaction
 import androidx.room.withTransaction
 import com.cbo.core.database.dao.UserDao
@@ -11,6 +10,7 @@ import com.cbo.core.data.mapper.UserEntityMapper
 import com.cbo.core.database.dao.UserSettingsDao
 import com.cbo.core.database.database.AppDatabase
 import com.cbo.core.database.entity.UserSettingsEntity
+import com.cbo.core.logger.AppLogger
 import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.repository.UserRepository
 import java.security.SecureRandom
@@ -48,10 +48,10 @@ constructor(
                 Result.success(Unit)
             }
         } catch (e: SQLiteConstraintException) {
-            Log.e("UserRepositoryImpl", "Violated Constraints -> ${e.message}")
+            AppLogger.e("Violated Constraints -> ${e.message}", throwable = e)
             Result.failure(e)
         } catch (e: Exception) {
-            Log.e("UserRepositoryImpl", "An error ocurred -> ${e.message}")
+            AppLogger.e("An error ocurred -> ${e.message}", throwable = e)
             Result.failure(e)
         }
     }
@@ -76,7 +76,7 @@ constructor(
                 Result.failure(LoginException.UserNotFoundException())
             }
         } catch (e: Exception) {
-            Log.e("UserRepositoryImpl", "An error occurred -> ${e.message}")
+            AppLogger.e("An error occurred -> ${e.message}", throwable = e)
             Result.failure(LoginException.UserNotFoundException())
         }
     }
@@ -85,7 +85,7 @@ constructor(
         return try {
             userDao.userExists(username)
         } catch (e: Exception) {
-            Log.e("UserRepositoryImpl", "An error ocurred -> ${e.message}")
+            AppLogger.e("An error ocurred -> ${e.message}", throwable = e)
             false
         }
     }
@@ -94,7 +94,7 @@ constructor(
         return try {
             return userDao.emailExists(email)
         } catch (e: Exception) {
-            Log.e("UserRepositoryImpl", "An error ocurred -> ${e.message}")
+            AppLogger.e("An error ocurred -> ${e.message}", throwable = e)
             false
         }
     }

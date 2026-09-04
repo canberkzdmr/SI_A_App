@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import java.util.Locale
@@ -26,23 +26,23 @@ class LocaleManager @Inject constructor() {
      */
     fun setAppLocale(languageCode: String?) {
         try {
-            Log.d(TAG, "=== setAppLocale called with languageCode: $languageCode ===")
+            AppLogger.d("=== setAppLocale called with languageCode: $languageCode ===")
             val localeList = if (languageCode.isNullOrEmpty()) {
                 // Clear to system default
-                Log.d(TAG, "Clearing custom locale via AppCompatDelegate")
+                AppLogger.d("Clearing custom locale via AppCompatDelegate")
                 LocaleListCompat.getEmptyLocaleList()
             } else {
                 val locale = Locale.forLanguageTag(languageCode)
-                Log.d(TAG, "Setting AppCompatDelegate locales to: $languageCode (${locale.displayLanguage})")
+                AppLogger.d("Setting AppCompatDelegate locales to: $languageCode (${locale.displayLanguage})")
                 // Also set process default for libraries that read Locale.getDefault()
                 Locale.setDefault(locale)
                 LocaleListCompat.create(locale)
             }
             AppCompatDelegate.setApplicationLocales(localeList)
             val current = AppCompatDelegate.getApplicationLocales()
-            Log.d(TAG, "=== setAppLocale completed, current AppCompatDelegate locale: ${if (current.isEmpty) "system" else current[0]?.toLanguageTag()} ===")
+            AppLogger.d("=== setAppLocale completed, current AppCompatDelegate locale: ${if (current.isEmpty) "system" else current[0]?.toLanguageTag()} ===")
         } catch (e: Exception) {
-            Log.e(TAG, "Error setting app locale to $languageCode", e)
+            AppLogger.e("Error setting app locale to $languageCode", throwable = e)
             e.printStackTrace()
         }
     }
@@ -66,7 +66,7 @@ class LocaleManager @Inject constructor() {
                 locales[0]?.toLanguageTag()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error getting current locale", e)
+            AppLogger.e("Error getting current locale", throwable = e)
             null
         }
     }

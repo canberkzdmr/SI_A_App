@@ -1,7 +1,7 @@
 package com.cbo.notes.presentation.screen
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
+import com.cbo.core.logger.AppLogger
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Spring
@@ -89,7 +89,7 @@ fun NotesScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     BackHandler {
-        Log.i("NotesScreen", "Back button is disabled for Notes Screen")
+        AppLogger.i("Back button is disabled for Notes Screen")
     }
 
     LaunchedEffect(initialCategoryId, uiState.categories) {

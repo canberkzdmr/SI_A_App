@@ -1,12 +1,12 @@
 package com.cbo.login.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
+import com.cbo.core.logger.AppLogger
 import com.cbo.login.domain.usecase.GetUserUseCase
 import com.cbo.login.domain.usecase.LoginUseCase
 import com.cbo.ui.snackbar.SnackbarManager
@@ -47,7 +47,7 @@ class LoginViewModel
 
                 loginUseCase.invoke(username, password).fold(
                     onSuccess = {
-                        Log.i("LoginViewModel", "User logged in")
+                        AppLogger.i("User logged in")
                         SnackbarManager.showMessage(SnackbarMessage.Success("Welcome $username!"))
                         _uiState.update { it.copy(isLoading = false, isLoggedIn = true, isFirstLoginDone = true) }
                     },
@@ -72,7 +72,7 @@ class LoginViewModel
                 user?.let {
                     setBiometricEnabledUseCase.invoke(it.id, enabled)
                 } ?: run {
-                    Log.e("LoginViewModel", "Enable BiometricLogin: User is null")
+                    AppLogger.e("Enable BiometricLogin: User is null")
                 }
             }
         }
@@ -93,7 +93,7 @@ class LoginViewModel
                 user?.let {
                     setFirstLoginDoneUseCase.invoke(it.id, true)
                 } ?: run {
-                    Log.e("LoginViewModel", "User is null!")
+                    AppLogger.e("User is null!")
                 }
             }
         }
@@ -104,12 +104,12 @@ class LoginViewModel
                 onSuccess = {
                     val user = userResult.getOrNull()
                     if (user == null) {
-                        Log.w("LoginViewModel", "Get User Result: Success, User: null")
+                        AppLogger.w("Get User Result: Success, User: null")
                     }
                     return user
                 },
                 onFailure = {
-                    Log.e("LoginViewModel", "Get User Result: Fail")
+                    AppLogger.e("Get User Result: Fail")
                     return null
                 },
             )

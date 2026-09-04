@@ -45,6 +45,7 @@ dependencies {
     api(project(":core-common"))
     api(project(":core-navigation"))
     api(project(":core-session"))
+    api(project(":core-logger"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

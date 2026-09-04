@@ -3,8 +3,8 @@ package com.cbo.notes.worker
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.cbo.core.common.constants.FeatureFlagManager
+import com.cbo.core.logger.AppLogger
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
 
@@ -15,7 +15,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent == null || geofencingEvent.hasError()) {
-            Log.e(TAG, "GeofencingEvent error: ${geofencingEvent?.errorCode}")
+            AppLogger.e("GeofencingEvent error: ${geofencingEvent?.errorCode}")
             return
         }
 
@@ -32,10 +32,10 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                     // 10 dakika (600,000 ms) debounce süresi ile jitter önleniyor.
                     if (now - lastTrigger > 10 * 60 * 1000) {
                         prefs.edit().putLong("last_trigger_$noteId", now).apply()
-                        Log.d(TAG, "Entered geofence for note: $noteId")
+                        AppLogger.d("Entered geofence for note: $noteId")
                         triggerNotificationWorker(context, noteId)
                     } else {
-                        Log.d(TAG, "Geofence debounce active for note: $noteId, ignoring trigger.")
+                        AppLogger.d("Geofence debounce active for note: $noteId, ignoring trigger.")
                     }
                 }
             }
@@ -46,9 +46,5 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         val scheduler = ReminderScheduler(context)
         // Schedule immediately (0 delay) and pass LOCATION triggerType
         scheduler.scheduleReminder(noteId, "Konum Hatırlatıcısı!", System.currentTimeMillis() + 1000, triggerType = "LOCATION")
-    }
-
-    companion object {
-        private const val TAG = "GeofenceReceiver"
     }
 }

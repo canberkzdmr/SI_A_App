@@ -1,10 +1,10 @@
 package com.cbo.core.data.repository
 
-import android.util.Log
 import com.cbo.core.database.dao.UserDao
 import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.model.PasswordVerifyModel
 import com.cbo.core.domain.repository.UserRepository
+import com.cbo.core.logger.AppLogger
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
@@ -19,7 +19,7 @@ class UserRepositoryImpl @Inject constructor(
 
             Result.failure(LoginException.UserNotFoundException())
         } catch (e: Exception) {
-            Log.e("UserRepositoryImpl", "An error occurred -> ${e.message}")
+            AppLogger.e("An error occurred -> ${e.message}", throwable = e)
             return null
         }
     }

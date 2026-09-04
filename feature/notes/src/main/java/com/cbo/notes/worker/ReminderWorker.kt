@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.text.Html
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -19,6 +18,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.cbo.core.database.dao.NoteDao
 import com.cbo.core.database.entity.NoteEntity
+import com.cbo.core.logger.AppLogger
 import com.cbo.notes.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -41,10 +41,10 @@ class ReminderWorker @AssistedInject constructor(
         val noteId = inputData.getInt(KEY_NOTE_ID, -1)
         val noteTitle = inputData.getString(KEY_NOTE_TITLE) ?: "Note Reminder"
         
-        Log.d(TAG, "Reminder triggered for note: $noteId - $noteTitle")
+        AppLogger.d("Reminder triggered for note: $noteId - $noteTitle")
         
         if (noteId == -1) {
-            Log.e(TAG, "Invalid note ID")
+            AppLogger.e("Invalid note ID")
             return Result.failure()
         }
         
@@ -52,7 +52,7 @@ class ReminderWorker @AssistedInject constructor(
             // Verify the note still exists
             val note = noteDao.getNoteById(noteId)
             if (note == null || note.isDeleted) {
-                Log.d(TAG, "Note was deleted or reminder was removed, skipping notification")
+                AppLogger.d("Note was deleted or reminder was removed, skipping notification")
                 return Result.success()
             }
             
@@ -75,7 +75,7 @@ class ReminderWorker @AssistedInject constructor(
             
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Error showing reminder notification", e)
+            AppLogger.e("Error showing reminder notification", e)
             Result.failure()
         }
     }
@@ -93,7 +93,7 @@ class ReminderWorker @AssistedInject constructor(
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                Log.w(TAG, "Notification permission not granted")
+                AppLogger.w("Notification permission not granted")
                 return
             }
         }
@@ -165,7 +165,7 @@ class ReminderWorker @AssistedInject constructor(
         }
         
         NotificationManagerCompat.from(context).notify(note.id, builder.build())
-        Log.d(TAG, "Notification shown for note: ${note.id} with priority $priorityLevel")
+        AppLogger.d("Notification shown for note: ${note.id} with priority $priorityLevel")
     }
     
     /**
@@ -244,7 +244,6 @@ class ReminderWorker @AssistedInject constructor(
     }
 
     companion object {
-        private const val TAG = "ReminderWorker"
         const val CHANNEL_ID_HIGH = "note_reminders_high"
         const val CHANNEL_ID_DEFAULT = "note_reminders_default"
         const val KEY_NOTE_ID = "note_id"

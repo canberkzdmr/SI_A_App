@@ -2,7 +2,7 @@ package com.cbo.user.presentation.screen
 
 import android.content.res.Configuration
 import android.net.Uri
-import android.util.Log
+import com.cbo.core.logger.AppLogger
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -365,7 +365,7 @@ fun EditableProfileImage(
             contract = ActivityResultContracts.GetContent(),
         ) { uri: Uri? ->
             uri?.let { selectedUri ->
-                Log.i("EditProfileScreen", "Image selected: $selectedUri")
+                AppLogger.i("Image selected: $selectedUri")
                 onImageSelected(selectedUri)
             }
         }

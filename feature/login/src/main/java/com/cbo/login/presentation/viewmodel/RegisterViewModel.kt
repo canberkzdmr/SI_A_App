@@ -1,6 +1,5 @@
 package com.cbo.login.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.common.base.UiState
@@ -9,6 +8,7 @@ import com.cbo.core.common.validation.FieldValidation
 import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.exception.RegistrationException
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
+import com.cbo.core.logger.AppLogger
 import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.usecase.GetUserUseCase
 import com.cbo.login.domain.usecase.LoginUseCase
@@ -32,7 +32,6 @@ class RegisterViewModel
         private val getUserUseCase: GetUserUseCase,
         private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
     ) : ViewModel() {
-        private val TAG = "RegisterViewModel"
 
         private val _uiState = MutableStateFlow<UiState<Unit>>(UiState.Idle)
         val uiState: StateFlow<UiState<Unit>> = _uiState.asStateFlow()
@@ -70,13 +69,13 @@ class RegisterViewModel
                         _uiState.value = UiState.Success(Unit)
                     } else {
                         val exception = loginResult.exceptionOrNull()
-                        Log.e(TAG, "Auto login failed: ${exception?.message}")
+                        AppLogger.e("Auto login failed: ${exception?.message}")
                         SnackbarManager.showMessage(SnackbarMessage.Warning(exception?.message ?: "Login failed"))
                         _uiState.value = UiState.Error(exception?.message ?: "Auto login failed")
                     }
                 } else {
                     val exception = result.exceptionOrNull()
-                    Log.e(TAG, exception?.message ?: "Unknown error")
+                    AppLogger.e(exception?.message ?: "Unknown error")
                     handleRegistrationException(exception)
                     SnackbarManager.showMessage(
                         SnackbarMessage.Warning(exception?.message ?: "Unknown error"),
@@ -93,7 +92,7 @@ class RegisterViewModel
                 userResult.getOrNull()?.let { user ->
                     setBiometricEnabledUseCase(user.id, enabled)
                 } ?: run {
-                    Log.e(TAG, "Enable BiometricLogin: User is null")
+                    AppLogger.e("Enable BiometricLogin: User is null")
                 }
                 setShowBiometricDialog(false)
                 completeLogin(username, password, onSuccess)
@@ -112,7 +111,7 @@ class RegisterViewModel
                 _uiState.value = UiState.Success(Unit)
             } else {
                 val exception = loginResult.exceptionOrNull()
-                Log.e(TAG, "Auto login failed: ${exception?.message}")
+                AppLogger.e("Auto login failed: ${exception?.message}")
                 SnackbarManager.showMessage(SnackbarMessage.Warning(exception?.message ?: "Login failed"))
                 _uiState.value = UiState.Error(exception?.message ?: "Auto login failed")
             }
@@ -122,7 +121,7 @@ class RegisterViewModel
         private fun handleRegistrationException(exception: Throwable?) {
             when (exception) {
                 is RegistrationException -> {
-                    Log.w(TAG, "Registration error: ${exception.message}")
+                    AppLogger.w("Registration error: ${exception.message}")
                 }
             }
         }

@@ -1,10 +1,10 @@
 package com.cbo.core.data.repository
 
-import android.util.Log
 import com.cbo.core.data.mapper.UserSettingsEntityMapper
 import com.cbo.core.database.dao.UserSettingsDao
 import com.cbo.core.domain.exception.UserSettingsException
 import com.cbo.core.domain.repository.UserSettingsRepository
+import com.cbo.core.logger.AppLogger
 import javax.inject.Inject
 
 class UserSettingsRepositoryImpl @Inject constructor(
@@ -27,7 +27,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
             userSettingsDao.updateFirstLoginDone(userId = userId, done = done)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("UserSettingsRepositoryImpl", "Error setFirstLoginDone: ${e.message}")
+            AppLogger.e("Error setFirstLoginDone: ${e.message}", throwable = e)
             Result.failure(e)
         }
     }
@@ -37,7 +37,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
             userSettingsDao.updateBiometricsEnabled(userId = userId, enabled = enabled)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("UserSettingsRepositoryImpl", "Error setFirstLoginDone: ${e.message}")
+            AppLogger.e("Error setBiometricsEnabled: ${e.message}", throwable = e)
             Result.failure(e)
         }
     }
@@ -47,14 +47,14 @@ class UserSettingsRepositoryImpl @Inject constructor(
             val language = userSettingsDao.getPreferredLanguage(userId)
             return Result.success(language)
         } catch (e: Exception) {
-            Log.e("UserSettingsRepositoryImpl", "Error getPreferredLanguage: ${e.message}")
+            AppLogger.e("Error getPreferredLanguage: ${e.message}", throwable = e)
             Result.failure(e)
         }
     }
 
     override suspend fun setPreferredLanguage(userId: Int, languageCode: String?): Result<Unit> {
         return try {
-            Log.d("UserSettingsRepositoryImpl", "setPreferredLanguage: $languageCode")
+            AppLogger.d("setPreferredLanguage: $languageCode")
             languageCode?.let {
                 userSettingsDao.setPreferredLanguage(userId, languageCode)
             } ?: run {
@@ -62,7 +62,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
             }
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("UserSettingsRepositoryImpl", "Error setPreferredLanguage: ${e.message}")
+            AppLogger.e("Error setPreferredLanguage: ${e.message}", throwable = e)
             Result.failure(e)
         }
     }

@@ -1,7 +1,7 @@
 package com.cbo.login.presentation.screen
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import com.cbo.core.logger.AppLogger
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -69,7 +69,7 @@ fun LoginScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(state.isLoggedIn) {
-        Log.d("LoginScreen", "state isLoggedIn: ${state.isLoggedIn}")
+        AppLogger.d("state isLoggedIn: ${state.isLoggedIn}")
         if (state.isLoggedIn) {
             onLoginSuccess()
         }
@@ -222,13 +222,13 @@ fun LoginScreenContent(
                 message = stringResource(id = com.cbo.login.R.string.enable_biometric_message),
                 onConfirm = {
                     onBiometricLoginEnabled(true)
-                    Log.d("LoginScreen", "Biometric Login Enabled")
+                    AppLogger.d("Biometric Login Enabled")
                     onShowBiometricDialog(false)
                     onLoginClick()
                 },
                 onDismiss = {
                     onShowBiometricDialog(false)
-                    Log.d("LoginScreen", "Biometric Login is Not Enabled")
+                    AppLogger.d("Biometric Login is Not Enabled")
                     onLoginClick()
                 },
                 confirmText = stringResource(id = com.cbo.login.R.string.enable),

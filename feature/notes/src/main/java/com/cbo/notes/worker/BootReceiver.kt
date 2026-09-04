@@ -3,8 +3,8 @@ package com.cbo.notes.worker
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.cbo.core.database.dao.NoteDao
+import com.cbo.core.logger.AppLogger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +22,7 @@ class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED || intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) {
-            Log.d("BootReceiver", "Device rebooted or package replaced. Rescheduling reminders.")
+            AppLogger.d("Device rebooted or package replaced. Rescheduling reminders.")
             
             val reminderScheduler = ReminderScheduler(context)
             
@@ -36,7 +36,7 @@ class BootReceiver : BroadcastReceiver() {
                         val reminderTime = note.reminderTime
                         if (reminderTime != null && reminderTime > currentTime) {
                             reminderScheduler.scheduleReminder(note.id, note.title, reminderTime)
-                            Log.d("BootReceiver", "Rescheduled time reminder for note \${note.id}")
+                            AppLogger.d("Rescheduled time reminder for note ${note.id}")
                         }
                     }
 
@@ -53,11 +53,11 @@ class BootReceiver : BroadcastReceiver() {
                                 longitude = lng,
                                 radiusInMeters = radius
                             )
-                            Log.d("BootReceiver", "Rescheduled location reminder for note \${note.id}")
+                            AppLogger.d("Rescheduled location reminder for note ${note.id}")
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("BootReceiver", "Error rescheduling reminders on boot", e)
+                    AppLogger.e("Error rescheduling reminders on boot", e)
                 }
             }
         }
