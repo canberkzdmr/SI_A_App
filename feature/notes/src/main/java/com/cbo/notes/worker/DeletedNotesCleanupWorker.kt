@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.cbo.core.common.util.safePutAttribute
+import com.cbo.core.common.util.safePutMetric
+import com.cbo.core.common.util.traceMetricSuspend
 import com.cbo.notes.domain.usecase.CleanupExpiredDeletedNotesUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -22,16 +25,20 @@ class DeletedNotesCleanupWorker @AssistedInject constructor(
     private val cleanupExpiredDeletedNotesUseCase: CleanupExpiredDeletedNotesUseCase
 ) : CoroutineWorker(context, workerParams) {
 
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = traceMetricSuspend("trace_worker_cleanup_deleted_notes") { trace ->
+        trace.safePutMetric("run_attempt_count", runAttemptCount.toLong())
         Log.d(TAG, "Starting deleted notes cleanup work")
         
-        return try {
+        try {
             cleanupExpiredDeletedNotesUseCase.invoke().fold(
                 onSuccess = { deletedCount ->
+                    trace.safePutMetric("deleted_notes_count", deletedCount.toLong())
+                    trace.safePutAttribute("status", "success")
                     Log.d(TAG, "Successfully cleaned up $deletedCount expired deleted notes")
                     Result.success()
                 },
                 onFailure = { error ->
+                    trace.safePutAttribute("status", "failure")
                     Log.e(TAG, "Failed to cleanup expired notes: ${error.message}")
                     // Retry if there's an error
                     if (runAttemptCount < MAX_RETRY_ATTEMPTS) {
@@ -42,6 +49,7 @@ class DeletedNotesCleanupWorker @AssistedInject constructor(
                 }
             )
         } catch (e: Exception) {
+            trace.safePutAttribute("status", "exception")
             Log.e(TAG, "Exception during cleanup work", e)
             if (runAttemptCount < MAX_RETRY_ATTEMPTS) {
                 Result.retry()

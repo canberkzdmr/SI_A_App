@@ -1,7 +1,12 @@
 package com.cbo.notes.presentation.screen
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.presentation.viewmodel.MapViewModel
@@ -33,6 +39,16 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
+
+private fun Context.hasLocationPermission(): Boolean {
+    return ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @SuppressLint("MissingPermission")
@@ -75,8 +91,46 @@ fun MapScreenContent(
     }
     val coroutineScope = rememberCoroutineScope()
     
+    var hasLocationPermission by remember {
+        mutableStateOf(context.hasLocationPermission())
+    }
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(39.92077, 32.85411), 6f)
+    }
+
+    val fetchCurrentLocation = remember(fusedLocationClient, hasLocationPermission) {
+        { onLocationFound: ((Location) -> Unit)? ->
+            if (!isPreview && hasLocationPermission) {
+                try {
+                    fusedLocationClient?.lastLocation?.addOnSuccessListener { location: Location? ->
+                        if (location != null) {
+                            onUpdateCurrentLocation(location)
+                            onLocationFound?.invoke(location)
+                        }
+                    }?.addOnFailureListener {
+                        // ignore failure
+                    }
+                } catch (_: SecurityException) {
+                    hasLocationPermission = false
+                }
+            }
+        }
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        hasLocationPermission = granted
+        if (granted && !isPreview) {
+            fetchCurrentLocation { location ->
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(
+                    LatLng(location.latitude, location.longitude), 12f
+                )
+            }
+        }
     }
 
     var isFilterSheetOpen by remember { mutableStateOf(false) }
@@ -86,13 +140,20 @@ fun MapScreenContent(
 
     LaunchedEffect(Unit) {
         if (!isPreview) {
-            fusedLocationClient?.lastLocation?.addOnSuccessListener { location: Location? ->
-                if (location != null) {
-                    onUpdateCurrentLocation(location)
+            if (context.hasLocationPermission()) {
+                hasLocationPermission = true
+                fetchCurrentLocation { location ->
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(
                         LatLng(location.latitude, location.longitude), 12f
                     )
                 }
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
             }
         }
     }
@@ -102,9 +163,8 @@ fun MapScreenContent(
             FloatingActionButton(
                 onClick = {
                     if (!isPreview) {
-                        fusedLocationClient?.lastLocation?.addOnSuccessListener { location: Location? ->
-                            if (location != null) {
-                                onUpdateCurrentLocation(location)
+                        if (hasLocationPermission) {
+                            fetchCurrentLocation { location ->
                                 coroutineScope.launch {
                                     cameraPositionState.animate(
                                         CameraUpdateFactory.newLatLngZoom(
@@ -113,6 +173,13 @@ fun MapScreenContent(
                                     )
                                 }
                             }
+                        } else {
+                            locationPermissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
                         }
                     }
                 },
@@ -135,7 +202,7 @@ fun MapScreenContent(
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
                     cameraPositionState = cameraPositionState,
-                    properties = MapProperties(isMyLocationEnabled = true),
+                    properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
                     uiSettings = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false),
                     onMapClick = {
                         onSelectNote(null)
@@ -207,9 +274,17 @@ fun MapScreenContent(
                         selected = uiState.isNearbyFilterEnabled,
                         onClick = {
                             if (!uiState.isNearbyFilterEnabled && !isPreview) {
-                                fusedLocationClient?.lastLocation?.addOnSuccessListener { loc ->
-                                    if (loc != null) onUpdateCurrentLocation(loc)
-                                    onToggleNearbyFilter()
+                                if (hasLocationPermission) {
+                                    fetchCurrentLocation { loc ->
+                                        onToggleNearbyFilter()
+                                    }
+                                } else {
+                                    locationPermissionLauncher.launch(
+                                        arrayOf(
+                                            Manifest.permission.ACCESS_FINE_LOCATION,
+                                            Manifest.permission.ACCESS_COARSE_LOCATION
+                                        )
+                                    )
                                 }
                             } else {
                                 onToggleNearbyFilter()

@@ -18,6 +18,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
+import com.cbo.core.common.util.safePutMetric
+import com.cbo.core.common.util.traceMetricSuspend
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
@@ -81,8 +83,12 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertNote(note: Note): Result<Note> {
-        return try {
+    override suspend fun insertNote(note: Note): Result<Note> = traceMetricSuspend("trace_insert_note") { trace ->
+        try {
+            trace.safePutMetric("todos_count", note.todos.size.toLong())
+            trace.safePutMetric("attachments_count", note.attachments.size.toLong())
+            trace.safePutMetric("tags_count", note.tags.size.toLong())
+
             val entity = noteEntityMapper.toEntity(note)
             val insertedId: Long = noteDao.insert(entity)
             val insertedNote = note.copy(id = insertedId.toInt())
@@ -102,8 +108,12 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateNote(note: Note): Result<Note> {
-        return try {
+    override suspend fun updateNote(note: Note): Result<Note> = traceMetricSuspend("trace_update_note") { trace ->
+        try {
+            trace.safePutMetric("todos_count", note.todos.size.toLong())
+            trace.safePutMetric("attachments_count", note.attachments.size.toLong())
+            trace.safePutMetric("tags_count", note.tags.size.toLong())
+
             val entity = noteEntityMapper.toEntity(note)
             val tagList = tagDao.getTagsByNote(note.id) // tags in db
             if (tagList.isNotEmpty()) {
@@ -409,128 +419,135 @@ class NoteRepositoryImpl @Inject constructor(
     // Statistics
     // -------------------------------------------------------------------------
 
-    override suspend fun getNoteStatistics(userId: Int): NoteStatistics = coroutineScope {
-        try {
-            val now = System.currentTimeMillis()
-            // Haftanın başlangıcı (Pazartesi 00:00)
-            val weekStart = LocalDate.now(ZoneId.systemDefault())
-                .with(WeekFields.of(Locale.getDefault()).dayOfWeek(), DayOfWeek.MONDAY.value.toLong())
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant().toEpochMilli()
+    override suspend fun getNoteStatistics(userId: Int): NoteStatistics = traceMetricSuspend("trace_calculate_note_statistics") { trace ->
+        coroutineScope {
+            try {
+                val now = System.currentTimeMillis()
+                // Haftanın başlangıcı (Pazartesi 00:00)
+                val weekStart = LocalDate.now(ZoneId.systemDefault())
+                    .with(WeekFields.of(Locale.getDefault()).dayOfWeek(), DayOfWeek.MONDAY.value.toLong())
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant().toEpochMilli()
 
-            // Eski not eşiği (90 gün önce)
-            val staleThreshold = now - (90L * 24 * 60 * 60 * 1000)
+                // Eski not eşiği (90 gün önce)
+                val staleThreshold = now - (90L * 24 * 60 * 60 * 1000)
 
-            // Tüm sorguları ardışık olarak çalıştırıyoruz (SQLite zaten çok hızlıdır, 23 paralel sorgu thread havuzunu kilitler)
-            val totalNotes           = noteDao.getNotesCount(userId)
-            val archived             = noteDao.getArchivedNotesCount(userId)
-            val favorite             = noteDao.getFavoriteNotesCount(userId)
-            val pinned               = noteDao.getPinnedNotesCount(userId)
-            val deleted              = noteDao.getDeletedNotesCount(userId)
-            val perDay               = noteDao.getNotesCountPerDay(userId)
-            val perDow               = noteDao.getNotesCountByDayOfWeek(userId)
-            val perHour              = noteDao.getNotesCountByHour(userId)
-            val perMonth             = noteDao.getNotesCountPerMonth(userId)
-            val categoryStats        = noteDao.getCategoryDistribution(userId)
-            val colorStats           = noteDao.getColorDistribution(userId)
-            val activeReminder       = noteDao.getActiveReminderCount(userId)
-            val expiredReminder      = noteDao.getExpiredReminderCount(userId)
-            val locationReminder     = noteDao.getLocationReminderCount(userId)
-            val staleNotes           = noteDao.getStaleNotesCount(userId, staleThreshold)
-            val weeklyNotes          = noteDao.getWeeklyNoteCount(userId, weekStart)
-            val weeklyTodosRaw       = noteDao.getWeeklyUpdatedNoteTodos(userId, weekStart)
-            val totalLinks           = noteLinkDao.getTotalLinkCountForUser(userId)
-            val mostLinked           = noteLinkDao.getMostLinkedNotes(userId, 5)
-            val orphans              = noteLinkDao.getOrphanNoteCount(userId)
-            val topTags              = tagDao.getMostUsedTags(userId, 10)
-            val weeklyTopTag         = tagDao.getMostUsedTagSince(userId, weekStart)
+                // Tüm sorguları ardışık olarak çalıştırıyoruz (SQLite zaten çok hızlıdır, 23 paralel sorgu thread havuzunu kilitler)
+                val totalNotes           = noteDao.getNotesCount(userId)
+                val archived             = noteDao.getArchivedNotesCount(userId)
+                val favorite             = noteDao.getFavoriteNotesCount(userId)
+                val pinned               = noteDao.getPinnedNotesCount(userId)
+                val deleted              = noteDao.getDeletedNotesCount(userId)
+                val perDay               = noteDao.getNotesCountPerDay(userId)
+                val perDow               = noteDao.getNotesCountByDayOfWeek(userId)
+                val perHour              = noteDao.getNotesCountByHour(userId)
+                val perMonth             = noteDao.getNotesCountPerMonth(userId)
+                val categoryStats        = noteDao.getCategoryDistribution(userId)
+                val colorStats           = noteDao.getColorDistribution(userId)
+                val activeReminder       = noteDao.getActiveReminderCount(userId)
+                val expiredReminder      = noteDao.getExpiredReminderCount(userId)
+                val locationReminder     = noteDao.getLocationReminderCount(userId)
+                val staleNotes           = noteDao.getStaleNotesCount(userId, staleThreshold)
+                val weeklyNotes          = noteDao.getWeeklyNoteCount(userId, weekStart)
+                val weeklyTodosRaw       = noteDao.getWeeklyUpdatedNoteTodos(userId, weekStart)
+                val totalLinks           = noteLinkDao.getTotalLinkCountForUser(userId)
+                val mostLinked           = noteLinkDao.getMostLinkedNotes(userId, 5)
+                val orphans              = noteLinkDao.getOrphanNoteCount(userId)
+                val topTags              = tagDao.getMostUsedTags(userId, 10)
+                val weeklyTopTag         = tagDao.getMostUsedTagSince(userId, weekStart)
 
-            // Aktif notların anlık listesini al (word count, attachment, todo için)
-            val activeNotes = noteDao.getNotesWithDetailsByUser(userId).first()
+                // Aktif notların anlık listesini al (word count, attachment, todo için)
+                val activeNotes = noteDao.getNotesWithDetailsByUser(userId).first()
 
-            // Word count ve attachment hesaplama
-            var wordCount = 0L
-            var totalTodos = 0
-            var completedTodos = 0
-            var totalAttach = 0
-            var imageAttach = 0
-            var audioAttach = 0
+                // Word count ve attachment hesaplama
+                var wordCount = 0L
+                var totalTodos = 0
+                var completedTodos = 0
+                var totalAttach = 0
+                var imageAttach = 0
+                var audioAttach = 0
 
-            activeNotes.forEach { noteWithDetails ->
-                val note = noteWithDetails.note
-                // Yaklaşık kelime sayısı: boşlukla ayrılmış token'lar
-                val words = (note.title + " " + note.content).trim().split("\\s+".toRegex())
-                wordCount += words.count { it.isNotBlank() }
+                activeNotes.forEach { noteWithDetails ->
+                    val note = noteWithDetails.note
+                    // Yaklaşık kelime sayısı: boşlukla ayrılmış token'lar
+                    val words = (note.title + " " + note.content).trim().split("\\s+".toRegex())
+                    wordCount += words.count { it.isNotBlank() }
 
-                // Todo istatistikleri
-                note.todos.forEach { todo ->
-                    totalTodos++
-                    if (todo.isDone) completedTodos++
-                }
+                    // Todo istatistikleri
+                    note.todos.forEach { todo ->
+                        totalTodos++
+                        if (todo.isDone) completedTodos++
+                    }
 
-                // Attachment istatistikleri
-                note.attachments.forEach { attachUri ->
-                    totalAttach++
-                    when {
-                        attachUri.endsWith(".mp3", true) ||
-                        attachUri.endsWith(".m4a", true) ||
-                        attachUri.endsWith(".3gp", true) ||
-                        attachUri.contains("audio", ignoreCase = true) -> audioAttach++
-                        else -> imageAttach++
+                    // Attachment istatistikleri
+                    note.attachments.forEach { attachUri ->
+                        totalAttach++
+                        when {
+                            attachUri.endsWith(".mp3", true) ||
+                            attachUri.endsWith(".m4a", true) ||
+                            attachUri.endsWith(".3gp", true) ||
+                            attachUri.contains("audio", ignoreCase = true) -> audioAttach++
+                            else -> imageAttach++
+                        }
                     }
                 }
+
+                // Haftalık todo sayısını JSON'dan hesapla
+                val todoType = object : TypeToken<List<Map<String, Any>>>() {}.type
+                var weeklyCompleted = 0
+                weeklyTodosRaw.forEach { todosJson ->
+                    try {
+                        val todos: List<Map<String, Any>> = gson.fromJson(todosJson, todoType)
+                        weeklyCompleted += todos.count { it["isDone"] == true }
+                    } catch (_: Exception) { /* ignore malformed json */ }
+                }
+
+                // Streak hesaplama
+                val perDayMap = perDay.associate { it.day to it.noteCount }
+                val streaks = calculateStreaks(perDayMap)
+
+                trace.safePutMetric("total_notes_count", totalNotes.toLong())
+                trace.safePutMetric("total_words_count", wordCount)
+                trace.safePutMetric("total_todos_count", totalTodos.toLong())
+                trace.safePutMetric("total_attachments_count", totalAttach.toLong())
+
+                NoteStatistics(
+                    totalNotes           = totalNotes,
+                    archivedNotes        = archived,
+                    favoriteNotes        = favorite,
+                    pinnedNotes          = pinned,
+                    deletedNotes         = deleted,
+                    totalWordCount       = wordCount,
+                    totalTodoItems       = totalTodos,
+                    completedTodoItems   = completedTodos,
+                    totalAttachments     = totalAttach,
+                    imageAttachments     = imageAttach,
+                    audioAttachments     = audioAttach,
+                    notesPerDay          = perDayMap,
+                    notesPerHour         = perHour.associate { it.hour to it.noteCount },
+                    notesPerDayOfWeek    = perDow.associate { it.dayOfWeek to it.noteCount },
+                    notesPerMonth        = perMonth.associate { it.month to it.noteCount },
+                    currentStreak        = streaks.first,
+                    longestStreak        = streaks.second,
+                    categoryDistribution = categoryStats.associate { it.categoryName to it.noteCount },
+                    topTags              = topTags.map { it.name to it.usageCount },
+                    colorDistribution    = colorStats.associate { it.colorName to it.noteCount },
+                    totalNoteLinks       = totalLinks,
+                    mostLinkedNotes      = mostLinked.map { it.noteId to it.linkCount },
+                    orphanNoteCount      = orphans,
+                    activeReminderCount  = activeReminder,
+                    expiredReminderCount = expiredReminder,
+                    locationReminderCount= locationReminder,
+                    weeklyNoteCount      = weeklyNotes,
+                    weeklyCompletedTodoCount = weeklyCompleted,
+                    mostUsedTagThisWeek  = weeklyTopTag?.name,
+                    staleNoteCount       = staleNotes,
+                    fullyCompletedTodoNoteCount = 0, // Hesaplama aktif notlardan yapılıyor
+                )
+            } catch (e: Exception) {
+                Log.e("NoteRepositoryImpl", "Error computing statistics: ${e.message}", e)
+                NoteStatistics()
             }
-
-            // Haftalık todo sayısını JSON'dan hesapla
-            val todoType = object : TypeToken<List<Map<String, Any>>>() {}.type
-            var weeklyCompleted = 0
-            weeklyTodosRaw.forEach { todosJson ->
-                try {
-                    val todos: List<Map<String, Any>> = gson.fromJson(todosJson, todoType)
-                    weeklyCompleted += todos.count { it["isDone"] == true }
-                } catch (_: Exception) { /* ignore malformed json */ }
-            }
-
-            // Streak hesaplama
-            val perDayMap = perDay.associate { it.day to it.noteCount }
-            val streaks = calculateStreaks(perDayMap)
-
-            NoteStatistics(
-                totalNotes           = totalNotes,
-                archivedNotes        = archived,
-                favoriteNotes        = favorite,
-                pinnedNotes          = pinned,
-                deletedNotes         = deleted,
-                totalWordCount       = wordCount,
-                totalTodoItems       = totalTodos,
-                completedTodoItems   = completedTodos,
-                totalAttachments     = totalAttach,
-                imageAttachments     = imageAttach,
-                audioAttachments     = audioAttach,
-                notesPerDay          = perDayMap,
-                notesPerHour         = perHour.associate { it.hour to it.noteCount },
-                notesPerDayOfWeek    = perDow.associate { it.dayOfWeek to it.noteCount },
-                notesPerMonth        = perMonth.associate { it.month to it.noteCount },
-                currentStreak        = streaks.first,
-                longestStreak        = streaks.second,
-                categoryDistribution = categoryStats.associate { it.categoryName to it.noteCount },
-                topTags              = topTags.map { it.name to it.usageCount },
-                colorDistribution    = colorStats.associate { it.colorName to it.noteCount },
-                totalNoteLinks       = totalLinks,
-                mostLinkedNotes      = mostLinked.map { it.noteId to it.linkCount },
-                orphanNoteCount      = orphans,
-                activeReminderCount  = activeReminder,
-                expiredReminderCount = expiredReminder,
-                locationReminderCount= locationReminder,
-                weeklyNoteCount      = weeklyNotes,
-                weeklyCompletedTodoCount = weeklyCompleted,
-                mostUsedTagThisWeek  = weeklyTopTag?.name,
-                staleNoteCount       = staleNotes,
-                fullyCompletedTodoNoteCount = 0, // Hesaplama aktif notlardan yapılıyor
-            )
-        } catch (e: Exception) {
-            Log.e("NoteRepositoryImpl", "Error computing statistics: ${e.message}", e)
-            NoteStatistics()
         }
     }
 

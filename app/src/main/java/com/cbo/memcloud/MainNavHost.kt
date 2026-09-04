@@ -25,6 +25,7 @@ import com.cbo.notes.presentation.screen.MapScreen
 import com.cbo.notes.presentation.navigation.NOTES_ROUTE
 import com.cbo.notes.presentation.navigation.CATEGORIES_ROUTE
 import com.cbo.notes.presentation.navigation.TAGS_ROUTE
+import com.cbo.ui.performance.TrackScreenPerformance
 
 @Composable
 fun MainNavHost(
@@ -145,6 +146,7 @@ fun MainNavHost(
         )
 
         composable("calendar") {
+            TrackScreenPerformance("calendar")
             CalendarScreen(
                 onNavigateToEditNote = { noteId ->
                     navController.navigate("edit_note/$noteId")
@@ -153,6 +155,7 @@ fun MainNavHost(
         }
 
         composable("map") {
+            TrackScreenPerformance("map")
             MapScreen(
                 onNavigateToEditNote = { noteId ->
                     navController.navigate("edit_note/$noteId")

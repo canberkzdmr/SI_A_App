@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import com.cbo.notes.presentation.viewmodel.NotesViewModel
+import com.cbo.ui.performance.TrackScreenPerformance
 
 const val NOTES_ROUTE = "notes"
 const val CREATE_NOTE_ROUTE = "create_note"
@@ -109,6 +110,7 @@ fun NavGraphBuilder.notesGraph(
                 }
             )
         ) { backStackEntry ->
+            TrackScreenPerformance("notes_list")
             val categoryArg = backStackEntry.arguments?.getInt("categoryId") ?: -1
             val initialCategoryId = if (categoryArg != -1) categoryArg else null
             NotesScreen(
@@ -200,6 +202,7 @@ fun NavGraphBuilder.notesGraph(
     }
 
     composable(route = CREATE_NOTE_ROUTE) {
+        TrackScreenPerformance("create_note")
         EditNoteScreen(
             onNavigateBack = onNavigateBack
         )
@@ -214,12 +217,14 @@ fun NavGraphBuilder.notesGraph(
             }
         )
     ) {
+        TrackScreenPerformance("edit_note")
         EditNoteScreen(
             onNavigateBack = onNavigateBack
         )
     }
 
     composable(route = CATEGORIES_ROUTE) {
+        TrackScreenPerformance("categories")
         CategoriesScreen(
             onNavigateBack = onNavigateBack,
             onOpenNotesForCategory = onOpenNotesForCategory,
@@ -227,6 +232,7 @@ fun NavGraphBuilder.notesGraph(
     }
 
     composable(route = TAGS_ROUTE) {
+        TrackScreenPerformance("tags")
         TagsScreen(
             onNavigateBack = onNavigateBack
         )
@@ -241,6 +247,7 @@ fun NavGraphBuilder.notesGraph(
             }
         )
     ) {
+        TrackScreenPerformance("deleted_archived")
         DeletedArchivedNotesScreen(
             onNavigateBack = onNavigateBack
         )

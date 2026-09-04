@@ -8,6 +8,7 @@ import com.cbo.notes.domain.model.Note
 import com.cbo.notes.domain.model.Tag
 import com.cbo.notes.domain.usecase.*
 import com.cbo.ui.snackbar.SnackbarManager
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -94,11 +95,9 @@ class NotesViewModelTest {
             deleteNoteUseCase,
             getNotesViewModeUseCase,
             setNotesViewModeUseCase,
-            snackbarManager
+            snackbarManager,
+            SavedStateHandle()
         )
-        
-        // Set test dispatcher for background operations
-        viewModel.defaultDispatcher = testDispatcher
     }
 
     @After

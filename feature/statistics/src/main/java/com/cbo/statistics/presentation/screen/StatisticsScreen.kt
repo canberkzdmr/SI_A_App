@@ -55,12 +55,14 @@ import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.cbo.ui.performance.TrackScreenPerformance
 
 @Composable
 fun StatisticsScreen(
     onNavigateBack: () -> Unit,
     viewModel: StatisticsViewModel = hiltViewModel(),
 ) {
+    TrackScreenPerformance("statistics")
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     StatisticsScreenContent(
