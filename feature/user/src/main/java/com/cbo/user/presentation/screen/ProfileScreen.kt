@@ -43,6 +43,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+import com.cbo.ui.snackbar.SnackbarManager
+import com.cbo.ui.snackbar.SnackbarMessage
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.cbo.ui.components.ScreenWithTopBarAndInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -109,6 +123,57 @@ fun ProfileScreen(
         Log.i("ProfileScreen", "Back button is disabled for Profile Screen")
     }*/
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var pendingExportJson by remember { mutableStateOf<String?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri?.let { destUri ->
+            pendingExportJson?.let { json ->
+                try {
+                    context.contentResolver.openOutputStream(destUri)?.use { outputStream ->
+                        outputStream.write(json.toByteArray(Charsets.UTF_8))
+                        outputStream.flush()
+                    }
+                    coroutineScope.launch {
+                        SnackbarManager.showMessage(SnackbarMessage.Success("Yedek başarıyla kaydedildi!"))
+                    }
+                } catch (e: Exception) {
+                    coroutineScope.launch {
+                        SnackbarManager.showMessage(SnackbarMessage.Error("Yedek kaydedilemedi: ${e.message}"))
+                    }
+                } finally {
+                    pendingExportJson = null
+                }
+            }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { sourceUri ->
+            try {
+                val json = context.contentResolver.openInputStream(sourceUri)?.use { inputStream ->
+                    inputStream.bufferedReader(Charsets.UTF_8).readText()
+                }
+                if (!json.isNullOrBlank()) {
+                    viewModel.restoreBackup(json)
+                } else {
+                    coroutineScope.launch {
+                        SnackbarManager.showMessage(SnackbarMessage.Error("Seçilen dosya boş veya okunamadı."))
+                    }
+                }
+            } catch (e: Exception) {
+                coroutineScope.launch {
+                    SnackbarManager.showMessage(SnackbarMessage.Error("Yedek okunamadı: ${e.message}"))
+                }
+            }
+        }
+    }
+
     val isDarkThemeApplied = LocalIsDarkTheme.current
     ProfileScreenContent(
         uiState = uiState,
@@ -121,7 +186,16 @@ fun ProfileScreen(
         onLanguageChange = { onChangeLanguage() },
         onManageCategories = { onCategoriesClicked() },
         onManageTags = { onTagsClicked() },
-        onExportNotes = {},
+        onExportNotes = {
+            viewModel.exportBackup { json ->
+                pendingExportJson = json
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(Date())
+                exportLauncher.launch("memcloud_backup_$timestamp.json")
+            }
+        },
+        onImportNotes = {
+            importLauncher.launch(arrayOf("application/json", "application/octet-stream", "*/*"))
+        },
         onStatisticsClicked = { onStatisticsClicked() },
         onEnableBiometrics = viewModel::toggleBiometrics,
         onContactSupport = {},
@@ -142,6 +216,7 @@ fun ProfileScreenContent(
     onManageCategories: () -> Unit,
     onManageTags: () -> Unit,
     onExportNotes: () -> Unit,
+    onImportNotes: () -> Unit,
     onStatisticsClicked: () -> Unit,
     onEnableBiometrics: () -> Unit,
     onContactSupport: () -> Unit,
@@ -176,6 +251,7 @@ fun ProfileScreenContent(
                 Icons.Default.Tag to R.string.manage_tags,
                 Icons.Default.BarChart to R.string.statistics,
                 Icons.Default.UploadFile to R.string.export_notes,
+                Icons.Default.FileDownload to R.string.import_notes,
             ),
             R.string.section_security to listOf(
                 Icons.Default.Fingerprint to R.string.enable_biometrics,
@@ -337,6 +413,7 @@ fun ProfileScreenContent(
                                     R.string.manage_tags -> onManageTags()
                                     R.string.statistics -> onStatisticsClicked()
                                     R.string.export_notes -> onExportNotes()
+                                    R.string.import_notes -> onImportNotes()
                                     R.string.enable_biometrics -> onEnableBiometrics()
                                     R.string.contact_support -> onContactSupport()
                                     R.string.app_version -> { /* no-op */ }
@@ -429,6 +506,7 @@ fun ProfileScreenPreview() {
             onManageCategories = {},
             onManageTags = {},
             onExportNotes = {},
+            onImportNotes = {},
             onStatisticsClicked = {},
             onEnableBiometrics = {},
             onContactSupport = {},

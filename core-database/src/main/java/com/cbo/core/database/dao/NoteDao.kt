@@ -284,6 +284,12 @@ interface NoteDao : BaseDao<NoteEntity> {
         AND updatedAt >= :weekStart
     """)
     suspend fun getWeeklyUpdatedNoteTodos(userId: Int, weekStart: Long): List<String>
+
+    @Query("SELECT * FROM notes WHERE userId = :userId AND isDeleted = 0")
+    suspend fun getAllNotesForBackup(userId: Int): List<NoteEntity>
+
+    @Query("SELECT * FROM note_tag_cross_ref WHERE noteId IN (SELECT id FROM notes WHERE userId = :userId AND isDeleted = 0)")
+    suspend fun getAllNoteTagCrossRefsForBackup(userId: Int): List<NoteTagCrossRef>
 }
 
 /**

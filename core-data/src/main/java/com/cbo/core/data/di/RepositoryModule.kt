@@ -25,4 +25,10 @@ abstract class RepositoryModule {
     abstract fun bindUserSettingsRepository(
         userSettingsRepositoryImpl: UserSettingsRepositoryImpl
     ): UserSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBackupRepository(
+        backupRepositoryImpl: com.cbo.core.data.repository.BackupRepositoryImpl
+    ): com.cbo.core.domain.repository.BackupRepository
 }

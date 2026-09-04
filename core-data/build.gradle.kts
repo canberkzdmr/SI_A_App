@@ -45,6 +45,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.gson)
+    implementation(libs.room.ktx)
     
     // Hilt for dependency injection
     implementation(libs.hilt.android)
@@ -60,4 +62,9 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+}
+
+tasks.withType<Test>().configureEach {
+    jvmArgs("-Dnet.bytebuddy.experimental=true")
 }

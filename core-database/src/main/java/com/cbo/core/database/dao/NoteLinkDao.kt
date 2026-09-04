@@ -19,6 +19,13 @@ interface NoteLinkDao : BaseDao<NoteLinkEntity> {
     @Query("DELETE FROM note_links WHERE sourceNoteId = :noteId OR targetNoteId = :noteId")
     suspend fun deleteAllLinksForNote(noteId: Int)
 
+    @Query("""
+        SELECT l.* FROM note_links l
+        INNER JOIN notes n ON l.sourceNoteId = n.id
+        WHERE n.userId = :userId AND n.isDeleted = 0
+    """)
+    suspend fun getAllLinksForUser(userId: Int): List<NoteLinkEntity>
+
     // =========================================================================
     // STATISTICS QUERIES
     // =========================================================================

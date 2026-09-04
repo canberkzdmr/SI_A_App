@@ -33,6 +33,9 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -81,4 +84,8 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     implementation(libs.lifecycle.runtime.compose)
+}
+
+tasks.withType<Test>().configureEach {
+    jvmArgs("-Dnet.bytebuddy.experimental=true")
 }

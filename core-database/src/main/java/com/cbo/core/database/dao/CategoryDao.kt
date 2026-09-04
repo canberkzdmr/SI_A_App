@@ -13,6 +13,9 @@ interface CategoryDao : BaseDao<CategoryEntity> {
     @Query("SELECT * FROM categories WHERE userId = :userId ORDER BY sortOrder ASC, name ASC")
     fun getCategoriesByUser(userId: Int): Flow<List<CategoryEntity>>
 
+    @Query("SELECT * FROM categories WHERE userId = :userId ORDER BY sortOrder ASC, name ASC")
+    suspend fun getAllCategoriesForUser(userId: Int): List<CategoryEntity>
+
     @Query("SELECT * FROM categories WHERE id = :categoryId")
     suspend fun getCategoryById(categoryId: Int): CategoryEntity?
 

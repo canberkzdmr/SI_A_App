@@ -1,7 +1,7 @@
 package com.cbo.user.domain.usecase
 
+import com.cbo.core.domain.model.UserDetail
 import com.cbo.user.domain.repository.UserRepository
-import com.cbo.core.database.entity.UserDetailEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -27,7 +27,8 @@ class UpsertUserDetailUseCaseTest {
     @Test
     fun `invoke should return success when repository returns success`() = runTest {
         // Given
-        val userDetail = UserDetailEntity(
+        val userDetail = UserDetail(
+            id = 1,
             userId = 1,
             fullName = "Test User",
             avatarUrl = "avatar.jpg",
@@ -51,7 +52,8 @@ class UpsertUserDetailUseCaseTest {
     @Test
     fun `invoke should return failure when repository returns failure`() = runTest {
         // Given
-        val userDetail = UserDetailEntity(
+        val userDetail = UserDetail(
+            id = 1,
             userId = 1,
             fullName = "Test User",
             avatarUrl = "avatar.jpg",
@@ -76,7 +78,8 @@ class UpsertUserDetailUseCaseTest {
     @Test
     fun `invoke should handle null user detail fields correctly`() = runTest {
         // Given
-        val userDetail = UserDetailEntity(
+        val userDetail = UserDetail(
+            id = 1,
             userId = 1,
             fullName = null,
             avatarUrl = null,
@@ -100,7 +103,8 @@ class UpsertUserDetailUseCaseTest {
     @Test
     fun `invoke should return failure when repository throws exception`() = runTest {
         // Given
-        val userDetail = UserDetailEntity(
+        val userDetail = UserDetail(
+            id = 1,
             userId = 1,
             fullName = "Test User",
             avatarUrl = "avatar.jpg",

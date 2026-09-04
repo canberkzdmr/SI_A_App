@@ -10,6 +10,9 @@ interface NoteTemplateDao : BaseDao<NoteTemplateEntity> {
     @Query("SELECT * FROM note_templates WHERE userId = :userId ORDER BY name ASC")
     fun getTemplatesForUser(userId: Int): Flow<List<NoteTemplateEntity>>
 
+    @Query("SELECT * FROM note_templates WHERE userId = :userId ORDER BY name ASC")
+    suspend fun getAllTemplatesForUser(userId: Int): List<NoteTemplateEntity>
+
     @Query("SELECT * FROM note_templates WHERE id = :id")
     suspend fun getTemplateById(id: Int): NoteTemplateEntity?
 

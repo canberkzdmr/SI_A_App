@@ -22,7 +22,8 @@
     <string name="my_notes">Notlarım</string>
     <string name="manage_categories">Kategorileri Yönet</string>
     <string name="manage_tags">Etiketleri Yönet</string>
-    <string name="export_notes">Notları Dışa Aktar</string>
+    <string name="export_notes">Notları Dışa Aktar (Yedekle)</string>
+    <string name="import_notes">Notları İçe Aktar (Geri Yükle)</string>
 
     <string name="enable_biometrics">Biyometriyi Etkinleştir</string>
 

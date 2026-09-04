@@ -13,6 +13,9 @@ interface TagDao : BaseDao<TagEntity> {
     @Query("SELECT * FROM tags WHERE userId = :userId ORDER BY usageCount DESC, name ASC")
     fun getTagsByUser(userId: Int): Flow<List<TagEntity>>
 
+    @Query("SELECT * FROM tags WHERE userId = :userId ORDER BY usageCount DESC, name ASC")
+    suspend fun getAllTagsForUser(userId: Int): List<TagEntity>
+
     @Query("SELECT * FROM tags WHERE id = :tagId")
     suspend fun getTagById(tagId: Int): TagEntity?
 

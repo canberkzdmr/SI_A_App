@@ -1,12 +1,15 @@
 package com.cbo.user.domain.usecase
 
+import com.cbo.core.domain.model.User
+import com.cbo.core.domain.model.UserDetail
+import com.cbo.core.domain.model.UserSettings
+import com.cbo.core.domain.model.UserWithDetail
 import com.cbo.user.domain.repository.UserRepository
-import com.cbo.core.database.entity.UserDetailEntity
-import com.cbo.core.database.entity.UserEntity
-import com.cbo.core.database.entity.UserWithDetail
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -27,20 +30,11 @@ class GetUserWithDetailUseCaseTest {
     }
 
     @Test
-    fun `invoke should return success when repository returns success`() = runTest {
-        // Given
+    fun `invoke should return user with detail from repository flow`() = runTest {
         val userId = 1
-        val userEntity = UserEntity(
-            id = userId,
-            username = "testuser",
-            passwordHash = "password".toByteArray(),
-            salt = "salt".toByteArray(),
-            email = "test@example.com",
-            registrationDate = "2024-01-01",
-            lastPasswordChangeDate = "2024-01-01",
-            isActive = true
-        )
-        val userDetailEntity = UserDetailEntity(
+        val user = User(id = userId, username = "testuser", email = "test@example.com")
+        val userDetail = UserDetail(
+            id = 1,
             userId = userId,
             fullName = "Test User",
             avatarUrl = "avatar.jpg",
@@ -50,49 +44,21 @@ class GetUserWithDetailUseCaseTest {
             dateOfBirth = null,
             gender = null
         )
-        val userWithDetail = UserWithDetail(
-            user = userEntity,
-            userDetail = userDetailEntity
-        )
-        val expectedResult = Result.success(userWithDetail)
-        whenever(repository.getUserWithDetail(userId)).thenReturn(expectedResult)
+        val userSettings = UserSettings(userId = userId, isBiometricsEnabled = false, preferredLanguage = "tr")
+        val userWithDetail = UserWithDetail(user = user, userDetail = userDetail, userSettings = userSettings)
 
-        // When
-        val result = useCase.invoke(userId)
+        whenever(repository.getUserWithDetail(userId)).thenReturn(flowOf(userWithDetail))
 
-        // Then
-        assertTrue(result.isSuccess)
-        assertEquals(userWithDetail, result.getOrNull())
+        val result = useCase(userId).first()
+        assertEquals(userWithDetail, result)
     }
 
     @Test
-    fun `invoke should return failure when repository returns failure`() = runTest {
-        // Given
+    fun `invoke should return null when repository emits null`() = runTest {
         val userId = 1
-        val exception = Exception("User not found")
-        val expectedResult = Result.failure<UserWithDetail>(exception)
-        whenever(repository.getUserWithDetail(userId)).thenReturn(expectedResult)
+        whenever(repository.getUserWithDetail(userId)).thenReturn(flowOf(null))
 
-        // When
-        val result = useCase.invoke(userId)
-
-        // Then
-        assertTrue(result.isFailure)
-        assertEquals(exception.message, result.exceptionOrNull()?.message)
-    }
-
-    @Test
-    fun `invoke should return failure when repository throws exception`() = runTest {
-        // Given
-        val userId = 1
-        val exception = RuntimeException("Database error")
-        whenever(repository.getUserWithDetail(userId)).thenThrow(exception)
-
-        // When & Then
-        try {
-            useCase.invoke(userId)
-        } catch (e: Exception) {
-            assertEquals(exception.message, e.message)
-        }
+        val result = useCase(userId).first()
+        assertNull(result)
     }
 }

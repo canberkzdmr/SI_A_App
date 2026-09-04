@@ -33,6 +33,9 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
@@ -101,4 +104,8 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.places)
     implementation(libs.kizitonwose.calendar.compose)
+}
+
+tasks.withType<Test>().configureEach {
+    jvmArgs("-Dnet.bytebuddy.experimental=true")
 }

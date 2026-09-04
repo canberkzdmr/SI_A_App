@@ -28,6 +28,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.cbo.core.domain.usecase.ExportBackupUseCase
+import com.cbo.core.domain.usecase.RestoreBackupUseCase
+
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val logoutUseCase: LogoutUseCase,
@@ -36,6 +39,8 @@ class ProfileViewModel @Inject constructor(
     private val getUserWithDetailUseCase: GetUserWithDetailUseCase,
     private val setBiometricEnabledUseCase: SetBiometricEnabledUseCase,
     private val toggleDarkThemeUseCase: ToggleDarkThemeUseCase,
+    private val exportBackupUseCase: ExportBackupUseCase,
+    private val restoreBackupUseCase: RestoreBackupUseCase,
 ) : ViewModel() {
     val currentUser: Flow<User?> = userSession.currentUser
     private val _uiState = MutableStateFlow(ProfileUiState(isLoading = true))
@@ -149,8 +154,42 @@ class ProfileViewModel @Inject constructor(
         // Logic for categories
     }
 
-    fun exportNotes() {
-        // Logic to export notes
+    fun exportBackup(onReady: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val userId = _uiState.value.userId
+                if (userId <= 0) {
+                    SnackbarManager.showMessage(SnackbarMessage.Error("Kullanıcı oturumu bulunamadı."))
+                    return@launch
+                }
+                val json = exportBackupUseCase(userId)
+                onReady(json)
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Failed to export backup", e)
+                SnackbarManager.showMessage(SnackbarMessage.Error("Yedek alınamadı: ${e.message}"))
+            }
+        }
+    }
+
+    fun restoreBackup(jsonContent: String) {
+        viewModelScope.launch {
+            try {
+                val userId = _uiState.value.userId
+                if (userId <= 0) {
+                    SnackbarManager.showMessage(SnackbarMessage.Error("Kullanıcı oturumu bulunamadı."))
+                    return@launch
+                }
+                val summary = restoreBackupUseCase(userId, jsonContent)
+                SnackbarManager.showMessage(
+                    SnackbarMessage.Success(
+                        "Yedek başarıyla geri yüklendi: ${summary.notesCount} not, ${summary.categoriesCount} kategori, ${summary.tagsCount} etiket"
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Failed to restore backup", e)
+                SnackbarManager.showMessage(SnackbarMessage.Error("Yedek geri yüklenemedi: ${e.message}"))
+            }
+        }
     }
 
     fun toggleBiometrics() {

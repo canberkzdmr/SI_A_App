@@ -32,10 +32,17 @@ android {
         }
         val mapsApiKey = localProperties.getProperty("MAPS_API_KEY", "")
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        manifestPlaceholders["appName"] = "MemCloud"
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+            manifestPlaceholders["appName"] = "MemCloud (Debug)"
+        }
         release {
+            manifestPlaceholders["appName"] = "MemCloud"
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
