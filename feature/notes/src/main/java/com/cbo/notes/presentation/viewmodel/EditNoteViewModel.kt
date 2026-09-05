@@ -28,6 +28,7 @@ import com.cbo.notes.domain.usecase.GetNoteTemplatesUseCase
 import com.cbo.notes.domain.usecase.AddNoteTemplateUseCase
 import com.cbo.notes.domain.model.NoteTemplate
 import com.cbo.notes.worker.ReminderScheduler
+import com.cbo.notes.worker.LocationReminderManager
 import com.cbo.notes.presentation.component.getAudioPath
 import com.cbo.notes.presentation.component.isAudioAttachment
 import com.cbo.ui.snackbar.SnackbarManager
@@ -494,7 +495,7 @@ class EditNoteViewModel @Inject constructor(
         }
     }
 
-    fun setLocationReminder(latitude: Double, longitude: Double, locationName: String, isReminder: Boolean, radius: Float = 100f) {
+    fun setLocationReminder(latitude: Double, longitude: Double, locationName: String, isReminder: Boolean, radius: Float = LocationReminderManager.DEFAULT_RADIUS) {
         _uiState.update {
             it.copy(
                 reminderLatitude = latitude,
@@ -576,7 +577,7 @@ class EditNoteViewModel @Inject constructor(
                 noteId = savedNote.id,
                 latitude = savedNote.reminderLatitude,
                 longitude = savedNote.reminderLongitude,
-                radiusInMeters = savedNote.reminderRadius ?: 100f
+                radiusInMeters = savedNote.reminderRadius ?: LocationReminderManager.DEFAULT_RADIUS
             )
         } else {
             locationReminderManager.removeLocationReminder(savedNote.id)

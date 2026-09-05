@@ -46,7 +46,7 @@ class BootReceiver : BroadcastReceiver() {
                         val lat = note.reminderLatitude
                         val lng = note.reminderLongitude
                         if (note.isLocationReminderEnabled && lat != null && lng != null) {
-                            val radius = note.reminderRadius ?: 100f
+                            val radius = note.reminderRadius ?: LocationReminderManager.DEFAULT_RADIUS
                             locationReminderManager.addLocationReminder(
                                 noteId = note.id,
                                 latitude = lat,

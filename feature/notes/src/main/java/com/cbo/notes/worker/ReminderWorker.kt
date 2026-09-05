@@ -33,7 +33,8 @@ import dagger.assisted.AssistedInject
 class ReminderWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
-    private val noteDao: NoteDao
+    private val noteDao: NoteDao,
+    private val notificationHelper: ReminderNotificationHelper
 ) : CoroutineWorker(context, workerParams) {
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
@@ -62,7 +63,7 @@ class ReminderWorker @AssistedInject constructor(
             val triggerType = inputData.getString("trigger_type") ?: "TIME"
             
             // Show the notification
-            showNotification(note, currentTitle, triggerType)
+            notificationHelper.showNotification(note, currentTitle, triggerType)
             
             // Handle repeat or clear only for time-based triggers
             if (triggerType == "TIME") {
@@ -77,131 +78,6 @@ class ReminderWorker @AssistedInject constructor(
         } catch (e: Exception) {
             AppLogger.e("Error showing reminder notification", e)
             Result.failure()
-        }
-    }
-    
-    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    private fun showNotification(note: NoteEntity, title: String, triggerType: String) {
-        val priorityLevel = note.reminderPriority ?: "DEFAULT"
-        val channelId = if (priorityLevel == "HIGH") CHANNEL_ID_HIGH else CHANNEL_ID_DEFAULT
-        createNotificationChannels()
-        
-        // Check notification permission on Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                AppLogger.w("Notification permission not granted")
-                return
-            }
-        }
-        
-        // Convert Markdown content to plain text for notification display
-        val plainTextContent = stripMarkdown(note.content)
-        
-        // Create intent to open the note when notification is tapped
-        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra(EXTRA_NOTE_ID, note.id)
-        }
-        
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            note.id,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        // Snooze actions
-        val snooze15Intent = Intent(context, SnoozeReceiver::class.java).apply {
-            action = SnoozeReceiver.ACTION_SNOOZE
-            putExtra(EXTRA_NOTE_ID, note.id)
-            putExtra(SnoozeReceiver.EXTRA_SNOOZE_MINUTES, 15)
-            putExtra(KEY_NOTE_TITLE, title)
-        }
-        val snooze15Pending = PendingIntent.getBroadcast(
-            context, note.id * 10 + 1, snooze15Intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val snooze60Intent = Intent(context, SnoozeReceiver::class.java).apply {
-            action = SnoozeReceiver.ACTION_SNOOZE
-            putExtra(EXTRA_NOTE_ID, note.id)
-            putExtra(SnoozeReceiver.EXTRA_SNOOZE_MINUTES, 60)
-            putExtra(KEY_NOTE_TITLE, title)
-        }
-        val snooze60Pending = PendingIntent.getBroadcast(
-            context, note.id * 10 + 2, snooze60Intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        // Build and show the notification
-        val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_notification_reminder)
-            .setContentTitle(if (triggerType == "LOCATION") "📍 $title" else title)
-            .setContentText(plainTextContent.take(100).let { if (plainTextContent.length > 100) "$it..." else it })
-            .setStyle(NotificationCompat.BigTextStyle().bigText(plainTextContent.take(300)))
-            .setPriority(if (priorityLevel == "HIGH") NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-            
-        if (triggerType == "LOCATION") {
-            val turnOffIntent = Intent(context, SnoozeReceiver::class.java).apply {
-                action = SnoozeReceiver.ACTION_TURN_OFF_LOCATION_REMINDER
-                putExtra(EXTRA_NOTE_ID, note.id)
-            }
-            val turnOffPending = PendingIntent.getBroadcast(
-                context, note.id * 10 + 3, turnOffIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            builder.addAction(0, "Bildirimini iptal et", turnOffPending)
-        } else {
-            builder.addAction(0, "15 Dk Ertele", snooze15Pending)
-            builder.addAction(0, "1 Saat Ertele", snooze60Pending)
-        }
-            
-        if (priorityLevel == "LOW") {
-            builder.setSilent(true)
-        }
-        
-        NotificationManagerCompat.from(context).notify(note.id, builder.build())
-        AppLogger.d("Notification shown for note: ${note.id} with priority $priorityLevel")
-    }
-    
-    /**
-     * Strips Markdown syntax from content and returns plain text.
-     */
-    private fun stripMarkdown(markdown: String): String {
-        if (markdown.isBlank()) return ""
-        
-        // Simple regex to strip basic markdown characters for notification
-        return markdown
-            .replace(Regex("[#*`_\\[\\]()]"), "") // Remove common markdown symbols
-            .replace(Regex("!.*\\]\\(.*\\)"), "") // Remove images
-            .replace(Regex("<.*?>"), "") // Remove any remaining HTML if present
-            .trim()
-            .replace(Regex("\\s+"), " ") // Replace multiple whitespaces with single space
-    }
-    private fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
-            
-            // High priority channel
-            val highChannel = NotificationChannel(CHANNEL_ID_HIGH, "Yüksek Öncelikli Hatırlatıcılar", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Yüksek öncelikli not hatırlatıcıları"
-                enableVibration(true)
-                enableLights(true)
-            }
-            
-            // Default priority channel
-            val defaultChannel = NotificationChannel(CHANNEL_ID_DEFAULT, "Normal Hatırlatıcılar", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "Normal öncelikli not hatırlatıcıları"
-                enableVibration(false)
-                enableLights(false)
-            }
-            
-            notificationManager.createNotificationChannel(highChannel)
-            notificationManager.createNotificationChannel(defaultChannel)
         }
     }
     

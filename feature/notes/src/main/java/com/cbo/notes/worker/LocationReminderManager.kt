@@ -22,7 +22,9 @@ class LocationReminderManager @Inject constructor(
     private val geofencingClient: GeofencingClient = LocationServices.getGeofencingClient(context)
 
     private val geofencePendingIntent: PendingIntent by lazy {
-        val intent = Intent(context, GeofenceBroadcastReceiver::class.java)
+        val intent = Intent(context, GeofenceBroadcastReceiver::class.java).apply {
+            action = ACTION_GEOFENCE_EVENT
+        }
         PendingIntent.getBroadcast(
             context,
             0,
@@ -32,14 +34,14 @@ class LocationReminderManager @Inject constructor(
     }
 
     /**
-     * Coğrafi sınır (geofence) ekler. Kullanıcı bu alana girdiğinde tetiklenir.
+     * Coğrafi sınır (geofence) ekler. Kullanıcı bu alana girdiğinde veya bu alanda bulunduğunda tetiklenir.
      */
     @SuppressLint("MissingPermission")
     fun addLocationReminder(
         noteId: Int,
         latitude: Double,
         longitude: Double,
-        radiusInMeters: Float = 100f
+        radiusInMeters: Float = DEFAULT_RADIUS
     ) {
         if (!FeatureFlagManager.ENABLE_BACKGROUND_LOCATION) {
             AppLogger.w("Background location feature is disabled via FeatureFlagManager.")
@@ -50,17 +52,19 @@ class LocationReminderManager @Inject constructor(
             .setRequestId(noteId.toString())
             .setCircularRegion(latitude, longitude, radiusInMeters)
             .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_DWELL)
+            .setLoiteringDelay(10000) // 10 saniye beklemede DWELL tetiklenir
+            .setNotificationResponsiveness(0)
             .build()
 
         val geofencingRequest = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER or GeofencingRequest.INITIAL_TRIGGER_DWELL)
             .addGeofence(geofence)
             .build()
 
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
             addOnSuccessListener {
-                AppLogger.d("Geofence added for note $noteId")
+                AppLogger.d("Geofence added for note $noteId with radius $radiusInMeters m (ENTER + DWELL)")
             }
             addOnFailureListener {
                 AppLogger.e("Failed to add geofence for note $noteId", it)
@@ -82,5 +86,10 @@ class LocationReminderManager @Inject constructor(
         } catch (e: Exception) {
             AppLogger.e("Failed to cancel notification for note $noteId", e)
         }
+    }
+
+    companion object {
+        const val ACTION_GEOFENCE_EVENT = "com.cbo.notes.action.GEOFENCE_EVENT"
+        const val DEFAULT_RADIUS = 250f
     }
 }

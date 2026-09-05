@@ -1,7 +1,13 @@
 package com.cbo.notes.presentation.component
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,12 +21,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cbo.notes.R
 import com.cbo.notes.presentation.viewmodel.LocationSearchViewModel
+import com.cbo.ui.theme.MemCloudApplicationTheme
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -34,9 +44,10 @@ import kotlinx.coroutines.launch
 fun LocationPickerDialog(
     initialLatitude: Double? = null,
     initialLongitude: Double? = null,
+    initialRadius: Float = 250f,
     initialIsReminder: Boolean = false,
     onDismissRequest: () -> Unit,
-    onLocationSelected: (latitude: Double, longitude: Double, locationName: String, isReminder: Boolean) -> Unit,
+    onLocationSelected: (latitude: Double, longitude: Double, locationName: String, isReminder: Boolean, radius: Float) -> Unit,
     viewModel: LocationSearchViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -56,6 +67,43 @@ fun LocationPickerDialog(
     }
     var locationName by remember { mutableStateOf("Seçilen Konum") }
     var isReminder by remember { mutableStateOf(initialIsReminder) }
+    var selectedRadius by remember { mutableStateOf(if (initialRadius > 0) initialRadius else 250f) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            isReminder = true
+        } else {
+            isReminder = false
+            Toast.makeText(
+                context,
+                context.getString(R.string.notification_permission_required),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    val onToggleReminder: (Boolean) -> Unit = { shouldEnable ->
+        if (shouldEnable) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val hasPermission = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+
+                if (hasPermission) {
+                    isReminder = true
+                } else {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            } else {
+                isReminder = true
+            }
+        } else {
+            isReminder = false
+        }
+    }
 
     val cameraPositionState = rememberCameraPositionState {
         position = if (initialLatitude != null && initialLongitude != null) {
@@ -84,7 +132,7 @@ fun LocationPickerDialog(
         Surface(
             modifier = Modifier
                 .fillMaxWidth(0.95f)
-                .fillMaxHeight(0.8f),
+                .fillMaxHeight(0.85f),
             shape = MaterialTheme.shapes.large,
             color = MaterialTheme.colorScheme.surface
         ) {
@@ -132,11 +180,20 @@ fun LocationPickerDialog(
                             locationName = "Seçilen Konum"
                         }
                     ) {
-                        selectedLocation?.let {
+                        selectedLocation?.let { pos ->
                             Marker(
-                                state = MarkerState(position = it),
+                                state = MarkerState(position = pos),
                                 title = locationName
                             )
+                            if (isReminder) {
+                                Circle(
+                                    center = pos,
+                                    radius = selectedRadius.toDouble(),
+                                    fillColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                    strokeColor = MaterialTheme.colorScheme.primary,
+                                    strokeWidth = 2f
+                                )
+                            }
                         }
                     }
 
@@ -216,16 +273,50 @@ fun LocationPickerDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clickable(onClick = {
-                            isReminder = !isReminder
-                        })
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                        .clickable {
+                            onToggleReminder(!isReminder)
+                        }
                 ) {
                     Checkbox(
                         checked = isReminder,
-                        onCheckedChange = { isReminder = it }
+                        onCheckedChange = { checked ->
+                            onToggleReminder(checked)
+                        }
                     )
                     Text("Buraya geldiğimde bana hatırlat")
+                }
+
+                if (isReminder) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "Bildirim Yarıçapı: ${selectedRadius.toInt()} metre",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            listOf(150f, 250f, 500f, 1000f).forEach { radiusOption ->
+                                FilterChip(
+                                    selected = selectedRadius == radiusOption,
+                                    onClick = { selectedRadius = radiusOption },
+                                    label = {
+                                        Text(
+                                            if (radiusOption == 250f) "250m (Önerilen)"
+                                            else if (radiusOption >= 1000f) "1 km"
+                                            else "${radiusOption.toInt()} m"
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Row(
@@ -241,11 +332,22 @@ fun LocationPickerDialog(
                     Button(
                         onClick = {
                             selectedLocation?.let {
+                                if (isReminder && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    val hasPermission = ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    ) == PackageManager.PERMISSION_GRANTED
+                                    if (!hasPermission) {
+                                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                        return@Button
+                                    }
+                                }
                                 onLocationSelected(
                                     it.latitude,
                                     it.longitude,
                                     locationName,
-                                    isReminder
+                                    isReminder,
+                                    selectedRadius
                                 )
                             }
                         },
@@ -254,6 +356,27 @@ fun LocationPickerDialog(
                         Text("Kaydet")
                     }
                 }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LocationReminderRowPreview() {
+    MemCloudApplicationTheme {
+        Surface {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Checkbox(
+                    checked = true,
+                    onCheckedChange = {}
+                )
+                Text("Buraya geldiğimde bana hatırlat")
             }
         }
     }

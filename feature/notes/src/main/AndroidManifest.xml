@@ -23,7 +23,7 @@
             android:name=".worker.GeofenceBroadcastReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.android.gms.location.GeofenceBroadcastReceiver" />
+                <action android:name="com.cbo.notes.action.GEOFENCE_EVENT" />
             </intent-filter>
         </receiver>
     </application>

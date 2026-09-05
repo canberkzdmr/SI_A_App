@@ -520,7 +520,7 @@ fun EditNoteScreen(
     onShowReminderDialog: () -> Unit = {},
     onHideReminderDialog: () -> Unit = {},
     onSetReminder: (Long, com.cbo.notes.domain.model.ReminderRepeat, com.cbo.notes.domain.model.ReminderPriority) -> Unit = { _, _, _ -> },
-    onSetLocationReminder: (Double, Double, String, Boolean) -> Unit = { _, _, _, _ -> },
+    onSetLocationReminder: (Double, Double, String, Boolean, Float) -> Unit = { _, _, _, _, _ -> },
     onRemoveReminder: () -> Unit = {},
     onRemoveLocationReminder: () -> Unit = {},
     onShowTemplateSelector: () -> Unit = {},
@@ -1179,10 +1179,11 @@ fun EditNoteScreen(
         com.cbo.notes.presentation.component.LocationPickerDialog(
             initialLatitude = uiState.reminderLatitude,
             initialLongitude = uiState.reminderLongitude,
+            initialRadius = uiState.reminderRadius ?: com.cbo.notes.worker.LocationReminderManager.DEFAULT_RADIUS,
             initialIsReminder = uiState.isLocationReminderEnabled,
             onDismissRequest = { showLocationPicker = false },
-            onLocationSelected = { lat, lng, name, isReminder ->
-                onSetLocationReminder(lat, lng, name, isReminder)
+            onLocationSelected = { lat, lng, name, isReminder, radius ->
+                onSetLocationReminder(lat, lng, name, isReminder, radius)
                 showLocationPicker = false
             }
         )
