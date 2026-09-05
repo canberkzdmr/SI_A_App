@@ -7,8 +7,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -104,48 +102,61 @@ private fun CustomSnackbar(snackbarData: SnackbarData) {
             MaterialTheme.colorScheme.onPrimary
         )
     }
-    
-    // Animation for smooth appearance
-    val scale by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = tween(durationMillis = 300),
-        label = "snackbar_scale"
-    )
 
-    Snackbar(
-        modifier = Modifier
-            .padding(Dimens.Padding.default),
-        containerColor = backgroundColor,
-        contentColor = contentColor,
-        shape = RoundedCornerShape(Dimens.CornerRadius.default),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing.medium),
+    key(snackbarData) {
+        val dismissState = rememberSwipeToDismissBoxState(
+            confirmValueChange = { value ->
+                if (value != SwipeToDismissBoxValue.Settled) {
+                    snackbarData.dismiss()
+                    true
+                } else {
+                    false
+                }
+            }
+        )
+
+        SwipeToDismissBox(
+            state = dismissState,
+            backgroundContent = {},
             modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(Dimens.Icon.default)
-            )
-            Text(
-                text = message,
-                color = contentColor,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(
-                onClick = { snackbarData.dismiss() },
-                modifier = Modifier.size(Dimens.Icon.default)
+            Snackbar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Dimens.Padding.default),
+                containerColor = backgroundColor,
+                contentColor = contentColor,
+                shape = RoundedCornerShape(Dimens.CornerRadius.default),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Dismiss",
-                    tint = contentColor,
-                    modifier = Modifier.size(Dimens.Icon.small)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Dimens.Spacing.medium),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier.size(Dimens.Icon.default)
+                    )
+                    Text(
+                        text = message,
+                        color = contentColor,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(
+                        onClick = { snackbarData.dismiss() },
+                        modifier = Modifier.size(Dimens.Icon.default)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Dismiss",
+                            tint = contentColor,
+                            modifier = Modifier.size(Dimens.Icon.small)
+                        )
+                    }
+                }
             }
         }
     }
