@@ -6,6 +6,35 @@
     <string name="nav_calendar">Takvim</string>
     <string name="nav_profile">Profil</string>
     <string name="nav_create">Oluştur</string>
+    <string name="nav_new_note">Yeni Not</string>
     <string name="phone_number">Telefon Numaranızı Girin</string>
     <string name="phone_number_error">Telefon numarası 10 hane olmalıdır</string>
+
+    <!-- General Actions -->
+    <string name="btn_ok">Tamam</string>
+    <string name="btn_cancel">İptal</string>
+    <string name="btn_save">Kaydet</string>
+    <string name="btn_retry">Tekrar Dene</string>
+    <string name="search_placeholder">Ara...</string>
+    <string name="cd_clear">Temizle</string>
+
+    <!-- Date Picker -->
+    <string name="date_picker_select_date">Tarih Seçin</string>
+    <string name="date_picker_choose_date">Bir tarih seçin</string>
+    <string name="date_picker_clear_date">Tarihi temizle</string>
+    <string name="date_picker_select_range">Tarih Aralığı Seçin</string>
+    <string name="date_picker_choose_dates">Tarihleri seçin</string>
+    <string name="date_picker_clear_dates">Tarihleri temizle</string>
+
+    <!-- State Components -->
+    <string name="state_empty_title">Öğe bulunamadı</string>
+    <string name="state_empty_message">Şu anda görüntülenecek öğe yok.</string>
+    <string name="state_error_title">Bir şeyler yanlış gitti</string>
+    <string name="state_try_again">Tekrar Dene</string>
+    <string name="state_success_title">Başarılı!</string>
+    <string name="state_offline_title">İnternet Bağlantısı Yok</string>
+    <string name="state_offline_message">Lütfen internet bağlantınızı kontrol edip tekrar deneyin.</string>
+
+    <!-- Units -->
+    <string name="unit_days">gün</string>
 </resources>

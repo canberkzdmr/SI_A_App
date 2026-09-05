@@ -19,10 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.cbo.ui.R
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -31,8 +33,8 @@ fun AppAlertDialog(
     message: String,
     onConfirm: () -> Unit,
     onDismiss: (() -> Unit)? = null,
-    confirmText: String = "OK",
-    dismissText: String = "Cancel",
+    confirmText: String = stringResource(R.string.btn_ok),
+    dismissText: String = stringResource(R.string.btn_cancel),
     showDismissButton: Boolean = true,
 ) {
     AlertDialog(
@@ -59,7 +61,7 @@ fun AppInfoDialog(
     title: String,
     message: String,
     onDismiss: () -> Unit,
-    confirmText: String = "OK",
+    confirmText: String = stringResource(R.string.btn_ok),
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(

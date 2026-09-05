@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="log_viewer_title">Application Logs</string>
+    <string name="log_viewer_stats_format">%1$d logs | %2$s MB • v%3$s</string>
+    <string name="log_viewer_search_placeholder">Search tag, message, or error...</string>
+    <string name="log_viewer_no_logs">No logs found</string>
+    <string name="log_viewer_filter_all">ALL</string>
+    <string name="log_viewer_has_stacktrace">⚠️ Has Stacktrace</string>
+    <string name="log_viewer_copy_full_log">Copy Full Log</string>
+    <string name="log_viewer_copied_to_clipboard">Copied to clipboard</string>
+    <string name="log_viewer_tag">Tag: %1$s</string>
+    <string name="log_viewer_time">Time: %1$s</string>
+    <string name="log_viewer_thread">Thread: %1$s</string>
+    <string name="log_viewer_message">Message:</string>
+    <string name="log_viewer_metadata">Metadata:</string>
+    <string name="log_viewer_stacktrace">Stacktrace:</string>
+    <string name="log_viewer_clear_dialog_title">Clear All Logs?</string>
+    <string name="log_viewer_clear_dialog_message">This will delete all saved logs from the local database.</string>
+    <string name="log_viewer_clear">Clear</string>
+    <string name="log_viewer_cancel">Cancel</string>
+    <string name="log_viewer_cd_close">Close</string>
+    <string name="log_viewer_cd_export_share">Export &amp; Share</string>
+    <string name="log_viewer_cd_clear_logs">Clear Logs</string>
+    <string name="log_viewer_cd_clear_search">Clear Search</string>
+    <string name="log_viewer_share_subject">Application Logs - %1$s</string>
+    <string name="log_viewer_share_title">Share Application Logs</string>
+</resources>

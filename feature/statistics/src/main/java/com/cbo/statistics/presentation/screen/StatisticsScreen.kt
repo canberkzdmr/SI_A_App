@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cbo.notes.domain.model.NoteStatistics
+import com.cbo.statistics.R
 import com.cbo.statistics.presentation.component.charts.DonutChart
 import com.cbo.statistics.presentation.component.charts.HeatmapChart
 import com.cbo.statistics.presentation.component.charts.donutPalette
@@ -86,14 +88,14 @@ fun StatisticsScreenContent(
             TopAppBar(
                 title = {
                     AppTitle(
-                        text = "İstatistikler",
+                        text = stringResource(R.string.statistics_title),
                         fontWeight = FontWeight.Bold,
                     )
                 },
                 navigationIcon = {
                     AppIconButton(
                         onClick = onNavigateBack,
-                        icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri") }
+                        icon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back)) }
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -102,7 +104,7 @@ fun StatisticsScreenContent(
                 actions = {
                     AppIconButton(
                         onClick = onRetry,
-                        icon = { Icon(Icons.Default.Refresh, contentDescription = "Yenile") }
+                        icon = { Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh)) }
                     )
                 }
             )
@@ -112,7 +114,7 @@ fun StatisticsScreenContent(
             uiState.isLoading -> {
                 AppLoadingScreen(
                     modifier = Modifier.padding(padding),
-                    message = "İstatistikler hesaplanıyor…"
+                    message = stringResource(R.string.calculating_statistics)
                 )
             }
             uiState.error != null -> {
@@ -120,7 +122,7 @@ fun StatisticsScreenContent(
                     modifier = Modifier.padding(padding),
                     error = uiState.error,
                     onRetry = onRetry,
-                    retryText = "Tekrar Dene"
+                    retryText = stringResource(R.string.retry)
                 )
             }
             uiState.statistics != null -> {
@@ -163,25 +165,25 @@ private fun StatisticsContent(
 // =============================================================================
 @Composable
 private fun OverviewSection(stats: NoteStatistics) {
-    AppSectionCard(title = "Genel Bakış", icon = Icons.AutoMirrored.Filled.Note) {
+    AppSectionCard(title = stringResource(R.string.stats_overview), icon = Icons.AutoMirrored.Filled.Note) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AppKpiCard("Toplam Not", stats.totalNotes.toString(), Icons.Default.Description, Color(0xFF6366F1), Modifier.weight(1f))
-                AppKpiCard("Kelime", formatNumber(stats.totalWordCount), Icons.Default.TextFields, Color(0xFF22D3EE), Modifier.weight(1f))
+                AppKpiCard(stringResource(R.string.stats_total_notes), stats.totalNotes.toString(), Icons.Default.Description, Color(0xFF6366F1), Modifier.weight(1f))
+                AppKpiCard(stringResource(R.string.stats_words), formatNumber(stats.totalWordCount), Icons.Default.TextFields, Color(0xFF22D3EE), Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AppKpiCard("Favori", stats.favoriteNotes.toString(), Icons.Default.Favorite, Color(0xFFF43F5E), Modifier.weight(1f))
-                AppKpiCard("Arşivlenmiş", stats.archivedNotes.toString(), Icons.Default.Archive, Color(0xFFF59E0B), Modifier.weight(1f))
+                AppKpiCard(stringResource(R.string.stats_favorites), stats.favoriteNotes.toString(), Icons.Default.Favorite, Color(0xFFF43F5E), Modifier.weight(1f))
+                AppKpiCard(stringResource(R.string.stats_archived), stats.archivedNotes.toString(), Icons.Default.Archive, Color(0xFFF59E0B), Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                AppKpiCard("Sabitlenen", stats.pinnedNotes.toString(), Icons.Default.PushPin, Color(0xFF10B981), Modifier.weight(1f))
-                AppKpiCard("Okuma Süresi", "${stats.estimatedReadingMinutes} dk", Icons.Default.Schedule, Color(0xFF8B5CF6), Modifier.weight(1f))
+                AppKpiCard(stringResource(R.string.stats_pinned), stats.pinnedNotes.toString(), Icons.Default.PushPin, Color(0xFF10B981), Modifier.weight(1f))
+                AppKpiCard(stringResource(R.string.stats_reading_time), stringResource(R.string.stats_reading_minutes_format, stats.estimatedReadingMinutes), Icons.Default.Schedule, Color(0xFF8B5CF6), Modifier.weight(1f))
             }
 
             // Görev Tamamlanma Bar'ı
             if (stats.totalTodoItems > 0) {
                 Spacer(modifier = Modifier.height(4.dp))
-                AppCaption(text = "Görev Tamamlama")
+                AppCaption(text = stringResource(R.string.stats_todo_completion))
                 Spacer(modifier = Modifier.height(4.dp))
                 LinearProgressIndicator(
                     progress = { stats.todoCompletionRate },
@@ -191,7 +193,12 @@ private fun OverviewSection(stats: NoteStatistics) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 AppCaption(
-                    text = "${stats.completedTodoItems} / ${stats.totalTodoItems} görev tamamlandı (${(stats.todoCompletionRate * 100).toInt()}%)"
+                    text = stringResource(
+                        R.string.stats_todos_completed_format,
+                        stats.completedTodoItems,
+                        stats.totalTodoItems,
+                        (stats.todoCompletionRate * 100).toInt()
+                    )
                 )
             }
 
@@ -202,9 +209,9 @@ private fun OverviewSection(stats: NoteStatistics) {
                     horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    AppCompactStatItem(value = stats.totalAttachments.toString(), label = "Toplam Ek", icon = Icons.Default.Attachment)
-                    AppCompactStatItem(value = stats.imageAttachments.toString(), label = "Görsel", icon = Icons.Default.Image)
-                    AppCompactStatItem(value = stats.audioAttachments.toString(), label = "Ses", icon = Icons.Default.Mic)
+                    AppCompactStatItem(value = stats.totalAttachments.toString(), label = stringResource(R.string.stats_total_attachments), icon = Icons.Default.Attachment)
+                    AppCompactStatItem(value = stats.imageAttachments.toString(), label = stringResource(R.string.stats_images), icon = Icons.Default.Image)
+                    AppCompactStatItem(value = stats.audioAttachments.toString(), label = stringResource(R.string.stats_audio), icon = Icons.Default.Mic)
                 }
             }
         }
@@ -216,9 +223,9 @@ private fun OverviewSection(stats: NoteStatistics) {
 // =============================================================================
 @Composable
 private fun HeatmapSection(stats: NoteStatistics) {
-    AppSectionCard(title = "Aktivite Haritası", icon = Icons.Default.GridOn) {
+    AppSectionCard(title = stringResource(R.string.stats_activity_map), icon = Icons.Default.GridOn) {
         if (stats.notesPerDay.isEmpty()) {
-            AppBody("Henüz aktivite yok", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(16.dp))
+            AppBody(stringResource(R.string.stats_no_activity_yet), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(16.dp))
         } else {
             HeatmapChart(
                 notesPerDay = stats.notesPerDay,
@@ -231,7 +238,7 @@ private fun HeatmapSection(stats: NoteStatistics) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AppCaption("Az")
+                AppCaption(stringResource(R.string.stats_less))
                 Spacer(modifier = Modifier.width(4.dp))
                 listOf(0.1f, 0.3f, 0.6f, 1.0f).forEach { alpha ->
                     Box(
@@ -242,7 +249,7 @@ private fun HeatmapSection(stats: NoteStatistics) {
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                 }
-                AppCaption("Çok")
+                AppCaption(stringResource(R.string.stats_more))
             }
         }
     }
@@ -253,42 +260,44 @@ private fun HeatmapSection(stats: NoteStatistics) {
 // =============================================================================
 @Composable
 private fun StreakSection(stats: NoteStatistics) {
-    AppSectionCard(title = "Üretkenlik", icon = Icons.Default.LocalFireDepartment) {
+    AppSectionCard(title = stringResource(R.string.stats_productivity), icon = Icons.Default.LocalFireDepartment) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             AppStreakCard(
                 value = stats.currentStreak,
-                label = "Güncel Seri",
+                label = stringResource(R.string.stats_current_streak),
                 emoji = if (stats.currentStreak >= 7) "🔥" else "📝",
                 color = Color(0xFFFF6B35),
+                unit = stringResource(R.string.stats_unit_days),
                 modifier = Modifier.weight(1f)
             )
             AppStreakCard(
                 value = stats.longestStreak,
-                label = "En Uzun Seri",
+                label = stringResource(R.string.stats_longest_streak),
                 emoji = "🏆",
                 color = Color(0xFFF59E0B),
+                unit = stringResource(R.string.stats_unit_days),
                 modifier = Modifier.weight(1f)
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
         stats.peakHour?.let { hour ->
             val period = when {
-                hour in 5..11 -> "Sabah"
-                hour in 12..17 -> "Öğleden Sonra"
-                hour in 18..21 -> "Akşam"
-                else -> "Gece"
+                hour in 5..11 -> stringResource(R.string.stats_period_morning)
+                hour in 12..17 -> stringResource(R.string.stats_period_afternoon)
+                hour in 18..21 -> stringResource(R.string.stats_period_evening)
+                else -> stringResource(R.string.stats_period_night)
             }
             AppInsightBanner(
                 icon = Icons.Default.WbTwilight,
-                text = "En verimli zaman: $period ($hour:00 - ${hour + 1}:00)"
+                text = stringResource(R.string.stats_peak_time_format, period, hour, hour + 1)
             )
         }
         stats.peakDayOfWeek?.let { dow ->
-            val dayName = listOf("Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi").getOrNull(dow) ?: ""
+            val dayName = java.time.DayOfWeek.of(if (dow == 0) 7 else dow).getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.getDefault())
             Spacer(modifier = Modifier.height(6.dp))
             AppInsightBanner(
                 icon = Icons.Default.CalendarToday,
-                text = "En aktif gün: $dayName"
+                text = stringResource(R.string.stats_peak_day_format, dayName)
             )
         }
     }
@@ -301,10 +310,10 @@ private fun StreakSection(stats: NoteStatistics) {
 private fun TrendSection(stats: NoteStatistics) {
     if (stats.notesPerMonth.isEmpty()) return
 
-    AppSectionCard(title = "Aylık Trend", icon = Icons.AutoMirrored.Filled.TrendingUp) {
+    AppSectionCard(title = stringResource(R.string.stats_monthly_trend), icon = Icons.AutoMirrored.Filled.TrendingUp) {
         val sortedMonths = stats.notesPerMonth.entries.sortedBy { it.key }.takeLast(6)
         if (sortedMonths.isEmpty()) {
-            AppBody("Yeterli veri yok", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(16.dp))
+            AppBody(stringResource(R.string.stats_not_enough_data), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(16.dp))
             return@AppSectionCard
         }
         val modelProducer = remember { CartesianChartModelProducer() }
@@ -336,7 +345,7 @@ private fun TrendSection(stats: NoteStatistics) {
 private fun HourlyDistributionSection(stats: NoteStatistics) {
     if (stats.notesPerHour.isEmpty()) return
 
-    AppSectionCard(title = "Günlük Dağılım", icon = Icons.Default.QueryStats) {
+    AppSectionCard(title = stringResource(R.string.stats_daily_distribution), icon = Icons.Default.QueryStats) {
         val hours = (0..23).map { stats.notesPerHour[it] ?: 0 }
         val modelProducer = remember { CartesianChartModelProducer() }
         LaunchedEffect(stats.notesPerHour) {
@@ -357,7 +366,7 @@ private fun HourlyDistributionSection(stats: NoteStatistics) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         AppCaption(
-            text = "Saat dilimlerine göre not oluşturma sıklığı",
+            text = stringResource(R.string.stats_hourly_caption),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
@@ -371,7 +380,7 @@ private fun HourlyDistributionSection(stats: NoteStatistics) {
 private fun CategorySection(stats: NoteStatistics) {
     if (stats.categoryDistribution.isEmpty()) return
 
-    AppSectionCard(title = "Kategori Dağılımı", icon = Icons.Default.Category) {
+    AppSectionCard(title = stringResource(R.string.stats_category_distribution), icon = Icons.Default.Category) {
         val slices = stats.categoryDistribution.entries
             .sortedByDescending { it.value }
             .take(8)
@@ -382,7 +391,7 @@ private fun CategorySection(stats: NoteStatistics) {
         DonutChart(
             slices = slices,
             centerLabel = topCategory.take(8),
-            centerSubLabel = "En fazla",
+            centerSubLabel = stringResource(R.string.stats_most),
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -395,7 +404,7 @@ private fun CategorySection(stats: NoteStatistics) {
 private fun TagCloudSection(stats: NoteStatistics) {
     if (stats.topTags.isEmpty()) return
 
-    AppSectionCard(title = "Popüler Etiketler", icon = Icons.Default.Tag) {
+    AppSectionCard(title = stringResource(R.string.stats_popular_tags), icon = Icons.Default.Tag) {
         val colors = listOf(
             Color(0xFF6366F1), Color(0xFF22D3EE), Color(0xFFF59E0B),
             Color(0xFF10B981), Color(0xFFF43F5E), Color(0xFF8B5CF6)
@@ -419,7 +428,7 @@ private fun TagCloudSection(stats: NoteStatistics) {
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    AppCaption(text = "$count not")
+                    AppCaption(text = stringResource(R.string.stats_tag_note_count, count))
                     Spacer(modifier = Modifier.width(8.dp))
                     LinearProgressIndicator(
                         progress = { count.toFloat() / (stats.topTags.firstOrNull()?.second ?: 1).toFloat() },
@@ -438,21 +447,21 @@ private fun TagCloudSection(stats: NoteStatistics) {
 // =============================================================================
 @Composable
 private fun ZettelkastenSection(stats: NoteStatistics) {
-    AppSectionCard(title = "Zettelkasten & Bilgi Ağı", icon = Icons.Default.AccountTree) {
+    AppSectionCard(title = stringResource(R.string.stats_zettelkasten_title), icon = Icons.Default.AccountTree) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            AppKpiCard("Bağlantılar", stats.totalNoteLinks.toString(), Icons.Default.Link, Color(0xFF6366F1), Modifier.weight(1f))
-            AppKpiCard("Bağlantısız", stats.orphanNoteCount.toString(), Icons.Default.LinkOff, Color(0xFFF59E0B), Modifier.weight(1f))
+            AppKpiCard(stringResource(R.string.stats_links), stats.totalNoteLinks.toString(), Icons.Default.Link, Color(0xFF6366F1), Modifier.weight(1f))
+            AppKpiCard(stringResource(R.string.stats_unlinked), stats.orphanNoteCount.toString(), Icons.Default.LinkOff, Color(0xFFF59E0B), Modifier.weight(1f))
         }
         Spacer(modifier = Modifier.height(8.dp))
         AppInsightBanner(
             icon = Icons.Default.Hub,
-            text = "Bağlantı yoğunluğu: %.2f bağ/not".format(stats.linkDensity)
+            text = stringResource(R.string.stats_link_density_format, stats.linkDensity)
         )
         if (stats.orphanNoteCount > 0) {
             Spacer(modifier = Modifier.height(6.dp))
             AppInsightBanner(
                 icon = Icons.Default.Warning,
-                text = "${stats.orphanNoteCount} not hiçbir şeye bağlı değil. Bağlantı eklemeyi deneyin!",
+                text = stringResource(R.string.stats_orphan_notes_warning, stats.orphanNoteCount),
                 color = MaterialTheme.colorScheme.tertiary
             )
         }
@@ -466,16 +475,16 @@ private fun ZettelkastenSection(stats: NoteStatistics) {
 private fun ReminderSection(stats: NoteStatistics) {
     if (stats.activeReminderCount == 0 && stats.expiredReminderCount == 0 && stats.locationReminderCount == 0) return
 
-    AppSectionCard(title = "Hatırlatıcılar", icon = Icons.Default.Alarm) {
+    AppSectionCard(title = stringResource(R.string.stats_reminders), icon = Icons.Default.Alarm) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            AppKpiCard("Aktif", stats.activeReminderCount.toString(), Icons.Default.NotificationsActive, Color(0xFF10B981), Modifier.weight(1f))
-            AppKpiCard("Süresi Geçmiş", stats.expiredReminderCount.toString(), Icons.Default.NotificationsOff, Color(0xFFF43F5E), Modifier.weight(1f))
+            AppKpiCard(stringResource(R.string.stats_active), stats.activeReminderCount.toString(), Icons.Default.NotificationsActive, Color(0xFF10B981), Modifier.weight(1f))
+            AppKpiCard(stringResource(R.string.stats_expired), stats.expiredReminderCount.toString(), Icons.Default.NotificationsOff, Color(0xFFF43F5E), Modifier.weight(1f))
         }
         if (stats.locationReminderCount > 0) {
             Spacer(modifier = Modifier.height(8.dp))
             AppInsightBanner(
                 icon = Icons.Default.LocationOn,
-                text = "${stats.locationReminderCount} konum bazlı hatırlatıcı aktif"
+                text = stringResource(R.string.stats_location_reminders_active, stats.locationReminderCount)
             )
         }
     }
@@ -509,17 +518,17 @@ private fun WeeklyDigestSection(stats: NoteStatistics) {
                     Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     AppTitleMedium(
-                        text = "Bu Haftanın Özeti",
+                        text = stringResource(R.string.stats_weekly_summary),
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                    AppCompactStatItem(value = "${stats.weeklyNoteCount}", label = "Yeni Not", color = Color.White)
-                    AppCompactStatItem(value = "${stats.weeklyCompletedTodoCount}", label = "Tamamlanan Görev", color = Color.White)
+                    AppCompactStatItem(value = "${stats.weeklyNoteCount}", label = stringResource(R.string.stats_weekly_new_notes), color = Color.White)
+                    AppCompactStatItem(value = "${stats.weeklyCompletedTodoCount}", label = stringResource(R.string.stats_weekly_completed_todos), color = Color.White)
                     if (stats.mostUsedTagThisWeek != null) {
-                        AppCompactStatItem(value = "#${stats.mostUsedTagThisWeek}", label = "Popüler Etiket", color = Color.White)
+                        AppCompactStatItem(value = "#${stats.mostUsedTagThisWeek}", label = stringResource(R.string.stats_weekly_popular_tag), color = Color.White)
                     }
                 }
             }
@@ -534,12 +543,12 @@ private fun WeeklyDigestSection(stats: NoteStatistics) {
 private fun HygieneSection(stats: NoteStatistics) {
     if (stats.staleNoteCount == 0 && stats.fullyCompletedTodoNoteCount == 0) return
 
-    AppSectionCard(title = "Not Sağlığı", icon = Icons.Default.HealthAndSafety) {
+    AppSectionCard(title = stringResource(R.string.stats_note_hygiene), icon = Icons.Default.HealthAndSafety) {
         if (stats.staleNoteCount > 0) {
             AppInsightBanner(
                 icon = Icons.Default.AccessTime,
-                title = "${stats.staleNoteCount} Eski Not",
-                text = "90 günden uzun süredir güncellenmemiş. Gözden geçirmeyi veya arşivlemeyi düşünün.",
+                title = stringResource(R.string.stats_stale_notes_title, stats.staleNoteCount),
+                text = stringResource(R.string.stats_stale_notes_desc),
                 color = Color(0xFFF59E0B)
             )
         }
@@ -547,8 +556,8 @@ private fun HygieneSection(stats: NoteStatistics) {
             if (stats.staleNoteCount > 0) Spacer(modifier = Modifier.height(8.dp))
             AppInsightBanner(
                 icon = Icons.Default.CheckCircle,
-                title = "${stats.fullyCompletedTodoNoteCount} Not Arşivlemeye Hazır",
-                text = "Tüm görevleri tamamlanmış notlar arşive taşınabilir.",
+                title = stringResource(R.string.stats_ready_to_archive_title, stats.fullyCompletedTodoNoteCount),
+                text = stringResource(R.string.stats_ready_to_archive_desc),
                 color = Color(0xFF10B981)
             )
         }

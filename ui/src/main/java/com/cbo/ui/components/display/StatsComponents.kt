@@ -21,9 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.R
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppCaption
 import com.cbo.ui.components.AppLabelLarge
@@ -305,7 +307,7 @@ fun AppStreakCard(
     label: String,
     emoji: String,
     color: Color = MaterialTheme.colorScheme.primary,
-    unit: String = "gün",
+    unit: String = stringResource(R.string.unit_days),
     modifier: Modifier = Modifier
 ) {
     Surface(

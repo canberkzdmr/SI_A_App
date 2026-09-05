@@ -17,8 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.R
 import com.cbo.ui.theme.Dimens
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppTitle
@@ -32,8 +34,8 @@ import com.cbo.ui.components.SecondaryButton
 fun AppEmptyState(
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Default.Inbox,
-    title: String = "No items found",
-    message: String = "There are no items to display at the moment.",
+    title: String = stringResource(R.string.state_empty_title),
+    message: String = stringResource(R.string.state_empty_message),
     actionText: String? = null,
     onAction: (() -> Unit)? = null,
     secondaryActionText: String? = null,
@@ -100,7 +102,7 @@ fun AppErrorState(
     modifier: Modifier = Modifier,
     error: String,
     onRetry: (() -> Unit)? = null,
-    retryText: String = "Try Again",
+    retryText: String = stringResource(R.string.state_try_again),
     showIcon: Boolean = true
 ) {
     Column(
@@ -122,7 +124,7 @@ fun AppErrorState(
         }
         
         AppTitle(
-            text = "Something went wrong",
+            text = stringResource(R.string.state_error_title),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.error
         )
@@ -152,7 +154,7 @@ fun AppErrorState(
 @Composable
 fun AppSuccessState(
     modifier: Modifier = Modifier,
-    title: String = "Success!",
+    title: String = stringResource(R.string.state_success_title),
     message: String,
     actionText: String? = null,
     onAction: (() -> Unit)? = null
@@ -223,7 +225,7 @@ fun AppOfflineState(
         Spacer(modifier = Modifier.height(Dimens.Spacing.default))
         
         AppTitle(
-            text = "No Internet Connection",
+            text = stringResource(R.string.state_offline_title),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -231,7 +233,7 @@ fun AppOfflineState(
         Spacer(modifier = Modifier.height(Dimens.Spacing.small))
         
         AppBody(
-            text = "Please check your internet connection and try again.",
+            text = stringResource(R.string.state_offline_message),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
@@ -240,7 +242,7 @@ fun AppOfflineState(
             Spacer(modifier = Modifier.height(Dimens.Spacing.extraLarge))
             
             PrimaryButton(
-                text = "Retry",
+                text = stringResource(R.string.btn_retry),
                 onClick = onRetry
             )
         }

@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -58,6 +59,9 @@ fun LocationPickerDialog(
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     val isSearching by viewModel.isLoading.collectAsStateWithLifecycle()
 
+    val defaultLocationName = stringResource(R.string.selected_location)
+    val myLocationTitle = stringResource(R.string.my_location)
+
     var selectedLocation by remember { 
         mutableStateOf(
             if (initialLatitude != null && initialLongitude != null) 
@@ -65,7 +69,7 @@ fun LocationPickerDialog(
             else null
         ) 
     }
-    var locationName by remember { mutableStateOf("Seçilen Konum") }
+    var locationName by remember(defaultLocationName) { mutableStateOf(defaultLocationName) }
     var isReminder by remember { mutableStateOf(initialIsReminder) }
     var selectedRadius by remember { mutableStateOf(if (initialRadius > 0) initialRadius else 250f) }
 
@@ -140,7 +144,7 @@ fun LocationPickerDialog(
                 // Header & Search
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Konum Seç",
+                        text = stringResource(R.string.pick_location_title),
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -149,12 +153,12 @@ fun LocationPickerDialog(
                         value = searchQuery,
                         onValueChange = viewModel::onQueryChange,
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Adres veya mekan ara...") },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Ara") },
+                        placeholder = { Text(stringResource(R.string.search_location_placeholder)) },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search)) },
                         trailingIcon = {
                             if (searchQuery.isNotEmpty()) {
                                 IconButton(onClick = { viewModel.onQueryChange("") }) {
-                                    Icon(Icons.Default.Clear, contentDescription = "Temizle")
+                                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.clear))
                                 }
                             }
                         },
@@ -177,7 +181,7 @@ fun LocationPickerDialog(
                         uiSettings = MapUiSettings(zoomControlsEnabled = true, myLocationButtonEnabled = false),
                         onMapClick = { latLng ->
                             selectedLocation = latLng
-                            locationName = "Seçilen Konum"
+                            locationName = defaultLocationName
                         }
                     ) {
                         selectedLocation?.let { pos ->
@@ -265,7 +269,7 @@ fun LocationPickerDialog(
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
                     ) {
-                        Icon(Icons.Default.MyLocation, contentDescription = "Mevcut Konumum")
+                        Icon(Icons.Default.MyLocation, contentDescription = myLocationTitle)
                     }
                 }
 
@@ -284,7 +288,7 @@ fun LocationPickerDialog(
                             onToggleReminder(checked)
                         }
                     )
-                    Text("Buraya geldiğimde bana hatırlat")
+                    Text(stringResource(R.string.remind_me_at_location))
                 }
 
                 if (isReminder) {
@@ -294,7 +298,7 @@ fun LocationPickerDialog(
                             .padding(horizontal = 16.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = "Bildirim Yarıçapı: ${selectedRadius.toInt()} metre",
+                            text = stringResource(R.string.notification_radius_format, selectedRadius.toInt()),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -308,7 +312,7 @@ fun LocationPickerDialog(
                                     onClick = { selectedRadius = radiusOption },
                                     label = {
                                         Text(
-                                            if (radiusOption == 250f) "250m (Önerilen)"
+                                            if (radiusOption == 250f) stringResource(R.string.radius_250m_recommended)
                                             else if (radiusOption >= 1000f) "1 km"
                                             else "${radiusOption.toInt()} m"
                                         )
@@ -326,7 +330,7 @@ fun LocationPickerDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismissRequest) {
-                        Text("İptal")
+                        Text(stringResource(R.string.cancel))
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
@@ -353,7 +357,7 @@ fun LocationPickerDialog(
                         },
                         enabled = selectedLocation != null
                     ) {
-                        Text("Kaydet")
+                        Text(stringResource(R.string.save))
                     }
                 }
             }
@@ -376,7 +380,7 @@ private fun LocationReminderRowPreview() {
                     checked = true,
                     onCheckedChange = {}
                 )
-                Text("Buraya geldiğimde bana hatırlat")
+                Text(stringResource(R.string.remind_me_at_location))
             }
         }
     }

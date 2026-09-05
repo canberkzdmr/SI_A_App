@@ -68,48 +68,57 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlin.math.cos
 import kotlin.math.sin
 
+import androidx.annotation.StringRes
+
 /**
  * Bottom navigation destinations for the main app screens
  */
 sealed class BottomNavDestination(
     val route: String,
     val title: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    @StringRes val titleRes: Int = 0
 ) {
     object Notes : BottomNavDestination(
         route = "notes",
         title = "Notes",
-        icon = Icons.AutoMirrored.Filled.Note
+        icon = Icons.AutoMirrored.Filled.Note,
+        titleRes = com.cbo.ui.R.string.nav_notes
     )
     
     object Categories : BottomNavDestination(
         route = "categories", 
         title = "Categories",
-        icon = Icons.Default.Category
+        icon = Icons.Default.Category,
+        titleRes = com.cbo.ui.R.string.nav_categories
     )
     
     object Calendar : BottomNavDestination(
         route = "calendar", 
         title = "Calendar",
-        icon = Icons.Default.CalendarMonth
+        icon = Icons.Default.CalendarMonth,
+        titleRes = com.cbo.ui.R.string.nav_calendar
     )
     
     object Profile : BottomNavDestination(
         route = "profile",
         title = "Profile", 
-        icon = Icons.Default.Person
+        icon = Icons.Default.Person,
+        titleRes = com.cbo.ui.R.string.nav_profile
     )
 
     object Tags : BottomNavDestination(
         route = "tags",
         title = "Tags",
-        icon = Icons.Default.Tag
+        icon = Icons.Default.Tag,
+        titleRes = com.cbo.ui.R.string.nav_tags
     )
     
     object Map : BottomNavDestination(
         route = "map",
         title = "Map",
-        icon = Icons.Default.Map
+        icon = Icons.Default.Map,
+        titleRes = com.cbo.ui.R.string.nav_map
     )
 }
 
@@ -528,7 +537,7 @@ fun CenterButton(
         ) {
             Icon(
                 imageVector = Icons.Default.Menu,
-                contentDescription = "Create",
+                contentDescription = androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_create),
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(28.dp)
             )
@@ -557,7 +566,7 @@ fun CenterLabel(
         ) {
             if (!isExpanded) {
                 Text(
-                    text = "Create",
+                    text = androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_create),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -571,10 +580,10 @@ fun CenterActionOptions(
     onOptionClick: (String) -> Unit
 ) {
     val centerOptions = listOf(
-        CenterOption("categories", Icons.Default.Category, "Categories", Color(0xFFFF6B6B)),
-        CenterOption("tags", Icons.Default.Tag, "Tags", Color(0xFF4ECDC4)),
+        CenterOption("categories", Icons.Default.Category, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_categories), Color(0xFFFF6B6B)),
+        CenterOption("tags", Icons.Default.Tag, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_tags), Color(0xFF4ECDC4)),
 
-        CenterOption("create_note", Icons.Default.Edit, "New Note", Color(0xFF7E57C2)),
+        CenterOption("create_note", Icons.Default.Edit, androidx.compose.ui.res.stringResource(id = com.cbo.ui.R.string.nav_new_note), Color(0xFF7E57C2)),
     )
 
     Box(

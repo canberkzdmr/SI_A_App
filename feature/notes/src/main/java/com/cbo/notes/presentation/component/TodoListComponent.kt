@@ -33,9 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.cbo.notes.R
 import com.cbo.notes.domain.model.TodoItem
 
 /**
@@ -83,7 +85,7 @@ fun TodoListComponent(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
-                text = "To-Do List",
+                text = stringResource(R.string.todo_list_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -172,7 +174,7 @@ private fun TodoItemRow(
             decorationBox = { innerTextField ->
                 if (item.text.isEmpty()) {
                     Text(
-                        text = "Task item",
+                        text = stringResource(R.string.todo_task_item_placeholder),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
@@ -187,7 +189,7 @@ private fun TodoItemRow(
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Delete item",
+                contentDescription = stringResource(R.string.todo_delete_item),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.size(16.dp)
             )

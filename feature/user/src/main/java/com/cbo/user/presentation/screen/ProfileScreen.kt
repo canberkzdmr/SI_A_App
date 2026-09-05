@@ -290,7 +290,7 @@ fun ProfileScreenContent(
                     } else if (uiState.avatarUrl.isNotEmpty()) {
                         SubcomposeAsyncImage(
                             model = uiState.avatarUrl,
-                            contentDescription = "Profile Picture",
+                            contentDescription = stringResource(R.string.profile_picture),
                             modifier =
                                 Modifier
                                     .size(Dimens.Icon.avatar)
@@ -310,7 +310,7 @@ fun ProfileScreenContent(
                                 // Fallback to default image if avatar fails to load
                                 Image(
                                     painter = painterResource(R.drawable.person_profile),
-                                    contentDescription = "Default Profile Picture",
+                                    contentDescription = stringResource(R.string.default_profile_picture),
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop,
                                 )
@@ -320,7 +320,7 @@ fun ProfileScreenContent(
                         // Show default image when no avatar is set
                         Image(
                             painter = painterResource(R.drawable.person_profile),
-                            contentDescription = "Default Profile Picture",
+                            contentDescription = stringResource(R.string.default_profile_picture),
                             modifier =
                                 Modifier
                                     .size(Dimens.Icon.avatar)

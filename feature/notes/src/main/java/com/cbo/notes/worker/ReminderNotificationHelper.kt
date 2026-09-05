@@ -84,7 +84,7 @@ class ReminderNotificationHelper @Inject constructor(
                 turnOffIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            builder.addAction(0, "Bildirimini iptal et", turnOffPending)
+            builder.addAction(0, context.getString(R.string.notification_action_turn_off_location), turnOffPending)
         } else {
             // Snooze actions
             val snooze15Intent = Intent(context, SnoozeReceiver::class.java).apply {
@@ -113,8 +113,8 @@ class ReminderNotificationHelper @Inject constructor(
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            builder.addAction(0, "15 Dk Ertele", snooze15Pending)
-            builder.addAction(0, "1 Saat Ertele", snooze60Pending)
+            builder.addAction(0, context.getString(R.string.notification_action_snooze_15m), snooze15Pending)
+            builder.addAction(0, context.getString(R.string.notification_action_snooze_1h), snooze60Pending)
         }
 
         if (priorityLevel == "LOW") {
@@ -145,20 +145,20 @@ class ReminderNotificationHelper @Inject constructor(
 
             val highChannel = NotificationChannel(
                 CHANNEL_ID_HIGH,
-                "Yüksek Öncelikli Hatırlatıcılar",
+                context.getString(R.string.channel_high_priority_name),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Yüksek öncelikli not hatırlatıcıları"
+                description = context.getString(R.string.channel_high_priority_desc)
                 enableVibration(true)
                 enableLights(true)
             }
 
             val defaultChannel = NotificationChannel(
                 CHANNEL_ID_DEFAULT,
-                "Normal Hatırlatıcılar",
+                context.getString(R.string.channel_default_priority_name),
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Normal öncelikli not hatırlatıcıları"
+                description = context.getString(R.string.channel_default_priority_desc)
                 enableVibration(false)
                 enableLights(false)
             }

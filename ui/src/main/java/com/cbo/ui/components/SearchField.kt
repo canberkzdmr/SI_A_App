@@ -14,8 +14,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.R
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Composable
@@ -23,7 +25,7 @@ fun AppSearchField(
     value: String,
     onValueChange: (String) -> Unit,
     onClear: () -> Unit,
-    placeholder: String = "Search...",
+    placeholder: String = stringResource(R.string.search_placeholder),
     modifier: Modifier = Modifier,
 ) {
     TextField(
@@ -43,7 +45,7 @@ fun AppSearchField(
                 IconButton(onClick = onClear) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear",
+                        contentDescription = stringResource(R.string.cd_clear),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp)
                     )

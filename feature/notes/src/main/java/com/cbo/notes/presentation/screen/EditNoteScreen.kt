@@ -87,6 +87,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -290,7 +291,7 @@ private fun CategorySelection(
                     IconButton(onClick = onCreateCategoryFromInput) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add category",
+                            contentDescription = stringResource(R.string.add_category),
                         )
                     }
                 }
@@ -385,7 +386,7 @@ private fun TagSelection(
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Create custom tag",
+                            contentDescription = stringResource(R.string.create_custom_tag),
                             modifier = Modifier.size(16.dp),
                         )
                     },
@@ -411,7 +412,7 @@ private fun TagSelection(
                     onTagInputChange(newValue)
                 }
             },
-            placeholder = "Type tag name & press Enter/Space",
+            placeholder = stringResource(R.string.type_tag_name_enter),
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -433,7 +434,7 @@ private fun TagSelection(
                     IconButton(onClick = onCreateTagFromInput) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add tag",
+                            contentDescription = stringResource(R.string.add_tag),
                         )
                     }
                 }
@@ -749,7 +750,7 @@ fun EditNoteScreen(
                                     ) {
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = "Back",
+                                            contentDescription = stringResource(R.string.back),
                                         )
                                     }
                                 },
@@ -761,7 +762,7 @@ fun EditNoteScreen(
                                                 Icons.Default.NotificationsActive
                                             else
                                                 Icons.Default.NotificationAdd,
-                                            contentDescription = "Set Reminder",
+                                            contentDescription = stringResource(R.string.set_reminder),
                                             tint = if (uiState.reminderTime != null)
                                                 MaterialTheme.colorScheme.primary
                                             else
@@ -771,7 +772,7 @@ fun EditNoteScreen(
                                     IconButton(onClick = onShowTemplateSelector) {
                                         Icon(
                                             imageVector = Icons.Default.Description,
-                                            contentDescription = "Templates"
+                                            contentDescription = stringResource(R.string.templates)
                                         )
                                     }
                                     TextButton(
@@ -784,7 +785,7 @@ fun EditNoteScreen(
                                                 strokeWidth = 2.dp,
                                             )
                                         } else {
-                                            Text("Save")
+                                            Text(stringResource(R.string.save))
                                         }
                                     }
                                 },
@@ -890,14 +891,14 @@ fun EditNoteScreen(
                                         leadingIcon = {
                                             Icon(
                                                 imageVector = Icons.Default.AddLocationAlt,
-                                                contentDescription = "Location Reminder",
+                                                contentDescription = stringResource(R.string.location_reminder),
                                                 modifier = Modifier.size(16.dp)
                                             )
                                         },
                                         trailingIcon = {
                                             Icon(
                                                 imageVector = Icons.Default.Clear,
-                                                contentDescription = "Remove Location",
+                                                contentDescription = stringResource(R.string.remove_location),
                                                 modifier = Modifier
                                                     .size(16.dp)
                                                     .clickable { onRemoveLocationReminder() }
@@ -980,7 +981,7 @@ fun EditNoteScreen(
                                             leadingIcon = {
                                                 Icon(
                                                     imageVector = Icons.Default.Link,
-                                                    contentDescription = "Link",
+                                                    contentDescription = stringResource(R.string.link),
                                                     modifier = Modifier.size(16.dp)
                                                 )
                                             }
@@ -1013,7 +1014,7 @@ fun EditNoteScreen(
                 IconButton(onClick = onToggleColorPicker) {
                     Icon(
                         imageVector = Icons.Default.Palette,
-                        contentDescription = "Note color",
+                        contentDescription = stringResource(R.string.note_color),
                         tint = if (uiState.showColorPicker)
                             MaterialTheme.colorScheme.primary
                         else
@@ -1037,7 +1038,7 @@ fun EditNoteScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.CheckBox,
-                            contentDescription = "Add Todo",
+                            contentDescription = stringResource(R.string.add_todo),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
@@ -1052,40 +1053,20 @@ fun EditNoteScreen(
                         }
                     }
                 ) {
-                    IconButton(
-                        onClick = {
-                            activeAccordionId = 2
-                            scope.launch { scaffoldState.bottomSheetState.expand() }
-
-                            if (uiState.isRecording) {
-                                onStopRecording()
-                            } else {
-                                val hasPermission = ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.RECORD_AUDIO
-                                ) == PackageManager.PERMISSION_GRANTED
-
-                                if (hasPermission) {
-                                    onStartRecording()
-                                } else {
-                                    permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                                }
-                            }
-                        }
-                    ) {
+                    IconButton(onClick = {
+                        activeAccordionId = 0
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Mic,
-                            contentDescription = if (uiState.isRecording) "Stop recording" else "Record audio",
-                            tint = if (uiState.isRecording)
-                                MaterialTheme.colorScheme.error
-                            else
-                                MaterialTheme.colorScheme.onSurface,
+                            contentDescription = stringResource(R.string.audio_note),
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
                     }
                 }
 
-                // Add image toggle
+                // Add image button
                 BadgedBox(
                     badge = {
                         if (imageAttachments.isNotEmpty()) {
@@ -1094,13 +1075,12 @@ fun EditNoteScreen(
                     }
                 ) {
                     IconButton(onClick = {
-                        activeAccordionId = 3
+                        activeAccordionId = 2
                         scope.launch { scaffoldState.bottomSheetState.expand() }
-                        onAddAttachments()
                     }) {
                         Icon(
                             imageVector = Icons.Default.AddPhotoAlternate,
-                            contentDescription = "Add image",
+                            contentDescription = stringResource(R.string.add_image),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
@@ -1111,7 +1091,7 @@ fun EditNoteScreen(
                 IconButton(onClick = onShowReminderDialog) {
                     Icon(
                         imageVector = Icons.Default.NotificationAdd,
-                        contentDescription = "Add reminder",
+                        contentDescription = stringResource(R.string.set_reminder),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(22.dp)
                     )
@@ -1136,7 +1116,7 @@ fun EditNoteScreen(
                 }) {
                     Icon(
                         imageVector = Icons.Default.AddLocationAlt,
-                        contentDescription = "Add location reminder",
+                        contentDescription = stringResource(R.string.add_location_reminder),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(22.dp)
                     )
@@ -1227,7 +1207,7 @@ fun TemplateSelectionDialog(
     } else {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Select Template") },
+            title = { Text(stringResource(R.string.select_template)) },
             text = {
                 LazyColumn {
                     items(templates.size) { index ->
@@ -1244,12 +1224,12 @@ fun TemplateSelectionDialog(
             },
             confirmButton = {
                 TextButton(onClick = { showCreateDialog = true }) {
-                    Text("Create New")
+                    Text(stringResource(R.string.create_new))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -1266,20 +1246,20 @@ fun CreateTemplateDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create Template") },
+        title = { Text(stringResource(R.string.create_template)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Template Name") },
+                    label = { Text(stringResource(R.string.template_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = content,
                     onValueChange = { content = it },
-                    label = { Text("Content (Markdown)") },
+                    label = { Text(stringResource(R.string.template_content_markdown)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
@@ -1291,12 +1271,12 @@ fun CreateTemplateDialog(
                 onClick = { onCreate(name, content) },
                 enabled = name.isNotBlank() && content.isNotBlank()
             ) {
-                Text("Create")
+                Text(stringResource(R.string.create))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

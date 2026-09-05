@@ -145,7 +145,7 @@ fun NoteCardContent(
             if (imageAttachments.isNotEmpty()) {
                 AsyncImage(
                     model = imageAttachments.first(),
-                    contentDescription = "Image Attachment",
+                    contentDescription = stringResource(R.string.image_attachment),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(124.dp)

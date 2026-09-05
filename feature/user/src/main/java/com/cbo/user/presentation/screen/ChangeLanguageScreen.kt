@@ -86,7 +86,7 @@ fun ChangeLanguageScreenContent(
                         IconButton(onClick = { onNavigateBack() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.back),
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )
                         }

@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cbo.notes.R
 import com.cbo.notes.domain.model.Note
 import com.cbo.notes.presentation.viewmodel.CalendarViewModel
 import com.cbo.ui.theme.MemCloudApplicationTheme
@@ -88,7 +90,7 @@ fun CalendarScreenContent(
                     onSelectDate(LocalDate.now())
                 },
             ) {
-                Icon(Icons.Default.Today, contentDescription = "Bugün")
+                Icon(Icons.Default.Today, contentDescription = stringResource(R.string.today))
             }
         }
     ) { paddingValues ->
@@ -156,7 +158,7 @@ fun CalendarScreenContent(
                 if (uiState.selectedDateNotes.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "Bu tarihte hatırlatıcı bulunmuyor.",
+                            text = stringResource(R.string.no_reminders_on_this_date),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -196,7 +198,7 @@ private fun CalendarTitle(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = goToPrevious) {
-            Icon(Icons.Default.ChevronLeft, contentDescription = "Önceki Ay")
+            Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.cal_previous_month))
         }
         
         Text(
@@ -206,7 +208,7 @@ private fun CalendarTitle(
         )
         
         IconButton(onClick = goToNext) {
-            Icon(Icons.Default.ChevronRight, contentDescription = "Sonraki Ay")
+            Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.cal_next_month))
         }
     }
 }

@@ -65,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,6 +73,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cbo.core.logger.AppLogger
+import com.cbo.core.logger.R
 import com.cbo.core.logger.database.LogDatabase
 import com.cbo.core.logger.database.LogEntity
 import com.cbo.core.logger.maintenance.LogPruningManager
@@ -145,7 +147,7 @@ fun LogViewerScreen(
                 onCopy = { text ->
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clipboard.setPrimaryClip(ClipData.newPlainText("Log Detail", text))
-                    Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.log_viewer_copied_to_clipboard), Toast.LENGTH_SHORT).show()
                 }
             )
         }
@@ -155,8 +157,8 @@ fun LogViewerScreen(
     if (showClearDialog) {
         AlertDialog(
             onDismissRequest = { showClearDialog = false },
-            title = { Text("Clear All Logs?") },
-            text = { Text("This will delete all saved logs from the local database.") },
+            title = { Text(stringResource(R.string.log_viewer_clear_dialog_title)) },
+            text = { Text(stringResource(R.string.log_viewer_clear_dialog_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -167,12 +169,12 @@ fun LogViewerScreen(
                         }
                     }
                 ) {
-                    Text("Clear", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.log_viewer_clear), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showClearDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.log_viewer_cancel))
                 }
             }
         )
@@ -203,20 +205,25 @@ fun LogViewerContent(
                     IconButton(onClick = onClose) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Close"
+                            contentDescription = stringResource(R.string.log_viewer_cd_close)
                         )
                     }
                 },
                 title = {
                     Column {
                         Text(
-                            text = "Application Logs",
+                            text = stringResource(R.string.log_viewer_title),
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
                         val sizeMb = dbSizeBytes / (1024.0 * 1024.0)
                         Text(
-                            text = "${logs.size} logs | ${String.format(Locale.US, "%.2f", sizeMb)} MB • v${AppLogger.VERSION}",
+                            text = stringResource(
+                                R.string.log_viewer_stats_format,
+                                logs.size,
+                                String.format(Locale.US, "%.2f", sizeMb),
+                                AppLogger.VERSION
+                            ),
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -232,11 +239,11 @@ fun LogViewerContent(
                         )
                     } else {
                         IconButton(onClick = onExportClick) {
-                            Icon(Icons.Default.Share, contentDescription = "Export & Share")
+                            Icon(Icons.Default.Share, contentDescription = stringResource(R.string.log_viewer_cd_export_share))
                         }
                     }
                     IconButton(onClick = onClearClick) {
-                        Icon(Icons.Default.Delete, contentDescription = "Clear Logs")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.log_viewer_cd_clear_logs))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -258,12 +265,12 @@ fun LogViewerContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 6.dp),
-                placeholder = { Text("Search tag, message, or error...", fontSize = 14.sp) },
+                placeholder = { Text(stringResource(R.string.log_viewer_search_placeholder), fontSize = 14.sp) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear Search")
+                            Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.log_viewer_cd_clear_search))
                         }
                     }
                 },
@@ -290,7 +297,12 @@ fun LogViewerContent(
                         onClick = {
                             onLevelSelect(if (level == "ALL") null else level)
                         },
-                        label = { Text(level, fontSize = 12.sp) },
+                        label = {
+                            Text(
+                                text = if (level == "ALL") stringResource(R.string.log_viewer_filter_all) else level,
+                                fontSize = 12.sp
+                            )
+                        },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = getLevelColor(level).copy(alpha = 0.2f),
                             selectedLabelColor = getLevelColor(level)
@@ -308,7 +320,7 @@ fun LogViewerContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No logs found",
+                        text = stringResource(R.string.log_viewer_no_logs),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
@@ -398,7 +410,7 @@ fun LogItemCard(log: LogEntity, onClick: () -> Unit) {
             if (!log.throwable.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "⚠️ Has Stacktrace",
+                    text = stringResource(R.string.log_viewer_has_stacktrace),
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Medium
@@ -445,19 +457,19 @@ fun LogDetailSheet(log: LogEntity, onCopy: (String) -> Unit) {
                     onCopy(fullText)
                 }
             ) {
-                Text("Copy Full Log")
+                Text(stringResource(R.string.log_viewer_copy_full_log))
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Tag: ${log.tag}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        Text("Time: $formattedDate", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text("Thread: ${log.threadName}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.log_viewer_tag, log.tag), fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Text(stringResource(R.string.log_viewer_time, formattedDate), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.log_viewer_thread, log.threadName), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("Message:", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+        Text(stringResource(R.string.log_viewer_message), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
         Surface(
             shape = RoundedCornerShape(8.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -475,7 +487,7 @@ fun LogDetailSheet(log: LogEntity, onCopy: (String) -> Unit) {
 
         if (!log.metadata.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Metadata:", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            Text(stringResource(R.string.log_viewer_metadata), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
             Surface(
                 shape = RoundedCornerShape(8.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -494,7 +506,7 @@ fun LogDetailSheet(log: LogEntity, onCopy: (String) -> Unit) {
 
         if (!log.throwable.isNullOrEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Stacktrace:", fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
+            Text(stringResource(R.string.log_viewer_stacktrace), fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
             Surface(
                 shape = RoundedCornerShape(8.dp),
                 color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),

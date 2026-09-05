@@ -199,5 +199,99 @@
     <string name="profile">Profile</string>
     <string name="main_screen_search_placeholder">Search</string>
     <string name="day_summary">Summary of the Day</string>
+
+    <!-- Calendar Screen -->
+    <string name="today">Today</string>
+    <string name="no_reminders_on_this_date">No reminders on this date.</string>
+    <string name="cal_previous_month">Previous Month</string>
+    <string name="cal_next_month">Next Month</string>
+
+    <!-- Map Screen -->
+    <string name="map_my_location">My Location</string>
+    <string name="uncategorized">Uncategorized</string>
+    <string name="map_nearby_filter">Nearby (5km)</string>
+    <string name="close">Close</string>
+    <string name="map_go_to_note">Go to Note</string>
+    <string name="map_search_cat_tag_placeholder">Search category or tag...</string>
+    <string name="no_results_found">No results found</string>
+
+    <!-- Location Picker Dialog -->
+    <string name="pick_location_title">Select Location</string>
+    <string name="search_location_placeholder">Search address or place...</string>
+    <string name="my_location">My Location</string>
+    <string name="selected_location">Selected Location</string>
+    <string name="remind_me_at_location">Remind me when I arrive here</string>
+    <string name="notification_radius_format">Notification Radius: %1$d meters</string>
+    <string name="radius_250m_recommended">250m (Recommended)</string>
+
+    <!-- Reminder Dialog Details -->
+    <string name="reminder_chip_this_evening">This Evening</string>
+    <string name="reminder_chip_tomorrow_morning">Tomorrow Morning</string>
+    <string name="reminder_chip_weekend">Weekend</string>
+    <string name="reminder_repeat">Repeat</string>
+    <string name="reminder_repeat_none">Never</string>
+    <string name="reminder_repeat_daily">Daily</string>
+    <string name="reminder_repeat_weekly">Weekly</string>
+    <string name="reminder_repeat_monthly">Monthly</string>
+    <string name="reminder_repeat_yearly">Yearly</string>
+    <string name="reminder_priority">Priority</string>
+    <string name="reminder_priority_low">Low</string>
+    <string name="reminder_priority_default">Default</string>
+    <string name="reminder_priority_high">High</string>
+    <string name="reminder_priority_urgent">Urgent</string>
+
+    <!-- Audio Recorder & Player -->
+    <string name="mic_permission_required">Microphone permission required for audio notes</string>
+    <string name="failed_to_start_recording">Failed to start recording: %1$s</string>
+    <string name="recording">Recording</string>
+    <string name="stop_recording">Stop recording</string>
+    <string name="cannot_play_audio">Cannot play audio</string>
+    <string name="audio_pause">Pause</string>
+    <string name="audio_play">Play</string>
+    <string name="save_name">Save name</string>
+    <string name="cancel_edit">Cancel edit</string>
+    <string name="rename_audio">Rename audio</string>
+    <string name="remove_audio">Remove audio</string>
+    <string name="audio_note">Audio Note</string>
+
+    <!-- Todo List -->
+    <string name="todo_list_title">To-Do List</string>
+    <string name="todo_task_item_placeholder">Task item</string>
+    <string name="todo_delete_item">Delete item</string>
+
+    <!-- Image Attachments -->
+    <string name="add_image">Add Image</string>
+    <string name="image_attachment">Image Attachment</string>
+    <string name="remove">Remove</string>
+    <string name="remove_image">Remove Image</string>
+    <string name="full_preview">Full Preview</string>
+
+    <!-- Note Editing & Controls -->
+    <string name="templates">Templates</string>
+    <string name="location_reminder">Location Reminder</string>
+    <string name="remove_location">Remove Location</string>
+    <string name="link">Link</string>
+    <string name="note_color">Note color</string>
+    <string name="add_todo">Add Todo</string>
+    <string name="add_location_reminder">Add location reminder</string>
+    <string name="select_template">Select Template</string>
+    <string name="create_new">Create New</string>
+    <string name="create_template">Create Template</string>
+    <string name="template_name">Template Name</string>
+    <string name="template_content_markdown">Content (Markdown)</string>
+    <string name="create">Create</string>
+    <string name="tag">Tag</string>
+    <string name="toggle_view_mode">Toggle view mode</string>
+    <string name="selected">Selected</string>
+    <string name="no_color">No color</string>
+
+    <!-- Notification Actions & Channels -->
+    <string name="notification_action_turn_off_location">Turn off notification</string>
+    <string name="notification_action_snooze_15m">Snooze 15m</string>
+    <string name="notification_action_snooze_1h">Snooze 1h</string>
+    <string name="channel_high_priority_name">High Priority Reminders</string>
+    <string name="channel_high_priority_desc">High priority note reminders</string>
+    <string name="channel_default_priority_name">Normal Reminders</string>
+    <string name="channel_default_priority_desc">Normal priority note reminders</string>
 </resources>
 

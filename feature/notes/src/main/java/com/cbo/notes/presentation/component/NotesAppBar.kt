@@ -109,15 +109,15 @@ fun NotesAppBar(
                         when (viewMode) {
                             ViewMode.LIST -> Icon(
                                 imageVector = Icons.Default.ViewStream,
-                                contentDescription = "Toggle view mode"
+                                contentDescription = stringResource(com.cbo.notes.R.string.toggle_view_mode)
                             )
                             ViewMode.GRID -> Icon(
                                 imageVector = Icons.Default.GridView,
-                                contentDescription = "Toggle view mode"
+                                contentDescription = stringResource(com.cbo.notes.R.string.toggle_view_mode)
                             )
                             ViewMode.COMPACT -> Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ViewList,
-                                contentDescription = "Toggle view mode"
+                                contentDescription = stringResource(com.cbo.notes.R.string.toggle_view_mode)
                             )
                         }
                     }

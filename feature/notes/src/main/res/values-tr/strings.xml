@@ -175,4 +175,102 @@
 
     <string name="reminder_channel_name">Not Hatırlatıcıları</string>
     <string name="reminder_channel_description">Not hatırlatıcıları için bildirimler</string>
+    <string name="notifications">Bildirimler</string>
+    <string name="profile">Profil</string>
+    <string name="main_screen_search_placeholder">Ara</string>
+    <string name="day_summary">Günün Özeti</string>
+
+    <!-- Calendar Screen -->
+    <string name="today">Bugün</string>
+    <string name="no_reminders_on_this_date">Bu tarihte hatırlatıcı bulunmuyor.</string>
+    <string name="cal_previous_month">Önceki Ay</string>
+    <string name="cal_next_month">Sonraki Ay</string>
+
+    <!-- Map Screen -->
+    <string name="map_my_location">Konumum</string>
+    <string name="uncategorized">Kategorisiz</string>
+    <string name="map_nearby_filter">Yakınımdakiler (5km)</string>
+    <string name="close">Kapat</string>
+    <string name="map_go_to_note">Nota Git</string>
+    <string name="map_search_cat_tag_placeholder">Kategori veya etiket ara...</string>
+    <string name="no_results_found">Sonuç bulunamadı</string>
+
+    <!-- Location Picker Dialog -->
+    <string name="pick_location_title">Konum Seç</string>
+    <string name="search_location_placeholder">Adres veya mekan ara...</string>
+    <string name="my_location">Mevcut Konumum</string>
+    <string name="selected_location">Seçilen Konum</string>
+    <string name="remind_me_at_location">Buraya geldiğimde bana hatırlat</string>
+    <string name="notification_radius_format">Bildirim Yarıçapı: %1$d metre</string>
+    <string name="radius_250m_recommended">250m (Önerilen)</string>
+
+    <!-- Reminder Dialog Details -->
+    <string name="reminder_chip_this_evening">Bu Akşam</string>
+    <string name="reminder_chip_tomorrow_morning">Yarın Sabah</string>
+    <string name="reminder_chip_weekend">Hafta Sonu</string>
+    <string name="reminder_repeat">Tekrar</string>
+    <string name="reminder_repeat_none">Yok</string>
+    <string name="reminder_repeat_daily">Günlük</string>
+    <string name="reminder_repeat_weekly">Haftalık</string>
+    <string name="reminder_repeat_monthly">Aylık</string>
+    <string name="reminder_repeat_yearly">Yıllık</string>
+    <string name="reminder_priority">Öncelik</string>
+    <string name="reminder_priority_low">Düşük</string>
+    <string name="reminder_priority_default">Varsayılan</string>
+    <string name="reminder_priority_high">Yüksek</string>
+    <string name="reminder_priority_urgent">Acil</string>
+
+    <!-- Audio Recorder & Player -->
+    <string name="mic_permission_required">Sesli notlar için mikrofon izni gereklidir</string>
+    <string name="failed_to_start_recording">Kayıt başlatılamadı: %1$s</string>
+    <string name="recording">Kaydediliyor</string>
+    <string name="stop_recording">Kaydı durdur</string>
+    <string name="cannot_play_audio">Ses oynatılamıyor</string>
+    <string name="audio_pause">Duraklat</string>
+    <string name="audio_play">Oynat</string>
+    <string name="save_name">İsmi kaydet</string>
+    <string name="cancel_edit">Düzenlemeyi iptal et</string>
+    <string name="rename_audio">Ses kaydını yeniden adlandır</string>
+    <string name="remove_audio">Ses kaydını kaldır</string>
+    <string name="audio_note">Sesli Not</string>
+
+    <!-- Todo List -->
+    <string name="todo_list_title">Yapılacaklar Listesi</string>
+    <string name="todo_task_item_placeholder">Görev maddesi</string>
+    <string name="todo_delete_item">Maddeyi sil</string>
+
+    <!-- Image Attachments -->
+    <string name="add_image">Resim Ekle</string>
+    <string name="image_attachment">Resim Eki</string>
+    <string name="remove">Kaldır</string>
+    <string name="remove_image">Resmi Kaldır</string>
+    <string name="full_preview">Tam Önizleme</string>
+
+    <!-- Note Editing & Controls -->
+    <string name="templates">Şablonlar</string>
+    <string name="location_reminder">Konum Hatırlatıcısı</string>
+    <string name="remove_location">Konumu Kaldır</string>
+    <string name="link">Bağlantı</string>
+    <string name="note_color">Not rengi</string>
+    <string name="add_todo">Madde Ekle</string>
+    <string name="add_location_reminder">Konum hatırlatıcısı ekle</string>
+    <string name="select_template">Şablon Seçin</string>
+    <string name="create_new">Yeni Oluştur</string>
+    <string name="create_template">Şablon Oluştur</string>
+    <string name="template_name">Şablon Adı</string>
+    <string name="template_content_markdown">İçerik (Markdown)</string>
+    <string name="create">Oluştur</string>
+    <string name="tag">Etiket</string>
+    <string name="toggle_view_mode">Görünüm modunu değiştir</string>
+    <string name="selected">Seçildi</string>
+    <string name="no_color">Renk yok</string>
+
+    <!-- Notification Actions & Channels -->
+    <string name="notification_action_turn_off_location">Bildirimini iptal et</string>
+    <string name="notification_action_snooze_15m">15 Dk Ertele</string>
+    <string name="notification_action_snooze_1h">1 Saat Ertele</string>
+    <string name="channel_high_priority_name">Yüksek Öncelikli Hatırlatıcılar</string>
+    <string name="channel_high_priority_desc">Yüksek öncelikli not hatırlatıcıları</string>
+    <string name="channel_default_priority_name">Normal Hatırlatıcılar</string>
+    <string name="channel_default_priority_desc">Normal öncelikli not hatırlatıcıları</string>
 </resources>

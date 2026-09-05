@@ -1,0 +1,82 @@
+<resources>
+    <string name="statistics_title">İstatistikler</string>
+    <string name="back">Geri</string>
+    <string name="refresh">Yenile</string>
+    <string name="calculating_statistics">İstatistikler hesaplanıyor…</string>
+    <string name="retry">Tekrar Dene</string>
+
+    <!-- Overview Section -->
+    <string name="stats_overview">Genel Bakış</string>
+    <string name="stats_total_notes">Toplam Not</string>
+    <string name="stats_words">Kelime</string>
+    <string name="stats_favorites">Favori</string>
+    <string name="stats_archived">Arşivlenmiş</string>
+    <string name="stats_pinned">Sabitlenen</string>
+    <string name="stats_reading_time">Okuma Süresi</string>
+    <string name="stats_reading_minutes_format">%1$d dk</string>
+    <string name="stats_todo_completion">Görev Tamamlama</string>
+    <string name="stats_todos_completed_format">%1$d / %2$d görev tamamlandı (%3$d%%)</string>
+    <string name="stats_total_attachments">Toplam Ek</string>
+    <string name="stats_images">Görsel</string>
+    <string name="stats_audio">Ses</string>
+
+    <!-- Heatmap Section -->
+    <string name="stats_activity_map">Aktivite Haritası</string>
+    <string name="stats_no_activity_yet">Henüz aktivite yok</string>
+    <string name="stats_less">Az</string>
+    <string name="stats_more">Çok</string>
+
+    <!-- Streak Section -->
+    <string name="stats_productivity">Üretkenlik</string>
+    <string name="stats_current_streak">Güncel Seri</string>
+    <string name="stats_longest_streak">En Uzun Seri</string>
+    <string name="stats_period_morning">Sabah</string>
+    <string name="stats_period_afternoon">Öğleden Sonra</string>
+    <string name="stats_period_evening">Akşam</string>
+    <string name="stats_period_night">Gece</string>
+    <string name="stats_peak_time_format">En verimli zaman: %1$s (%2$d:00 - %3$d:00)</string>
+    <string name="stats_peak_day_format">En aktif gün: %1$s</string>
+
+    <!-- Monthly Trend Section -->
+    <string name="stats_monthly_trend">Aylık Trend</string>
+    <string name="stats_not_enough_data">Yeterli veri yok</string>
+
+    <!-- Hourly Distribution Section -->
+    <string name="stats_daily_distribution">Günlük Dağılım</string>
+    <string name="stats_hourly_caption">Saat dilimlerine göre not oluşturma sıklığı</string>
+
+    <!-- Category Distribution Section -->
+    <string name="stats_category_distribution">Kategori Dağılımı</string>
+    <string name="stats_most">En fazla</string>
+
+    <!-- Tag Cloud Section -->
+    <string name="stats_popular_tags">Popüler Etiketler</string>
+    <string name="stats_tag_note_count">%1$d not</string>
+
+    <!-- Zettelkasten Section -->
+    <string name="stats_zettelkasten_title">Zettelkasten &amp; Bilgi Ağı</string>
+    <string name="stats_links">Bağlantılar</string>
+    <string name="stats_unlinked">Bağlantısız</string>
+    <string name="stats_link_density_format">Bağlantı yoğunluğu: %1$.2f bağ/not</string>
+    <string name="stats_orphan_notes_warning">%1$d not hiçbir şeye bağlı değil. Bağlantı eklemeyi deneyin!</string>
+
+    <!-- Reminders Section -->
+    <string name="stats_reminders">Hatırlatıcılar</string>
+    <string name="stats_active">Aktif</string>
+    <string name="stats_expired">Süresi Geçmiş</string>
+    <string name="stats_location_reminders_active">%1$d konum bazlı hatırlatıcı aktif</string>
+
+    <!-- Weekly Digest Section -->
+    <string name="stats_weekly_summary">Bu Haftanın Özeti</string>
+    <string name="stats_weekly_new_notes">Yeni Not</string>
+    <string name="stats_weekly_completed_todos">Tamamlanan Görev</string>
+    <string name="stats_weekly_popular_tag">Popüler Etiket</string>
+
+    <!-- Hygiene Section -->
+    <string name="stats_note_hygiene">Not Sağlığı</string>
+    <string name="stats_stale_notes_title">%1$d Eski Not</string>
+    <string name="stats_stale_notes_desc">90 günden uzun süredir güncellenmemiş. Gözden geçirmeyi veya arşivlemeyi düşünün.</string>
+    <string name="stats_ready_to_archive_title">%1$d Not Arşivlemeye Hazır</string>
+    <string name="stats_ready_to_archive_desc">Tüm görevleri tamamlanmış notlar arşive taşınabilir.</string>
+    <string name="stats_unit_days">gün</string>
+</resources>

@@ -9,6 +9,8 @@ import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.media.PlaybackParams
 import android.os.Build
+import androidx.compose.ui.res.stringResource
+import com.cbo.notes.R
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
 import com.cbo.ui.theme.Dimens
@@ -109,7 +111,7 @@ fun AudioRecorderButton(
             onStartRecording()
         } else {
             coroutineScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Warning("Microphone permission required for audio notes"))
+                SnackbarManager.showMessage(SnackbarMessage.Warning(context.getString(R.string.mic_permission_required)))
             }
         }
     }
@@ -149,7 +151,7 @@ fun AudioRecorderButton(
                 }
                 recorder = mediaRecorder
             } catch (e: Exception) {
-                SnackbarManager.showMessage(SnackbarMessage.Error("Failed to start recording: ${e.message}"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(context.getString(R.string.failed_to_start_recording, e.message ?: "")))
                 onStopRecording()
             }
         } else {
@@ -226,7 +228,7 @@ fun AudioRecorderButton(
                             .background(MaterialTheme.colorScheme.error)
                     )
                     Text(
-                        text = "Recording",
+                        text = stringResource(R.string.recording),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -240,7 +242,7 @@ fun AudioRecorderButton(
                 IconButton(onClick = onStopRecording) {
                     Icon(
                         imageVector = Icons.Default.Stop,
-                        contentDescription = "Stop recording",
+                        contentDescription = stringResource(R.string.stop_recording),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -378,7 +380,7 @@ fun AudioPlayerMini(
                                 isPlaying = true
                             } catch (e: Exception) {
                                 coroutineScope.launch {
-                                    SnackbarManager.showMessage(SnackbarMessage.Error("Cannot play audio"))
+                                    SnackbarManager.showMessage(SnackbarMessage.Error(context.getString(R.string.cannot_play_audio)))
                                 }
                             }
                         }
@@ -387,7 +389,7 @@ fun AudioPlayerMini(
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        contentDescription = if (isPlaying) stringResource(R.string.audio_pause) else stringResource(R.string.audio_play),
                         tint = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 }
@@ -437,7 +439,7 @@ fun AudioPlayerMini(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Save name",
+                            contentDescription = stringResource(R.string.save_name),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(Dimens.Icon.extraSmall)
                         )
@@ -452,7 +454,7 @@ fun AudioPlayerMini(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Cancel edit",
+                            contentDescription = stringResource(R.string.cancel_edit),
                             tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f),
                             modifier = Modifier.size(Dimens.Icon.extraSmall)
                         )
@@ -497,7 +499,7 @@ fun AudioPlayerMini(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Rename audio",
+                                contentDescription = stringResource(R.string.rename_audio),
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f),
                                 modifier = Modifier.size(Dimens.Icon.extraSmall)
                             )
@@ -518,7 +520,7 @@ fun AudioPlayerMini(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Remove audio",
+                                contentDescription = stringResource(R.string.remove_audio),
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.6f),
                                 modifier = Modifier.size(Dimens.Icon.extraSmall)
                             )

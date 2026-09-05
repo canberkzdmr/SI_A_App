@@ -15,10 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.cbo.notes.R
 import com.cbo.ui.theme.Dimens
 
 @Composable
@@ -49,7 +51,7 @@ fun NoteImageAttachmentsRow(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.AddPhotoAlternate,
-                        contentDescription = "Add Image",
+                        contentDescription = stringResource(R.string.add_image),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -65,7 +67,7 @@ fun NoteImageAttachmentsRow(
             ) {
                 AsyncImage(
                     model = uri,
-                    contentDescription = "Image Attachment",
+                    contentDescription = stringResource(R.string.image_attachment),
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -83,7 +85,7 @@ fun NoteImageAttachmentsRow(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Remove",
+                            contentDescription = stringResource(R.string.remove),
                             modifier = Modifier.padding(2.dp),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
@@ -116,13 +118,13 @@ fun ImagePreviewDialog(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
                     }
                     IconButton(onClick = { 
                         onRemove()
                         onDismiss()
                     }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Remove Image")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove_image))
                     }
                 }
 
@@ -135,7 +137,7 @@ fun ImagePreviewDialog(
                 ) {
                     AsyncImage(
                         model = imageUri,
-                        contentDescription = "Full Preview",
+                        contentDescription = stringResource(R.string.full_preview),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
                     )

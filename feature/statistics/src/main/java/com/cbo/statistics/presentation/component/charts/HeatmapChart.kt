@@ -86,7 +86,9 @@ fun HeatmapChart(
         }
     }
 
-    val dayLabels = listOf("P", "S", "Ç", "P", "C", "C", "P") // Pzt-Paz
+    val dayLabels = remember {
+        java.time.DayOfWeek.values().map { it.getDisplayName(TextStyle.NARROW, Locale.getDefault()) }
+    }
 
     var animationProgress by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(notesPerDay) { animationProgress = 1f }

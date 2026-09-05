@@ -1,0 +1,82 @@
+<resources>
+    <string name="statistics_title">Statistics</string>
+    <string name="back">Back</string>
+    <string name="refresh">Refresh</string>
+    <string name="calculating_statistics">Calculating statistics…</string>
+    <string name="retry">Retry</string>
+
+    <!-- Overview Section -->
+    <string name="stats_overview">Overview</string>
+    <string name="stats_total_notes">Total Notes</string>
+    <string name="stats_words">Words</string>
+    <string name="stats_favorites">Favorites</string>
+    <string name="stats_archived">Archived</string>
+    <string name="stats_pinned">Pinned</string>
+    <string name="stats_reading_time">Reading Time</string>
+    <string name="stats_reading_minutes_format">%1$d min</string>
+    <string name="stats_todo_completion">Task Completion</string>
+    <string name="stats_todos_completed_format">%1$d / %2$d tasks completed (%3$d%%)</string>
+    <string name="stats_total_attachments">Total Attachments</string>
+    <string name="stats_images">Images</string>
+    <string name="stats_audio">Audio</string>
+
+    <!-- Heatmap Section -->
+    <string name="stats_activity_map">Activity Map</string>
+    <string name="stats_no_activity_yet">No activity yet</string>
+    <string name="stats_less">Less</string>
+    <string name="stats_more">More</string>
+
+    <!-- Streak Section -->
+    <string name="stats_productivity">Productivity</string>
+    <string name="stats_current_streak">Current Streak</string>
+    <string name="stats_longest_streak">Longest Streak</string>
+    <string name="stats_period_morning">Morning</string>
+    <string name="stats_period_afternoon">Afternoon</string>
+    <string name="stats_period_evening">Evening</string>
+    <string name="stats_period_night">Night</string>
+    <string name="stats_peak_time_format">Most productive time: %1$s (%2$d:00 - %3$d:00)</string>
+    <string name="stats_peak_day_format">Most active day: %1$s</string>
+
+    <!-- Monthly Trend Section -->
+    <string name="stats_monthly_trend">Monthly Trend</string>
+    <string name="stats_not_enough_data">Not enough data</string>
+
+    <!-- Hourly Distribution Section -->
+    <string name="stats_daily_distribution">Daily Distribution</string>
+    <string name="stats_hourly_caption">Note creation frequency by hour</string>
+
+    <!-- Category Distribution Section -->
+    <string name="stats_category_distribution">Category Distribution</string>
+    <string name="stats_most">Most</string>
+
+    <!-- Tag Cloud Section -->
+    <string name="stats_popular_tags">Popular Tags</string>
+    <string name="stats_tag_note_count">%1$d notes</string>
+
+    <!-- Zettelkasten Section -->
+    <string name="stats_zettelkasten_title">Zettelkasten &amp; Knowledge Graph</string>
+    <string name="stats_links">Links</string>
+    <string name="stats_unlinked">Unlinked</string>
+    <string name="stats_link_density_format">Link density: %1$.2f links/note</string>
+    <string name="stats_orphan_notes_warning">%1$d notes are not linked to anything. Consider adding links!</string>
+
+    <!-- Reminders Section -->
+    <string name="stats_reminders">Reminders</string>
+    <string name="stats_active">Active</string>
+    <string name="stats_expired">Expired</string>
+    <string name="stats_location_reminders_active">%1$d location-based reminders active</string>
+
+    <!-- Weekly Digest Section -->
+    <string name="stats_weekly_summary">This Week\'s Summary</string>
+    <string name="stats_weekly_new_notes">New Notes</string>
+    <string name="stats_weekly_completed_todos">Completed Tasks</string>
+    <string name="stats_weekly_popular_tag">Popular Tag</string>
+
+    <!-- Hygiene Section -->
+    <string name="stats_note_hygiene">Note Hygiene</string>
+    <string name="stats_stale_notes_title">%1$d Stale Notes</string>
+    <string name="stats_stale_notes_desc">Not updated in over 90 days. Consider reviewing or archiving them.</string>
+    <string name="stats_ready_to_archive_title">%1$d Notes Ready to Archive</string>
+    <string name="stats_ready_to_archive_desc">Notes with all tasks completed can be moved to the archive.</string>
+    <string name="stats_unit_days">days</string>
+</resources>

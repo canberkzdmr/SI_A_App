@@ -372,7 +372,7 @@ private fun SwipeBackgroundDelete(modifier: Modifier = Modifier) {
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
-            contentDescription = "Delete",
+            contentDescription = stringResource(R.string.delete),
             tint = MaterialTheme.colorScheme.onError,
             modifier = Modifier.size(28.dp),
         )
@@ -392,7 +392,7 @@ private fun SwipeBackgroundPin(modifier: Modifier = Modifier) {
     ) {
         Icon(
             imageVector = Icons.Default.PushPin,
-            contentDescription = "Pin",
+            contentDescription = stringResource(R.string.pin),
             tint = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.size(28.dp),
         )

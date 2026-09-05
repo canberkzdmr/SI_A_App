@@ -26,8 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import com.cbo.notes.R
 
 /**
  * Predefined note colors - carefully curated, pastel palette for a premium feel.
@@ -103,7 +105,7 @@ fun NoteColorBar(
                     if (isSelected) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Selected",
+                            contentDescription = stringResource(R.string.selected),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
                         )
@@ -138,7 +140,7 @@ fun NoteColorBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.FormatColorReset,
-                        contentDescription = "No color",
+                        contentDescription = stringResource(R.string.no_color),
                         tint = if (selectedColor == null)
                             MaterialTheme.colorScheme.primary
                         else

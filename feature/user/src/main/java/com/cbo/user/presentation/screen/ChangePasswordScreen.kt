@@ -84,7 +84,7 @@ fun ChangePasswordScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(id = com.cbo.user.R.string.back),
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )
                         }

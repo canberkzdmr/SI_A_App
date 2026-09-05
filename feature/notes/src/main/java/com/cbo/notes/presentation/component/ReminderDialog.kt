@@ -178,21 +178,21 @@ fun ReminderDialog(
                         FilterChip(
                             selected = false,
                             onClick = { setSmartChipTime("Evening") },
-                            label = { Text("Bu Akşam") }
+                            label = { Text(stringResource(R.string.reminder_chip_this_evening)) }
                         )
                     }
                     item {
                         FilterChip(
                             selected = false,
                             onClick = { setSmartChipTime("Morning") },
-                            label = { Text("Yarın Sabah") }
+                            label = { Text(stringResource(R.string.reminder_chip_tomorrow_morning)) }
                         )
                     }
                     item {
                         FilterChip(
                             selected = false,
                             onClick = { setSmartChipTime("Weekend") },
-                            label = { Text("Hafta Sonu") }
+                            label = { Text(stringResource(R.string.reminder_chip_weekend)) }
                         )
                     }
                 }
@@ -245,10 +245,10 @@ fun ReminderDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedTextField(
-                        value = selectedRepeat.name,
+                        value = selectedRepeat.toDisplayString(),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Tekrar") },
+                        label = { Text(stringResource(R.string.reminder_repeat)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = repeatExpanded) },
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                         modifier = Modifier.menuAnchor()
@@ -259,7 +259,7 @@ fun ReminderDialog(
                     ) {
                         ReminderRepeat.entries.forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(option.name) },
+                                text = { Text(option.toDisplayString()) },
                                 onClick = {
                                     selectedRepeat = option
                                     repeatExpanded = false
@@ -276,10 +276,10 @@ fun ReminderDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedTextField(
-                        value = selectedPriority.name,
+                        value = selectedPriority.toDisplayString(),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Öncelik") },
+                        label = { Text(stringResource(R.string.reminder_priority)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = priorityExpanded) },
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                         modifier = Modifier.menuAnchor()
@@ -290,7 +290,7 @@ fun ReminderDialog(
                     ) {
                         ReminderPriority.entries.forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(option.name) },
+                                text = { Text(option.toDisplayString()) },
                                 onClick = {
                                     selectedPriority = option
                                     priorityExpanded = false
@@ -440,6 +440,22 @@ private fun TimePickerDialog(
             }
         }
     }
+}
+
+@Composable
+private fun ReminderRepeat.toDisplayString(): String = when (this) {
+    ReminderRepeat.NONE -> stringResource(R.string.reminder_repeat_none)
+    ReminderRepeat.DAILY -> stringResource(R.string.reminder_repeat_daily)
+    ReminderRepeat.WEEKLY -> stringResource(R.string.reminder_repeat_weekly)
+    ReminderRepeat.MONTHLY -> stringResource(R.string.reminder_repeat_monthly)
+    ReminderRepeat.YEARLY -> stringResource(R.string.reminder_repeat_yearly)
+}
+
+@Composable
+private fun ReminderPriority.toDisplayString(): String = when (this) {
+    ReminderPriority.LOW -> stringResource(R.string.reminder_priority_low)
+    ReminderPriority.DEFAULT -> stringResource(R.string.reminder_priority_default)
+    ReminderPriority.HIGH -> stringResource(R.string.reminder_priority_high)
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

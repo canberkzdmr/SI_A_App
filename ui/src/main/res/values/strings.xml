@@ -6,6 +6,35 @@
     <string name="nav_calendar">Calendar</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_create">Create</string>
+    <string name="nav_new_note">New Note</string>
     <string name="phone_number">Enter Phone Number</string>
     <string name="phone_number_error">Phone number must be 10 digits</string>
+
+    <!-- General Actions -->
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_retry">Retry</string>
+    <string name="search_placeholder">Search...</string>
+    <string name="cd_clear">Clear</string>
+
+    <!-- Date Picker -->
+    <string name="date_picker_select_date">Select Date</string>
+    <string name="date_picker_choose_date">Choose a date</string>
+    <string name="date_picker_clear_date">Clear date</string>
+    <string name="date_picker_select_range">Select Date Range</string>
+    <string name="date_picker_choose_dates">Choose dates</string>
+    <string name="date_picker_clear_dates">Clear dates</string>
+
+    <!-- State Components -->
+    <string name="state_empty_title">No items found</string>
+    <string name="state_empty_message">There are no items to display at the moment.</string>
+    <string name="state_error_title">Something went wrong</string>
+    <string name="state_try_again">Try Again</string>
+    <string name="state_success_title">Success!</string>
+    <string name="state_offline_title">No Internet Connection</string>
+    <string name="state_offline_message">Please check your internet connection and try again.</string>
+
+    <!-- Units -->
+    <string name="unit_days">days</string>
 </resources>

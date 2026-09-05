@@ -3,6 +3,7 @@ package com.cbo.core.logger.ui
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
+import com.cbo.core.logger.R
 import com.cbo.core.logger.database.LogDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -57,11 +58,11 @@ object LogExportHelper {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_STREAM, uri)
-                putExtra(Intent.EXTRA_SUBJECT, "Application Logs - ${file.name}")
+                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.log_viewer_share_subject, file.name))
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
 
-            val chooser = Intent.createChooser(shareIntent, "Share Application Logs").apply {
+            val chooser = Intent.createChooser(shareIntent, context.getString(R.string.log_viewer_share_title)).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(chooser)

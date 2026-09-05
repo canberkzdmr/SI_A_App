@@ -47,10 +47,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cbo.core.common.util.DatePattern
 import com.cbo.core.common.util.DateUtil
+import com.cbo.ui.R
 import com.cbo.ui.theme.MemCloudApplicationTheme
 import java.util.Locale
 
@@ -65,8 +67,8 @@ fun DatePickerField(
     selectedDate: Long?,
     onDateSelected: (Long?) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Select Date",
-    placeholder: String = "Choose a date",
+    label: String = stringResource(R.string.date_picker_select_date),
+    placeholder: String = stringResource(R.string.date_picker_choose_date),
     enabled: Boolean = true,
     error: String? = null,
     datePattern: String = DatePattern.SHORT_DATE,
@@ -106,7 +108,7 @@ fun DatePickerField(
                 IconButton(onClick = { onDateSelected(null) }) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Clear date"
+                        contentDescription = stringResource(R.string.date_picker_clear_date)
                     )
                 }
             }
@@ -144,10 +146,10 @@ fun AppDatePickerModal(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     initialDate: Long? = null,
-    confirmButtonText: String = "OK",
-    dismissButtonText: String = "Cancel",
+    confirmButtonText: String = stringResource(R.string.btn_ok),
+    dismissButtonText: String = stringResource(R.string.btn_cancel),
     yearRange: IntRange = IntRange(1900, 2025),
-    title: String = "Select Date",
+    title: String = stringResource(R.string.date_picker_select_date),
 ) {
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialDate,
@@ -192,8 +194,8 @@ fun DateRangePickerField(
     endDate: Long?,
     onDateRangeSelected: (Long?, Long?) -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Select Date Range",
-    placeholder: String = "Choose dates",
+    label: String = stringResource(R.string.date_picker_select_range),
+    placeholder: String = stringResource(R.string.date_picker_choose_dates),
     enabled: Boolean = true,
     error: String? = null,
     datePattern: String = DatePattern.SHORT_DATE,
@@ -236,7 +238,7 @@ fun DateRangePickerField(
                 IconButton(onClick = { onDateRangeSelected(null, null) }) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Clear dates"
+                        contentDescription = stringResource(R.string.date_picker_clear_dates)
                     )
                 }
             }
@@ -275,9 +277,9 @@ fun AppDateRangePickerModal(
     onDateRangeSelected: (Long?, Long?) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    confirmButtonText: String = "OK",
-    dismissButtonText: String = "Cancel",
-    title: String = "Select Date Range",
+    confirmButtonText: String = stringResource(R.string.btn_ok),
+    dismissButtonText: String = stringResource(R.string.btn_cancel),
+    title: String = stringResource(R.string.date_picker_select_range),
 ) {
     val dateRangePickerState = rememberDateRangePickerState(
         initialSelectedStartDateMillis = initialStartDate,

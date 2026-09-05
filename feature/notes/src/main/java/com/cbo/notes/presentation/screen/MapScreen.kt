@@ -24,8 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.cbo.notes.R
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -185,7 +187,7 @@ fun MapScreenContent(
                 },
                 modifier = Modifier.padding(bottom = 70.dp)
             ) {
-                Icon(Icons.Default.MyLocation, contentDescription = "Benim Konumum")
+                Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.map_my_location))
             }
         }
     ) { paddingValues ->
@@ -216,7 +218,7 @@ fun MapScreenContent(
                         Marker(
                             state = MarkerState(position = LatLng(lat, lng)),
                             title = note.title,
-                            snippet = note.category?.name ?: "Kategorisiz",
+                            snippet = note.category?.name ?: stringResource(R.string.uncategorized),
                             icon = BitmapDescriptorFactory.defaultMarker(hue),
                             onClick = {
                                 onSelectNote(note)
@@ -260,11 +262,11 @@ fun MapScreenContent(
                                 }
                             }
                         ) {
-                            Icon(Icons.Default.FilterList, contentDescription = "Filtrele")
+                            Icon(Icons.Default.FilterList, contentDescription = stringResource(R.string.filter))
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Filtreler",
+                            text = stringResource(R.string.filters),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -290,7 +292,7 @@ fun MapScreenContent(
                                 onToggleNearbyFilter()
                             }
                         },
-                        label = { Text("Yakınımdakiler (5km)") },
+                        label = { Text(stringResource(R.string.map_nearby_filter)) },
                         leadingIcon = {
                             if (uiState.isNearbyFilterEnabled) {
                                 Icon(Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -329,7 +331,7 @@ fun MapScreenContent(
                         overflow = TextOverflow.Ellipsis
                     )
                     IconButton(onClick = { onSelectNote(null) }) {
-                        Icon(Icons.Default.Close, contentDescription = "Kapat")
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
                     }
                 }
                 
@@ -360,7 +362,7 @@ fun MapScreenContent(
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Nota Git")
+                    Text(stringResource(R.string.map_go_to_note))
                 }
             }
         }
@@ -385,12 +387,12 @@ fun MapScreenContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Filtrele",
+                        text = stringResource(R.string.filter),
                         style = MaterialTheme.typography.titleLarge
                     )
                     if (activeFilterCount > 0) {
                         TextButton(onClick = { onClearFilters() }) {
-                            Text("Temizle ($activeFilterCount)")
+                            Text(stringResource(R.string.clear_count, activeFilterCount))
                         }
                     }
                 }
@@ -399,12 +401,12 @@ fun MapScreenContent(
                     value = filterSearchQuery,
                     onValueChange = { filterSearchQuery = it },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    placeholder = { Text("Kategori veya etiket ara...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Ara") },
+                    placeholder = { Text(stringResource(R.string.map_search_cat_tag_placeholder)) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search)) },
                     trailingIcon = {
                         if (filterSearchQuery.isNotEmpty()) {
                             IconButton(onClick = { filterSearchQuery = "" }) {
-                                Icon(Icons.Default.Close, contentDescription = "Temizle")
+                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.clear))
                             }
                         }
                     },
@@ -428,7 +430,7 @@ fun MapScreenContent(
                 ) {
                     if (filteredCategories.isNotEmpty()) {
                         Text(
-                            text = "Kategoriler",
+                            text = stringResource(R.string.categories),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -454,7 +456,7 @@ fun MapScreenContent(
 
                     if (filteredTags.isNotEmpty()) {
                         Text(
-                            text = "Etiketler",
+                            text = stringResource(R.string.tags_title),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
@@ -484,7 +486,7 @@ fun MapScreenContent(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Sonuç bulunamadı",
+                                text = stringResource(R.string.no_results_found),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
