@@ -53,6 +53,13 @@
     <string name="save">Save</string>
     <string name="back">Back</string>
     <string name="change_avatar">Change Avatar</string>
+    <string name="bio_character_count">%1$s (%2$d/%3$d)</string>
+    <string name="user_information_updated">User information updated</string>
+    <string name="user_information_update_failed">User information could not be updated</string>
+    <string name="user_info_retrieval_failed">Failed to retrieve user information</string>
+    <string name="user_details_retrieval_failed">Could not get user details</string>
+    <string name="failed_to_save_image">Failed to save image</string>
+    <string name="error_processing_image">Error processing image</string>
 
     <!-- Gender Options -->
     <string name="male">Male</string>

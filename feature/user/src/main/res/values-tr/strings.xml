@@ -40,6 +40,13 @@
     <string name="save">Kaydet</string>
     <string name="back">Geri</string>
     <string name="change_avatar">Avatarı Değiştir</string>
+    <string name="bio_character_count">%1$s (%2$d/%3$d)</string>
+    <string name="user_information_updated">Kullanıcı bilgileri güncellendi</string>
+    <string name="user_information_update_failed">Kullanıcı bilgileri güncellenemedi</string>
+    <string name="user_info_retrieval_failed">Kullanıcı bilgileri alınamadı</string>
+    <string name="user_details_retrieval_failed">Kullanıcı detayları alınamadı</string>
+    <string name="failed_to_save_image">Görsel kaydedilemedi</string>
+    <string name="error_processing_image">Görsel işlenirken hata oluştu</string>
 
     <string name="male">Erkek</string>
     <string name="female">Kadın</string>

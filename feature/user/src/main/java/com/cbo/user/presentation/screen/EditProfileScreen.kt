@@ -101,7 +101,8 @@ fun EditProfileScreen(
     )
 
     // Show error
-    uiState.error?.let { errorMsg ->
+    val errorMessage = uiState.errorRes?.let { stringResource(id = it) } ?: uiState.error
+    errorMessage?.let { errorMsg ->
         Text(
             text = errorMsg,
             color = MaterialTheme.colorScheme.error,
@@ -143,7 +144,7 @@ fun EditProfileScreenContent(
                         icon = {
                             Icon(
                                 Icons.AutoMirrored.Default.ArrowBack,
-                                contentDescription = stringResource(id = com.cbo.user.R.string.back),
+                                contentDescription = stringResource(id = R.string.back),
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )
                         },
@@ -153,7 +154,7 @@ fun EditProfileScreenContent(
                     AppIconButton(onClick = save, icon = {
                         Icon(
                             Icons.Default.Save,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.save),
                             tint = MaterialTheme.colorScheme.onPrimary,
                         )
                     })
@@ -296,7 +297,7 @@ fun EditProfileScreenContent(
 
                     AppOutlinedTextField(
                         value = uiState.bio,
-                        label = stringResource(R.string.bio) + "(${uiState.bio.length}/150)",
+                        label = stringResource(R.string.bio_character_count, stringResource(R.string.bio), uiState.bio.length, 150),
                         onValueChange = updateBio,
                         singleLine = false,
                         maxLines = 3,

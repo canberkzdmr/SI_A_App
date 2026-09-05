@@ -6,6 +6,7 @@ import com.cbo.core.domain.model.UserDetail
 import com.cbo.core.domain.model.UserSettings
 import com.cbo.core.domain.model.UserWithDetail
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
+import com.cbo.user.R
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.SaveImageUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
@@ -178,7 +179,7 @@ class EditProfileViewModelTest {
 
         val uiState = viewModel.uiState.value
         assertFalse(uiState.isLoading)
-        assertEquals("User informations could not retrieved", uiState.error)
+        assertEquals(R.string.user_info_retrieval_failed, uiState.errorRes)
     }
 
     @Test

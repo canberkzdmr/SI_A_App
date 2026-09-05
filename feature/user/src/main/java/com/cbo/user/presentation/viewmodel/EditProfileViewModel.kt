@@ -1,15 +1,17 @@
 package com.cbo.user.presentation.viewmodel
 
 import android.net.Uri
-import com.cbo.core.logger.AppLogger
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cbo.core.domain.model.Gender
 import com.cbo.core.domain.model.User
 import com.cbo.core.domain.model.UserDetail
+import com.cbo.core.logger.AppLogger
 import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
+import com.cbo.user.R
 import com.cbo.user.domain.usecase.GetUserWithDetailUseCase
 import com.cbo.user.domain.usecase.SaveImageUseCase
 import com.cbo.user.domain.usecase.UpsertUserDetailUseCase
@@ -45,13 +47,13 @@ constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             getActiveUserUseCase()
-                .catch { _uiState.update { it.copy(isLoading = false, error = "User informations could not retrieved") } }
+                .catch { _uiState.update { it.copy(isLoading = false, errorRes = R.string.user_info_retrieval_failed, error = null) } }
                 .collect { user: User? ->
                     user?.let { user ->
                         AppLogger.d("Retrieved User: ${user.username}(${user.id})")
                         getUserWithDetailUseCase.invoke(user.id)
                             .catch { error ->
-                                _uiState.value = _uiState.value.copy(isLoading = false, error = error.message)
+                                _uiState.value = _uiState.value.copy(isLoading = false, error = error.message, errorRes = null)
                             }
                             .map { userWithDetail ->
                                 userWithDetail?.let {
@@ -69,11 +71,13 @@ constructor(
                                         bio = userWithDetail.userDetail?.bio.orEmpty(),
                                         phoneNumber = userWithDetail.userDetail?.phoneNumber.orEmpty(),
                                         address = userWithDetail.userDetail?.address.orEmpty(),
-                                        isLoading = false
+                                        isLoading = false,
+                                        error = null,
+                                        errorRes = null,
                                     )
                                 } ?: run {
                                     AppLogger.e("Error while retrieving user details. User detail is null")
-                                    EditUserProfileUiState(isLoading = false, error = "Could not get user details")
+                                    EditUserProfileUiState(isLoading = false, errorRes = R.string.user_details_retrieval_failed, error = null)
                                 }
                             }
                             .collect { detail ->
@@ -106,7 +110,7 @@ constructor(
                 AppLogger.d("Image selected: $contentUri")
                 
                 // Set image loading state
-                _uiState.update { it.copy(isImageLoading = true, error = null) }
+                _uiState.update { it.copy(isImageLoading = true, error = null, errorRes = null) }
                 
                 val currentAvatarUrl = _uiState.value.avatarUrl
                 
@@ -119,11 +123,11 @@ constructor(
                     _uiState.update { it.copy(isImageLoading = false) }
                 } else {
                     AppLogger.e("Failed to save image")
-                    _uiState.update { it.copy(isImageLoading = false, error = "Failed to save image") }
+                    _uiState.update { it.copy(isImageLoading = false, errorRes = R.string.failed_to_save_image, error = null) }
                 }
             } catch (e: Exception) {
                 AppLogger.e("Error processing image", e)
-                _uiState.update { it.copy(isImageLoading = false, error = "Error processing image: ${e.message}") }
+                _uiState.update { it.copy(isImageLoading = false, errorRes = R.string.error_processing_image, error = e.message) }
             }
         }
     }
@@ -173,14 +177,14 @@ constructor(
             )
             upsertUserDetailUseCase.invoke(detail).fold(
                 onSuccess = {
-                    _uiState.update { it.copy(isLoading = false, isSaved = true) }
-                    SnackbarManager.showMessage(SnackbarMessage.Success("User information updated"))
+                    _uiState.update { it.copy(isLoading = false, isSaved = true, error = null, errorRes = null) }
+                    SnackbarManager.showMessage(SnackbarMessage.Success(messageRes = R.string.user_information_updated))
                     _navigationEvents.trySend(NavigationEvent.SaveSuccess)
                 },
                 onFailure = { error ->
                     AppLogger.e("Failed to update user(id: ${_uiState.value.userId}) -> ${error.message}")
-                    _uiState.update { it.copy(isLoading = false, error = error.message) }
-                    SnackbarManager.showMessage(SnackbarMessage.Error("User information could not be updated"))
+                    _uiState.update { it.copy(isLoading = false, error = error.message, errorRes = null) }
+                    SnackbarManager.showMessage(SnackbarMessage.Error(messageRes = R.string.user_information_update_failed))
                 }
             )
         }
@@ -202,6 +206,7 @@ data class EditUserProfileUiState(
     val isLoading: Boolean = false,
     val isImageLoading: Boolean = false,
     val error: String? = null,
+    @StringRes val errorRes: Int? = null,
     val isSaved: Boolean = false
 )
 
