@@ -7,6 +7,7 @@ import com.cbo.core.domain.model.User
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.domain.usecase.SetFirstLoginDoneUseCase
 import com.cbo.core.logger.AppLogger
+import com.cbo.login.R
 import com.cbo.login.domain.usecase.GetUserUseCase
 import com.cbo.login.domain.usecase.LoginUseCase
 import com.cbo.ui.snackbar.SnackbarManager
@@ -48,7 +49,7 @@ class LoginViewModel
                 loginUseCase.invoke(username, password).fold(
                     onSuccess = {
                         AppLogger.i("User logged in")
-                        SnackbarManager.showMessage(SnackbarMessage.Success("Welcome $username!"))
+                        SnackbarManager.showMessage(SnackbarMessage.Success(messageRes = R.string.welcome_user, formatArgs = listOf(username)))
                         _uiState.update { it.copy(isLoading = false, isLoggedIn = true, isFirstLoginDone = true) }
                     },
                     onFailure = { exception ->
@@ -58,8 +59,13 @@ class LoginViewModel
                                 return@launch
                             }
                             else -> {
-                                SnackbarManager.showMessage(SnackbarMessage.Error(exception.message ?: "Login failed"))
-                                _uiState.update { it.copy(isLoading = false, errorMessage = exception.message ?: "Login failed") }
+                                val errorMsg = exception.message
+                                if (errorMsg != null) {
+                                    SnackbarManager.showMessage(SnackbarMessage.Error(errorMsg))
+                                } else {
+                                    SnackbarManager.showMessage(SnackbarMessage.Error(messageRes = R.string.login_failed))
+                                }
+                                _uiState.update { it.copy(isLoading = false, errorMessage = errorMsg) }
                             }
                         }
                     },

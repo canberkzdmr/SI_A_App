@@ -72,6 +72,7 @@ fun LocationPickerDialog(
     var locationName by remember(defaultLocationName) { mutableStateOf(defaultLocationName) }
     var isReminder by remember { mutableStateOf(initialIsReminder) }
     var selectedRadius by remember { mutableStateOf(if (initialRadius > 0) initialRadius else 250f) }
+    val myLocationStr = stringResource(R.string.my_location)
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -256,7 +257,7 @@ fun LocationPickerDialog(
                                 if (location != null) {
                                     val latLng = LatLng(location.latitude, location.longitude)
                                     selectedLocation = latLng
-                                    locationName = "Mevcut Konumum"
+                                    locationName = myLocationStr
                                     coroutineScope.launch {
                                         cameraPositionState.animate(
                                             CameraUpdateFactory.newLatLngZoom(latLng, 15f)
@@ -313,8 +314,8 @@ fun LocationPickerDialog(
                                     label = {
                                         Text(
                                             if (radiusOption == 250f) stringResource(R.string.radius_250m_recommended)
-                                            else if (radiusOption >= 1000f) "1 km"
-                                            else "${radiusOption.toInt()} m"
+                                            else if (radiusOption >= 1000f) stringResource(R.string.radius_1km)
+                                            else stringResource(R.string.radius_m_format, radiusOption.toInt())
                                         )
                                     }
                                 )

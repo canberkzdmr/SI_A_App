@@ -11,7 +11,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppOutlinedTextField
+import com.cbo.ui.components.AppTitle
 import com.cbo.ui.theme.MemCloudApplicationTheme
 
 @Preview(showBackground = true, name = "Form Field Group")
@@ -155,10 +157,9 @@ fun FormActionsPreview() {
 fun FormContainerPreview() {
     MemCloudApplicationTheme {
         AppFormContainer {
-            AppFormSection(
-                title = "Account Settings",
-                description = "Manage your account preferences"
-            ) {
+            AppFormSection {
+                AppTitle("Account Settings")
+                AppBody("Manage your account preferences")
                 AppOutlinedTextField(
                     value = "",
                     onValueChange = { },

@@ -37,4 +37,27 @@
 
     <!-- Units -->
     <string name="unit_days">gün</string>
+
+    <!-- General UI -->
+    <string name="show_more">Daha fazla göster</string>
+    <string name="show_less">Daha az göster</string>
+    <string name="loading">Yükleniyor...</string>
+    <string name="btn_confirm">Onayla</string>
+    <string name="btn_add">Ekle</string>
+    <string name="collapse">Daralt</string>
+    <string name="expand">Genişlet</string>
+    <string name="none">Yok</string>
+    <string name="start_writing_note">Notunuzu yazmaya başlayın...</string>
+    <string name="link_text_label">Metin</string>
+    <string name="link_text_placeholder">Bağlantı metnini girin</string>
+    <string name="err_text_empty">Metin boş olamaz</string>
+    <string name="link_url_label">Bağlantı Adresi</string>
+    <string name="link_url_placeholder">Bağlantı adresini girin</string>
+    <string name="err_url_empty">Bağlantı adresi boş olamaz</string>
+    <string name="insert_link">Bağlantı Ekle</string>
+    <string name="time_just_now">az önce</string>
+    <string name="time_min_ago">%1$d dk önce</string>
+    <string name="time_h_ago">%1$d sa önce</string>
+    <string name="time_d_ago">%1$d g önce</string>
+    <string name="time_w_ago">%1$d hf önce</string>
 </resources>

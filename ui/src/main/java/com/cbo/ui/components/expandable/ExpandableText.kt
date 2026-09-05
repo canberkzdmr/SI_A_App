@@ -20,17 +20,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.R
 
 /**
  * An expandable text component that limits visible lines and provides a toggle button
- * ("Daha fazla göster" / "Daha az göster") with smooth height animations.
+ * with smooth height animations.
  *
  * @param text Full string content.
  * @param modifier Modifier applied to the container.
  * @param collapsedMaxLines Maximum lines displayed when collapsed (default: 3).
- * @param expandLabel Button text when collapsed (default: "Daha fazla göster").
- * @param collapseLabel Button text when expanded (default: "Daha az göster").
+ * @param expandLabel Button text when collapsed (default: localized "Show more").
+ * @param collapseLabel Button text when expanded (default: localized "Show less").
  * @param style Typography style for the text body.
  * @param textColor Color of the body text.
  * @param toggleColor Color of the toggle action button text.
@@ -41,8 +43,8 @@ fun AppExpandableText(
     text: String,
     modifier: Modifier = Modifier,
     collapsedMaxLines: Int = 3,
-    expandLabel: String = "Daha fazla göster",
-    collapseLabel: String = "Daha az göster",
+    expandLabel: String = stringResource(R.string.show_more),
+    collapseLabel: String = stringResource(R.string.show_less),
     style: TextStyle = MaterialTheme.typography.bodyMedium,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     toggleColor: Color = MaterialTheme.colorScheme.primary,

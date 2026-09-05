@@ -33,6 +33,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.ui.res.stringResource
+import com.cbo.ui.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,7 +69,7 @@ fun RichTextEditorField(
     valueMarkdown: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Start writing your note...",
+    placeholder: String = stringResource(id = R.string.start_writing_note),
     minHeight: Int = 200
 ) {
     val richTextState = rememberRichTextState()
@@ -355,26 +357,26 @@ private fun SimpleLinkDialog(
         listOf(
             FormField(
                 key = "text",
-                label = "Text",
-                placeholder = "Enter link text",
+                label = stringResource(id = R.string.link_text_label),
+                placeholder = stringResource(id = R.string.link_text_placeholder),
                 value = text,
                 onValueChange = { text = it },
                 isError = text.isBlank(),
-                errorMessage = if (text.isBlank()) "Text cannot be empty" else null,
+                errorMessage = if (text.isBlank()) stringResource(id = R.string.err_text_empty) else null,
             ),
             FormField(
                 key = "url",
-                label = "URL",
-                placeholder = "Enter link URL",
+                label = stringResource(id = R.string.link_url_label),
+                placeholder = stringResource(id = R.string.link_url_placeholder),
                 value = url,
                 onValueChange = { url = it },
                 isError = url.isBlank(),
-                errorMessage = if (url.isBlank()) "URL cannot be empty" else null,
+                errorMessage = if (url.isBlank()) stringResource(id = R.string.err_url_empty) else null,
             ),
         )
 
     AppFormDialog(
-        title = "Insert Link",
+        title = stringResource(id = R.string.insert_link),
         fields = fields,
         onConfirm = { formData ->
             val textValue = formData.fields["text"].orEmpty()
@@ -384,7 +386,7 @@ private fun SimpleLinkDialog(
             }
         },
         onDismiss = onDismiss,
-        confirmText = "Add",
-        cancelText = "Cancel",
+        confirmText = stringResource(id = R.string.btn_add),
+        cancelText = stringResource(id = R.string.btn_cancel),
     )
 }

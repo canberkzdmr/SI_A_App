@@ -117,10 +117,11 @@ fun StatisticsScreenContent(
                     message = stringResource(R.string.calculating_statistics)
                 )
             }
-            uiState.error != null -> {
+            uiState.error != null || uiState.errorRes != null -> {
+                val errorMessage = uiState.errorRes?.let { stringResource(it) } ?: uiState.error ?: stringResource(R.string.unknown_error)
                 AppErrorState(
                     modifier = Modifier.padding(padding),
-                    error = uiState.error,
+                    error = errorMessage,
                     onRetry = onRetry,
                     retryText = stringResource(R.string.retry)
                 )

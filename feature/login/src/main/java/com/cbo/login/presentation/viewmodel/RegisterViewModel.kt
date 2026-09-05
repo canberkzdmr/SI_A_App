@@ -9,6 +9,7 @@ import com.cbo.core.domain.exception.LoginException
 import com.cbo.core.domain.exception.RegistrationException
 import com.cbo.core.domain.usecase.SetBiometricEnabledUseCase
 import com.cbo.core.logger.AppLogger
+import com.cbo.login.R
 import com.cbo.login.domain.model.RegisterUserModel
 import com.cbo.login.domain.usecase.GetUserUseCase
 import com.cbo.login.domain.usecase.LoginUseCase
@@ -64,23 +65,33 @@ class RegisterViewModel
                     if (loginResult.exceptionOrNull() is LoginException.FirstLoginIsNotCompleted) {
                         setShowBiometricDialog(true)
                     } else if (loginResult.isSuccess) {
-                        SnackbarManager.showMessage(SnackbarMessage.Success("Welcome ${user.username}!"))
+                        SnackbarManager.showMessage(SnackbarMessage.Success(messageRes = R.string.welcome_user, formatArgs = listOf(user.username)))
                         onSuccess()
                         _uiState.value = UiState.Success(Unit)
                     } else {
                         val exception = loginResult.exceptionOrNull()
                         AppLogger.e("Auto login failed: ${exception?.message}")
-                        SnackbarManager.showMessage(SnackbarMessage.Warning(exception?.message ?: "Login failed"))
-                        _uiState.value = UiState.Error(exception?.message ?: "Auto login failed")
+                        val errorMsg = exception?.message
+                        if (errorMsg != null) {
+                            SnackbarManager.showMessage(SnackbarMessage.Warning(errorMsg))
+                            _uiState.value = UiState.Error(errorMsg)
+                        } else {
+                            SnackbarManager.showMessage(SnackbarMessage.Warning(messageRes = R.string.login_failed))
+                            _uiState.value = UiState.Error("Auto login failed")
+                        }
                     }
                 } else {
                     val exception = result.exceptionOrNull()
                     AppLogger.e(exception?.message ?: "Unknown error")
                     handleRegistrationException(exception)
-                    SnackbarManager.showMessage(
-                        SnackbarMessage.Warning(exception?.message ?: "Unknown error"),
-                    )
-                    _uiState.value = UiState.Error(exception?.message ?: "Unknown error")
+                    val errorMsg = exception?.message
+                    if (errorMsg != null) {
+                        SnackbarManager.showMessage(SnackbarMessage.Warning(errorMsg))
+                        _uiState.value = UiState.Error(errorMsg)
+                    } else {
+                        SnackbarManager.showMessage(SnackbarMessage.Warning(messageRes = R.string.unknown_error))
+                        _uiState.value = UiState.Error("Unknown error")
+                    }
                 }
             }
 
@@ -106,14 +117,20 @@ class RegisterViewModel
         private suspend fun completeLogin(username: String, password: String, onSuccess: () -> Unit) {
             val loginResult = loginUseCase(username, password)
             if (loginResult.isSuccess) {
-                SnackbarManager.showMessage(SnackbarMessage.Success("Welcome $username!"))
+                SnackbarManager.showMessage(SnackbarMessage.Success(messageRes = R.string.welcome_user, formatArgs = listOf(username)))
                 onSuccess()
                 _uiState.value = UiState.Success(Unit)
             } else {
                 val exception = loginResult.exceptionOrNull()
                 AppLogger.e("Auto login failed: ${exception?.message}")
-                SnackbarManager.showMessage(SnackbarMessage.Warning(exception?.message ?: "Login failed"))
-                _uiState.value = UiState.Error(exception?.message ?: "Auto login failed")
+                val errorMsg = exception?.message
+                if (errorMsg != null) {
+                    SnackbarManager.showMessage(SnackbarMessage.Warning(errorMsg))
+                    _uiState.value = UiState.Error(errorMsg)
+                } else {
+                    SnackbarManager.showMessage(SnackbarMessage.Warning(messageRes = R.string.login_failed))
+                    _uiState.value = UiState.Error("Auto login failed")
+                }
             }
         }
 
@@ -168,7 +185,11 @@ class RegisterViewModel
             if (_registerState.value.username.length >= 3) {
                 FieldValidation(true)
             } else {
-                FieldValidation(false, "Username must be at least 3 characters")
+                FieldValidation(
+                    isValid = false,
+                    errorMessage = "Username must be at least 3 characters",
+                    errorMessageRes = R.string.err_username_min_chars
+                )
             }
 
         fun validateEmail(): FieldValidation =
@@ -178,7 +199,11 @@ class RegisterViewModel
             ) {
                 FieldValidation(true)
             } else {
-                FieldValidation(false, "Invalid email format")
+                FieldValidation(
+                    isValid = false,
+                    errorMessage = "Invalid email format",
+                    errorMessageRes = R.string.err_invalid_email
+                )
             }
 
         fun validatePassword(): FieldValidation {
@@ -186,7 +211,11 @@ class RegisterViewModel
             return if (isValidPassword(password)) {
                 FieldValidation(true)
             } else {
-                FieldValidation(false, getPasswordError(password))
+                FieldValidation(
+                    isValid = false,
+                    errorMessage = getPasswordError(password),
+                    errorMessageRes = getPasswordErrorRes(password)
+                )
             }
         }
 
@@ -199,18 +228,35 @@ class RegisterViewModel
                 else -> "Invalid password"
             }
 
+        private fun getPasswordErrorRes(password: String): Int =
+            when {
+                password.length < 8 -> R.string.err_password_min_chars
+                !password.any { it.isUpperCase() } -> R.string.err_password_uppercase
+                !password.any { it.isLowerCase() } -> R.string.err_password_lowercase
+                !password.any { it.isDigit() } -> R.string.err_password_number
+                else -> R.string.err_password_invalid
+            }
+
         fun validateReTypePassword(): FieldValidation =
             if (_registerState.value.password == _registerState.value.reTypePassword) {
                 FieldValidation(true)
             } else {
-                FieldValidation(false, "Passwords are not matching")
+                FieldValidation(
+                    isValid = false,
+                    errorMessage = "Passwords are not matching",
+                    errorMessageRes = R.string.err_passwords_not_matching
+                )
             }
 
         private fun validateTermsAndConditionsChecker(): FieldValidation =
             if (_registerState.value.termsAndConditionsChecked) {
                 FieldValidation(true)
             } else {
-                FieldValidation(false, "Please approve terms and conditions")
+                FieldValidation(
+                    isValid = false,
+                    errorMessage = "Please approve terms and conditions",
+                    errorMessageRes = R.string.err_accept_terms
+                )
             }
     }
 

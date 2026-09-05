@@ -38,5 +38,20 @@
     <string name="enable_biometric_message">You can log in faster next time using fingerprint or face.</string>
     <string name="enable">Enable</string>
     <string name="not_now">Not now</string>
+
+    <!-- Validation & Status -->
+    <string name="welcome_user">Welcome %1$s!</string>
+    <string name="login_failed">Login failed</string>
+    <string name="auto_login_failed">Auto login failed</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="err_username_min_chars">Username must be at least 3 characters</string>
+    <string name="err_invalid_email">Invalid email format</string>
+    <string name="err_password_min_chars">Must be at least 8 characters</string>
+    <string name="err_password_uppercase">Include at least one uppercase letter</string>
+    <string name="err_password_lowercase">Include at least one lowercase letter</string>
+    <string name="err_password_number">Include at least one number</string>
+    <string name="err_password_invalid">Invalid password</string>
+    <string name="err_passwords_not_matching">Passwords are not matching</string>
+    <string name="err_accept_terms">Please approve terms and conditions</string>
 </resources>
 

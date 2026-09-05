@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import com.cbo.statistics.R
+
 /**
  * ViewModel for the Statistics screen.
  * Collects [NoteStatistics] from [GetNoteStatisticsUseCase] and exposes
@@ -32,16 +34,20 @@ class StatisticsViewModel @Inject constructor(
 
     fun loadStatistics() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLoading = true, error = null, errorRes = null) }
             getStatisticsUseCase()
                 .catch { e ->
                     _uiState.update {
-                        it.copy(isLoading = false, error = e.message ?: "Unknown error")
+                        it.copy(
+                            isLoading = false,
+                            error = e.message,
+                            errorRes = if (e.message == null) R.string.unknown_error else null
+                        )
                     }
                 }
                 .collect { stats ->
                     _uiState.update {
-                        it.copy(isLoading = false, statistics = stats, error = null)
+                        it.copy(isLoading = false, statistics = stats, error = null, errorRes = null)
                     }
                 }
         }
@@ -54,4 +60,5 @@ data class StatisticsUiState(
     val isLoading: Boolean = true,
     val statistics: NoteStatistics? = null,
     val error: String? = null,
+    val errorRes: Int? = null,
 )

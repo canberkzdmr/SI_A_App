@@ -273,4 +273,19 @@
     <string name="channel_high_priority_desc">Yüksek öncelikli not hatırlatıcıları</string>
     <string name="channel_default_priority_name">Normal Hatırlatıcılar</string>
     <string name="channel_default_priority_desc">Normal öncelikli not hatırlatıcıları</string>
+
+    <!-- Controls, Dialogs & Formats -->
+    <string name="search_notes">Notlarda ara...</string>
+    <string name="radius_1km">1 km</string>
+    <string name="radius_m_format">%1$d m</string>
+    <string name="more_actions">Daha fazla işlem</string>
+    <string name="notes_count_format">%1$d not</string>
+    <string name="updated_prefix">güncellendi </string>
+    <string name="create_new_tag">Yeni Etiket Oluştur</string>
+    <string name="edit_tag">Etiketi Düzenle</string>
+    <string name="tag_name_max_chars">Etiket adı (en fazla %1$d karakter)</string>
+    <string name="tag_name_validation_error">Etiket adı %1$d karakterden az olmalıdır</string>
+    <string name="color_optional">Renk (isteğe bağlı)</string>
+    <string name="enter_tag_name">Etiket adı girin...</string>
+    <string name="update">Güncelle</string>
 </resources>

@@ -79,4 +79,5 @@
     <string name="stats_ready_to_archive_title">%1$d Not Arşivlemeye Hazır</string>
     <string name="stats_ready_to_archive_desc">Tüm görevleri tamamlanmış notlar arşive taşınabilir.</string>
     <string name="stats_unit_days">gün</string>
+    <string name="unknown_error">Bilinmeyen bir hata oluştu</string>
 </resources>

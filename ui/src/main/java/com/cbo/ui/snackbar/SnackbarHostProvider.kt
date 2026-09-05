@@ -37,7 +37,13 @@ fun SnackbarHostProvider(
         SnackbarManager.messages.collect { message ->
             scope.launch {
                 // Resolve string resource if textRes is provided, otherwise use text
-                val messageText = message.textRes?.let { context.getString(it) } ?: message.text ?: ""
+                val messageText = message.textRes?.let {
+                    if (message.formatArgs.isNotEmpty()) {
+                        context.getString(it, *message.formatArgs.toTypedArray())
+                    } else {
+                        context.getString(it)
+                    }
+                } ?: message.text ?: ""
 
                 snackbarHostState.currentSnackbarData?.dismiss()
                 snackbarHostState.showSnackbar(

@@ -13,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.cbo.ui.R
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.DestructiveButton
@@ -39,8 +41,8 @@ fun AppConfirmationDialog(
     message: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    confirmText: String = "Confirm",
-    dismissText: String = "Cancel",
+    confirmText: String = stringResource(id = R.string.btn_confirm),
+    dismissText: String = stringResource(id = R.string.btn_cancel),
     showDismissButton: Boolean = true,
     isLoading: Boolean = false
 ) {

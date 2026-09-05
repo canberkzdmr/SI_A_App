@@ -12,8 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.R
 import com.cbo.ui.components.AppBody
 
 /**
@@ -22,7 +24,7 @@ import com.cbo.ui.components.AppBody
 @Composable
 fun AppLoadingScreen(
     modifier: Modifier = Modifier,
-    message: String = "Loading...",
+    message: String = stringResource(R.string.loading),
     showProgress: Boolean = true,
     progressSize: Int = 32
 ) {
@@ -59,7 +61,7 @@ fun AppLoadingScreen(
 @Composable
 fun AppLoadingOverlay(
     modifier: Modifier = Modifier,
-    message: String = "Loading...",
+    message: String = stringResource(R.string.loading),
     showProgress: Boolean = true
 ) {
     Box(

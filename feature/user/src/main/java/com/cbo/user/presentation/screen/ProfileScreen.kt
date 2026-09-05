@@ -138,11 +138,11 @@ fun ProfileScreen(
                         outputStream.flush()
                     }
                     coroutineScope.launch {
-                        SnackbarManager.showMessage(SnackbarMessage.Success("Yedek başarıyla kaydedildi!"))
+                        SnackbarManager.showMessage(SnackbarMessage.Success(stringRes = R.string.backup_save_success))
                     }
                 } catch (e: Exception) {
                     coroutineScope.launch {
-                        SnackbarManager.showMessage(SnackbarMessage.Error("Yedek kaydedilemedi: ${e.message}"))
+                        SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.backup_save_failed, formatArgs = listOf(e.message.orEmpty())))
                     }
                 } finally {
                     pendingExportJson = null
@@ -163,12 +163,12 @@ fun ProfileScreen(
                     viewModel.restoreBackup(json)
                 } else {
                     coroutineScope.launch {
-                        SnackbarManager.showMessage(SnackbarMessage.Error("Seçilen dosya boş veya okunamadı."))
+                        SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.backup_file_empty))
                     }
                 }
             } catch (e: Exception) {
                 coroutineScope.launch {
-                    SnackbarManager.showMessage(SnackbarMessage.Error("Yedek okunamadı: ${e.message}"))
+                    SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.backup_read_failed, formatArgs = listOf(e.message.orEmpty())))
                 }
             }
         }

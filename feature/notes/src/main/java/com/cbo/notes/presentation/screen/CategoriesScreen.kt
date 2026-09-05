@@ -230,7 +230,7 @@ fun CategoriesContent(
 
     if (uiState.showCreateDialog) {
         CategoryDialog(
-            title = if (uiState.editingCategory != null) "Edit Category" else "Create Category",
+            title = if (uiState.editingCategory != null) stringResource(id = com.cbo.notes.R.string.edit_category) else stringResource(id = com.cbo.notes.R.string.create_category),
             name = uiState.dialogTitle,
             description = uiState.dialogDescription,
             color = uiState.dialogColor,
@@ -273,7 +273,7 @@ private fun EmptyCategoriesState(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "No categories yet",
+            text = stringResource(id = com.cbo.notes.R.string.no_categories_yet),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
@@ -282,7 +282,7 @@ private fun EmptyCategoriesState(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Create categories to organize your notes better",
+            text = stringResource(id = com.cbo.notes.R.string.create_first_category),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -301,7 +301,7 @@ private fun EmptyCategoriesState(
                 modifier = Modifier.size(20.dp),
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Create Category")
+            Text(stringResource(id = com.cbo.notes.R.string.create_category))
         }
     }
 }
@@ -319,7 +319,7 @@ private fun SwipeBackgroundEdit(modifier: Modifier = Modifier) {
     ) {
         Icon(
             imageVector = Icons.Default.Edit,
-            contentDescription = "Edit",
+            contentDescription = stringResource(id = com.cbo.notes.R.string.edit),
             tint = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.size(28.dp),
         )
@@ -339,7 +339,7 @@ private fun SwipeBackgroundDelete(modifier: Modifier = Modifier) {
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
-            contentDescription = "Delete",
+            contentDescription = stringResource(id = com.cbo.notes.R.string.delete),
             tint = MaterialTheme.colorScheme.onError,
             modifier = Modifier.size(28.dp),
         )
@@ -502,10 +502,10 @@ fun CategoryItem(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                StatChip(text = "${category.notesCount} notes")
+                                StatChip(text = stringResource(id = com.cbo.notes.R.string.notes_count_format, category.notesCount))
                                 val lastUpdated = lastUpdatedMillis
                                 if (lastUpdated != null && lastUpdated > 0L) {
-                                    StatChip(text = "updated ")
+                                    StatChip(text = stringResource(id = com.cbo.notes.R.string.updated_prefix))
                                     RelativeTimeText(epochMillis = lastUpdated)
                                 } else {
                                     RelativeTimeText(epochMillis = category.createdAt)
@@ -528,7 +528,7 @@ fun CategoryItem(
                         IconButton(onClick = { expanded = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More actions",
+                                contentDescription = stringResource(id = com.cbo.notes.R.string.more_actions),
                             )
                         }
                         DropdownMenu(
@@ -536,14 +536,14 @@ fun CategoryItem(
                             onDismissRequest = { expanded = false },
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Edit") },
+                                text = { Text(stringResource(id = com.cbo.notes.R.string.edit)) },
                                 onClick = {
                                     expanded = false
                                     onEdit()
                                 },
                             )
                             DropdownMenuItem(
-                                text = { Text("Delete") },
+                                text = { Text(stringResource(id = com.cbo.notes.R.string.delete)) },
                                 onClick = {
                                     expanded = false
                                     onDelete()
@@ -582,11 +582,11 @@ private fun CategoryDialog(
                 AppOutlinedTextField(
                     value = name,
                     onValueChange = onNameChange,
-                    label = "Category Name",
-                    placeholder = "Enter category name...",
+                    label = stringResource(id = com.cbo.notes.R.string.category_name),
+                    placeholder = stringResource(id = com.cbo.notes.R.string.enter_category_name),
                     modifier = Modifier.fillMaxWidth(),
                     isValid = name.length <= FieldValidationRules.MAX_CATEGORY_NAME_LENGTH,
-                    validationErrorMessage = validationErrorMessage, // "Category name must be less than ${FieldValidationRules.MAX_CATEGORY_NAME_LENGTH} characters",
+                    validationErrorMessage = validationErrorMessage,
                     singleLine = true,
                     isError =
                         name.isBlank() || name.length > FieldValidationRules.MAX_CATEGORY_NAME_LENGTH || validationErrorMessage.isNotEmpty(),
@@ -599,8 +599,8 @@ private fun CategoryDialog(
                 AppOutlinedTextField(
                     value = description,
                     onValueChange = onDescriptionChange,
-                    label = "Description (optional)",
-                    placeholder = "Enter description...",
+                    label = stringResource(id = com.cbo.notes.R.string.description_optional),
+                    placeholder = stringResource(id = com.cbo.notes.R.string.enter_description),
                     maxLines = 3,
                     modifier =
                         Modifier
@@ -632,13 +632,13 @@ private fun CategoryDialog(
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Save")
+                    Text(stringResource(id = com.cbo.notes.R.string.save))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = com.cbo.notes.R.string.cancel))
             }
         },
     )

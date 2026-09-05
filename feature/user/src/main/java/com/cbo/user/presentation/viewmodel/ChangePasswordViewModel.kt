@@ -8,6 +8,7 @@ import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.user.domain.usecase.ChangePasswordUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
+import com.cbo.user.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +37,7 @@ class ChangePasswordViewModel @Inject constructor(
             getActiveUserUseCase()
                 .catch { 
                     AppLogger.e("Error loading active user", it)
-                    SnackbarManager.showMessage(SnackbarMessage.Error("Failed to load user data"))
+                    SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.failed_to_load_user_data))
                 }
                 .collect { user ->
                     currentUser = user
@@ -86,7 +87,7 @@ class ChangePasswordViewModel @Inject constructor(
         // Validate current password
         if (state.currentPassword.isEmpty()) {
             viewModelScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Error("Current password is required"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.err_current_password_required))
             }
             return false
         }
@@ -94,14 +95,14 @@ class ChangePasswordViewModel @Inject constructor(
         // Validate new password
         if (state.newPassword.isEmpty()) {
             viewModelScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Error("New password is required"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.err_new_password_required))
             }
             return false
         }
 
         if (!isValidPassword(state.newPassword)) {
             viewModelScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Error(getPasswordValidationError(state.newPassword)))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = getPasswordValidationErrorRes(state.newPassword)))
             }
             return false
         }
@@ -109,14 +110,14 @@ class ChangePasswordViewModel @Inject constructor(
         // Validate confirm password
         if (state.confirmPassword.isEmpty()) {
             viewModelScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Error("Please confirm your new password"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.err_confirm_password_required))
             }
             return false
         }
 
         if (state.newPassword != state.confirmPassword) {
             viewModelScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Error("Passwords do not match"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.err_passwords_do_not_match))
             }
             return false
         }
@@ -124,7 +125,7 @@ class ChangePasswordViewModel @Inject constructor(
         // Check if new password is same as current password
         if (state.currentPassword == state.newPassword) {
             viewModelScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Error("New password must be different from current password"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.err_new_password_same_as_current))
             }
             return false
         }
@@ -140,7 +141,7 @@ class ChangePasswordViewModel @Inject constructor(
         val user = currentUser
         if (user == null) {
             viewModelScope.launch {
-                SnackbarManager.showMessage(SnackbarMessage.Error("User not found"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.err_user_not_found))
             }
             return
         }
@@ -159,12 +160,12 @@ class ChangePasswordViewModel @Inject constructor(
                         isLoading = false,
                         isPasswordChanged = true
                     )
-                    SnackbarManager.showMessage(SnackbarMessage.Success("Password changed successfully!"))
+                    SnackbarManager.showMessage(SnackbarMessage.Success(stringRes = R.string.password_changed_success))
                 },
                 onFailure = { error ->
                     AppLogger.e("Failed to change password", error)
                     _uiState.value = _uiState.value.copy(isLoading = false)
-                    SnackbarManager.showMessage(SnackbarMessage.Error(error.message ?: "Failed to change password"))
+                    SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.failed_to_change_password))
                 }
             )
         }
@@ -180,13 +181,13 @@ class ChangePasswordViewModel @Inject constructor(
         return lengthValid && hasUpperCase && hasLowerCase && hasDigit
     }
 
-    private fun getPasswordValidationError(password: String): String {
+    private fun getPasswordValidationErrorRes(password: String): Int {
         return when {
-            password.length < 8 -> "Password must be at least 8 characters"
-            !password.any { it.isUpperCase() } -> "Password must include at least one uppercase letter"
-            !password.any { it.isLowerCase() } -> "Password must include at least one lowercase letter"
-            !password.any { it.isDigit() } -> "Password must include at least one number"
-            else -> "Invalid password"
+            password.length < 8 -> R.string.err_password_min_length
+            !password.any { it.isUpperCase() } -> R.string.err_password_uppercase
+            !password.any { it.isLowerCase() } -> R.string.err_password_lowercase
+            !password.any { it.isDigit() } -> R.string.err_password_number
+            else -> R.string.err_password_invalid
         }
     }
 }

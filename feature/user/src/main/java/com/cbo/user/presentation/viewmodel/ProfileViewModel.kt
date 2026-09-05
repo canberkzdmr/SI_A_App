@@ -13,6 +13,7 @@ import com.cbo.core.session.domain.usecase.GetActiveUserUseCase
 import com.cbo.core.session.domain.usecase.LogoutUseCase
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
+import com.cbo.user.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -115,7 +116,7 @@ class ProfileViewModel @Inject constructor(
             )
             logoutUseCase.invoke()
             userSession.clearUser()
-            SnackbarManager.showMessage(SnackbarMessage.Info("Logged out successfully!"))
+            SnackbarManager.showMessage(SnackbarMessage.Info(stringRes = R.string.logout_success))
             _events.emit(ProfileEvent.LoggedOut)
         }
     }
@@ -159,14 +160,14 @@ class ProfileViewModel @Inject constructor(
             try {
                 val userId = _uiState.value.userId
                 if (userId <= 0) {
-                    SnackbarManager.showMessage(SnackbarMessage.Error("Kullanıcı oturumu bulunamadı."))
+                    SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.user_session_not_found))
                     return@launch
                 }
                 val json = exportBackupUseCase(userId)
                 onReady(json)
             } catch (e: Exception) {
                 AppLogger.e("Failed to export backup", e)
-                SnackbarManager.showMessage(SnackbarMessage.Error("Yedek alınamadı: ${e.message}"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.backup_export_failed, formatArgs = listOf(e.message.orEmpty())))
             }
         }
     }
@@ -176,18 +177,19 @@ class ProfileViewModel @Inject constructor(
             try {
                 val userId = _uiState.value.userId
                 if (userId <= 0) {
-                    SnackbarManager.showMessage(SnackbarMessage.Error("Kullanıcı oturumu bulunamadı."))
+                    SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.user_session_not_found))
                     return@launch
                 }
                 val summary = restoreBackupUseCase(userId, jsonContent)
                 SnackbarManager.showMessage(
                     SnackbarMessage.Success(
-                        "Yedek başarıyla geri yüklendi: ${summary.notesCount} not, ${summary.categoriesCount} kategori, ${summary.tagsCount} etiket"
+                        stringRes = R.string.backup_restore_success,
+                        formatArgs = listOf(summary.notesCount, summary.categoriesCount, summary.tagsCount)
                     )
                 )
             } catch (e: Exception) {
                 AppLogger.e("Failed to restore backup", e)
-                SnackbarManager.showMessage(SnackbarMessage.Error("Yedek geri yüklenemedi: ${e.message}"))
+                SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.backup_restore_failed, formatArgs = listOf(e.message.orEmpty())))
             }
         }
     }

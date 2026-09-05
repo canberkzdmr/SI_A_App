@@ -21,8 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.cbo.notes.R
 import com.cbo.notes.domain.model.Category
 import com.cbo.notes.domain.model.Tag
 import com.cbo.ui.components.TertiaryButton
@@ -94,7 +96,7 @@ private fun SelectionSheetBody(
                 selectedItems = listOfNotNull(tempCategory),
                 onSelectionChange = { updated -> tempCategory = updated.firstOrNull() },
                 itemLabel = { it.name },
-                label = "Category",
+                label = stringResource(R.string.category),
                 selectionMode = SelectionMode.Single,
                 expanded = activePanel == Panel.Category,
                 onExpandedChange = { expand -> activePanel = if (expand) Panel.Category else null },
@@ -110,7 +112,7 @@ private fun SelectionSheetBody(
                     tempTags = updated
                 },
                 itemLabel = { "#${it.name}" },
-                label = "Tags",
+                label = stringResource(R.string.tags),
                 selectionMode = SelectionMode.Multiple,
                 expanded = activePanel == Panel.Tags,
                 onExpandedChange = { expand -> activePanel = if (expand) Panel.Tags else null },
@@ -129,7 +131,7 @@ private fun SelectionSheetBody(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TertiaryButton(
-                text = "Clear all",
+                text = stringResource(R.string.clear_all),
                 onClick = {
                     tempCategory = null
                     tempTags = emptyList()
@@ -138,9 +140,9 @@ private fun SelectionSheetBody(
 
             Spacer(Modifier.weight(1f))
 
-            TertiaryButton(text = "Cancel", onClick = onDismiss)
+            TertiaryButton(text = stringResource(R.string.cancel), onClick = onDismiss)
 
-            TertiaryButton(text = "Apply", onClick = {
+            TertiaryButton(text = stringResource(R.string.apply), onClick = {
                 AppLogger.d("Selected Category: $tempCategory\nSelected Tags: $tempTags")
                 onApply(tempCategory, tempTags)
                 onDismiss()

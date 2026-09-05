@@ -20,6 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.res.stringResource
+import com.cbo.ui.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -137,7 +139,11 @@ fun AppExpandableCard(
 
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        contentDescription = if (isExpanded) {
+                            stringResource(id = R.string.collapse)
+                        } else {
+                            stringResource(id = R.string.expand)
+                        },
                         modifier = Modifier.rotate(arrowRotationDegree),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )

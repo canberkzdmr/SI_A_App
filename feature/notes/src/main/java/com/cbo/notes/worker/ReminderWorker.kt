@@ -40,7 +40,7 @@ class ReminderWorker @AssistedInject constructor(
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun doWork(): Result {
         val noteId = inputData.getInt(KEY_NOTE_ID, -1)
-        val noteTitle = inputData.getString(KEY_NOTE_TITLE) ?: "Note Reminder"
+        val noteTitle = inputData.getString(KEY_NOTE_TITLE) ?: applicationContext.getString(R.string.reminder)
         
         AppLogger.d("Reminder triggered for note: $noteId - $noteTitle")
         

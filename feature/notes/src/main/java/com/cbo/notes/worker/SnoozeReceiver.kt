@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.cbo.core.database.dao.NoteDao
 import com.cbo.core.logger.AppLogger
+import com.cbo.notes.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +50,7 @@ class SnoozeReceiver : BroadcastReceiver() {
 
         val noteId = intent.getIntExtra(ReminderWorker.EXTRA_NOTE_ID, -1)
         val snoozeMinutes = intent.getIntExtra(EXTRA_SNOOZE_MINUTES, 15)
-        val noteTitle = intent.getStringExtra(ReminderWorker.KEY_NOTE_TITLE) ?: "Note Reminder"
+        val noteTitle = intent.getStringExtra(ReminderWorker.KEY_NOTE_TITLE) ?: context.getString(R.string.reminder)
 
         if (noteId == -1) return
 

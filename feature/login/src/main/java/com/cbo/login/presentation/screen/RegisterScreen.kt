@@ -226,8 +226,10 @@ fun RegisterScreenContent(
                         },
                         supportingText = {
                             if (!usernameValidation.isValid) {
+                                val errorMsg = usernameValidation.errorMessageRes?.let { stringResource(id = it) }
+                                    ?: usernameValidation.errorMessage ?: ""
                                 Text(
-                                    text = usernameValidation.errorMessage ?: "",
+                                    text = errorMsg,
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -257,8 +259,10 @@ fun RegisterScreenContent(
                         },
                         supportingText = {
                             if (!emailValidation.isValid) {
+                                val errorMsg = emailValidation.errorMessageRes?.let { stringResource(id = it) }
+                                    ?: emailValidation.errorMessage ?: ""
                                 Text(
-                                    text = emailValidation.errorMessage ?: "",
+                                    text = errorMsg,
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -291,8 +295,10 @@ fun RegisterScreenContent(
                         },
                         supportingText = {
                             if (!passwordValidation.isValid) {
+                                val errorMsg = passwordValidation.errorMessageRes?.let { stringResource(id = it) }
+                                    ?: passwordValidation.errorMessage ?: ""
                                 Text(
-                                    text = passwordValidation.errorMessage ?: "",
+                                    text = errorMsg,
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }
@@ -348,8 +354,10 @@ fun RegisterScreenContent(
                         },
                         supportingText = {
                             if (!reTypePasswordValidation.isValid) {
+                                val errorMsg = reTypePasswordValidation.errorMessageRes?.let { stringResource(id = it) }
+                                    ?: reTypePasswordValidation.errorMessage ?: ""
                                 Text(
-                                    text = reTypePasswordValidation.errorMessage ?: "",
+                                    text = errorMsg,
                                     color = MaterialTheme.colorScheme.error
                                 )
                             }

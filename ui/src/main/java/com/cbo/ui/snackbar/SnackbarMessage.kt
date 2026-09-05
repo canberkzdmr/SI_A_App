@@ -6,45 +6,58 @@ import androidx.compose.material3.SnackbarDuration
 sealed class SnackbarMessage(
     val text: String? = null,
     @StringRes val textRes: Int? = null,
+    val formatArgs: List<Any> = emptyList(),
     val duration: SnackbarDuration,
     val type: SnackbarType
 ) {
     class Success(
         message: String? = null,
-        @StringRes messageRes: Int? = null
+        @StringRes messageRes: Int? = null,
+        @StringRes stringRes: Int? = null,
+        formatArgs: List<Any> = emptyList(),
     ) : SnackbarMessage(
         text = message,
-        textRes = messageRes,
+        textRes = messageRes ?: stringRes,
+        formatArgs = formatArgs,
         duration = SnackbarDuration.Short,
         type = SnackbarType.SUCCESS
     )
 
     class Error(
         message: String? = null,
-        @StringRes messageRes: Int? = null
+        @StringRes messageRes: Int? = null,
+        @StringRes stringRes: Int? = null,
+        formatArgs: List<Any> = emptyList(),
     ) : SnackbarMessage(
         text = message,
-        textRes = messageRes,
+        textRes = messageRes ?: stringRes,
+        formatArgs = formatArgs,
         duration = SnackbarDuration.Long,
         type = SnackbarType.ERROR
     )
 
     class Info(
         message: String? = null,
-        @StringRes messageRes: Int? = null
+        @StringRes messageRes: Int? = null,
+        @StringRes stringRes: Int? = null,
+        formatArgs: List<Any> = emptyList(),
     ) : SnackbarMessage(
         text = message,
-        textRes = messageRes,
+        textRes = messageRes ?: stringRes,
+        formatArgs = formatArgs,
         duration = SnackbarDuration.Short,
         type = SnackbarType.INFO
     )
 
     class Warning(
         message: String? = null,
-        @StringRes messageRes: Int? = null
+        @StringRes messageRes: Int? = null,
+        @StringRes stringRes: Int? = null,
+        formatArgs: List<Any> = emptyList(),
     ) : SnackbarMessage(
         text = message,
-        textRes = messageRes,
+        textRes = messageRes ?: stringRes,
+        formatArgs = formatArgs,
         duration = SnackbarDuration.Short,
         type = SnackbarType.WARNING
     )

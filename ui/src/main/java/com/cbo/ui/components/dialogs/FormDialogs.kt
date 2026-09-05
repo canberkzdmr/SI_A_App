@@ -9,6 +9,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.cbo.ui.R
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.PrimaryButton
@@ -44,8 +46,8 @@ fun AppFormDialog(
     fields: List<FormField>,
     onConfirm: (FormData) -> Unit,
     onDismiss: () -> Unit,
-    confirmText: String = "Save",
-    cancelText: String = "Cancel",
+    confirmText: String = stringResource(id = R.string.btn_save),
+    cancelText: String = stringResource(id = R.string.btn_cancel),
     isLoading: Boolean = false
 ) {
     AlertDialog(
@@ -106,8 +108,8 @@ fun AppSimpleFormDialog(
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
     placeholder: String? = null,
-    confirmText: String = "Save",
-    cancelText: String = "Cancel",
+    confirmText: String = stringResource(id = R.string.btn_save),
+    cancelText: String = stringResource(id = R.string.btn_cancel),
     isLoading: Boolean = false
 ) {
     AlertDialog(

@@ -79,6 +79,38 @@
     <string name="username">Kullanıcı Adı</string>
     <string name="email">E-Posta</string>
     <string name="statistics">İstatistikler</string>
+
+    <!-- Backup and User Session Feedback -->
+    <string name="logout_success">Başarıyla çıkış yapıldı!</string>
+    <string name="user_session_not_found">Kullanıcı oturumu bulunamadı.</string>
+    <string name="backup_save_success">Yedek başarıyla kaydedildi!</string>
+    <string name="backup_save_failed">Yedek kaydedilemedi: %1$s</string>
+    <string name="backup_file_empty">Seçilen dosya boş veya okunamadı.</string>
+    <string name="backup_read_failed">Yedek okunamadı: %1$s</string>
+    <string name="backup_export_failed">Yedek alınamadı: %1$s</string>
+    <string name="backup_restore_success">Yedek başarıyla geri yüklendi: %1$d not, %2$d kategori, %3$d etiket</string>
+    <string name="backup_restore_failed">Yedek geri yüklenemedi: %1$s</string>
+    <string name="failed_to_load_user_data">Kullanıcı verileri yüklenemedi</string>
+    <string name="failed_to_load_profile_details">Profil detayları yüklenemedi</string>
+
+    <!-- Change Password Feedback -->
+    <string name="err_current_password_required">Mevcut şifre gereklidir</string>
+    <string name="err_new_password_required">Yeni şifre gereklidir</string>
+    <string name="err_confirm_password_required">Lütfen yeni şifrenizi onaylayın</string>
+    <string name="err_passwords_do_not_match">Şifreler birbiriyle eşleşmiyor</string>
+    <string name="err_new_password_same_as_current">Yeni şifre mevcut şifreden farklı olmalıdır</string>
+    <string name="err_user_not_found">Kullanıcı bulunamadı</string>
+    <string name="password_changed_success">Şifre başarıyla değiştirildi!</string>
+    <string name="failed_to_change_password">Şifre değiştirilemedi</string>
+    <string name="err_password_min_length">Şifre en az 8 karakter olmalıdır</string>
+    <string name="err_password_uppercase">Şifre en az bir büyük harf içermelidir</string>
+    <string name="err_password_lowercase">Şifre en az bir küçük harf içermelidir</string>
+    <string name="err_password_number">Şifre en az bir rakam içermelidir</string>
+    <string name="err_password_invalid">Geçersiz şifre</string>
+
+    <!-- Change Language Feedback -->
+    <string name="failed_to_load_languages">Diller yüklenemedi</string>
+    <string name="failed_to_change_language">Dil değiştirilemedi</string>
 </resources>
 
 

@@ -41,7 +41,7 @@ fun ForceUpdateScreen(modifier: Modifier = Modifier) {
         ) {
             Icon(
                 imageVector = Icons.Default.Warning,
-                contentDescription = "Update Required",
+                contentDescription = stringResource(id = R.string.update_required_title),
                 modifier = Modifier.height(100.dp).fillMaxSize(),
                 tint = MaterialTheme.colorScheme.primary
             )

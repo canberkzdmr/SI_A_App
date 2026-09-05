@@ -27,6 +27,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.ui.res.stringResource
+import com.cbo.ui.R
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -87,7 +89,7 @@ fun <T> ExpandableFilterSection(
                 Column(modifier = Modifier.weight(1f)) {
                     AppTitle(text = label, style = MaterialTheme.typography.titleSmall)
                     val summary =
-                        if (selectedItems.isEmpty()) "None"
+                        if (selectedItems.isEmpty()) stringResource(id = R.string.none)
                         else if (selectionMode == SelectionMode.Single) itemLabel(selectedItems.first())
                         else selectedItems.joinToString(limit = 3, transform = itemLabel).let {
                             if (selectedItems.size > 3) "$it, +${selectedItems.size - 3}" else it
@@ -96,7 +98,7 @@ fun <T> ExpandableFilterSection(
                 }
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (expanded) "Collapse" else "Expand"
+                    contentDescription = if (expanded) stringResource(id = R.string.collapse) else stringResource(id = R.string.expand)
                 )
             }
 
@@ -115,7 +117,7 @@ fun <T> ExpandableFilterSection(
                     AppOutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        placeholder = "Search...",
+                        placeholder = stringResource(id = R.string.search_placeholder),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )

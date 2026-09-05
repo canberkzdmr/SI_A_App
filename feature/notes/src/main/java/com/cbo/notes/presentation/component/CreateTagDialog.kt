@@ -3,14 +3,16 @@ package com.cbo.notes.presentation.component
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cbo.core.domain.FieldValidationRules
+import com.cbo.notes.R
 import com.cbo.ui.components.AppLabelLarge
 import com.cbo.ui.components.AppOutlinedTextField
 import com.cbo.ui.components.ColorPicker
@@ -32,7 +34,7 @@ internal fun CreateTagDialog(
 
     CustomAlertDialog(
         onDismiss = { onDismiss() },
-        title = if (isEdit) "Edit Tag" else "Create New Tag",
+        title = if (isEdit) stringResource(R.string.edit_tag) else stringResource(R.string.create_new_tag),
         content = {
             LaunchedEffect(Unit) {
                 focusRequester.requestFocus()
@@ -50,10 +52,10 @@ internal fun CreateTagDialog(
                         onTagNameChange(newValue.trim())
                     }
                 },
-                label = "Tag name (max ${FieldValidationRules.MAX_TAG_NAME_LENGTH} chars)",
+                label = stringResource(R.string.tag_name_max_chars, FieldValidationRules.MAX_TAG_NAME_LENGTH),
                 isValid = tagName.length <= FieldValidationRules.MAX_TAG_NAME_LENGTH,
-                validationErrorMessage = "Tag name must be less than ${FieldValidationRules.MAX_TAG_NAME_LENGTH} characters",
-                placeholder = "Enter tag name...",
+                validationErrorMessage = stringResource(R.string.tag_name_validation_error, FieldValidationRules.MAX_TAG_NAME_LENGTH),
+                placeholder = stringResource(R.string.enter_tag_name),
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
@@ -64,7 +66,7 @@ internal fun CreateTagDialog(
             Spacer(modifier = Modifier.height(16.dp))
 
             AppLabelLarge(
-                text = "Color (optional)",
+                text = stringResource(R.string.color_optional),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -76,11 +78,11 @@ internal fun CreateTagDialog(
         },
         buttons = {
             TertiaryButton(
-                text = "Cancel",
+                text = stringResource(R.string.cancel),
                 onClick = onDismiss
             )
             TertiaryButton(
-                text = "Create",
+                text = if (isEdit) stringResource(R.string.update) else stringResource(R.string.create),
                 onClick = onConfirm,
                 enabled = tagName.isNotBlank() && !isCreating && tagName.length <= FieldValidationRules.MAX_TAG_NAME_LENGTH,
                 isInProgress = isCreating,

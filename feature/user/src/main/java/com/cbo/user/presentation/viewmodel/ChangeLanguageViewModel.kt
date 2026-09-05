@@ -13,6 +13,7 @@ import com.cbo.core.session.UserSession
 import com.cbo.ui.components.AppSwitchOption
 import com.cbo.ui.snackbar.SnackbarManager
 import com.cbo.ui.snackbar.SnackbarMessage
+import com.cbo.user.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -119,7 +120,7 @@ class ChangeLanguageViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         _uiState.update { it.copy(isLoading = false, errorMessage = "Failed to change language") }
-                        SnackbarManager.showMessage(SnackbarMessage.Error("Failed to change language"))
+                        SnackbarManager.showMessage(SnackbarMessage.Error(stringRes = R.string.failed_to_change_language))
                         AppLogger.e("Error changing language", error)
                     }
                 )

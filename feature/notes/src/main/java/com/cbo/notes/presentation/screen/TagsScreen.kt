@@ -393,7 +393,7 @@ private fun EmptyTagsState(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "No tags yet",
+            text = stringResource(id = com.cbo.notes.R.string.no_tags_yet),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
@@ -402,7 +402,7 @@ private fun EmptyTagsState(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Create tags to filter your notes better",
+            text = stringResource(id = com.cbo.notes.R.string.create_tags_filter),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -421,7 +421,7 @@ private fun EmptyTagsState(
                 modifier = Modifier.size(20.dp),
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Create Tag")
+            Text(stringResource(id = com.cbo.notes.R.string.create_new_tag))
         }
     }
 }

@@ -12,7 +12,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.cbo.ui.R
 import com.cbo.ui.components.AppBody
 import com.cbo.ui.components.AppTitle
 import com.cbo.ui.components.PrimaryButton
@@ -23,30 +25,27 @@ import com.cbo.ui.components.SecondaryButton
  */
 @Composable
 fun AppFormFieldGroup(
-    title: String? = null,
-    description: String? = null,
+    title: String,
     modifier: Modifier = Modifier,
+    description: String? = null,
     content: @Composable () -> Unit
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (title != null) {
-                AppTitle(text = title)
-            }
+            AppTitle(text = title)
             
-            if (description != null) {
+            description?.let {
                 AppBody(
-                    text = description,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    text = it,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
@@ -56,28 +55,19 @@ fun AppFormFieldGroup(
 }
 
 /**
- * Form section with title and optional description
+ * Form section container
  */
 @Composable
 fun AppFormSection(
-    title: String,
-    description: String? = null,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        AppTitle(text = title)
-        
-        if (description != null) {
-            AppBody(
-                text = description,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-        }
-        
         content()
     }
 }
@@ -90,8 +80,8 @@ fun AppFormActions(
     onSave: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
-    saveText: String = "Save",
-    cancelText: String = "Cancel",
+    saveText: String = stringResource(R.string.btn_save),
+    cancelText: String = stringResource(R.string.btn_cancel),
     isLoading: Boolean = false,
     showCancel: Boolean = true
 ) {

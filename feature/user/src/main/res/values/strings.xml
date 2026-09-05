@@ -90,6 +90,37 @@
     <string name="about_languages">About Languages</string>
     <string name="language_help">The language change will apply to the entire application. Once you save the change, your selected language will be retained.</string>
     <string name="language_options">Language Options</string>
+    <!-- Backup and User Session Feedback -->
+    <string name="logout_success">Logged out successfully!</string>
+    <string name="user_session_not_found">User session not found.</string>
+    <string name="backup_save_success">Backup saved successfully!</string>
+    <string name="backup_save_failed">Failed to save backup: %1$s</string>
+    <string name="backup_file_empty">Selected file is empty or unreadable.</string>
+    <string name="backup_read_failed">Failed to read backup: %1$s</string>
+    <string name="backup_export_failed">Failed to export backup: %1$s</string>
+    <string name="backup_restore_success">Backup restored successfully: %1$d notes, %2$d categories, %3$d tags</string>
+    <string name="backup_restore_failed">Failed to restore backup: %1$s</string>
+    <string name="failed_to_load_user_data">Failed to load user data</string>
+    <string name="failed_to_load_profile_details">Failed to load profile details</string>
+
+    <!-- Change Password Feedback -->
+    <string name="err_current_password_required">Current password is required</string>
+    <string name="err_new_password_required">New password is required</string>
+    <string name="err_confirm_password_required">Please confirm your new password</string>
+    <string name="err_passwords_do_not_match">Passwords do not match</string>
+    <string name="err_new_password_same_as_current">New password must be different from current password</string>
+    <string name="err_user_not_found">User not found</string>
+    <string name="password_changed_success">Password changed successfully!</string>
+    <string name="failed_to_change_password">Failed to change password</string>
+    <string name="err_password_min_length">Password must be at least 8 characters</string>
+    <string name="err_password_uppercase">Password must include at least one uppercase letter</string>
+    <string name="err_password_lowercase">Password must include at least one lowercase letter</string>
+    <string name="err_password_number">Password must include at least one number</string>
+    <string name="err_password_invalid">Invalid password</string>
+
+    <!-- Change Language Feedback -->
+    <string name="failed_to_load_languages">Failed to load languages</string>
+    <string name="failed_to_change_language">Failed to change language</string>
 </resources>
 
 

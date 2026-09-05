@@ -28,6 +28,8 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.ui.res.stringResource
+import com.cbo.ui.R
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -93,7 +95,7 @@ fun <T> FilterDropDown(
             AppOutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = "Search...",
+                placeholder = stringResource(id = R.string.search_placeholder),
                 singleLine = true,
                 modifier = Modifier
                     .padding(8.dp)

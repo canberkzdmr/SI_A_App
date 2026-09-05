@@ -293,5 +293,20 @@
     <string name="channel_high_priority_desc">High priority note reminders</string>
     <string name="channel_default_priority_name">Normal Reminders</string>
     <string name="channel_default_priority_desc">Normal priority note reminders</string>
+
+    <!-- Controls, Dialogs & Formats -->
+    <string name="search_notes">Search notes...</string>
+    <string name="radius_1km">1 km</string>
+    <string name="radius_m_format">%1$d m</string>
+    <string name="more_actions">More actions</string>
+    <string name="notes_count_format">%1$d notes</string>
+    <string name="updated_prefix">updated </string>
+    <string name="create_new_tag">Create New Tag</string>
+    <string name="edit_tag">Edit Tag</string>
+    <string name="tag_name_max_chars">Tag name (max %1$d chars)</string>
+    <string name="tag_name_validation_error">Tag name must be less than %1$d characters</string>
+    <string name="color_optional">Color (optional)</string>
+    <string name="enter_tag_name">Enter tag name...</string>
+    <string name="update">Update</string>
 </resources>
 

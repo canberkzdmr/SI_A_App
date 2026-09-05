@@ -38,5 +38,20 @@
     <string name="enable_biometric_message">Bir dahaki sefere parmak izi veya yüz ile daha hızlı giriş yapabilirsiniz.</string>
     <string name="enable">Etkinleştir</string>
     <string name="not_now">Şimdi değil</string>
+
+    <!-- Validation & Status -->
+    <string name="welcome_user">Hoş geldiniz %1$s!</string>
+    <string name="login_failed">Giriş başarısız</string>
+    <string name="auto_login_failed">Otomatik giriş başarısız</string>
+    <string name="unknown_error">Bilinmeyen hata</string>
+    <string name="err_username_min_chars">Kullanıcı adı en az 3 karakter olmalıdır</string>
+    <string name="err_invalid_email">Geçersiz e-posta biçimi</string>
+    <string name="err_password_min_chars">En az 8 karakter olmalıdır</string>
+    <string name="err_password_uppercase">En az bir büyük harf içermelidir</string>
+    <string name="err_password_lowercase">En az bir küçük harf içermelidir</string>
+    <string name="err_password_number">En az bir rakam içermelidir</string>
+    <string name="err_password_invalid">Geçersiz şifre</string>
+    <string name="err_passwords_not_matching">Şifreler eşleşmiyor</string>
+    <string name="err_accept_terms">Lütfen şartlar ve koşulları onaylayın</string>
 </resources>
 

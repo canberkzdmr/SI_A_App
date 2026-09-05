@@ -255,7 +255,7 @@ private fun SearchBar(
         value = searchQuery,
         onValueChange = onSearchQueryChange,
         modifier = modifier,
-        placeholder = "Search notes...",
+        placeholder = stringResource(id = com.cbo.notes.R.string.search_notes),
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
@@ -268,7 +268,7 @@ private fun SearchBar(
                 IconButton(onClick = onClearSearch) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear search",
+                        contentDescription = stringResource(id = com.cbo.notes.R.string.clear_search),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
